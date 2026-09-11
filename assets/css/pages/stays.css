@@ -3,17 +3,11 @@
    Pixel-matched to Phone 2 & Phone 3 reference UI
    ========================================================================== */
 
+/* Main Container & Max Width (Mobile First: max-width: 600px for phones) */
 .stays-page-wrap {
   max-width: 600px;
   margin: 0 auto;
   padding: 16px 16px 120px;
-}
-
-@media (min-width: 900px) {
-  .stays-page-wrap {
-    max-width: 860px;
-    padding: 24px 24px 120px;
-  }
 }
 
 /* 1. Header Row (Phone 2) */
@@ -534,4 +528,52 @@
 
 .book-now-btn:hover {
   background: var(--color-camel-dark);
+}
+
+/* ==========================================================================
+   DESKTOP & LARGE SCREEN ENHANCEMENTS (min-width: 992px)
+   Eliminate wasted space, 2-column feed and desktop stay details layout
+   ========================================================================== */
+@media (min-width: 992px) {
+  .stays-page-wrap {
+    max-width: 1220px;
+    padding: 24px 32px 100px;
+  }
+
+  /* 2-column feed filling the desktop screen */
+  .browse-feed {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+
+  .browse-card-media {
+    height: 280px;
+  }
+
+  /* Split Detail View for desktop */
+  .detail-view-pane {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 36px;
+    align-items: start;
+  }
+
+  .detail-nav-bar {
+    grid-column: 1 / -1;
+  }
+
+  .detail-hero-media {
+    height: 480px;
+  }
+
+  .detail-sticky-bar {
+    position: static;
+    transform: none;
+    max-width: 100%;
+    padding: 0;
+    margin-top: 20px;
+    background: transparent;
+    border: none;
+  }
 }

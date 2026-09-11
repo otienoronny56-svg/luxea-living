@@ -3,18 +3,11 @@
    Pixel-matched to high-end mobile reference UI
    ========================================================================== */
 
-/* Main Container & Max Width */
+/* Main Container & Max Width (Mobile First: max-width: 600px for phones) */
 .landing-content {
   max-width: 600px;
   margin: 0 auto;
   padding: 16px 16px 100px;
-}
-
-@media (min-width: 900px) {
-  .landing-content {
-    max-width: 860px;
-    padding: 28px 24px 100px;
-  }
 }
 
 /* 1. Hero Banner Card */
@@ -353,4 +346,76 @@
   font-size: 0.78rem;
   color: var(--color-camel-dark);
   margin: 0;
+}
+
+/* ==========================================================================
+   DESKTOP & LARGE SCREEN ENHANCEMENTS (min-width: 992px)
+   Eliminate wasted space, make hero panoramic & compact, and display 4-card grid
+   ========================================================================== */
+@media (min-width: 992px) {
+  .landing-content {
+    max-width: 1220px;
+    padding: 24px 32px 80px;
+  }
+
+  /* Compact panoramic hero image so things below are visible immediately */
+  .mobile-hero-banner {
+    height: 240px;
+    border-radius: 24px;
+    margin-bottom: 20px;
+  }
+
+  .hero-overlay {
+    padding: 24px 32px;
+  }
+
+  .hero-title-clean {
+    font-size: 2.2rem;
+  }
+
+  .hero-subtitle-clean {
+    font-size: 0.95rem;
+  }
+
+  /* Centered, sleek switcher and pills */
+  .segmented-switcher {
+    max-width: 480px;
+    margin: 0 auto 20px;
+  }
+
+  .property-type-scroll {
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  /* Split Featured Area wide layout */
+  .featured-area-card {
+    padding: 24px 32px;
+    margin-bottom: 36px;
+  }
+
+  .featured-area-thumb {
+    width: 180px;
+    height: 110px;
+    border-radius: 18px;
+  }
+
+  /* 4-column wide grid for Curated For You on desktop! */
+  .curated-scroll-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    overflow: visible;
+    padding-bottom: 0;
+    margin-bottom: 40px;
+  }
+
+  .curated-card {
+    flex: none;
+    width: 100%;
+  }
+
+  .curated-card-thumb {
+    height: 180px;
+  }
 }
