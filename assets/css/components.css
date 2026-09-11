@@ -395,3 +395,324 @@
 .hidden {
   display: none !important;
 }
+
+/* ==========================================================================
+   GLOBAL AUTHENTICATION & USER ACCOUNT SUITE
+   ========================================================================== */
+.lux-header-auth-slot {
+  display: flex;
+  align-items: center;
+}
+
+.lux-auth-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  border-color: var(--color-khaki);
+  color: var(--color-espresso);
+  transition: all 0.25s ease;
+}
+
+.lux-auth-trigger-btn:hover {
+  background-color: var(--color-khaki-light);
+  border-color: var(--color-camel);
+  color: var(--color-espresso);
+}
+
+/* User Profile Pill Button in Header */
+.lux-user-menu-wrap {
+  position: relative;
+}
+
+.lux-user-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 6px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--color-khaki);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.lux-user-pill-btn:hover {
+  background: #FFFFFF;
+  border-color: var(--color-camel);
+  box-shadow: 0 4px 12px rgba(74, 52, 42, 0.12);
+  transform: translateY(-1px);
+}
+
+.user-avatar-initials {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-espresso);
+  color: var(--color-linen);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.user-name-short {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+}
+
+.user-role-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.user-role-badge.badge-admin {
+  background: #B2967D;
+  color: #FFFFFF;
+}
+
+.user-role-badge.badge-host {
+  background: #D7C9B8;
+  color: #4A342A;
+}
+
+.user-role-badge.badge-member {
+  background: #27AE60;
+  color: #FFFFFF;
+}
+
+.dropdown-chevron {
+  color: var(--color-camel-dark);
+  transition: transform 0.2s ease;
+}
+
+.lux-user-pill-btn[aria-expanded="true"] .dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+/* User Dropdown Menu */
+.lux-user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  background: #FFFFFF;
+  border: 1px solid var(--color-khaki-light);
+  border-radius: var(--radius-md);
+  box-shadow: 0 16px 36px rgba(74, 52, 42, 0.16);
+  padding: 8px;
+  z-index: 250;
+  animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-user-info {
+  padding: 10px 12px;
+  background: var(--color-linen-light);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+}
+
+.user-info-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+}
+
+.user-info-email {
+  font-size: 0.72rem;
+  color: var(--color-cocoa);
+  margin-bottom: 6px;
+  word-break: break-all;
+}
+
+.user-info-role {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--color-khaki-light);
+  margin: 6px 0;
+}
+
+.dropdown-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown-link:hover {
+  background: var(--color-linen);
+  color: var(--color-camel-dark);
+}
+
+.dropdown-link.active-link {
+  color: var(--color-camel-dark);
+  font-weight: 700;
+}
+
+.dropdown-link.dropdown-logout {
+  color: #C0392B;
+}
+
+.dropdown-link.dropdown-logout:hover {
+  background: #FDEDEC;
+}
+
+/* Luxury Auth Modal Specifics */
+.lux-auth-modal-card {
+  max-width: 440px;
+  width: 92%;
+  padding: 32px 28px;
+  text-align: left;
+}
+
+.auth-card-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.auth-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-espresso);
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(74, 52, 42, 0.2);
+}
+
+.auth-monogram {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: var(--color-linen);
+  line-height: 1;
+}
+
+.auth-modal-title {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+  margin-bottom: 6px;
+}
+
+.auth-modal-sub {
+  font-size: 0.82rem;
+  color: var(--color-cocoa);
+  line-height: 1.4;
+}
+
+/* Role Selector Tabs */
+.auth-role-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--color-linen);
+  border-radius: var(--radius-pill);
+  margin-bottom: 12px;
+}
+
+.auth-role-tab {
+  flex: 1;
+  padding: 8px 10px;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--color-espresso);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-role-tab.active {
+  background: #FFFFFF;
+  color: var(--color-espresso);
+  box-shadow: var(--shadow-sm);
+  font-weight: 700;
+}
+
+.auth-role-hint {
+  font-size: 0.74rem;
+  color: var(--color-camel-dark);
+  background: var(--color-linen-light);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  border-left: 3px solid var(--color-camel);
+}
+
+.auth-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-error-banner {
+  padding: 8px 12px;
+  background: #FDEDEC;
+  color: #C0392B;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid #E74C3C;
+}
+
+.auth-card-footer {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-khaki-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--color-cocoa);
+}
+
+.auth-link-gold {
+  color: var(--color-camel-dark);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-link-gold:hover {
+  text-decoration: underline;
+}

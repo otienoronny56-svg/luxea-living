@@ -54,4 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.lux-modal-overlay.active').forEach(m => m.classList.remove('active'));
     }
   });
+
+  // Automatically initialize global luxury Auth Suite & Header account controls
+  import('/assets/js/modules/authModal.js')
+    .then(mod => {
+      if (mod && mod.initAuthSuite) mod.initAuthSuite();
+    })
+    .catch(err => console.warn('Auth suite load notice:', err));
 });
