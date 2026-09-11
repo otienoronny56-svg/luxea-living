@@ -116,6 +116,12 @@ ON public.lux_hosts
 FOR SELECT
 USING (true);
 
+-- Allow updating hosts (for Super Admin approvals / status change)
+CREATE POLICY "Allow update of lux_hosts"
+ON public.lux_hosts
+FOR UPDATE
+USING (true);
+
 
 -- ==============================================================================
 -- 3. CURATED PROPERTIES TABLE (For live listings catalog & Host management)

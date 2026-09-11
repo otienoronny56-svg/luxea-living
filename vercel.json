@@ -1,4 +1,12 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/admin/login", "destination": "/admin/index.html" },
+    { "source": "/admin/login/", "destination": "/admin/index.html" },
+    { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/host", "destination": "/host/index.html" },
+    { "source": "/stays", "destination": "/stays/index.html" },
+    { "source": "/waitlist", "destination": "/waitlist/index.html" }
+  ]
 }
