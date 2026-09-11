@@ -170,6 +170,17 @@ CREATE TABLE IF NOT EXISTS public.lux_properties (
 -- Enable RLS for Properties
 ALTER TABLE public.lux_properties ENABLE ROW LEVEL SECURITY;
 
+-- Ensure all columns exist for existing tables
+ALTER TABLE public.lux_properties ADD COLUMN IF NOT EXISTS property_type VARCHAR(50) DEFAULT 'apartment';
+ALTER TABLE public.lux_properties ADD COLUMN IF NOT EXISTS city TEXT;
+ALTER TABLE public.lux_properties ADD COLUMN IF NOT EXISTS location_group VARCHAR(50);
+ALTER TABLE public.lux_properties ADD COLUMN IF NOT EXISTS is_available BOOLEAN DEFAULT true;
+ALTER TABLE public.lux_properties ADD COLUMN IF NOT EXISTS available_from DATE;
+ALTER TABLE public.lux_properties ADD COLUMN IF NOT EXISTS available_to DATE;
+ALTER TABLE public.lux_properties ADD COLUMN IF NOT EXISTS blocked_dates JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.lux_properties ADD COLUMN IF NOT EXISTS host_ref_id VARCHAR(30);
+ALTER TABLE public.lux_properties ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
 -- Idempotent Property Policies
 DROP POLICY IF EXISTS "Allow public read lux_properties" ON public.lux_properties;
 CREATE POLICY "Allow public read lux_properties"

@@ -10,3 +10,5 @@ $RECYCLE.BIN/
 .system_generated/
 scratch/
 node_modules/
+.env
+.env.*

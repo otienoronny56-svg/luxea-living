@@ -15,6 +15,6 @@ Find a home that elevates life. Curated luxury villas, penthouses, and bespoke r
 - `assets/js/`: Modular JavaScript (`config.js`, `supabase.js`, `modules/`).
 
 ## Supabase Integration
-- Project Reference: `abzcabikdkmfaijnqbkf`
+- Project Reference: `abzcabiqdkmfaijnqbkf`
 - Database Tables: `lux_hosts`, `lux_properties`, `lux_waitlist`
 - Storage Buckets: `lux_listings` (property photos), `lux_documents` (host IDs, verification)
