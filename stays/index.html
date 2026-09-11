@@ -260,7 +260,15 @@
 
       function renderFeed(filter = 'all') {
         feedContainer.innerHTML = '';
-        const items = filter === 'all' ? LUXEA_STAYS : LUXEA_STAYS.filter(s => s.category === filter);
+        const f = filter.toLowerCase();
+        const items = f === 'all' 
+          ? LUXEA_STAYS 
+          : LUXEA_STAYS.filter(s => 
+              s.category === f || 
+              s.locationGroup === f || 
+              s.city.toLowerCase().includes(f) ||
+              s.location.toLowerCase().includes(f)
+            );
         resultsCount.textContent = `${items.length} curated stays`;
 
         items.forEach(stay => {

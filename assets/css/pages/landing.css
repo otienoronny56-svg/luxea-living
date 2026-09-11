@@ -379,3 +379,263 @@
     height: 180px;
   }
 }
+
+/* ==========================================================================
+   LOCATION SHELVES & GEOLOCATION (Airbnb Kenya Reference Style)
+   ========================================================================== */
+.location-perm-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #FFFFFF, var(--color-linen));
+  border: 1px solid var(--color-khaki-light);
+  border-radius: 20px;
+  padding: 16px 20px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 16px rgba(74, 52, 42, 0.04);
+  gap: 16px;
+}
+
+.perm-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.perm-icon {
+  font-size: 1.5rem;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--color-linen);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.perm-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.perm-desc {
+  font-size: 0.8rem;
+  color: var(--color-cocoa);
+  margin: 0;
+}
+
+/* Location Shelf Section */
+.location-shelf-section {
+  margin-bottom: 36px;
+}
+
+.shelf-head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.shelf-title {
+  font-family: var(--font-sans);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.shelf-sub {
+  font-size: 0.78rem;
+  color: var(--color-camel-dark);
+  display: block;
+  margin-top: 2px;
+}
+
+.shelf-arrow-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid var(--color-khaki-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-espresso);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.shelf-arrow-btn:hover {
+  background: var(--color-linen);
+  border-color: var(--color-camel);
+}
+
+/* Scrollable / Responsive Cards Row */
+.shelf-cards-scroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shelf-cards-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.shelf-card {
+  flex: 0 0 175px;
+  background: transparent;
+  border-radius: 18px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+@media (min-width: 480px) {
+  .shelf-card {
+    flex: 0 0 215px;
+  }
+}
+
+.shelf-card:hover {
+  transform: translateY(-2px);
+}
+
+.shelf-card-thumb {
+  position: relative;
+  width: 100%;
+  height: 165px;
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 14px rgba(74, 52, 42, 0.06);
+}
+
+@media (min-width: 480px) {
+  .shelf-card-thumb {
+    height: 195px;
+  }
+}
+
+.shelf-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.shelf-card:hover .shelf-card-thumb img {
+  transform: scale(1.04);
+}
+
+.guest-favorite-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.shelf-heart-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(4px);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.shelf-heart-btn.active {
+  color: #E05A47;
+  background: #FFFFFF;
+}
+
+.shelf-type-city {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--color-camel-dark);
+  margin-bottom: 2px;
+}
+
+.shelf-card-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shelf-pricing-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.shelf-price {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+}
+
+.shelf-price small {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-cocoa);
+}
+
+.shelf-rating {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+}
+
+.shelf-dist-pill {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #2F7A4D;
+  margin-top: 4px;
+}
+
+/* Desktop 4-column shelves */
+@media (min-width: 992px) {
+  .shelf-cards-scroll {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .shelf-card {
+    flex: none;
+    width: 100%;
+  }
+
+  .shelf-card-thumb {
+    height: 220px;
+  }
+}
