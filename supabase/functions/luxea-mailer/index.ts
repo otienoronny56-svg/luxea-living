@@ -281,6 +281,10 @@ Deno.serve(async (req) => {
 
       // Alert Admin (Ronald)
       try {
+        const dossierUrl = `${APP_BASE_URL}/admin/host-dossier.html?ref=${refId}`;
+        const phoneDigits = (record.phone || '').replace(/[^0-9]/g, '');
+        const waLink = phoneDigits.startsWith('0') ? '254' + phoneDigits.substring(1) : phoneDigits.startsWith('254') ? phoneDigits : '254' + phoneDigits;
+
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -290,19 +294,66 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             from: SENDER_EMAIL,
             to: [ADMIN_EMAIL],
-            subject: `🔔 New Host Application to Audit: ${hostName} (${refId})`,
+            subject: `⚡ Action Required: New Host Application to Audit — ${hostName} [${refId}]`,
             html: `
-              <div style="font-family: sans-serif; background: #0B0806; color: #EDE8E3; padding: 24px; border-radius: 8px;">
-                <h2 style="color: #D4AF37; margin: 0 0 12px;">New Host Application Pending Audit</h2>
-                <p><strong>Host:</strong> ${hostName} (&lt;${hostEmail}&gt;)</p>
-                <p><strong>Property:</strong> ${propName} (${propType})</p>
-                <p><strong>Location:</strong> ${location}</p>
-                <p><strong>Ref ID:</strong> ${refId}</p>
-                <p><strong>Payout:</strong> ${payoutMethod}</p>
-                <div style="margin-top: 18px;">
-                  <a href="${APP_BASE_URL}/admin/" style="background: #B28756; color: #000; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px;">
-                    Review &amp; Approve in Super Admin ↗
-                  </a>
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0B0806; color: #EDE8E3; padding: 36px 20px;">
+                <div style="max-width: 580px; margin: 0 auto; background-color: #140F0B; border: 1px solid #B28756; border-radius: 12px; padding: 32px;">
+                  <div style="text-align: center; margin-bottom: 20px;">
+                    <span style="letter-spacing: 4px; font-size: 18px; font-weight: 700; color: #D4AF37;">LUXEA LIVING</span>
+                    <div style="font-size: 11px; letter-spacing: 1.5px; color: #A0958C; text-transform: uppercase; margin-top: 4px;">Super Admin Executive Dispatch</div>
+                  </div>
+                  
+                  <div style="background: rgba(234, 179, 8, 0.15); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 6px; padding: 6px 12px; font-size: 11px; color: #FACC15; font-weight: 700; letter-spacing: 1px; display: inline-block; margin-bottom: 16px;">
+                    ⚡ NEW HOST DOSSIER AWAITING AUDIT
+                  </div>
+
+                  <h2 style="color: #FFFFFF; font-size: 20px; margin: 0 0 10px;">${hostName} has submitted a new property</h2>
+                  <p style="color: #C5BCB3; font-size: 13px; line-height: 1.6; margin: 0 0 20px;">
+                    A new partner application has landed in the property registry. It requires your curatorial audit and approval before going live.
+                  </p>
+
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background: #0E0A07; border: 1px solid rgba(178, 135, 86, 0.25); border-radius: 8px; margin-bottom: 24px; font-size: 13px;">
+                    <tr>
+                      <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #8F847C;">Reference ID</td>
+                      <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #D4AF37; font-family: monospace; font-weight: bold; text-align: right;">${refId}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #8F847C;">Host Partner</td>
+                      <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #EDE8E3; font-weight: 600; text-align: right;">${hostName}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #8F847C;">Property Name</td>
+                      <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #EDE8E3; font-weight: 600; text-align: right;">${propName}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #8F847C;">Location / County</td>
+                      <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #EDE8E3; text-align: right;">${location}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #8F847C;">Phone / WhatsApp</td>
+                      <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #EDE8E3; text-align: right;">${record.phone || 'N/A'}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 14px; color: #8F847C;">Payout Channel</td>
+                      <td style="padding: 10px 14px; color: #4ADE80; font-weight: 600; text-align: right;">${payoutMethod}</td>
+                    </tr>
+                  </table>
+
+                  <div style="text-align: center; margin-bottom: 20px;">
+                    <a href="${dossierUrl}" style="display: inline-block; background: #D4AF37; color: #0B0806; font-weight: bold; font-size: 14px; text-decoration: none; padding: 14px 28px; border-radius: 8px; letter-spacing: 0.5px;">
+                      Open Full Host Dossier &amp; Review Audit [${refId}] ↗
+                    </a>
+                  </div>
+
+                  <div style="text-align: center;">
+                    <a href="https://wa.me/${waLink}?text=${encodeURIComponent('Hello ' + hostName + ', this is Ronald from Luxea Living reviewing your host partner application ' + refId)}" style="color: #25D366; font-size: 12px; text-decoration: none; font-weight: 600;">
+                      💬 Open Direct WhatsApp with ${hostName} ↗
+                    </a>
+                  </div>
+
+                  <div style="border-top: 1px solid rgba(178, 135, 86, 0.2); padding-top: 16px; margin-top: 24px; font-size: 11px; color: #6D635B; text-align: center;">
+                    Luxea Living Super Admin Command Pipeline • <a href="${APP_BASE_URL}/admin/" style="color: #B28756;">luxealiving.co.ke/admin</a>
+                  </div>
                 </div>
               </div>
             `,

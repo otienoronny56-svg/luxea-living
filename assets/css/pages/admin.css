@@ -986,3 +986,111 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   URGENT PENDING AUDIT BEACON & BLINKING PULSE ANIMATIONS
+   ========================================================================== */
+@keyframes beaconBlinkPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.7);
+    border-color: #D97706;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(217, 119, 6, 0);
+    border-color: #F59E0B;
+    transform: scale(1.04);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
+    border-color: #D97706;
+    transform: scale(1);
+  }
+}
+
+@keyframes dotFlash {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.15; transform: scale(0.65); }
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+}
+
+/* Pending status pill blinking alert */
+.status-pill.pill-amber.has-pending {
+  animation: beaconBlinkPulse 1.8s infinite ease-in-out;
+  background: #FFFBEB !important;
+  border: 1.5px solid #D97706 !important;
+  color: #92400E !important;
+  font-weight: 700;
+}
+
+.status-pill.pill-amber.has-pending .pill-count {
+  background: #D97706 !important;
+  color: #FFFFFF !important;
+}
+
+.pulsing-beacon-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: #D97706;
+  margin-right: 5px;
+  animation: dotFlash 1.1s infinite ease-in-out;
+  box-shadow: 0 0 6px rgba(217, 119, 6, 0.6);
+}
+
+.pulse-badge {
+  animation: badgePulse 1.5s infinite ease-in-out;
+  background: #FEF3C7 !important;
+  color: #92400E !important;
+  border: 1px solid #D97706 !important;
+}
+
+/* Executive Urgent Action Banner */
+.pending-alert-banner {
+  background: linear-gradient(90deg, #FEF3C7 0%, #FFFBEB 100%);
+  border: 1px solid #FCD34D;
+  border-left: 4px solid #D97706;
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(217, 119, 6, 0.09);
+  transition: all 0.3s ease;
+}
+
+.pending-alert-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: #78350F;
+}
+
+.btn-banner-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #D97706;
+  color: #FFFFFF;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
+}
+
+.btn-banner-review:hover {
+  background: #B45309;
+  transform: translateY(-1px);
+}

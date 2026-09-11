@@ -318,6 +318,15 @@
         </div>
       </div>
 
+      <!-- Urgent Action Required Banner (Visible when pending applications exist) -->
+      <div id="pendingAuditBanner" class="pending-alert-banner hidden">
+        <div class="pending-alert-content">
+          <span class="pulsing-beacon-dot"></span>
+          <span><strong>Action Required:</strong> <span id="pendingBannerCount">1</span> host application(s) awaiting curatorial audit and approval.</span>
+        </div>
+        <a href="#" id="pendingBannerLink" class="btn-banner-review">Review Latest Dossier ↗</a>
+      </div>
+
       <!-- Navigation Tabs with Quick Counters -->
       <div class="admin-tabs-nav">
         <button class="admin-tab-link active" id="tabHostsBtn">

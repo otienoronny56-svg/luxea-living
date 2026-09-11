@@ -189,6 +189,58 @@ export function initAdminDashboard() {
     if (pRejected) pRejected.textContent = rejectedHosts;
 
     // =======================================================================
+    // BLINKING INDICATOR & URGENT PENDING ACTION BANNER
+    // =======================================================================
+    const pendingPill = document.querySelector('.status-pill.pill-amber');
+    const pendingBanner = document.getElementById('pendingAuditBanner');
+    const pendingBannerCount = document.getElementById('pendingBannerCount');
+    const pendingBannerLink = document.getElementById('pendingBannerLink');
+    const trendPendingBadge = document.getElementById('trendPendingBadge');
+
+    if (pendingHosts > 0) {
+      // 1. Blinking pulsing glow on Pending filter pill
+      if (pendingPill) {
+        pendingPill.classList.add('has-pending');
+        if (!pendingPill.querySelector('.pulsing-beacon-dot')) {
+          const dot = document.createElement('span');
+          dot.className = 'pulsing-beacon-dot';
+          pendingPill.prepend(dot);
+        }
+      }
+
+      // 2. Urgent Action Banner at top of table
+      if (pendingBanner) {
+        pendingBanner.classList.remove('hidden');
+        if (pendingBannerCount) pendingBannerCount.textContent = pendingHosts;
+        const latestPending = cachedHosts.find(h => !h.review_status || h.review_status === 'pending_review');
+        if (latestPending && pendingBannerLink) {
+          const ref = latestPending.ref_id || latestPending.refId;
+          pendingBannerLink.href = `/admin/host-dossier.html?ref=${ref}`;
+          pendingBannerLink.textContent = `Audit ${latestPending.full_name || latestPending.fullName || 'Host'} [${ref}] ↗`;
+        }
+      }
+
+      // 3. Pulse badge on Pending KPI card
+      if (trendPendingBadge) {
+        trendPendingBadge.textContent = `⚡ ${pendingHosts} Action Req`;
+        trendPendingBadge.classList.add('pulse-badge');
+      }
+    } else {
+      if (pendingPill) {
+        pendingPill.classList.remove('has-pending');
+        const dot = pendingPill.querySelector('.pulsing-beacon-dot');
+        if (dot) dot.remove();
+      }
+      if (pendingBanner) {
+        pendingBanner.classList.add('hidden');
+      }
+      if (trendPendingBadge) {
+        trendPendingBadge.textContent = 'All Vetted';
+        trendPendingBadge.classList.remove('pulse-badge');
+      }
+    }
+
+    // =======================================================================
     // ANALYTICS HUB 1: PORTFOLIO REVENUE & VALUATION
     // =======================================================================
     const availMap = JSON.parse(localStorage.getItem('luxea_host_avail_map') || '{}');
