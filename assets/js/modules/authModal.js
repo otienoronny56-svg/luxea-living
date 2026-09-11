@@ -430,11 +430,13 @@ function injectAuthModalHtml() {
 
           if (hostRows && hostRows.length > 0) {
             const host = hostRows[0];
+            const isApproved = host.review_status === 'approved';
             const sessionData = {
               email: host.email,
               name: host.full_name,
               refId: host.ref_id,
               role: 'host',
+              status: host.review_status || 'pending_review',
               propertyName: host.property_name,
               isSuperAdmin: false,
               loggedInAt: new Date().toISOString()
@@ -443,7 +445,11 @@ function injectAuthModalHtml() {
             window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: sessionData } }));
             window.closeAuthModal();
 
-            if (window.showToast) window.showToast(`🏡 Welcome, Host Partner ${host.full_name}!`);
+            if (isApproved) {
+              if (window.showToast) window.showToast(`🏡 Welcome, Verified Host Partner ${host.full_name}!`);
+            } else {
+              if (window.showToast) window.showToast(`⏳ Welcome, ${host.full_name}. Your host application is currently under admin verification.`);
+            }
             updateHeaderAuthState();
             return;
           }

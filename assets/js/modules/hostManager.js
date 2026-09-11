@@ -67,11 +67,23 @@ export function initHostManager(containerId = 'hostManagerContainer') {
   }
 
   function renderListings() {
+    const userSession = JSON.parse(localStorage.getItem('luxea_user_session') || 'null');
+    const adminSession = JSON.parse(localStorage.getItem('luxea_admin_session') || 'null');
+    const isSuperAdmin = (adminSession && adminSession.isSuperAdmin) || (userSession && userSession.isSuperAdmin);
+    const hostTitle = userSession && userSession.name && !isSuperAdmin ? `${userSession.name}'s Property Portfolio` : 'Your Property Portfolio';
+    const hostSub = isSuperAdmin 
+      ? 'Super Admin Control: Manage live availability, rates, and blackout calendar across all listings.' 
+      : 'Manage live guest availability, blackout calendar dates, and photography for your residence.';
+
     container.innerHTML = `
       <div class="host-manager-header">
         <div>
-          <h2 class="manager-title">Your Property Portfolio</h2>
-          <p class="manager-sub">Manage live availability, blackout dates, and photos stored in Supabase.</p>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+            <span class="badge-tag badge-gold" style="font-size:0.68rem; padding:3px 8px;">VERIFIED HOST PARTNER</span>
+            ${userSession && userSession.refId ? `<span style="font-family:monospace; font-size:0.75rem; font-weight:700; color:var(--color-camel-dark);">${userSession.refId}</span>` : ''}
+          </div>
+          <h2 class="manager-title">${hostTitle}</h2>
+          <p class="manager-sub">${hostSub}</p>
         </div>
         <button class="btn btn-primary btn-sm" id="openNewListingBtn">
           <span>+ Add New Listing</span>

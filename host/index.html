@@ -48,14 +48,40 @@
   <main class="container">
     <div class="host-portal-wrapper">
       
-      <!-- Top Mode Switcher Bar -->
-      <div class="host-mode-switcher-bar">
-        <button class="host-mode-btn active" id="hostModeRegisterBtn">
-          <span>📝</span> Partner Registration Form
-        </button>
-        <button class="host-mode-btn" id="hostModeManageBtn">
-          <span>⚡</span> Host Dashboard &amp; Availability
-        </button>
+      <!-- Host Portal Utility Bar (Subtle & Private) -->
+      <div class="host-utility-bar">
+        <div class="host-utility-left">
+          <span class="utility-badge">✦ FOUNDING PARTNER CIRCLE</span>
+          <span class="utility-note">Applications reviewed by Super Admin within 24 hours</span>
+        </div>
+        <div class="host-utility-right">
+          <button type="button" class="btn-text-link" id="openStatusLookupBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <span>Track Application Status</span>
+          </button>
+          <span class="util-divider">•</span>
+          <button type="button" class="btn-text-link" id="hostSignInBtn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Verified Host Sign In</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Logged-in Verified Host Bar (Dynamic) -->
+      <div class="host-verified-session-bar hidden" id="hostVerifiedSessionBar">
+        <div class="verified-session-info">
+          <span class="verified-shield">🛡️</span>
+          <div>
+            <strong id="sessionHostName">Verified Partner</strong>
+            <span class="session-sub" id="sessionPropName">Property Owner</span>
+          </div>
+        </div>
+        <div class="verified-session-actions">
+          <button type="button" class="btn btn-outline btn-sm" id="toggleHostModeBtn">
+            <span id="toggleHostModeLabel">Go to Host Dashboard ↗</span>
+          </button>
+          <button type="button" class="btn btn-text btn-sm" id="hostLogoutBtn" style="color: #FFCDD2;">Sign Out</button>
+        </div>
       </div>
 
       <!-- VIEW 1: REGISTRATION WIZARD -->
@@ -64,380 +90,658 @@
           <span class="badge-tag badge-gold">EARLY PARTNER REGISTRATION</span>
           <h1 class="host-hero-title">Host Information &amp; Property Details</h1>
           <p class="host-hero-subtitle">
-            Join our founding circle of distinguished property owners in Nairobi, Diani Beach, Naivasha, and beyond.
+            Join our founding circle of distinguished property owners in Nairobi, Diani Beach, Naivasha, and beyond. Systematic 5-step application • Verified within 24 hours.
           </p>
         </div>
 
-      <!-- Stepper Progress -->
-      <div class="form-stepper">
-        <div class="step-item active" data-step="1">
-          <span class="step-num">1</span>
-          <span class="step-title">Personal</span>
-        </div>
-        <div class="step-line"></div>
-        <div class="step-item" data-step="2">
-          <span class="step-num">2</span>
-          <span class="step-title">Property</span>
-        </div>
-        <div class="step-line"></div>
-        <div class="step-item" data-step="3">
-          <span class="step-num">3</span>
-          <span class="step-title">Unit &amp; Amenities</span>
-        </div>
-        <div class="step-line"></div>
-        <div class="step-item" data-step="4">
-          <span class="step-num">4</span>
-          <span class="step-title">Payout</span>
-        </div>
-        <div class="step-line"></div>
-        <div class="step-item" data-step="5">
-          <span class="step-num">5</span>
-          <span class="step-title">Documents</span>
-        </div>
-      </div>
-
-      <!-- Dedicated Full-Page Multi-Step Form (No Modals) -->
-      <form id="luxeaHostForm" class="host-form" novalidate>
-
-        <!-- STEP 1: A. PERSONAL DETAILS -->
-        <div class="form-step-pane active" id="stepPane1">
-          <div class="pane-header">
-            <h2 class="pane-title">A. Personal Details</h2>
-            <p class="pane-desc">Enter your legal contact information for partner verification.</p>
+        <!-- Dynamic Progress Indicator Bar -->
+        <div class="progress-indicator-bar">
+          <div class="progress-meta">
+            <span class="progress-step-text" id="progressStepLabel">Step 1 of 5: Personal Details</span>
+            <span class="progress-percent" id="progressPercentLabel">20% Completed</span>
           </div>
-
-          <div class="form-grid">
-            <div class="form-group col-full">
-              <label for="hostFullName" class="form-label">Full Name <span class="required">*</span></label>
-              <input type="text" id="hostFullName" class="form-control" placeholder="e.g. Ronald Kipchumba" required>
-            </div>
-
-            <div class="form-group col-half">
-              <label for="hostNationalId" class="form-label">National ID / Passport No. <span class="required">*</span></label>
-              <input type="text" id="hostNationalId" class="form-control" placeholder="e.g. 12345678 or A0123456" required>
-            </div>
-
-            <div class="form-group col-half">
-              <label for="hostPhone" class="form-label">Phone Number (Tel input) <span class="required">*</span></label>
-              <input type="tel" id="hostPhone" class="form-control" placeholder="+254 712 345 678" required>
-            </div>
-
-            <div class="form-group col-half">
-              <label for="hostEmail" class="form-label">Email Address <span class="required">*</span></label>
-              <input type="email" id="hostEmail" class="form-control" placeholder="name@domain.com" required>
-            </div>
-
-            <div class="form-group col-half">
-              <label for="hostKraPin" class="form-label">KRA PIN <span class="required">*</span></label>
-              <input type="text" id="hostKraPin" class="form-control" placeholder="e.g. P051234567A" required>
-            </div>
-
-            <div class="form-group col-half">
-              <label for="hostDob" class="form-label">Date of Birth <span class="required">*</span></label>
-              <input type="date" id="hostDob" class="form-control" required>
-            </div>
-          </div>
-
-          <div class="pane-actions">
-            <div></div>
-            <button type="button" class="btn btn-primary step-next-btn" data-next="2">
-              Next: Property Details →
-            </button>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill" style="width: 20%;"></div>
           </div>
         </div>
 
-        <!-- STEP 2: B. PROPERTY DETAILS -->
-        <div class="form-step-pane" id="stepPane2">
-          <div class="pane-header">
-            <h2 class="pane-title">B. Property Details</h2>
-            <p class="pane-desc">Tell us about the property you wish to feature on Luxea Living.</p>
+        <!-- Stepper Progress with Subtitles -->
+        <div class="form-stepper">
+          <div class="step-item active" data-step="1">
+            <span class="step-num">1</span>
+            <div class="step-content">
+              <span class="step-title">Personal</span>
+              <span class="step-sub">Identity &amp; Contact</span>
+            </div>
           </div>
+          <div class="step-line"></div>
+          <div class="step-item" data-step="2">
+            <span class="step-num">2</span>
+            <div class="step-content">
+              <span class="step-title">Property</span>
+              <span class="step-sub">Location &amp; Type</span>
+            </div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item" data-step="3">
+            <span class="step-num">3</span>
+            <div class="step-content">
+              <span class="step-title">Unit &amp; Amenities</span>
+              <span class="step-sub">Rooms &amp; Inclusions</span>
+            </div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item" data-step="4">
+            <span class="step-num">4</span>
+            <div class="step-content">
+              <span class="step-title">Payout</span>
+              <span class="step-sub">M-Pesa / Bank</span>
+            </div>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item" data-step="5">
+            <span class="step-num">5</span>
+            <div class="step-content">
+              <span class="step-title">Verification</span>
+              <span class="step-sub">Review &amp; Sign</span>
+            </div>
+          </div>
+        </div>
 
-          <div class="form-grid">
-            <div class="form-group col-full">
-              <label for="propertyName" class="form-label">Property Name <span class="required">*</span></label>
-              <input type="text" id="propertyName" class="form-control" placeholder="e.g. The Glass Pavilion at Karen Ridge" required>
+        <!-- Dedicated Full-Page Multi-Step Form -->
+        <form id="luxeaHostForm" class="host-form" novalidate>
+
+          <!-- STEP 1: A. PERSONAL DETAILS -->
+          <div class="form-step-pane active" id="stepPane1">
+            <div class="pane-header">
+              <h2 class="pane-title">A. Personal &amp; Legal Details</h2>
+              <p class="pane-desc">Enter your legal contact information for partner identity verification.</p>
             </div>
 
-            <div class="form-group col-full">
-              <label class="form-label">Property Type <span class="required">*</span></label>
-              <div class="radio-pill-group">
-                <label class="radio-pill"><input type="radio" name="propertyType" value="Apartment" checked><span>Apartment</span></label>
-                <label class="radio-pill"><input type="radio" name="propertyType" value="Studio"><span>Studio</span></label>
-                <label class="radio-pill"><input type="radio" name="propertyType" value="Villa"><span>Villa</span></label>
-                <label class="radio-pill"><input type="radio" name="propertyType" value="Guest House"><span>Guest House</span></label>
-                <label class="radio-pill"><input type="radio" name="propertyType" value="Other"><span>Other</span></label>
+            <div class="friendly-context-box">
+              <div class="context-icon">💡</div>
+              <div class="context-body">
+                <strong>Why we verify partner identity:</strong>
+                <p>Luxea provides curated stays for high-end guests. Verifying each host guarantees peace of mind, insurance eligibility, and seamless rental tax compliance in Kenya.</p>
               </div>
             </div>
 
-            <div class="form-group col-full">
-              <label for="propertyAddress" class="form-label">Property Address (Short Text) <span class="required">*</span></label>
-              <textarea id="propertyAddress" rows="2" class="form-control" placeholder="Street name, landmark, gate/court details..." required></textarea>
-            </div>
-
-            <div class="form-group col-half">
-              <label for="propertyCounty" class="form-label">County <span class="required">*</span></label>
-              <input type="text" id="propertyCounty" class="form-control" placeholder="e.g. Nairobi, Kilifi, Kwale, Nakuru" required>
-            </div>
-
-            <div class="form-group col-half">
-              <label for="propertyArea" class="form-label">Area / Suburb <span class="required">*</span></label>
-              <input type="text" id="propertyArea" class="form-control" placeholder="e.g. Karen, Westlands, Diani, Nyali" required>
-            </div>
-
-            <div class="form-group col-full">
-              <label for="propertyMaps" class="form-label">Google Maps Location Link <span class="required">*</span></label>
-              <input type="url" id="propertyMaps" class="form-control" placeholder="https://maps.google.com/?q=..." required>
-            </div>
-          </div>
-
-          <div class="pane-actions">
-            <button type="button" class="btn btn-secondary step-prev-btn" data-prev="1">← Back</button>
-            <button type="button" class="btn btn-primary step-next-btn" data-next="3">Next: Unit &amp; Amenities →</button>
-          </div>
-        </div>
-
-        <!-- STEP 3: C. UNIT INFORMATION & AMENITIES -->
-        <div class="form-step-pane" id="stepPane3">
-          <div class="pane-header">
-            <h2 class="pane-title">C. Unit Information &amp; Amenities</h2>
-            <p class="pane-desc">Specify the capacity and luxury inclusions available to guests.</p>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group col-third">
-              <label for="unitBedrooms" class="form-label">Bedrooms <span class="required">*</span></label>
-              <input type="number" id="unitBedrooms" min="0" max="30" value="2" class="form-control" required>
-            </div>
-
-            <div class="form-group col-third">
-              <label for="unitBathrooms" class="form-label">Bathrooms <span class="required">*</span></label>
-              <input type="number" id="unitBathrooms" min="1" max="30" step="0.5" value="2" class="form-control" required>
-            </div>
-
-            <div class="form-group col-third">
-              <label for="unitMaxGuests" class="form-label">Max Guests <span class="required">*</span></label>
-              <input type="number" id="unitMaxGuests" min="1" max="50" value="4" class="form-control" required>
-            </div>
-
-            <div class="form-group col-full">
-              <label class="form-label">Amenities Available (Select all that apply):</label>
-              <div class="amenities-checkbox-grid">
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="WiFi" checked><span>WiFi</span></label>
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Smart TV" checked><span>Smart TV</span></label>
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Netflix" checked><span>Netflix</span></label>
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Kitchen" checked><span>Kitchen</span></label>
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Parking" checked><span>Parking</span></label>
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Workspace"><span>Workspace</span></label>
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Balcony"><span>Balcony</span></label>
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Washing Machine"><span>Washing Machine</span></label>
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Swimming Pool"><span>Swimming Pool</span></label>
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Private Chef"><span>Private Chef</span></label>
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Backup Generator"><span>Backup Generator</span></label>
-                <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Air Conditioning"><span>Air Conditioning</span></label>
+            <div class="form-grid">
+              <div class="form-group col-full">
+                <label for="hostFullName" class="form-label">Full Legal Name <span class="required">*</span></label>
+                <input type="text" id="hostFullName" class="form-control" placeholder="e.g. Ronald Kipchumba" required>
+                <small class="field-hint">Enter your full name exactly as it appears on your official ID or Passport.</small>
               </div>
 
-              <div class="other-amenity-row" style="margin-top: 10px;">
-                <label for="otherAmenityInput" class="form-label">Other (please specify):</label>
-                <input type="text" id="otherAmenityInput" class="form-control" placeholder="e.g. Wine cellar, Jacuzzi, Rooftop deck">
+              <div class="form-group col-half">
+                <label for="hostNationalId" class="form-label">National ID / Passport No. <span class="required">*</span></label>
+                <input type="text" id="hostNationalId" class="form-control" placeholder="e.g. 12345678 or A0123456" required>
+                <small class="field-hint">🔒 Encrypted and stored securely for partner verification.</small>
               </div>
+
+              <div class="form-group col-half">
+                <label for="hostPhone" class="form-label">Phone Number <span class="required">*</span></label>
+                <input type="tel" id="hostPhone" class="form-control" placeholder="+254 712 345 678" required>
+                <small class="field-hint">💬 We will send instant guest arrival alerts and concierge updates here.</small>
+              </div>
+
+              <div class="form-group col-half">
+                <label for="hostEmail" class="form-label">Email Address <span class="required">*</span></label>
+                <input type="email" id="hostEmail" class="form-control" placeholder="name@domain.com" required>
+                <small class="field-hint">✉️ Your application receipt and dashboard activation link will be sent here.</small>
+              </div>
+
+              <div class="form-group col-half">
+                <label for="hostKraPin" class="form-label">KRA PIN <span class="required">*</span></label>
+                <input type="text" id="hostKraPin" class="form-control" placeholder="e.g. P051234567A" required>
+                <small class="field-hint">📑 Required by Kenyan authorities for lawful rental income compliance.</small>
+              </div>
+
+              <div class="form-group col-half">
+                <label for="hostDob" class="form-label">Date of Birth <span class="required">*</span></label>
+                <input type="date" id="hostDob" class="form-control" required>
+                <small class="field-hint">📅 Host partners must be 18 years of age or older.</small>
+              </div>
+            </div>
+
+            <div class="pane-actions">
+              <div></div>
+              <button type="button" class="btn btn-primary step-next-btn" data-next="2">
+                <span>Next: Property Details</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
             </div>
           </div>
 
-          <div class="pane-actions">
-            <button type="button" class="btn btn-secondary step-prev-btn" data-prev="2">← Back</button>
-            <button type="button" class="btn btn-primary step-next-btn" data-next="4">Next: Payout Details →</button>
-          </div>
-        </div>
+          <!-- STEP 2: B. PROPERTY DETAILS -->
+          <div class="form-step-pane" id="stepPane2">
+            <div class="pane-header">
+              <h2 class="pane-title">B. Property Details &amp; Location</h2>
+              <p class="pane-desc">Tell us about the distinguished property you wish to feature on Luxea Living.</p>
+            </div>
 
-        <!-- STEP 4: D. PAYOUT DETAILS -->
-        <div class="form-step-pane" id="stepPane4">
-          <div class="pane-header">
-            <h2 class="pane-title">D. Payout Details</h2>
-            <p class="pane-desc">Select how you prefer to receive earnings from bookings on Luxea Living.</p>
-          </div>
+            <div class="form-grid">
+              <div class="form-group col-full">
+                <label for="propertyName" class="form-label">Property Title / Name <span class="required">*</span></label>
+                <input type="text" id="propertyName" class="form-control" placeholder="e.g. The Glass Pavilion at Karen Ridge" required>
+                <small class="field-hint">Choose an appealing, distinguished title for guest listings.</small>
+              </div>
 
-          <div class="form-grid">
-            <div class="form-group col-full">
-              <label class="form-label">Preferred Payment Method: <span class="required">*</span></label>
-              <div class="payment-method-toggle">
-                <label class="method-card">
-                  <input type="radio" name="payoutMethod" value="M-Pesa" checked>
-                  <div class="method-box">
-                    <div class="method-icon-circle mpesa-bg">M</div>
-                    <div class="method-info">
-                      <strong>M-Pesa</strong>
-                      <span>Fast mobile money payouts to Safaricom lines</span>
+              <div class="form-group col-full">
+                <label class="form-label">Property Type <span class="required">*</span></label>
+                <div class="property-cards-grid">
+                  <label class="property-type-card">
+                    <input type="radio" name="propertyType" value="Apartment" checked>
+                    <div class="prop-card-inner">
+                      <span class="prop-card-icon">🏢</span>
+                      <strong class="prop-card-title">Apartment</strong>
+                      <span class="prop-card-desc">Serviced flat</span>
                     </div>
-                  </div>
-                </label>
-                <label class="method-card">
-                  <input type="radio" name="payoutMethod" value="Bank Transfer">
-                  <div class="method-box">
-                    <div class="method-icon-circle bank-bg">🏛️</div>
-                    <div class="method-info">
-                      <strong>Bank Transfer</strong>
-                      <span>Direct settlement to corporate or personal bank accounts</span>
+                  </label>
+                  <label class="property-type-card">
+                    <input type="radio" name="propertyType" value="Studio">
+                    <div class="prop-card-inner">
+                      <span class="prop-card-icon">🛋️</span>
+                      <strong class="prop-card-title">Studio</strong>
+                      <span class="prop-card-desc">Executive studio</span>
                     </div>
+                  </label>
+                  <label class="property-type-card">
+                    <input type="radio" name="propertyType" value="Villa">
+                    <div class="prop-card-inner">
+                      <span class="prop-card-icon">🏡</span>
+                      <strong class="prop-card-title">Villa</strong>
+                      <span class="prop-card-desc">Private luxury estate</span>
+                    </div>
+                  </label>
+                  <label class="property-type-card">
+                    <input type="radio" name="propertyType" value="Penthouse">
+                    <div class="prop-card-inner">
+                      <span class="prop-card-icon">🌅</span>
+                      <strong class="prop-card-title">Penthouse</strong>
+                      <span class="prop-card-desc">Top-floor luxury</span>
+                    </div>
+                  </label>
+                  <label class="property-type-card">
+                    <input type="radio" name="propertyType" value="Guest House">
+                    <div class="prop-card-inner">
+                      <span class="prop-card-icon">🌿</span>
+                      <strong class="prop-card-title">Cottage</strong>
+                      <span class="prop-card-desc">Boutique haven</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group col-half">
+                <label for="propertyCounty" class="form-label">County <span class="required">*</span></label>
+                <input type="text" id="propertyCounty" class="form-control" list="countySuggestions" placeholder="e.g. Nairobi, Kwale (Diani), Nakuru (Naivasha)" required>
+                <datalist id="countySuggestions">
+                  <option value="Nairobi"></option>
+                  <option value="Mombasa"></option>
+                  <option value="Kwale (Diani Beach)"></option>
+                  <option value="Nakuru (Naivasha)"></option>
+                  <option value="Kilifi (Watamu &amp; Malindi)"></option>
+                  <option value="Kiambu"></option>
+                  <option value="Nanyuki (Laikipia)"></option>
+                  <option value="Kisumu"></option>
+                </datalist>
+                <small class="field-hint">Primary Kenyan region where the residence is situated.</small>
+              </div>
+
+              <div class="form-group col-half">
+                <label for="propertyArea" class="form-label">Area / Suburb <span class="required">*</span></label>
+                <input type="text" id="propertyArea" class="form-control" placeholder="e.g. Karen, Westlands, Diani Beach, Nyali" required>
+                <small class="field-hint">Neighborhood, estate, or beachfront locality.</small>
+              </div>
+
+              <div class="form-group col-full">
+                <label for="propertyAddress" class="form-label">Physical Address &amp; Access Notes <span class="required">*</span></label>
+                <textarea id="propertyAddress" rows="2" class="form-control" placeholder="Street name, landmark, gate/court number, or building name..." required></textarea>
+                <small class="field-hint">Used by our onboarding team for property inspection.</small>
+              </div>
+
+              <div class="form-group col-full">
+                <label for="propertyMaps" class="form-label">Google Maps Pin Link <span class="required">*</span></label>
+                <input type="url" id="propertyMaps" class="form-control" placeholder="https://maps.app.goo.gl/... or https://maps.google.com/?q=..." required>
+                <small class="field-hint">📍 Open Google Maps, drop a pin at your residence gate, tap Share &gt; Copy Link, and paste here.</small>
+              </div>
+            </div>
+
+            <div class="pane-actions">
+              <button type="button" class="btn btn-secondary step-prev-btn" data-prev="1">← Back</button>
+              <button type="button" class="btn btn-primary step-next-btn" data-next="3">
+                <span>Next: Unit &amp; Amenities</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 3: C. UNIT INFORMATION & AMENITIES -->
+          <div class="form-step-pane" id="stepPane3">
+            <div class="pane-header">
+              <h2 class="pane-title">C. Unit Information &amp; Amenities</h2>
+              <p class="pane-desc">Specify the capacity and luxury inclusions available to guests.</p>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group col-third">
+                <label for="unitBedrooms" class="form-label">Bedrooms <span class="required">*</span></label>
+                <input type="number" id="unitBedrooms" min="0" max="30" value="2" class="form-control" required>
+                <small class="field-hint">Number of guest bedrooms</small>
+              </div>
+
+              <div class="form-group col-third">
+                <label for="unitBathrooms" class="form-label">Bathrooms <span class="required">*</span></label>
+                <input type="number" id="unitBathrooms" min="1" max="30" step="0.5" value="2" class="form-control" required>
+                <small class="field-hint">Full &amp; half bathrooms</small>
+              </div>
+
+              <div class="form-group col-third">
+                <label for="unitMaxGuests" class="form-label">Max Guests <span class="required">*</span></label>
+                <input type="number" id="unitMaxGuests" min="1" max="50" value="4" class="form-control" required>
+                <small class="field-hint">Maximum guest occupancy</small>
+              </div>
+
+              <div class="form-group col-full">
+                <label class="form-label">Amenities &amp; Luxury Inclusions (Select all that apply):</label>
+                
+                <span class="amenity-section-label">✦ Essential Comforts</span>
+                <div class="amenities-checkbox-grid">
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="High-Speed WiFi" checked><span>📶 High-Speed WiFi</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Smart 4K TV" checked><span>📺 Smart 4K TV</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Netflix / Streaming" checked><span>🎬 Streaming Apps</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Gourmet Kitchen" checked><span>🍳 Equipped Kitchen</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Secure Parking" checked><span>🚗 Secure Parking</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Washing Machine"><span>🧺 In-Unit Washer</span></label>
+                </div>
+
+                <span class="amenity-section-label">✦ Luxury &amp; Leisure</span>
+                <div class="amenities-checkbox-grid">
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Swimming Pool"><span>🏊 Swimming Pool</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Air Conditioning"><span>❄️ Air Conditioning</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Backup Generator"><span>⚡ 24/7 Generator</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Balcony / Terrace"><span>🌅 Scenic Balcony</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Dedicated Workspace"><span>💻 Work Desk</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Hot Tub / Jacuzzi"><span>🧘 Hot Tub</span></label>
+                </div>
+
+                <span class="amenity-section-label">✦ Premium Concierge &amp; Services</span>
+                <div class="amenities-checkbox-grid">
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Private Chef Available"><span>👨‍🍳 Chef On-Call</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="24/7 Security &amp; CCTV"><span>🛡️ 24/7 Manned Security</span></label>
+                  <label class="amenity-checkbox"><input type="checkbox" name="amenity" value="Daily Housekeeping"><span>✨ Daily Housekeeping</span></label>
+                </div>
+
+                <div class="other-amenity-row" style="margin-top: 14px;">
+                  <label for="otherAmenityInput" class="form-label">Other Unique Highlights:</label>
+                  <input type="text" id="otherAmenityInput" class="form-control" placeholder="e.g. Wine cellar, EV charger, Rooftop gazebo, Solar water heater">
+                </div>
+              </div>
+            </div>
+
+            <div class="pane-actions">
+              <button type="button" class="btn btn-secondary step-prev-btn" data-prev="2">← Back</button>
+              <button type="button" class="btn btn-primary step-next-btn" data-next="4">
+                <span>Next: Payout Details</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 4: D. PAYOUT DETAILS -->
+          <div class="form-step-pane" id="stepPane4">
+            <div class="pane-header">
+              <h2 class="pane-title">D. Payout Preferences</h2>
+              <p class="pane-desc">Select how you prefer to receive earnings from bookings on Luxea Living.</p>
+            </div>
+
+            <div class="friendly-context-box">
+              <div class="context-icon">🛡️</div>
+              <div class="context-body">
+                <strong>Instant &amp; Guaranteed Settlement</strong>
+                <p>Earnings are automatically disbursed to your verified payout account within 24 hours of guest check-in. Zero withdrawal delays.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group col-full">
+                <label class="form-label">Preferred Payment Method <span class="required">*</span></label>
+                <div class="payment-method-toggle">
+                  <label class="method-card">
+                    <input type="radio" name="payoutMethod" value="M-Pesa" checked>
+                    <div class="method-box">
+                      <div class="method-icon-circle mpesa-bg">M</div>
+                      <div class="method-info">
+                        <strong>M-Pesa (Instant Settlement)</strong>
+                        <span>Direct mobile money disbursements to Safaricom lines</span>
+                      </div>
+                    </div>
+                  </label>
+                  <label class="method-card">
+                    <input type="radio" name="payoutMethod" value="Bank Transfer">
+                    <div class="method-box">
+                      <div class="method-icon-circle bank-bg">🏛️</div>
+                      <div class="method-info">
+                        <strong>Bank Transfer (Direct Deposit)</strong>
+                        <span>Direct settlement to NCBA, Stanbic, Absa, KCB, etc.</span>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="conditional-payout-fields col-full" id="mpesaFieldsBlock">
+                <div class="form-grid">
+                  <div class="form-group col-half">
+                    <label for="mpesaName" class="form-label">M-Pesa Registered Name <span class="required">*</span></label>
+                    <input type="text" id="mpesaName" class="form-control" placeholder="e.g. Ronald Kipchumba">
+                    <small class="field-hint">Name matching your Safaricom SIM registration.</small>
                   </div>
+                  <div class="form-group col-half">
+                    <label for="mpesaNumber" class="form-label">M-Pesa Mobile Number <span class="required">*</span></label>
+                    <input type="tel" id="mpesaNumber" class="form-control" placeholder="e.g. 0712345678 or +254712345678">
+                    <small class="field-hint">Disbursements will be credited directly to this line.</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="conditional-payout-fields col-full hidden" id="bankFieldsBlock">
+                <div class="form-grid">
+                  <div class="form-group col-third">
+                    <label for="bankName" class="form-label">Bank Name <span class="required">*</span></label>
+                    <input type="text" id="bankName" class="form-control" placeholder="e.g. NCBA, Stanbic, Absa, KCB">
+                  </div>
+                  <div class="form-group col-third">
+                    <label for="bankAccountNumber" class="form-label">Account Number <span class="required">*</span></label>
+                    <input type="text" id="bankAccountNumber" class="form-control" placeholder="e.g. 110023456789">
+                  </div>
+                  <div class="form-group col-third">
+                    <label for="bankAccountName" class="form-label">Account Holder Name</label>
+                    <input type="text" id="bankAccountName" class="form-control" placeholder="Name as shown on bank statement">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pane-actions">
+              <button type="button" class="btn btn-secondary step-prev-btn" data-prev="3">← Back</button>
+              <button type="button" class="btn btn-primary step-next-btn" data-next="5">
+                <span>Next: Review &amp; Sign</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 5: E. REQUIRED DOCUMENTS, PRE-FLIGHT REVIEW & F. DECLARATION -->
+          <div class="form-step-pane" id="stepPane5">
+            <div class="pane-header">
+              <h2 class="pane-title">E. Verification Documents &amp; Digital Signature</h2>
+              <p class="pane-desc">Upload supporting files and sign to complete your partner application.</p>
+            </div>
+
+            <!-- Systematic Pre-flight Review Snapshot Card -->
+            <div class="preflight-review-card" id="preflightReviewCard">
+              <div class="review-header">
+                <h3>Application Summary (Review before submitting)</h3>
+                <span class="badge-tag badge-gold">Pre-Flight Review</span>
+              </div>
+              <div class="review-grid">
+                <div class="review-item">
+                  <span>Host Partner:</span>
+                  <strong id="reviewHostName">—</strong>
+                </div>
+                <div class="review-item">
+                  <span>Contact:</span>
+                  <strong id="reviewHostContact">—</strong>
+                </div>
+                <div class="review-item">
+                  <span>Property:</span>
+                  <strong id="reviewPropName">—</strong>
+                </div>
+                <div class="review-item">
+                  <span>Location:</span>
+                  <strong id="reviewPropLocation">—</strong>
+                </div>
+                <div class="review-item">
+                  <span>Capacity:</span>
+                  <strong id="reviewPropCapacity">—</strong>
+                </div>
+                <div class="review-item">
+                  <span>Payout Method:</span>
+                  <strong id="reviewPayoutMethod">—</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group col-half">
+                <label class="form-label">National ID / Passport Copy <span class="required">*</span></label>
+                <div class="file-dropzone" id="idDropzone">
+                  <input type="file" id="idFileInput" accept="image/*,application/pdf" style="display:none;">
+                  <div class="dropzone-content" id="idDropzoneContent">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    <span class="dropzone-text">Click or drag National ID / Passport</span>
+                    <span class="dropzone-sub">PDF, PNG, JPG up to 10MB</span>
+                  </div>
+                  <div class="file-preview-badge hidden" id="idFileBadge" style="margin-top:10px; display:inline-flex; align-items:center; gap:8px; background:rgba(46,125,50,0.1); color:#2E7D32; padding:6px 14px; border-radius:20px; font-size:0.82rem;">
+                    <span>✓</span>
+                    <span class="file-name-text">id_document.pdf</span>
+                  </div>
+                </div>
+                <small class="field-hint">Clear front &amp; back scan or high-resolution photo.</small>
+              </div>
+
+              <div class="form-group col-half">
+                <label class="form-label">Property Photos (at least 3 photos) <span class="required">*</span></label>
+                <div class="file-dropzone" id="photosDropzone">
+                  <input type="file" id="photosFileInput" accept="image/*" multiple style="display:none;">
+                  <div class="dropzone-content">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <span class="dropzone-text" id="photosDropzoneText">Upload at least 3 property photos</span>
+                    <span class="dropzone-sub">Living room, bedroom, bathroom</span>
+                  </div>
+                  <div class="photos-preview-gallery" id="photosGalleryPreview"></div>
+                </div>
+                <small class="field-hint">High-quality landscape photos give your listing maximum prominence.</small>
+              </div>
+
+              <div class="form-group col-full">
+                <label class="form-label">Business / Title Registration Document (Optional)</label>
+                <input type="file" id="bizFileInput" class="form-control" accept="image/*,application/pdf">
+                <small class="field-hint">Optional: Lease agreement, corporate registration, or title deed summary.</small>
+              </div>
+
+              <div class="form-group col-full declaration-box">
+                <h3 class="decl-heading">F. Declaration &amp; Electronic Signature</h3>
+                <label class="checkbox-label" style="display: flex; gap: 10px; cursor: pointer; align-items: flex-start; margin-bottom: 14px;">
+                  <input type="checkbox" id="declarationCheck" required style="margin-top: 3px;">
+                  <span style="font-size: 0.86rem; color: var(--color-espresso); line-height: 1.5;">
+                    I declare that all information submitted is true, accurate, and lawfully represents my property. I agree to receive onboarding communications from Luxea Living and adhere to the partner service level agreement.
+                  </span>
                 </label>
+
+                <div class="signature-row">
+                  <div class="form-group" style="flex: 2;">
+                    <label for="hostSignature" class="form-label">Digital Signature (Type Full Legal Name) <span class="required">*</span></label>
+                    <input type="text" id="hostSignature" class="form-control sig-font" placeholder="e.g. Ronald Kipchumba" required>
+                    <small class="field-hint">Type your full legal name to legally sign this application.</small>
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label for="submissionDate" class="form-label">Date <span class="required">*</span></label>
+                    <input type="date" id="submissionDate" class="form-control" required readonly>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="conditional-payout-fields col-full" id="mpesaFieldsBlock">
-              <div class="form-grid">
-                <div class="form-group col-half">
-                  <label for="mpesaName" class="form-label">M-Pesa Name (Registered Name) <span class="required">*</span></label>
-                  <input type="text" id="mpesaName" class="form-control" placeholder="e.g. Ronald Kipchumba">
-                </div>
-                <div class="form-group col-half">
-                  <label for="mpesaNumber" class="form-label">M-Pesa Number <span class="required">*</span></label>
-                  <input type="tel" id="mpesaNumber" class="form-control" placeholder="e.g. 0712345678">
-                </div>
-              </div>
-            </div>
-
-            <div class="conditional-payout-fields col-full hidden" id="bankFieldsBlock">
-              <div class="form-grid">
-                <div class="form-group col-third">
-                  <label for="bankName" class="form-label">Bank Name <span class="required">*</span></label>
-                  <input type="text" id="bankName" class="form-control" placeholder="e.g. NCBA, Stanbic, Absa">
-                </div>
-                <div class="form-group col-third">
-                  <label for="bankAccountNumber" class="form-label">Account Number <span class="required">*</span></label>
-                  <input type="text" id="bankAccountNumber" class="form-control" placeholder="e.g. 110023456789">
-                </div>
-                <div class="form-group col-third">
-                  <label for="bankAccountName" class="form-label">Account Name</label>
-                  <input type="text" id="bankAccountName" class="form-control" placeholder="Name as shown on bank statement">
-                </div>
-              </div>
+            <div class="pane-actions">
+              <button type="button" class="btn btn-secondary step-prev-btn" data-prev="4">← Back</button>
+              <button type="submit" class="btn btn-primary btn-large" id="submitHostFormBtn">
+                <span>Submit Partner Application</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
             </div>
           </div>
 
-          <div class="pane-actions">
-            <button type="button" class="btn btn-secondary step-prev-btn" data-prev="3">← Back</button>
-            <button type="button" class="btn btn-primary step-next-btn" data-next="5">Next: Documents &amp; Declaration →</button>
+        </form>
+
+        <!-- SUCCESS CONFIRMATION PANE -->
+        <div class="form-success-pane hidden" id="hostSuccessPane">
+          <div class="success-icon-wrap">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <span class="badge-tag badge-gold">Application Successfully Received</span>
+          <h2 class="success-title">Welcome to the Founding Circle</h2>
+          <p class="success-desc">
+            Your property application has been logged in our partner database. Our onboarding team is reviewing your documents and will dispatch your activation link within 24 hours.
+          </p>
+
+          <div class="application-summary-card">
+            <div class="summary-row">
+              <span class="sum-label">Reference ID:</span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <strong class="sum-val sum-code" id="successRefId">LXH-2026-0000</strong>
+                <button type="button" id="copyRefBtn" class="btn-text-link" style="font-size:0.75rem; padding:2px 6px;">Copy</button>
+              </div>
+            </div>
+            <div class="summary-row">
+              <span class="sum-label">Property:</span>
+              <strong class="sum-val" id="successPropName">—</strong>
+            </div>
+            <div class="summary-row">
+              <span class="sum-label">Host Name:</span>
+              <strong class="sum-val" id="successHostName">—</strong>
+            </div>
+            <div class="summary-row">
+              <span class="sum-label">Payout Preference:</span>
+              <strong class="sum-val" id="successPayoutMethod">—</strong>
+            </div>
+          </div>
+
+          <div class="friendly-context-box" style="max-width: 500px; margin: 0 auto 28px; text-align: left;">
+            <div class="context-icon">⏳</div>
+            <div class="context-body">
+              <strong>What Happens Next:</strong>
+              <p>1. Document audit by Super Admin (underway)<br>
+                 2. Verification confirmation email sent to you<br>
+                 3. Official Host Suite activation link to manage availability &amp; bookings.</p>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary" id="trackFromSuccessBtn">Track Application Status</button>
+            <a href="/" class="btn btn-primary">Return to Homepage</a>
           </div>
         </div>
-
-        <!-- STEP 5: E. REQUIRED DOCUMENTS & F. DECLARATION -->
-        <div class="form-step-pane" id="stepPane5">
-          <div class="pane-header">
-            <h2 class="pane-title">E. Required Documents &amp; F. Declaration</h2>
-            <p class="pane-desc">Upload supporting files and sign to complete your partner application.</p>
-          </div>
-
-          <div class="form-grid">
-            <div class="form-group col-half">
-              <label class="form-label">National ID / Passport Copy <span class="required">*</span></label>
-              <div class="file-dropzone" id="idDropzone">
-                <input type="file" id="idFileInput" accept="image/*,application/pdf" style="display:none;">
-                <div class="dropzone-content">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                  <span class="dropzone-text">Click or drag National ID / Passport</span>
-                  <span class="dropzone-sub">PDF, PNG, JPG up to 10MB</span>
-                </div>
-                <div class="file-preview-badge hidden" id="idFileBadge">
-                  <span class="file-name-text">id_document.pdf</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group col-half">
-              <label class="form-label">Property Photos (at least 3) <span class="required">*</span></label>
-              <div class="file-dropzone" id="photosDropzone">
-                <input type="file" id="photosFileInput" accept="image/*" multiple style="display:none;">
-                <div class="dropzone-content">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                  <span class="dropzone-text">Upload at least 3 property photos</span>
-                  <span class="dropzone-sub">Living room, bedroom, bathroom</span>
-                </div>
-                <div class="photos-preview-gallery" id="photosGalleryPreview"></div>
-              </div>
-            </div>
-
-            <div class="form-group col-full">
-              <label class="form-label">Business Registration Certificate (Optional)</label>
-              <input type="file" id="bizFileInput" class="form-control" accept="image/*,application/pdf">
-            </div>
-
-            <div class="form-group col-full declaration-box">
-              <h3 class="decl-heading">F. Declaration</h3>
-              <label class="checkbox-label" style="display: flex; gap: 10px; cursor: pointer;">
-                <input type="checkbox" id="declarationCheck" required>
-                <span>I confirm that all information provided is accurate and complete. I agree to receive communications from Luxea. I have read and agree to Luxea's Terms &amp; Conditions.</span>
-              </label>
-
-              <div class="signature-row">
-                <div class="form-group" style="flex: 2;">
-                  <label for="hostSignature" class="form-label">Digital Signature (Full Legal Name) <span class="required">*</span></label>
-                  <input type="text" id="hostSignature" class="form-control sig-font" placeholder="e.g. Ronald Kipchumba" required>
-                </div>
-                <div class="form-group" style="flex: 1;">
-                  <label for="submissionDate" class="form-label">Date <span class="required">*</span></label>
-                  <input type="date" id="submissionDate" class="form-control" required>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="pane-actions">
-            <button type="button" class="btn btn-secondary step-prev-btn" data-prev="4">← Back</button>
-            <button type="submit" class="btn btn-primary btn-large" id="submitHostFormBtn">
-              <span>Submit Early Partner Application</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-          </div>
-        </div>
-
-      </form>
-
-      <!-- SUCCESS CONFIRMATION PANE (Embedded on page) -->
-      <div class="form-success-pane hidden" id="hostSuccessPane">
-        <div class="success-icon-wrap">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-        </div>
-        <span class="badge-tag badge-gold">Application Submitted</span>
-        <h2 class="success-title">Welcome to the Luxea Host Circle</h2>
-        <p class="success-desc">
-          Your property registration has been recorded in our partner database. Our onboarding concierge in Nairobi will review your documents and reach out within 24 hours.
-        </p>
-
-        <div class="application-summary-card">
-          <div class="summary-row">
-            <span class="sum-label">Reference ID:</span>
-            <strong class="sum-val sum-code" id="successRefId">LXH-2026-0000</strong>
-          </div>
-          <div class="summary-row">
-            <span class="sum-label">Property:</span>
-            <strong class="sum-val" id="successPropName">—</strong>
-          </div>
-          <div class="summary-row">
-            <span class="sum-label">Host Name:</span>
-            <strong class="sum-val" id="successHostName">—</strong>
-          </div>
-          <div class="summary-row">
-            <span class="sum-label">Payout Preference:</span>
-            <strong class="sum-val" id="successPayoutMethod">—</strong>
-          </div>
-        </div>
-
-        <div style="display:flex; gap:12px; justify-content:center;">
-          <a href="/" class="btn btn-primary">Return to Homepage</a>
-          <a href="/admin/" class="btn btn-secondary">View in Admin Portal</a>
-        </div>
-      </div>
 
       </div> <!-- /#hostRegisterView -->
 
-      <!-- VIEW 2: HOST DASHBOARD & AVAILABILITY / STORAGE MANAGER -->
+      <!-- VIEW 2: ACCESS GATED (When unverified user tries to access host dashboard) -->
+      <div id="hostGatedView" class="hidden">
+        <div class="gated-card">
+          <div class="gated-lock-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <span class="badge-tag badge-gold">VERIFIED ACCESS ONLY</span>
+          <h2 class="gated-title">Host Dashboard &amp; Availability Suite</h2>
+          <p class="gated-desc">
+            The Host Management Suite is reserved exclusively for verified property owners whose documentation has been vetted and approved by the Super Admin.
+          </p>
+          <div class="gated-actions">
+            <button type="button" class="btn btn-primary" id="gatedApplyBtn">
+              <span>Register as a Host Partner</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button type="button" class="btn btn-secondary" id="gatedSignInBtn">
+              <span>Sign In with Approved Account</span>
+            </button>
+            <button type="button" class="btn btn-outline" id="gatedTrackBtn">
+              <span>Track Existing Application Status</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 3: PENDING VERIFICATION (When logged in host is still pending review) -->
+      <div id="hostPendingView" class="hidden">
+        <div class="gated-card pending-card">
+          <div class="gated-clock-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <span class="badge-tag badge-amber" style="background:rgba(217,119,6,0.12); color:#D97706; border:1px solid rgba(217,119,6,0.3);">VERIFICATION IN PROGRESS</span>
+          <h2 class="gated-title" id="pendingHostTitle">Application Under Audit</h2>
+          <p class="gated-desc" id="pendingHostDesc">
+            Your host partner application has been safely received and is currently undergoing documentation vetting and property review by our Super Admin.
+          </p>
+          <div class="pending-info-box">
+            <div class="pending-row">
+              <span>Reference Number:</span>
+              <strong id="pendingRefId" class="sum-code">LXH-2026-0000</strong>
+            </div>
+            <div class="pending-row">
+              <span>Status:</span>
+              <span class="status-pill status-pending">Pending Admin Review</span>
+            </div>
+            <div class="pending-row">
+              <span>Next Step:</span>
+              <span>Activation link will be sent to your email upon approval</span>
+            </div>
+          </div>
+          <div class="gated-actions">
+            <button type="button" class="btn btn-secondary" id="pendingBackToFormBtn">
+              <span>Back to Registration Overview</span>
+            </button>
+            <a href="/" class="btn btn-outline">Return to Homepage</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: HOST DASHBOARD & AVAILABILITY / STORAGE MANAGER (Authorized Only) -->
       <div id="hostManagerView" class="hidden">
         <div id="hostManagerContainer"></div>
       </div>
 
     </div>
   </main>
+
+  <!-- Application Status Tracker Modal -->
+  <div class="host-modal-backdrop" id="statusLookupModal">
+    <div class="host-modal-card">
+      <div class="modal-head">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:1.2rem;">🔍</span>
+          <h3 style="font-family: var(--font-sans); font-size: 1.15rem; font-weight: 700; color: var(--color-espresso); margin:0;">
+            Track Host Application Status
+          </h3>
+        </div>
+        <button class="modal-close-btn" id="closeStatusModalBtn">&times;</button>
+      </div>
+      <div style="padding: 24px;">
+        <p style="font-size: 0.88rem; color: var(--color-cocoa); line-height: 1.5; margin-bottom: 18px;">
+          Enter your <strong>Application Reference ID</strong> (e.g. <code>LXH-2026-1234</code>) or the <strong>Email Address</strong> you used when applying.
+        </p>
+        <form id="statusLookupForm">
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="lookupQueryInput">Reference ID or Email Address</label>
+            <input type="text" id="lookupQueryInput" class="form-control" placeholder="e.g. LXH-2026-4891 or name@domain.com" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-large" style="width:100%; justify-content:center;" id="submitLookupBtn">
+            <span>Check Status</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </button>
+        </form>
+
+        <div id="lookupResultContainer" class="lookup-result-container hidden" style="margin-top: 20px;"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- Mobile Bottom Nav -->
   <nav class="mobile-bottom-nav">
@@ -465,37 +769,179 @@
     import { initHostForm } from '/assets/js/modules/hostForm.js';
     import { initHostManager } from '/assets/js/modules/hostManager.js';
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       initCurrency();
       initHostForm('luxeaHostForm');
       initHostManager('hostManagerContainer');
 
-      const registerBtn = document.getElementById('hostModeRegisterBtn');
-      const manageBtn = document.getElementById('hostModeManageBtn');
       const registerView = document.getElementById('hostRegisterView');
-      const manageView = document.getElementById('hostManagerView');
+      const gatedView = document.getElementById('hostGatedView');
+      const pendingView = document.getElementById('hostPendingView');
+      const managerView = document.getElementById('hostManagerView');
+      const verifiedBar = document.getElementById('hostVerifiedSessionBar');
+      const sessionHostName = document.getElementById('sessionHostName');
+      const sessionPropName = document.getElementById('sessionPropName');
+      const toggleHostModeBtn = document.getElementById('toggleHostModeBtn');
+      const toggleHostModeLabel = document.getElementById('toggleHostModeLabel');
+      const hostLogoutBtn = document.getElementById('hostLogoutBtn');
 
-      function switchMode(mode) {
-        if (mode === 'manage') {
-          manageBtn.classList.add('active');
-          registerBtn.classList.remove('active');
-          manageView.classList.remove('hidden');
-          registerView.classList.add('hidden');
+      let currentView = 'register'; // 'register', 'manage', 'gated', 'pending'
+
+      // Check current host authentication and verification status
+      async function checkHostAccess() {
+        const adminSession = JSON.parse(localStorage.getItem('luxea_admin_session') || 'null');
+        const userSession = JSON.parse(localStorage.getItem('luxea_user_session') || 'null');
+
+        // 1. Super Admin universal override
+        if (adminSession && (adminSession.isSuperAdmin || adminSession.email === 'otienoronny56@gmail.com')) {
+          return { allowed: true, role: 'super_admin', user: adminSession, isSuperAdmin: true };
+        }
+        if (userSession && (userSession.isSuperAdmin || userSession.email === 'otienoronny56@gmail.com')) {
+          return { allowed: true, role: 'super_admin', user: userSession, isSuperAdmin: true };
+        }
+
+        // 2. Check if logged in as Host Partner
+        if (userSession && (userSession.role === 'host' || userSession.refId)) {
+          let isApproved = userSession.status === 'approved' || userSession.reviewStatus === 'approved';
+
+          // Query Supabase for real-time status if available
+          if (window.LuxeaDB && userSession.refId) {
+            try {
+              const client = window.LuxeaDB.getClient();
+              if (client) {
+                const { data } = await client
+                  .from('lux_hosts')
+                  .select('review_status, full_name, property_name')
+                  .eq('ref_id', userSession.refId)
+                  .limit(1);
+
+                if (data && data.length > 0) {
+                  if (data[0].review_status === 'approved') {
+                    isApproved = true;
+                    userSession.status = 'approved';
+                    localStorage.setItem('luxea_user_session', JSON.stringify(userSession));
+                  } else {
+                    userSession.status = data[0].review_status;
+                  }
+                }
+              }
+            } catch (err) {
+              console.warn('Host status verification check:', err);
+            }
+          }
+
+          if (isApproved) {
+            return { allowed: true, role: 'host', user: userSession };
+          } else {
+            return { allowed: false, pending: true, user: userSession };
+          }
+        }
+
+        return { allowed: false, pending: false, user: null };
+      }
+
+      async function showView(viewName) {
+        currentView = viewName;
+
+        registerView.classList.add('hidden');
+        gatedView.classList.add('hidden');
+        pendingView.classList.add('hidden');
+        managerView.classList.add('hidden');
+
+        const access = await checkHostAccess();
+
+        // Update verified session bar if logged in as approved host or admin
+        if (access.allowed) {
+          if (verifiedBar) verifiedBar.classList.remove('hidden');
+          if (sessionHostName) sessionHostName.textContent = access.user.name || access.user.fullName || 'Verified Partner';
+          if (sessionPropName) sessionPropName.textContent = access.isSuperAdmin ? 'Super Admin Console Access' : (access.user.propertyName || 'Property Owner');
         } else {
-          registerBtn.classList.add('active');
-          manageBtn.classList.remove('active');
+          if (verifiedBar) verifiedBar.classList.add('hidden');
+        }
+
+        if (viewName === 'manage') {
+          if (access.allowed) {
+            managerView.classList.remove('hidden');
+            if (toggleHostModeLabel) toggleHostModeLabel.textContent = 'Register Another Property';
+          } else if (access.pending) {
+            pendingView.classList.remove('hidden');
+            const pTitle = document.getElementById('pendingHostTitle');
+            const pDesc = document.getElementById('pendingHostDesc');
+            const pRef = document.getElementById('pendingRefId');
+            if (pRef && access.user.refId) pRef.textContent = access.user.refId;
+            if (pTitle && access.user.name) pTitle.textContent = `Application Under Audit for ${access.user.name}`;
+          } else {
+            // Not logged in or unverified -> Strict Gate
+            gatedView.classList.remove('hidden');
+          }
+        } else {
+          // Default: Registration Wizard
           registerView.classList.remove('hidden');
-          manageView.classList.add('hidden');
+          if (toggleHostModeLabel) toggleHostModeLabel.textContent = 'Go to Host Dashboard ↗';
         }
       }
 
-      registerBtn?.addEventListener('click', () => switchMode('register'));
-      manageBtn?.addEventListener('click', () => switchMode('manage'));
+      // Button listeners
+      document.getElementById('gatedApplyBtn')?.addEventListener('click', () => showView('register'));
+      document.getElementById('pendingBackToFormBtn')?.addEventListener('click', () => showView('register'));
 
-      // Check URL parameters for tab
+      document.getElementById('gatedSignInBtn')?.addEventListener('click', () => {
+        if (window.openAuthModal) window.openAuthModal('host');
+        else if (window.showToast) window.showToast('Please use Sign In button in header');
+      });
+
+      document.getElementById('hostSignInBtn')?.addEventListener('click', () => {
+        if (window.openAuthModal) window.openAuthModal('host');
+        else if (window.showToast) window.showToast('Please use Sign In button in header');
+      });
+
+      toggleHostModeBtn?.addEventListener('click', () => {
+        if (currentView === 'manage') showView('register');
+        else showView('manage');
+      });
+
+      hostLogoutBtn?.addEventListener('click', () => {
+        localStorage.removeItem('luxea_user_session');
+        if (window.showToast) window.showToast('Signed out of partner portal.');
+        showView('register');
+      });
+
+      // Status Lookup Modal Handlers
+      const statusModal = document.getElementById('statusLookupModal');
+      const closeStatusBtn = document.getElementById('closeStatusModalBtn');
+      const openStatusBtns = ['openStatusLookupBtn', 'gatedTrackBtn', 'trackFromSuccessBtn'];
+
+      openStatusBtns.forEach(id => {
+        document.getElementById(id)?.addEventListener('click', () => {
+          if (statusModal) statusModal.classList.add('open');
+        });
+      });
+
+      closeStatusBtn?.addEventListener('click', () => {
+        if (statusModal) statusModal.classList.remove('open');
+      });
+
+      statusModal?.addEventListener('click', (e) => {
+        if (e.target === statusModal) statusModal.classList.remove('open');
+      });
+
+      // Copy Reference ID button
+      document.getElementById('copyRefBtn')?.addEventListener('click', () => {
+        const refText = document.getElementById('successRefId')?.textContent;
+        if (refText && navigator.clipboard) {
+          navigator.clipboard.writeText(refText);
+          const btn = document.getElementById('copyRefBtn');
+          btn.textContent = 'Copied! ✓';
+          setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+        }
+      });
+
+      // Check URL parameters for tab/mode
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('tab') === 'manage' || urlParams.get('mode') === 'manage') {
-        switchMode('manage');
+        showView('manage');
+      } else {
+        showView('register');
       }
     });
   </script>

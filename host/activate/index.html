@@ -431,11 +431,13 @@
             authSuccess = true;
           }
 
-          // Persist host session
+          // Persist host session as verified partner
           const hostSession = {
             email: hostEmail,
             name: dispName.textContent,
             role: 'host',
+            status: 'approved',
+            propertyName: dispProp.textContent,
             refId: refId,
             authMethod: 'password_hashed',
             loggedInAt: new Date().toISOString()
