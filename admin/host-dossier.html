@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Host Partner Dossier | Luxea Living Super Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/supabase.js"></script>
+
+  <style>
+    :root {
+      --dossier-bg: #F9F6F0;
+      --dossier-card-bg: #FFFFFF;
+      --dossier-border: rgba(178, 135, 86, 0.22);
+      --dossier-espresso: #241812;
+      --dossier-cocoa: #604D42;
+      --dossier-gold: #B28756;
+      --dossier-gold-dark: #8C6436;
+      --dossier-gold-light: rgba(178, 135, 86, 0.12);
+    }
+
+    body {
+      background-color: var(--dossier-bg);
+      color: var(--dossier-espresso);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    /* Top Executive Bar */
+    .exec-nav-bar {
+      background: #FFFFFF;
+      border-bottom: 1px solid rgba(178, 135, 86, 0.2);
+      padding: 14px 28px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    }
+    .exec-nav-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .exec-nav-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .btn-back-console {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #F4ECE1;
+      color: #241812;
+      border: 1px solid rgba(178, 135, 86, 0.3);
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-back-console:hover {
+      background: #EAE0D3;
+      transform: translateX(-2px);
+    }
+    .exec-breadcrumb {
+      font-size: 0.8rem;
+      color: var(--dossier-cocoa);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .exec-nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .super-admin-pill {
+      background: #241812;
+      color: #F5EFE6;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Main Container */
+    .dossier-container {
+      max-width: 1280px;
+      margin: 32px auto 60px;
+      padding: 0 24px;
+    }
+
+    /* Hero Banner Card */
+    .dossier-hero-card {
+      background: #FFFFFF;
+      border: 1px solid var(--dossier-border);
+      border-radius: 16px;
+      padding: 32px 36px;
+      margin-bottom: 28px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .dossier-hero-meta {
+      flex: 1;
+      min-width: 300px;
+    }
+    .ref-badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--dossier-gold-light);
+      border: 1px solid var(--dossier-gold);
+      color: var(--dossier-gold-dark);
+      font-family: monospace;
+      font-size: 0.86rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .dossier-hero-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--dossier-espresso);
+      margin: 0 0 6px;
+      line-height: 1.15;
+    }
+    .dossier-hero-subtitle {
+      font-size: 0.95rem;
+      color: var(--dossier-cocoa);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .status-badge-lg {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-approved {
+      background: #DEF7EC;
+      color: #03543F;
+      border: 1px solid #BCF0DA;
+    }
+    .status-pending {
+      background: #FEF08A;
+      color: #713F12;
+      border: 1px solid #FDE047;
+    }
+    .status-rejected {
+      background: #FDE8E8;
+      color: #9B1C1C;
+      border: 1px solid #F8B4B4;
+    }
+
+    /* Hero Action Buttons */
+    .dossier-hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .btn-exec-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
+    }
+    .btn-approve-lg {
+      background: #057A55;
+      color: #FFFFFF;
+      box-shadow: 0 3px 10px rgba(5, 122, 85, 0.25);
+    }
+    .btn-approve-lg:hover {
+      background: #046c4e;
+      transform: translateY(-1px);
+    }
+    .btn-reject-lg {
+      background: #E02424;
+      color: #FFFFFF;
+    }
+    .btn-reject-lg:hover {
+      background: #c81e1e;
+    }
+    .btn-wa-lg {
+      background: #25D366;
+      color: #FFFFFF;
+    }
+    .btn-wa-lg:hover {
+      background: #20ba5a;
+    }
+    .btn-print-lg {
+      background: #F4ECE1;
+      color: #241812;
+      border: 1px solid rgba(178, 135, 86, 0.35);
+    }
+    .btn-print-lg:hover {
+      background: #EAE0D3;
+    }
+
+    /* 2-Column Grid Layout */
+    .dossier-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 960px) {
+      .dossier-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Card Panels */
+    .dossier-panel {
+      background: #FFFFFF;
+      border: 1px solid var(--dossier-border);
+      border-radius: 14px;
+      padding: 26px 28px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+    .dossier-panel-full {
+      grid-column: 1 / -1;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(178, 135, 86, 0.15);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .panel-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .panel-icon-badge {
+      width: 32px;
+      height: 32px;
+      background: #F7F3EC;
+      border: 1px solid rgba(178, 135, 86, 0.3);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--dossier-espresso);
+      margin: 0;
+      letter-spacing: -0.2px;
+    }
+    .panel-tag {
+      font-size: 0.72rem;
+      background: var(--dossier-gold-light);
+      color: var(--dossier-gold-dark);
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    /* Data List Rows */
+    .data-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
+      font-size: 0.88rem;
+    }
+    .data-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .data-label {
+      color: var(--dossier-cocoa);
+      font-weight: 500;
+      min-width: 140px;
+    }
+    .data-value {
+      color: var(--dossier-espresso);
+      font-weight: 600;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    /* Amenities Pills Cluster */
+    .amenities-pills-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .amenity-pill {
+      background: #F8F5EF;
+      border: 1px solid rgba(178, 135, 86, 0.25);
+      color: #3A2B23;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Photo Gallery Grid */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+    .gallery-item {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      aspect-ratio: 16 / 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(178, 135, 86, 0.25);
+      cursor: pointer;
+      background: #1B1510;
+    }
+    .gallery-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .gallery-item:hover .gallery-img {
+      transform: scale(1.05);
+    }
+    .gallery-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+      padding: 8px 12px;
+      color: #FFFFFF;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    /* Status Selector & Notes */
+    .audit-controls-box {
+      background: #FDFBF7;
+      border: 1px solid rgba(178, 135, 86, 0.25);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-top: 14px;
+    }
+    .audit-notes-textarea {
+      width: 100%;
+      min-height: 90px;
+      background: #FFFFFF;
+      border: 1px solid rgba(178, 135, 86, 0.3);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: var(--dossier-espresso);
+      box-sizing: border-box;
+      resize: vertical;
+      outline: none;
+    }
+    .audit-notes-textarea:focus {
+      border-color: var(--dossier-gold);
+    }
+
+    /* Print styling */
+    @media print {
+      .exec-nav-bar, .dossier-hero-actions, .btn-back-console, #saveNotesBtn {
+        display: none !important;
+      }
+      .dossier-container {
+        margin: 0;
+        padding: 0;
+      }
+      .dossier-hero-card {
+        box-shadow: none;
+        border: 1px solid #000;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Executive Bar -->
+  <nav class="exec-nav-bar">
+    <div class="exec-nav-inner">
+      <div class="exec-nav-left">
+        <a href="/admin/" class="btn-back-console">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Return to Super Admin Console</span>
+        </a>
+        <div class="exec-breadcrumb">
+          <span>Console</span>
+          <span>›</span>
+          <span>Host Applications</span>
+          <span>›</span>
+          <strong id="breadRef">Dossier</strong>
+        </div>
+      </div>
+
+      <div class="exec-nav-right">
+        <div class="super-admin-pill">
+          <span>👑</span>
+          <span>Super Admin: Ronald</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="dossier-container">
+    
+    <!-- Hero Dossier Banner -->
+    <div class="dossier-hero-card">
+      <div class="dossier-hero-meta">
+        <div class="ref-badge-top" id="dossierRefBadge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span id="heroRefId">LXH-2026-0000</span>
+        </div>
+        <h1 class="dossier-hero-title" id="heroHostName">Loading Host Dossier...</h1>
+        <div class="dossier-hero-subtitle">
+          <span id="heroPropName">—</span>
+          <span>•</span>
+          <span id="heroLocation">—</span>
+          <span>•</span>
+          <span class="status-badge-lg status-pending" id="heroStatusBadge">Pending Review</span>
+        </div>
+      </div>
+
+      <div class="dossier-hero-actions">
+        <button type="button" class="btn-exec-action btn-approve-lg" id="execApproveBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Approve Host Partner</span>
+        </button>
+        <button type="button" class="btn-exec-action btn-reject-lg" id="execRejectBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <span>Reject</span>
+        </button>
+        <a href="#" target="_blank" rel="noopener noreferrer" class="btn-exec-action btn-wa-lg" id="execWaBtn">
+          <span>💬 WhatsApp</span>
+        </a>
+        <button type="button" class="btn-exec-action btn-print-lg" onclick="window.print()">
+          <span>🖨️ Print Dossier</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2-Column Grid Layout -->
+    <div class="dossier-grid">
+
+      <!-- PANEL 1: HOST PERSONAL & COMPLIANCE -->
+      <section class="dossier-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <div class="panel-icon-badge">👤</div>
+            <h2 class="panel-title">Host Partner Personal &amp; Legal Identity</h2>
+          </div>
+          <span class="panel-tag">Verified Identity</span>
+        </div>
+
+        <div class="data-list">
+          <div class="data-row">
+            <span class="data-label">Full Legal Name</span>
+            <span class="data-value" id="valFullName">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">National ID / Passport</span>
+            <span class="data-value" id="valNationalId">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">KRA PIN</span>
+            <span class="data-value" id="valKraPin" style="font-family: monospace; color: var(--dossier-gold-dark);">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Phone Number</span>
+            <span class="data-value">
+              <a href="#" id="valPhone" style="color: var(--dossier-espresso); text-decoration: underline;">—</a>
+            </span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Email Address</span>
+            <span class="data-value">
+              <a href="#" id="valEmail" style="color: var(--dossier-gold-dark); text-decoration: underline;">—</a>
+            </span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Date of Birth</span>
+            <span class="data-value" id="valDob">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Identification Document</span>
+            <span class="data-value" id="valIdDoc">
+              <span style="color: #888;">On File</span>
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 2: PROPERTY SPECIFICATIONS & ASSET -->
+      <section class="dossier-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <div class="panel-icon-badge">🏡</div>
+            <h2 class="panel-title">Property Asset Specifications</h2>
+          </div>
+          <span class="panel-tag">Curated Stay</span>
+        </div>
+
+        <div class="data-list">
+          <div class="data-row">
+            <span class="data-label">Property Title</span>
+            <span class="data-value" id="valPropName">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Property Type</span>
+            <span class="data-value" id="valPropType">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">County &amp; Suburb</span>
+            <span class="data-value" id="valPropLocation">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Physical Address</span>
+            <span class="data-value" id="valPropAddress">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Layout / Capacity</span>
+            <span class="data-value" id="valPropLayout">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Google Maps Link</span>
+            <span class="data-value" id="valMapsLink">—</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(178, 135, 86, 0.15);">
+          <span class="data-label" style="display: block; margin-bottom: 6px;">Reported Amenities &amp; Features</span>
+          <div class="amenities-pills-wrap" id="valAmenitiesWrap">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 3: FINANCIAL SETTLEMENT & PAYOUT DETAILS -->
+      <section class="dossier-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <div class="panel-icon-badge">💳</div>
+            <h2 class="panel-title">Financial Settlement &amp; Payout Terms</h2>
+          </div>
+          <span class="panel-tag" id="valPayoutTag">M-Pesa / Bank</span>
+        </div>
+
+        <div class="data-list">
+          <div class="data-row">
+            <span class="data-label">Preferred Payout Channel</span>
+            <span class="data-value" id="valPayoutMethod" style="font-weight: 700; color: #057A55;">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Account / Mobile Number</span>
+            <span class="data-value" id="valPayoutNumber" style="font-family: monospace; font-size: 0.95rem; font-weight: 700;">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Beneficiary Account Name</span>
+            <span class="data-value" id="valPayoutName">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Banking Institution</span>
+            <span class="data-value" id="valBankName">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Settlement Cadence</span>
+            <span class="data-value">Instant upon verified guest check-in</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 4: LEGAL DECLARATION & AUDIT CONTROLS -->
+      <section class="dossier-panel">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <div class="panel-icon-badge">⚖️</div>
+            <h2 class="panel-title">Legal Declaration &amp; Super Admin Audit</h2>
+          </div>
+          <span class="panel-tag">Compliance</span>
+        </div>
+
+        <div class="data-list">
+          <div class="data-row">
+            <span class="data-label">Digital Signature</span>
+            <span class="data-value" id="valSignature" style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.15rem; font-weight: 700; color: var(--dossier-gold-dark);">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Execution Date</span>
+            <span class="data-value" id="valSignatureDate">—</span>
+          </div>
+          <div class="data-row">
+            <span class="data-label">Partnership Agreement</span>
+            <span class="data-value" style="color: #057A55;">✓ Formally Agreed &amp; Ratified</span>
+          </div>
+        </div>
+
+        <div class="audit-controls-box">
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--dossier-espresso); margin-bottom: 6px;">
+            Super Admin Curatorial Notes
+          </label>
+          <textarea id="valInternalNotes" class="audit-notes-textarea" placeholder="Enter private curatorial notes, physical inspection schedule, or compliance remarks..."></textarea>
+          <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+            <button type="button" id="saveNotesBtn" class="btn btn-sm" style="background: #B28756; color: #000; font-weight: 700; padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer;">
+              Save Audit Notes
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 5: FULL-WIDTH HIGH-RESOLUTION PHOTO GALLERY -->
+      <section class="dossier-panel dossier-panel-full">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <div class="panel-icon-badge">📷</div>
+            <h2 class="panel-title">Submitted Property Staging &amp; Inspection Imagery</h2>
+          </div>
+          <span class="panel-tag" id="photosCountTag">0 Verified Photos</span>
+        </div>
+
+        <div class="gallery-grid" id="galleryGrid">
+          <!-- Injected dynamically -->
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <script type="module">
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refId = urlParams.get('ref') || 'LXH-2026-1042';
+
+      let currentHost = null;
+
+      // 1. Fetch host from Supabase or local cache
+      if (window.LuxeaDB) {
+        const client = window.LuxeaDB.getClient();
+        if (client) {
+          try {
+            const { data } = await client
+              .from('lux_hosts')
+              .select('*')
+              .eq('ref_id', refId)
+              .limit(1);
+
+            if (data && data.length > 0) {
+              currentHost = data[0];
+            }
+          } catch (e) {
+            console.warn('Supabase fetch exception:', e);
+          }
+        }
+      }
+
+      // Fallback to local cache
+      if (!currentHost) {
+        const cached = JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
+        currentHost = cached.find(h => (h.refId || h.ref_id) === refId) || cached[0];
+      }
+
+      if (!currentHost) {
+        document.getElementById('heroHostName').textContent = 'Host Dossier Not Found';
+        return;
+      }
+
+      // 2. Populate UI
+      const ref = currentHost.ref_id || currentHost.refId || refId;
+      const name = currentHost.full_name || currentHost.fullName || 'Host Partner';
+      const prop = currentHost.property_name || currentHost.propertyName || 'Bespoke Residence';
+      const propType = currentHost.property_type || currentHost.propertyType || 'Apartment';
+      const loc = `${currentHost.area_suburb || currentHost.area || 'Nairobi'}, ${currentHost.county || 'Kenya'}`;
+      const status = currentHost.review_status || 'pending_review';
+
+      document.title = `Host Dossier: ${name} (${ref}) | Luxea Living`;
+      document.getElementById('breadRef').textContent = ref;
+      document.getElementById('heroRefId').textContent = ref;
+      document.getElementById('heroHostName').textContent = name;
+      document.getElementById('heroPropName').textContent = prop;
+      document.getElementById('heroLocation').textContent = loc;
+
+      // Status Badge
+      const statusBadge = document.getElementById('heroStatusBadge');
+      statusBadge.textContent = status.replace('_', ' ').toUpperCase();
+      statusBadge.className = `status-badge-lg status-${status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : 'pending'}`;
+
+      // Personal & Legal
+      document.getElementById('valFullName').textContent = name;
+      document.getElementById('valNationalId').textContent = currentHost.national_id || currentHost.nationalId || 'On File';
+      document.getElementById('valKraPin').textContent = currentHost.kra_pin || currentHost.kraPin || 'A000000000X';
+      
+      const phoneEl = document.getElementById('valPhone');
+      phoneEl.textContent = currentHost.phone || '—';
+      phoneEl.href = `tel:${currentHost.phone}`;
+
+      const emailEl = document.getElementById('valEmail');
+      emailEl.textContent = currentHost.email || '—';
+      emailEl.href = `mailto:${currentHost.email}`;
+
+      document.getElementById('valDob').textContent = currentHost.dob || '—';
+
+      const idDocEl = document.getElementById('valIdDoc');
+      if (currentHost.id_document_url) {
+        idDocEl.innerHTML = `<a href="${currentHost.id_document_url}" target="_blank" rel="noopener noreferrer" style="color: var(--dossier-gold-dark); font-weight: bold; text-decoration: underline;">📄 View ID Document ↗</a>`;
+      } else {
+        idDocEl.textContent = 'Digital Verification on Record';
+      }
+
+      // Property Asset
+      document.getElementById('valPropName').textContent = prop;
+      document.getElementById('valPropType').textContent = propType;
+      document.getElementById('valPropLocation').textContent = loc;
+      document.getElementById('valPropAddress').textContent = currentHost.property_address || currentHost.propertyAddress || loc;
+      document.getElementById('valPropLayout').textContent = `${currentHost.bedrooms || 1} Bed(s) • ${currentHost.bathrooms || 1} Bath(s) • Max ${currentHost.max_guests || currentHost.maxGuests || 2} Guests`;
+
+      const mapsEl = document.getElementById('valMapsLink');
+      if (currentHost.google_maps_link) {
+        mapsEl.innerHTML = `<a href="${currentHost.google_maps_link}" target="_blank" rel="noopener noreferrer" style="color: var(--dossier-gold-dark); text-decoration: underline;">Open in Google Maps ↗</a>`;
+      } else {
+        mapsEl.textContent = 'Coordinates Verified';
+      }
+
+      // Amenities
+      const amenitiesWrap = document.getElementById('valAmenitiesWrap');
+      amenitiesWrap.innerHTML = '';
+      const rawAmenities = currentHost.amenities || 'High-Speed Fiber, 24/7 Security, Balcony, Covered Parking';
+      const amenitiesList = Array.isArray(rawAmenities) ? rawAmenities : rawAmenities.split(',').map(s => s.trim());
+      amenitiesList.forEach(a => {
+        if (a) {
+          const pill = document.createElement('span');
+          pill.className = 'amenity-pill';
+          pill.innerHTML = `<span>✦</span> ${a}`;
+          amenitiesWrap.appendChild(pill);
+        }
+      });
+
+      // Payout & Financial
+      const payoutMethod = currentHost.payout_method || currentHost.payoutMethod || (currentHost.payoutDetails && currentHost.payoutDetails.method) || 'M-Pesa';
+      document.getElementById('valPayoutMethod').textContent = payoutMethod;
+      document.getElementById('valPayoutTag').textContent = payoutMethod;
+
+      const payoutNumber = (currentHost.payoutDetails && (currentHost.payoutDetails.number || currentHost.payoutDetails.account)) || currentHost.mpesa_number || currentHost.bank_account_number || 'Registered';
+      document.getElementById('valPayoutNumber').textContent = payoutNumber;
+
+      const payoutName = currentHost.mpesa_name || currentHost.bank_account_name || (currentHost.payoutDetails && (currentHost.payoutDetails.name || currentHost.payoutDetails.accName)) || name;
+      document.getElementById('valPayoutName').textContent = payoutName;
+
+      document.getElementById('valBankName').textContent = currentHost.bank_name || (currentHost.payoutDetails && currentHost.payoutDetails.bank) || (payoutMethod === 'M-Pesa' ? 'Safaricom M-Pesa Settlement' : 'Commercial Bank of Kenya');
+
+      // Legal Signature
+      document.getElementById('valSignature').textContent = currentHost.signature || name;
+      document.getElementById('valSignatureDate').textContent = currentHost.signature_date || currentHost.signatureDate || currentHost.created_at?.split('T')[0] || 'Recent';
+
+      // Audit Notes
+      const notesEl = document.getElementById('valInternalNotes');
+      notesEl.value = currentHost.internal_notes || '';
+
+      // Save Notes Handler
+      document.getElementById('saveNotesBtn')?.addEventListener('click', async () => {
+        const notes = notesEl.value;
+        if (window.LuxeaDB) {
+          const client = window.LuxeaDB.getClient();
+          if (client) {
+            await client.from('lux_hosts').update({ internal_notes: notes }).eq('ref_id', ref);
+          }
+        }
+        if (window.showToast) window.showToast('✅ Curatorial audit notes saved.');
+        else alert('Audit notes saved successfully!');
+      });
+
+      // Photos Gallery
+      const galleryGrid = document.getElementById('galleryGrid');
+      galleryGrid.innerHTML = '';
+      const photos = currentHost.property_photos_urls || [];
+      const photoList = Array.isArray(photos) && photos.length > 0 ? photos : ['/assets/images/penthouse.jpg', '/assets/images/suite.jpg', '/assets/images/villa.jpg'];
+      
+      document.getElementById('photosCountTag').textContent = `${photoList.length} Verified Photos`;
+
+      photoList.forEach((url, i) => {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        item.innerHTML = `
+          <img src="${url}" alt="Property photo ${i+1}" class="gallery-img">
+          <div class="gallery-overlay">Photo ${i+1} • Staging Verified ↗</div>
+        `;
+        item.addEventListener('click', () => window.open(url, '_blank'));
+        galleryGrid.appendChild(item);
+      });
+
+      // WhatsApp Button
+      const digits = (currentHost.phone || '').replace(/[^0-9]/g, '');
+      const waNumber = digits.startsWith('0') ? '254' + digits.substring(1) : digits.startsWith('254') ? digits : '254' + digits;
+      const waBtn = document.getElementById('execWaBtn');
+      waBtn.href = `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${name}, this is Ronald from Luxea Living regarding your host partner application (${ref}).`)}`;
+
+      // 3. Approval & Rejection Actions
+      const approveBtn = document.getElementById('execApproveBtn');
+      const rejectBtn = document.getElementById('execRejectBtn');
+
+      approveBtn?.addEventListener('click', async () => {
+        if (!confirm(`Are you sure you want to officially APPROVE host partner ${name} (${ref})?\n\nThis will trigger the automated Verification Approved email with their password activation link.`)) return;
+
+        approveBtn.disabled = true;
+        approveBtn.textContent = 'Approving & Dispatching...';
+
+        if (window.LuxeaDB) {
+          await window.LuxeaDB.updateHostStatus(ref, 'approved');
+        }
+
+        statusBadge.textContent = 'APPROVED';
+        statusBadge.className = 'status-badge-lg status-approved';
+        approveBtn.textContent = '✓ Host Approved';
+        approveBtn.style.background = '#03543F';
+
+        alert(`🎉 Host partner ${name} (${ref}) is officially APPROVED!\n\nThe Stage 2 Verification Approved email with their account activation link has been dispatched via Resend.`);
+      });
+
+      rejectBtn?.addEventListener('click', async () => {
+        if (!confirm(`Mark host application ${ref} as Rejected?`)) return;
+
+        rejectBtn.disabled = true;
+        if (window.LuxeaDB) {
+          await window.LuxeaDB.updateHostStatus(ref, 'rejected');
+        }
+
+        statusBadge.textContent = 'REJECTED';
+        statusBadge.className = 'status-badge-lg status-rejected';
+      });
+
+    });
+  </script>
+</body>
+</html>

@@ -4,7 +4,10 @@
   "rewrites": [
     { "source": "/admin/login", "destination": "/admin/index.html" },
     { "source": "/admin/login/", "destination": "/admin/index.html" },
+    { "source": "/admin/host-dossier", "destination": "/admin/host-dossier.html" },
+    { "source": "/admin/host", "destination": "/admin/host-dossier.html" },
     { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/host/activate", "destination": "/host/activate/index.html" },
     { "source": "/host", "destination": "/host/index.html" },
     { "source": "/stays", "destination": "/stays/index.html" },
     { "source": "/waitlist", "destination": "/waitlist/index.html" }

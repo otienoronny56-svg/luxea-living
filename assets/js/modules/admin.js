@@ -390,9 +390,9 @@ export function initAdminDashboard() {
 
         <td>
           <div class="table-action-btns">
-            <button class="btn-table-action btn-inspect inspect-host-btn" data-ref="${ref}" title="View full host application dossier">
-              <span>Inspect</span>
-            </button>
+            <a href="/admin/host-dossier.html?ref=${ref}" class="btn-table-action btn-inspect" title="Open full host application dossier">
+              <span>Inspect Dossier ↗</span>
+            </a>
             <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-wa-action" title="Open direct WhatsApp conversation with host">
               <span>WhatsApp</span>
             </a>
@@ -433,14 +433,6 @@ export function initAdminDashboard() {
           // Refresh analytics and counters
           loadDashboardData();
         }
-      });
-    });
-
-    // 3. Inspect Full Dossier Modal
-    hostsTableBody.querySelectorAll('.inspect-host-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const ref = btn.getAttribute('data-ref');
-        openInspectModal(ref);
       });
     });
   }
