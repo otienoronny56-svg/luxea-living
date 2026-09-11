@@ -365,7 +365,41 @@
       }
 
       function filterAndSortStays() {
-        let items = [...LUXEA_STAYS];
+        // Merge hardcoded catalog with dynamic properties from Supabase
+        let allCatalog = [...LUXEA_STAYS];
+        try {
+          const cachedProps = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+          cachedProps.forEach(cp => {
+            if (!allCatalog.some(s => s.id === cp.id)) {
+              allCatalog.push({
+                id: cp.id,
+                name: cp.name,
+                category: cp.category || cp.property_type,
+                propertyType: cp.property_type || cp.category,
+                propertyTypeName: (cp.property_type || 'Apartment').toUpperCase(),
+                locationGroup: cp.location_group || cp.city.toLowerCase(),
+                location: `${cp.area || cp.city} • Kenya`,
+                city: cp.city || 'Nairobi',
+                lat: cp.lat || -1.264,
+                lng: cp.lng || 36.798,
+                usdPrice: cp.price_per_night_usd || 100,
+                kesPrice: cp.price_per_night_kes || 13000,
+                rating: '★ 5.0 (New)',
+                specs: `${cp.bedrooms || 2} Beds • ${cp.bathrooms || 2} Baths`,
+                image: cp.cover_image_url || '/assets/images/villa.jpg',
+                description: cp.description,
+                amenities: cp.amenities || ['WiFi', 'Parking'],
+                is_available: cp.is_available !== false
+              });
+            }
+          });
+        } catch (e) {}
+
+        const availMap = JSON.parse(localStorage.getItem('luxea_host_avail_map') || '{}');
+        let items = allCatalog.map(s => ({
+          ...s,
+          is_available: availMap[s.id] !== undefined ? availMap[s.id] : (s.is_available !== false)
+        }));
 
         // 1. Calculate distances if coords available
         if (userCoords) {
@@ -474,13 +508,16 @@
         }
 
         items.forEach(stay => {
+          const isAvail = stay.is_available !== false;
           const card = document.createElement('div');
-          card.className = 'browse-card';
+          card.className = `browse-card ${isAvail ? '' : 'browse-card-blocked'}`;
           card.innerHTML = `
             <div class="browse-card-media">
               <img src="${stay.image}" alt="${stay.name}" loading="lazy">
               <div class="card-top-left">
-                <span class="tag-badge">${stay.propertyTypeName || 'Verified Partner'}</span>
+                <span class="tag-badge ${isAvail ? '' : 'badge-unavailable'}">
+                  ${isAvail ? (stay.propertyTypeName || 'Verified Partner') : '🚫 Dates Blocked by Host'}
+                </span>
               </div>
               <div class="card-top-right">
                 <button class="card-heart-btn" aria-label="Save to wishlist" onclick="event.stopPropagation(); this.classList.toggle('active')">
@@ -501,7 +538,7 @@
                 </div>
                 <span class="verified-pill-icon">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                  <span>Verified</span>
+                  <span>${isAvail ? 'Verified' : 'Unavailable'}</span>
                 </span>
               </div>
             </div>
@@ -734,6 +771,15 @@
           showDetailView(targetStay);
         }
       }
+
+      // Supabase Realtime Listener: Live sync for availability and new listings
+      window.addEventListener('luxea:property_updated', (e) => {
+        console.log('⚡ Stays Feed live sync:', e.detail);
+        renderFeed();
+        if (window.showToast) {
+          window.showToast('⚡ Listing availability updated live by host');
+        }
+      });
     });
   </script>
 </body>

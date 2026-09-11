@@ -242,14 +242,19 @@ export function initNearbyStays(containerId = 'locationSectionsContainer') {
     const scrollWrap = document.createElement('div');
     scrollWrap.className = 'shelf-cards-scroll';
 
+    const availMap = JSON.parse(localStorage.getItem('luxea_host_avail_map') || '{}');
+
     config.items.forEach(item => {
+      const isAvail = availMap[item.id] !== undefined ? availMap[item.id] : (item.is_available !== false);
       const card = document.createElement('a');
       card.href = `/stays/?id=${item.id}`;
-      card.className = 'shelf-card';
+      card.className = `shelf-card ${isAvail ? '' : 'shelf-card-blocked'}`;
       card.innerHTML = `
         <div class="shelf-card-thumb">
           <img src="${item.image}" alt="${item.name}" loading="lazy">
-          <span class="guest-favorite-badge">${item.propertyTypeName || 'Verified'}</span>
+          <span class="guest-favorite-badge ${isAvail ? '' : 'badge-unavailable'}">
+            ${isAvail ? (item.propertyTypeName || 'Verified') : '🚫 Dates Blocked'}
+          </span>
           <button class="shelf-heart-btn" aria-label="Save to wishlist" onclick="event.preventDefault(); this.classList.toggle('active')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
@@ -357,4 +362,10 @@ export function initNearbyStays(containerId = 'locationSectionsContainer') {
   } else {
     renderAllSections();
   }
+
+  // Supabase Realtime: Re-render landing sections when host toggles availability
+  window.addEventListener('luxea:property_updated', () => {
+    console.log('⚡ NearbyStays Realtime refresh triggered');
+    renderAllSections();
+  });
 }

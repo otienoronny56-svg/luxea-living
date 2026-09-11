@@ -118,17 +118,20 @@ USING (true);
 
 
 -- ==============================================================================
--- 3. CURATED PROPERTIES TABLE (For live listings catalog)
+-- 3. CURATED PROPERTIES TABLE (For live listings catalog & Host management)
 -- ==============================================================================
 CREATE TABLE IF NOT EXISTS public.lux_properties (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     slug VARCHAR(100) NOT NULL UNIQUE,
     name TEXT NOT NULL,
-    category VARCHAR(50) NOT NULL, -- villa, penthouse, townhouse, suite
+    category VARCHAR(50) NOT NULL, -- villa, penthouse, townhouse, suite, apartment
+    property_type VARCHAR(50) NOT NULL DEFAULT 'apartment', -- apartment, villa, hotel, penthouse, townhouse
     tagline TEXT,
     description TEXT,
     county TEXT NOT NULL,
+    city TEXT NOT NULL,
     area TEXT NOT NULL,
+    location_group VARCHAR(50), -- ruaka, westlands, roysambu, mombasa, karen, naivasha
     price_per_night_usd NUMERIC NOT NULL,
     price_per_night_kes NUMERIC NOT NULL,
     bedrooms INTEGER NOT NULL DEFAULT 1,
@@ -141,42 +144,94 @@ CREATE TABLE IF NOT EXISTS public.lux_properties (
     amenities JSONB DEFAULT '[]'::jsonb,
     is_featured BOOLEAN DEFAULT false,
     is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    
+    -- Host Live Controls (Availability & Dates)
+    is_available BOOLEAN DEFAULT true, -- Host live toggle: ON (Bookable) / OFF (Unavailable)
+    available_from DATE,
+    available_to DATE,
+    blocked_dates JSONB DEFAULT '[]'::jsonb, -- Array of blackout date strings ["2026-10-01", "2026-10-02"]
+    host_ref_id VARCHAR(30), -- Reference to host LXH-xxxx
+    
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Enable RLS for Properties
 ALTER TABLE public.lux_properties ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Allow public read active lux_properties"
+CREATE POLICY "Allow public read lux_properties"
 ON public.lux_properties
 FOR SELECT
-USING (is_active = true);
+USING (true);
+
+CREATE POLICY "Allow public insert lux_properties"
+ON public.lux_properties
+FOR INSERT
+WITH CHECK (true);
+
+CREATE POLICY "Allow public update lux_properties"
+ON public.lux_properties
+FOR UPDATE
+USING (true);
 
 
 -- ==============================================================================
--- 4. SUPABASE STORAGE BUCKET: "lux_documents"
--- Run these storage queries to create the bucket for Host ID and Property Photos
+-- 4. SUPABASE STORAGE BUCKETS: "lux_listings" & "lux_documents"
+-- Run these storage queries to create the buckets for Host ID and Property Photos
 -- ==============================================================================
 
--- Create bucket if not exists
+-- 4A. Bucket for Host Documents (IDs, PINs, Business Reg)
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('lux_documents', 'lux_documents', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Policy: Allow public/anon uploads to lux_documents bucket
 CREATE POLICY "Allow public uploads to lux_documents"
 ON storage.objects
 FOR INSERT
 WITH CHECK (bucket_id = 'lux_documents');
 
--- Policy: Allow public read of lux_documents
 CREATE POLICY "Allow public read from lux_documents"
 ON storage.objects
 FOR SELECT
 USING (bucket_id = 'lux_documents');
 
--- Policy: Allow updates/deletes if needed
 CREATE POLICY "Allow updates to lux_documents"
 ON storage.objects
 FOR UPDATE
 USING (bucket_id = 'lux_documents');
+
+
+-- 4B. Bucket for Property & Listing Photos (High-Res Images uploaded by Hosts)
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('lux_listings', 'lux_listings', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "Allow public uploads to lux_listings"
+ON storage.objects
+FOR INSERT
+WITH CHECK (bucket_id = 'lux_listings');
+
+CREATE POLICY "Allow public read from lux_listings"
+ON storage.objects
+FOR SELECT
+USING (bucket_id = 'lux_listings');
+
+CREATE POLICY "Allow updates to lux_listings"
+ON storage.objects
+FOR UPDATE
+USING (bucket_id = 'lux_listings');
+
+CREATE POLICY "Allow deletes from lux_listings"
+ON storage.objects
+FOR DELETE
+USING (bucket_id = 'lux_listings');
+
+
+-- ==============================================================================
+-- 5. ENABLE SUPABASE REALTIME
+-- Enables live sync for availability toggle, new listings, and host changes
+-- ==============================================================================
+ALTER PUBLICATION supabase_realtime ADD TABLE public.lux_properties;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.lux_hosts;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.lux_waitlist;
+

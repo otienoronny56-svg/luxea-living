@@ -1,11 +1,14 @@
 /**
  * LUXEA LIVING — SUPABASE CLIENT & DATA LAYER
- * Handles bucket uploads to "lux_documents" and table transactions
- * for "lux_hosts", "lux_waitlist", and "lux_properties".
+ * Handles:
+ * 1. Storage Buckets: "lux_listings" (property photos) & "lux_documents" (IDs, documents)
+ * 2. Tables: "lux_hosts", "lux_waitlist", and "lux_properties"
+ * 3. Realtime: Subscriptions on "lux_properties" for live availability toggling & dates
  */
 
 (function () {
   let supabase = null;
+  let realtimeChannel = null;
 
   function getCredentials() {
     try {
@@ -23,13 +26,42 @@
     const creds = getCredentials();
     if (creds && window.supabase && typeof window.supabase.createClient === 'function') {
       try {
-        supabase = window.supabase.createClient(creds.url, creds.anonKey);
+        supabase = window.supabase.createClient(creds.url, creds.anonKey, {
+          realtime: {
+            params: {
+              eventsPerSecond: 10
+            }
+          }
+        });
         console.log('✅ Supabase initialized for Luxea Living:', creds.url);
+        initRealtimeSubscriptions();
       } catch (err) {
         console.warn('⚠️ Supabase init failed:', err);
       }
     }
     return supabase;
+  }
+
+  function initRealtimeSubscriptions() {
+    if (!supabase || realtimeChannel) return;
+
+    try {
+      realtimeChannel = supabase
+        .channel('lux_realtime_properties')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'lux_properties' },
+          (payload) => {
+            console.log('⚡ Supabase Realtime [lux_properties]:', payload);
+            window.dispatchEvent(new CustomEvent('luxea:property_updated', { detail: payload }));
+          }
+        )
+        .subscribe((status) => {
+          console.log('📡 Supabase Realtime Channel Status:', status);
+        });
+    } catch (e) {
+      console.warn('Realtime subscription error:', e);
+    }
   }
 
   window.LuxeaDB = {
@@ -50,10 +82,76 @@
 
     clearCredentials: function () {
       localStorage.removeItem('luxea_supabase_credentials');
+      if (realtimeChannel && supabase) {
+        supabase.removeChannel(realtimeChannel);
+        realtimeChannel = null;
+      }
       supabase = null;
     },
 
-    // 1. Upload File to "lux_documents" bucket
+    // =========================================================================
+    // 1. STORAGE BUCKET UPLOADS ("lux_listings" & "lux_documents")
+    // =========================================================================
+
+    /**
+     * Upload property photos directly to the "lux_listings" public bucket
+     */
+    uploadListingPhoto: async function (file, folder = 'properties') {
+      const client = this.getClient();
+      if (!client || !file) return null;
+
+      try {
+        const ext = file.name.split('.').pop();
+        const safeName = file.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
+        const path = `${folder}/${Date.now()}_${safeName}.${ext}`;
+
+        // Attempt upload to 'lux_listings' first, fallback to 'lux_documents'
+        let bucket = 'lux_listings';
+        let { data, error } = await client.storage
+          .from(bucket)
+          .upload(path, file, { cacheControl: '3600', upsert: true });
+
+        if (error) {
+          console.warn(`Upload to ${bucket} failed, trying fallback:`, error.message);
+          bucket = 'lux_documents';
+          const retry = await client.storage
+            .from(bucket)
+            .upload(path, file, { cacheControl: '3600', upsert: true });
+          error = retry.error;
+          data = retry.data;
+        }
+
+        if (error) {
+          console.error('Supabase storage upload error:', error);
+          return null;
+        }
+
+        const { data: publicUrlData } = client.storage
+          .from(bucket)
+          .getPublicUrl(path);
+
+        return publicUrlData.publicUrl;
+      } catch (err) {
+        console.error('Photo upload exception:', err);
+        return null;
+      }
+    },
+
+    /**
+     * Upload multiple property photos to "lux_listings"
+     */
+    uploadListingPhotos: async function (files, folder = 'properties') {
+      const urls = [];
+      for (const file of Array.from(files)) {
+        const url = await this.uploadListingPhoto(file, folder);
+        if (url) urls.push(url);
+      }
+      return urls;
+    },
+
+    /**
+     * Upload verification documents (ID, business certificates) to "lux_documents"
+     */
     uploadDocument: async function (file, folder = 'documents') {
       const client = this.getClient();
       if (!client || !file) return null;
@@ -61,13 +159,13 @@
       try {
         const ext = file.name.split('.').pop();
         const path = `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`;
-        
+
         const { data, error } = await client.storage
           .from('lux_documents')
           .upload(path, file, { cacheControl: '3600', upsert: false });
 
         if (error) {
-          console.warn('Supabase storage upload error:', error);
+          console.warn('Document storage upload error:', error);
           return null;
         }
 
@@ -82,7 +180,205 @@
       }
     },
 
-    // 2. Submit Host Application to "lux_hosts"
+    // =========================================================================
+    // 2. HOST LISTING MANAGEMENT & LIVE AVAILABILITY / DATES
+    // =========================================================================
+
+    /**
+     * Fetch all properties from Supabase "lux_properties"
+     */
+    fetchProperties: async function () {
+      const client = this.getClient();
+      if (client) {
+        try {
+          const { data, error } = await client
+            .from('lux_properties')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (!error && data && data.length > 0) {
+            localStorage.setItem('luxea_cached_properties', JSON.stringify(data));
+            return data;
+          }
+        } catch (e) {
+          console.warn('Fetch properties error:', e);
+        }
+      }
+
+      // Fallback to locally saved properties
+      return JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+    },
+
+    /**
+     * Live Host Availability Toggle: Switch property ON (bookable) or OFF (unavailable)
+     * Broadcasts via Realtime to all connected guests and stays pages
+     */
+    updatePropertyAvailability: async function (propertyId, isAvailable) {
+      console.log(`Updating availability for ${propertyId} -> ${isAvailable}`);
+
+      // 1. Update in local storage cache immediately
+      const cached = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+      const idx = cached.findIndex(p => p.id === propertyId || p.slug === propertyId);
+      if (idx !== -1) {
+        cached[idx].is_available = isAvailable;
+        cached[idx].updated_at = new Date().toISOString();
+        localStorage.setItem('luxea_cached_properties', JSON.stringify(cached));
+      }
+
+      // Also track in host availability map
+      const availMap = JSON.parse(localStorage.getItem('luxea_host_avail_map') || '{}');
+      availMap[propertyId] = isAvailable;
+      localStorage.setItem('luxea_host_avail_map', JSON.stringify(availMap));
+
+      // 2. Update Supabase
+      const client = this.getClient();
+      if (client) {
+        try {
+          const { data, error } = await client
+            .from('lux_properties')
+            .update({ 
+              is_available: isAvailable, 
+              updated_at: new Date().toISOString() 
+            })
+            .eq('id', propertyId)
+            .select();
+
+          if (error) console.warn('Supabase availability update error:', error.message);
+          else console.log('✅ Supabase availability updated:', data);
+        } catch (err) {
+          console.error('Supabase update exception:', err);
+        }
+      }
+
+      // 3. Dispatch local event for instant UI reaction
+      window.dispatchEvent(new CustomEvent('luxea:property_updated', {
+        detail: { eventType: 'UPDATE', new: { id: propertyId, is_available: isAvailable } }
+      }));
+
+      return { success: true, propertyId, isAvailable };
+    },
+
+    /**
+     * Host Dates & Blackout Management: Set available date range or blocked dates
+     */
+    updatePropertyDates: async function (propertyId, { availableFrom, availableTo, blockedDates = [] }) {
+      console.log(`Updating dates for ${propertyId}:`, { availableFrom, availableTo, blockedDates });
+
+      // Update local storage
+      const cached = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+      const idx = cached.findIndex(p => p.id === propertyId || p.slug === propertyId);
+      if (idx !== -1) {
+        if (availableFrom) cached[idx].available_from = availableFrom;
+        if (availableTo) cached[idx].available_to = availableTo;
+        if (blockedDates) cached[idx].blocked_dates = blockedDates;
+        localStorage.setItem('luxea_cached_properties', JSON.stringify(cached));
+      }
+
+      const datesMap = JSON.parse(localStorage.getItem('luxea_host_dates_map') || '{}');
+      datesMap[propertyId] = { availableFrom, availableTo, blockedDates };
+      localStorage.setItem('luxea_host_dates_map', JSON.stringify(datesMap));
+
+      const client = this.getClient();
+      if (client) {
+        try {
+          const updatePayload = { updated_at: new Date().toISOString() };
+          if (availableFrom) updatePayload.available_from = availableFrom;
+          if (availableTo) updatePayload.available_to = availableTo;
+          if (blockedDates) updatePayload.blocked_dates = blockedDates;
+
+          const { data, error } = await client
+            .from('lux_properties')
+            .update(updatePayload)
+            .eq('id', propertyId)
+            .select();
+
+          if (error) console.warn('Supabase dates update error:', error.message);
+          else console.log('✅ Supabase dates updated:', data);
+        } catch (err) {
+          console.error('Supabase dates update exception:', err);
+        }
+      }
+
+      window.dispatchEvent(new CustomEvent('luxea:property_updated', {
+        detail: { eventType: 'UPDATE', new: { id: propertyId, available_from: availableFrom, available_to: availableTo, blocked_dates: blockedDates } }
+      }));
+
+      return { success: true };
+    },
+
+    /**
+     * Host Add New Listing: Uploads photos to "lux_listings" and inserts into "lux_properties"
+     */
+    addPropertyListing: async function (listingData, photoFiles = []) {
+      const client = this.getClient();
+
+      // 1. Upload photos to bucket
+      let photoUrls = [];
+      if (photoFiles && photoFiles.length > 0) {
+        photoUrls = await this.uploadListingPhotos(photoFiles, 'properties');
+      }
+
+      const coverImage = photoUrls[0] || listingData.coverImage || '/assets/images/villa.jpg';
+      const gallery = photoUrls.length > 0 ? photoUrls : [coverImage];
+
+      const newProperty = {
+        id: crypto.randomUUID ? crypto.randomUUID() : `prop-${Date.now()}`,
+        slug: (listingData.name || 'stay').toLowerCase().replace(/[^a-z0-9]+/g, '-') + `-${Date.now().toString().slice(-4)}`,
+        name: listingData.name,
+        category: listingData.category || 'apartment',
+        property_type: listingData.propertyType || 'apartment',
+        tagline: listingData.tagline || 'Curated luxury stay in Kenya',
+        description: listingData.description || 'Modern luxury stay curated by Luxea.',
+        county: listingData.county || 'Nairobi',
+        city: listingData.city || 'Nairobi',
+        area: listingData.area || 'Westlands',
+        location_group: listingData.locationGroup || 'westlands',
+        price_per_night_usd: parseFloat(listingData.priceUsd) || 120,
+        price_per_night_kes: parseFloat(listingData.priceKes) || 15600,
+        bedrooms: parseInt(listingData.bedrooms) || 2,
+        bathrooms: parseFloat(listingData.bathrooms) || 2,
+        square_feet: parseInt(listingData.squareFeet) || 1400,
+        rating: 5.0,
+        reviews_count: 1,
+        cover_image_url: coverImage,
+        gallery_images: gallery,
+        amenities: listingData.amenities || ['High-Speed WiFi', 'Secure Parking', 'Air Conditioning'],
+        is_featured: false,
+        is_active: true,
+        is_available: true,
+        available_from: listingData.availableFrom || new Date().toISOString().split('T')[0],
+        available_to: listingData.availableTo || null,
+        blocked_dates: listingData.blockedDates || [],
+        host_ref_id: listingData.hostRefId || 'LXH-HOST-DIRECT',
+        created_at: new Date().toISOString()
+      };
+
+      // 2. Save locally
+      const cached = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+      cached.unshift(newProperty);
+      localStorage.setItem('luxea_cached_properties', JSON.stringify(cached));
+
+      // 3. Insert into Supabase
+      if (client) {
+        try {
+          const { data, error } = await client.from('lux_properties').insert([newProperty]);
+          if (error) console.warn('Supabase insert error into lux_properties:', error.message);
+          else console.log('✅ Supabase listing inserted:', data);
+        } catch (err) {
+          console.error('Supabase listing insert exception:', err);
+        }
+      }
+
+      window.dispatchEvent(new CustomEvent('luxea:property_updated', {
+        detail: { eventType: 'INSERT', new: newProperty }
+      }));
+
+      return newProperty;
+    },
+
+    // =========================================================================
+    // 3. HOST REGISTRATION APPLICATION
+    // =========================================================================
     submitHostApplication: async function (hostData, files = {}) {
       const client = this.getClient();
 
@@ -93,10 +389,8 @@
       if (client) {
         if (files.idFile) idUrl = await this.uploadDocument(files.idFile, 'host_ids');
         if (files.photos && files.photos.length > 0) {
-          for (const photo of files.photos) {
-            const url = await this.uploadDocument(photo, 'property_photos');
-            if (url) photoUrls.push(url);
-          }
+          // Upload property photos to the 'lux_listings' bucket!
+          photoUrls = await this.uploadListingPhotos(files.photos, 'host_applications');
         }
         if (files.bizFile) bizUrl = await this.uploadDocument(files.bizFile, 'business_reg');
       }
@@ -153,7 +447,9 @@
       return dbRow;
     },
 
-    // 3. Submit Guest Waitlist to "lux_waitlist"
+    // =========================================================================
+    // 4. GUEST WAITLIST
+    // =========================================================================
     submitWaitlistGuest: async function (guestData) {
       const client = this.getClient();
 
@@ -185,7 +481,9 @@
       return dbRow;
     },
 
-    // 4. Fetch Records
+    // =========================================================================
+    // 5. FETCH DATA FOR ADMIN & DASHBOARDS
+    // =========================================================================
     fetchHosts: async function () {
       const client = this.getClient();
       if (client) {

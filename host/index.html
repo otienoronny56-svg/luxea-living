@@ -47,13 +47,26 @@
 
   <main class="container">
     <div class="host-portal-wrapper">
-      <div class="host-hero-header">
-        <span class="badge-tag badge-gold">EARLY PARTNER REGISTRATION</span>
-        <h1 class="host-hero-title">Host Information &amp; Property Details</h1>
-        <p class="host-hero-subtitle">
-          Join our founding circle of distinguished property owners in Nairobi, Diani Beach, Naivasha, and beyond.
-        </p>
+      
+      <!-- Top Mode Switcher Bar -->
+      <div class="host-mode-switcher-bar">
+        <button class="host-mode-btn active" id="hostModeRegisterBtn">
+          <span>📝</span> Partner Registration Form
+        </button>
+        <button class="host-mode-btn" id="hostModeManageBtn">
+          <span>⚡</span> Host Dashboard &amp; Availability
+        </button>
       </div>
+
+      <!-- VIEW 1: REGISTRATION WIZARD -->
+      <div id="hostRegisterView">
+        <div class="host-hero-header">
+          <span class="badge-tag badge-gold">EARLY PARTNER REGISTRATION</span>
+          <h1 class="host-hero-title">Host Information &amp; Property Details</h1>
+          <p class="host-hero-subtitle">
+            Join our founding circle of distinguished property owners in Nairobi, Diani Beach, Naivasha, and beyond.
+          </p>
+        </div>
 
       <!-- Stepper Progress -->
       <div class="form-stepper">
@@ -416,6 +429,13 @@
         </div>
       </div>
 
+      </div> <!-- /#hostRegisterView -->
+
+      <!-- VIEW 2: HOST DASHBOARD & AVAILABILITY / STORAGE MANAGER -->
+      <div id="hostManagerView" class="hidden">
+        <div id="hostManagerContainer"></div>
+      </div>
+
     </div>
   </main>
 
@@ -443,10 +463,40 @@
   <script type="module">
     import { initCurrency } from '/assets/js/modules/currency.js';
     import { initHostForm } from '/assets/js/modules/hostForm.js';
+    import { initHostManager } from '/assets/js/modules/hostManager.js';
 
     document.addEventListener('DOMContentLoaded', () => {
       initCurrency();
       initHostForm('luxeaHostForm');
+      initHostManager('hostManagerContainer');
+
+      const registerBtn = document.getElementById('hostModeRegisterBtn');
+      const manageBtn = document.getElementById('hostModeManageBtn');
+      const registerView = document.getElementById('hostRegisterView');
+      const manageView = document.getElementById('hostManagerView');
+
+      function switchMode(mode) {
+        if (mode === 'manage') {
+          manageBtn.classList.add('active');
+          registerBtn.classList.remove('active');
+          manageView.classList.remove('hidden');
+          registerView.classList.add('hidden');
+        } else {
+          registerBtn.classList.add('active');
+          manageBtn.classList.remove('active');
+          registerView.classList.remove('hidden');
+          manageView.classList.add('hidden');
+        }
+      }
+
+      registerBtn?.addEventListener('click', () => switchMode('register'));
+      manageBtn?.addEventListener('click', () => switchMode('manage'));
+
+      // Check URL parameters for tab
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('tab') === 'manage' || urlParams.get('mode') === 'manage') {
+        switchMode('manage');
+      }
     });
   </script>
 </body>
