@@ -38,9 +38,9 @@
       </nav>
 
       <div class="header-actions">
-        <div class="supabase-status-chip" id="supabaseStatusChip">
+        <div class="supabase-status-chip" id="systemStatusChip">
           <span class="supabase-status-dot connected"></span>
-          <span>Supabase: Connected</span>
+          <span>Live Cloud Engine</span>
         </div>
         <span id="superAdminBadge" class="badge-tag badge-gold hidden" style="font-size: 0.75rem; padding: 5px 10px;">
           👑 Super Admin: Ronald
@@ -60,7 +60,7 @@
         <span class="badge-tag badge-gold">🔐 SUPER ADMIN AUTHENTICATION</span>
         <h1 class="admin-login-title">Super Admin Access</h1>
         <p class="admin-login-sub">
-          Authorized console for host partner vetting, payout approvals, live listings, and Supabase database management.
+          Authorized console for partner vetting, payout approvals, and luxury inventory command.
         </p>
 
         <form id="adminLoginForm" class="admin-login-form">
@@ -107,61 +107,226 @@
          ====================================================================== -->
     <div id="adminDashboardView" class="hidden">
       
-      <!-- Top Metrics Cluster -->
+      <!-- Top Executive Metrics Grid -->
       <div class="admin-metrics-grid">
         <div class="stat-metric-card">
-          <span class="metric-label">Total Host Submissions</span>
+          <div class="metric-card-top">
+            <span class="metric-label">Total Host Partners</span>
+            <span class="metric-trend-chip chip-neutral" id="trendHostsTotal">Live DB</span>
+          </div>
           <div class="metric-val" id="metricTotalHosts">0</div>
-          <div class="metric-sub">Across Nairobi &amp; Coast</div>
+          <div class="metric-sub">Across Nairobi, Coast &amp; Rift Valley</div>
         </div>
+
         <div class="stat-metric-card">
-          <span class="metric-label" style="color: #B7950B;">Pending Review</span>
-          <div class="metric-val" style="color: #B7950B;" id="metricPendingHosts">0</div>
-          <div class="metric-sub">Awaiting partner verification</div>
+          <div class="metric-card-top">
+            <span class="metric-label" style="color: #9A7B0C;">Pending Vetting</span>
+            <span class="metric-trend-chip chip-amber" id="trendPendingBadge">Action Req</span>
+          </div>
+          <div class="metric-val" style="color: #9A7B0C;" id="metricPendingHosts">0</div>
+          <div class="metric-sub">Awaiting document verification</div>
         </div>
+
         <div class="stat-metric-card">
-          <span class="metric-label" style="color: #1A7038;">Approved Partners</span>
-          <div class="metric-val" style="color: #1A7038;" id="metricApprovedHosts">0</div>
-          <div class="metric-sub">Active host circle</div>
+          <div class="metric-card-top">
+            <span class="metric-label" style="color: #1E8449;">Approved Partners</span>
+            <span class="metric-trend-chip chip-green" id="trendApprovedBadge">Verified</span>
+          </div>
+          <div class="metric-val" style="color: #1E8449;" id="metricApprovedHosts">0</div>
+          <div class="metric-sub">Active contracted properties</div>
         </div>
+
         <div class="stat-metric-card">
-          <span class="metric-label">Live Inventory Stays</span>
+          <div class="metric-card-top">
+            <span class="metric-label">Live Stays Catalog</span>
+            <span class="metric-trend-chip chip-gold" id="trendStaysLive">100% Active</span>
+          </div>
           <div class="metric-val" id="metricTotalStays">0</div>
-          <div class="metric-sub">Bookable on platform</div>
+          <div class="metric-sub">Bookable residences online</div>
         </div>
+
         <div class="stat-metric-card">
-          <span class="metric-label">VIP Waitlist</span>
+          <div class="metric-card-top">
+            <span class="metric-label">VIP Guest Waitlist</span>
+            <span class="metric-trend-chip chip-neutral" id="trendWaitlistTier">Founding</span>
+          </div>
           <div class="metric-val" id="metricTotalGuests">0</div>
-          <div class="metric-sub">Founding circle passes</div>
+          <div class="metric-sub">Founding Circle passholders</div>
         </div>
+      </div>
+
+      <!-- ======================================================================
+           EXECUTIVE ANALYTICS & PORTFOLIO BREAKDOWN HUB
+           ====================================================================== -->
+      <div class="admin-analytics-hub">
+        
+        <!-- Widget 1: Revenue Economics & Portfolio Valuation -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <div class="analytics-title-group">
+              <span class="analytics-badge">PORTFOLIO ECONOMICS</span>
+              <h3 class="analytics-title">Projected Nightly Valuation</h3>
+            </div>
+            <span class="analytics-chip-gold">Active Catalog</span>
+          </div>
+
+          <div class="portfolio-val-cluster">
+            <div class="val-primary">
+              <span class="val-currency">$</span>
+              <span class="val-number" id="analyticsTotalUsd">0</span>
+              <span class="val-tag">USD / Night</span>
+            </div>
+            <div class="val-secondary">
+              ≈ KES <strong id="analyticsTotalKes">0</strong> / Night
+            </div>
+          </div>
+
+          <div class="economics-grid">
+            <div class="econ-item">
+              <span class="econ-label">Average Daily Rate (ADR)</span>
+              <span class="econ-val" id="analyticsAdr">$0 / night</span>
+            </div>
+            <div class="econ-item">
+              <span class="econ-label">Catalog Bookability</span>
+              <span class="econ-val" id="analyticsOccupancy">100% Active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Widget 2: Regional Inventory Distribution -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <div class="analytics-title-group">
+              <span class="analytics-badge">GEOGRAPHIC FOOTPRINT</span>
+              <h3 class="analytics-title">Regional Distribution</h3>
+            </div>
+            <span class="analytics-chip-neutral" id="analyticsTotalRegions">4 Prime Hubs</span>
+          </div>
+
+          <div class="regional-bars-wrap" id="analyticsRegionsList">
+            <!-- Injected dynamically by admin.js -->
+            <div class="region-row">
+              <div class="region-meta">
+                <span class="region-name">Ruaka &amp; Northern Bypass</span>
+                <span class="region-count" id="regCountRuaka">2 Stays (40%)</span>
+              </div>
+              <div class="region-track">
+                <div class="region-fill" id="regBarRuaka" style="width: 40%;"></div>
+              </div>
+            </div>
+            <div class="region-row">
+              <div class="region-meta">
+                <span class="region-name">Westlands Skyline</span>
+                <span class="region-count" id="regCountWestlands">1 Stay (20%)</span>
+              </div>
+              <div class="region-track">
+                <div class="region-fill" id="regBarWestlands" style="width: 20%;"></div>
+              </div>
+            </div>
+            <div class="region-row">
+              <div class="region-meta">
+                <span class="region-name">Mombasa &amp; Diani Coast</span>
+                <span class="region-count" id="regCountCoast">1 Stay (20%)</span>
+              </div>
+              <div class="region-track">
+                <div class="region-fill" id="regBarCoast" style="width: 20%;"></div>
+              </div>
+            </div>
+            <div class="region-row">
+              <div class="region-meta">
+                <span class="region-name">Karen &amp; Kitisuru Sanctuary</span>
+                <span class="region-count" id="regCountKaren">1 Stay (20%)</span>
+              </div>
+              <div class="region-track">
+                <div class="region-fill" id="regBarKaren" style="width: 20%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Widget 3: Category Mix & Host Vetting Pipeline -->
+        <div class="analytics-card">
+          <div class="analytics-card-header">
+            <div class="analytics-title-group">
+              <span class="analytics-badge">INVENTORY &amp; PIPELINE</span>
+              <h3 class="analytics-title">Category Mix &amp; Funnel</h3>
+            </div>
+            <span class="analytics-chip-green">Realtime Vetting</span>
+          </div>
+
+          <div class="category-pills-cluster" id="analyticsCategoryPills">
+            <div class="cat-pill">
+              <span class="cat-icon">🏙️</span>
+              <span class="cat-label">Penthouses</span>
+              <span class="cat-count" id="catCountPenthouse">2</span>
+            </div>
+            <div class="cat-pill">
+              <span class="cat-icon">🌊</span>
+              <span class="cat-label">Beach Villas</span>
+              <span class="cat-count" id="catCountVilla">1</span>
+            </div>
+            <div class="cat-pill">
+              <span class="cat-icon">🏡</span>
+              <span class="cat-label">Townhomes</span>
+              <span class="cat-count" id="catCountTownhouse">1</span>
+            </div>
+            <div class="cat-pill">
+              <span class="cat-icon">✨</span>
+              <span class="cat-label">Modern Suites</span>
+              <span class="cat-count" id="catCountApartment">1</span>
+            </div>
+          </div>
+
+          <div class="pipeline-progress-wrap">
+            <span class="pipeline-label">Host Partner Vetting Funnel</span>
+            <div class="funnel-steps">
+              <div class="funnel-step">
+                <span class="f-num" id="funnelTotal">0</span>
+                <span class="f-label">Submitted</span>
+              </div>
+              <div class="funnel-arrow">→</div>
+              <div class="funnel-step">
+                <span class="f-num" id="funnelReview">0</span>
+                <span class="f-label">In Review</span>
+              </div>
+              <div class="funnel-arrow">→</div>
+              <div class="funnel-step f-approved">
+                <span class="f-num" id="funnelApproved">0</span>
+                <span class="f-label">Approved</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Action Header Card -->
       <div class="admin-header-card">
         <div>
-          <span class="badge-tag badge-gold">SUPER ADMIN PLATFORM CONSOLE</span>
+          <span class="badge-tag badge-gold">SUPER ADMIN PLATFORM COMMAND</span>
           <h1 class="admin-main-title">Partner Submissions &amp; Catalog</h1>
           <p style="color: var(--color-cocoa); font-size: 0.9rem; margin-top: 4px;">
-            Real-time live sync with Supabase tables (<code>lux_hosts</code>, <code>lux_properties</code>, <code>lux_waitlist</code>).
+            Real-time synchronized partner applications, verified payouts, and live portfolio inventory.
           </p>
         </div>
 
         <div class="admin-actions-cluster">
-          <button class="btn btn-secondary btn-sm" id="exportHostsCsvBtn">
+          <button class="btn btn-secondary btn-sm" id="exportHostsCsvBtn" title="Download host partner applications roster as CSV">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
             <span>Export Hosts CSV</span>
           </button>
-          <button class="btn btn-secondary btn-sm" id="exportGuestsCsvBtn">
+          <button class="btn btn-secondary btn-sm" id="exportGuestsCsvBtn" title="Download guest VIP waitlist as CSV">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
             <span>Export Waitlist CSV</span>
           </button>
-          <a href="https://supabase.com/dashboard/project/abzcabiqdkmfaijnqbkf" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
-            <span>Supabase Cloud ↗</span>
-          </a>
+          <button class="btn btn-primary btn-sm" id="refreshAdminDataBtn" title="Sync live updates">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span>Sync Engine</span>
+          </button>
         </div>
       </div>
 
-      <!-- Navigation Tabs -->
+      <!-- Navigation Tabs with Quick Counters -->
       <div class="admin-tabs-nav">
         <button class="admin-tab-link active" id="tabHostsBtn">
           <span>Host Partner Applications</span>
@@ -177,18 +342,30 @@
         </button>
       </div>
 
-      <!-- Toolbar / Search & Filter -->
+      <!-- Toolbar / Fast Search & Status Pills -->
       <div class="admin-toolbar-card">
         <div class="admin-search-box">
+          <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <input type="text" id="adminSearchInput" class="form-control" placeholder="Search by name, property, phone, county, ref ID, or email...">
         </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <select id="statusFilterSelect" class="form-control" style="width: 170px; font-size: 0.84rem;">
-            <option value="all">All Review Statuses</option>
-            <option value="pending_review">⏳ Pending Review</option>
-            <option value="approved">✅ Approved</option>
-            <option value="rejected">❌ Rejected</option>
-          </select>
+
+        <div class="status-pills-filter" id="statusPillsFilter">
+          <button type="button" class="status-pill active" data-status="all">
+            <span>All</span>
+            <span class="pill-count" id="pillCountAll">0</span>
+          </button>
+          <button type="button" class="status-pill pill-amber" data-status="pending_review">
+            <span>⏳ Pending</span>
+            <span class="pill-count" id="pillCountPending">0</span>
+          </button>
+          <button type="button" class="status-pill pill-green" data-status="approved">
+            <span>✅ Approved</span>
+            <span class="pill-count" id="pillCountApproved">0</span>
+          </button>
+          <button type="button" class="status-pill pill-red" data-status="rejected">
+            <span>❌ Rejected</span>
+            <span class="pill-count" id="pillCountRejected">0</span>
+          </button>
         </div>
       </div>
 
@@ -197,14 +374,14 @@
         <table class="lux-data-table">
           <thead>
             <tr>
-              <th>Ref ID</th>
-              <th>Host Details</th>
-              <th>Property Name &amp; Area</th>
-              <th>Type / Specs</th>
-              <th>Payout Details</th>
-              <th>Documents / Photos</th>
-              <th>Review Status</th>
-              <th>Super Admin Actions</th>
+              <th style="width: 130px;">Ref ID</th>
+              <th style="min-width: 170px;">Host &amp; Contact</th>
+              <th style="min-width: 180px;">Property &amp; Area</th>
+              <th style="width: 120px;">Type / Specs</th>
+              <th style="min-width: 150px;">Payout Method</th>
+              <th style="width: 120px;">Verification Files</th>
+              <th style="width: 140px;">Review Status</th>
+              <th style="min-width: 200px;">Super Admin Actions</th>
             </tr>
           </thead>
           <tbody id="hostsTableBody">
@@ -212,7 +389,7 @@
           </tbody>
         </table>
         <div id="hostsEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
-          No host applications found. Submissions from <a href="/host/" style="color: var(--color-camel-dark); text-decoration: underline;">/host/</a> will appear here automatically via Realtime.
+          No host applications found. Partner submissions from <a href="/host/" style="color: var(--color-camel-dark); text-decoration: underline;">/host/</a> will appear here instantly.
         </div>
       </div>
 
@@ -221,13 +398,13 @@
         <table class="lux-data-table">
           <thead>
             <tr>
-              <th>Cover Photo</th>
-              <th>Stay Title</th>
+              <th style="width: 90px;">Photo</th>
+              <th style="min-width: 200px;">Stay Title</th>
               <th>Location</th>
-              <th>Type</th>
-              <th>Price / Night</th>
+              <th>Category</th>
+              <th>Nightly Rate</th>
               <th>Live Guest Availability</th>
-              <th>Actions</th>
+              <th style="width: 130px;">Actions</th>
             </tr>
           </thead>
           <tbody id="staysTableBody">
@@ -241,13 +418,15 @@
         <table class="lux-data-table">
           <thead>
             <tr>
-              <th>Pass #</th>
+              <th style="width: 130px;">Pass #</th>
               <th>Guest Name</th>
               <th>Email Address</th>
               <th>Phone</th>
               <th>Preferred Destinations</th>
+              <th>Tier</th>
               <th>Joined Date</th>
             </tr>
+
           </thead>
           <tbody id="guestsTableBody">
             <!-- Injected by admin.js -->
