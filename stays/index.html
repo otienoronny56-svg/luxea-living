@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Curated Stays | Luxea Living</title>
+  <meta name="description" content="Browse curated luxury residences, beachfront villas, and sky penthouses across Kenya and beyond.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/pages/stays.css">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/supabase.js"></script>
+</head>
+<body>
+
+  <!-- Announcement Bar -->
+  <div class="announcement-bar">
+    <div class="container announcement-content">
+      <span>✨ <strong>Early Partner Drops:</strong> Reserve priority access to our founding residences before public release.</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="lux-header">
+    <div class="container nav-container">
+      <a href="/" class="brand-logo">
+        <span class="brand-monogram">L</span>
+        <div class="brand-text">
+          <span class="brand-name">Luxea</span>
+          <span class="brand-sub">LIVING</span>
+        </div>
+      </a>
+
+      <nav class="desktop-nav">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/stays/" class="nav-link active">Browse Stays</a>
+        <a href="/host/" class="nav-link">Become a Host</a>
+        <a href="/waitlist/" class="nav-link">VIP Waitlist</a>
+        <a href="/admin/" class="nav-link">Internal Portal</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="currency-toggle" id="currencyToggle">
+          <span class="currency-label">USD ($)</span>
+        </button>
+        <a href="/host/" class="btn btn-secondary">Host a Stay</a>
+        <a href="/waitlist/" class="btn btn-primary">Join Waitlist</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="stays-page-header">
+      <span class="badge-tag badge-gold">CURATED RESIDENCES</span>
+      <h1 class="stays-page-title">The Luxea Collection</h1>
+      <p style="max-width: 580px; margin: 0 auto;">
+        Every home in the Luxea portfolio is verified for architectural elegance, prime location, and bespoke comfort.
+      </p>
+    </div>
+
+    <!-- Search Panel -->
+    <div class="search-panel">
+      <div class="search-item">
+        <span class="search-label">Location</span>
+        <select class="search-select" id="filterLocation">
+          <option value="all">All Destinations (Kenya & Global)</option>
+          <option value="Diani Beach">Diani Beach & Galu</option>
+          <option value="Karen">Nairobi - Karen</option>
+          <option value="Westlands">Nairobi - Westlands</option>
+          <option value="Kitisuru">Nairobi - Kitisuru</option>
+        </select>
+      </div>
+      <div class="search-divider"></div>
+      <div class="search-item">
+        <span class="search-label">Property Style</span>
+        <select class="search-select" id="filterStyle">
+          <option value="all">All Architectural Styles</option>
+          <option value="villa">Ocean & Safari Villas</option>
+          <option value="penthouse">Sky Penthouses</option>
+          <option value="townhouse">Modern Townhomes</option>
+          <option value="suite">Boutique Executive Suites</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="applyFiltersBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span>Filter Collection</span>
+      </button>
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div class="filter-pills-bar" id="categoryPills">
+      <button class="pill-btn active" data-filter="all">All Collections</button>
+      <button class="pill-btn" data-filter="villa">Private Villas</button>
+      <button class="pill-btn" data-filter="penthouse">Sky Penthouses</button>
+      <button class="pill-btn" data-filter="townhouse">Townhomes</button>
+      <button class="pill-btn" data-filter="suite">Executive Suites</button>
+    </div>
+
+    <!-- Selected Stay Spotlight Section (NO MODALS - Direct In-Page Showcase) -->
+    <section id="staySpotlightSection" class="hidden" style="margin-bottom: 40px;">
+      <div style="background: var(--color-white); border: 1px solid var(--color-khaki); border-radius: var(--radius-xl); padding: 32px; box-shadow: var(--shadow-luxury); position: relative;">
+        <button id="closeSpotlightBtn" style="position: absolute; top: 20px; right: 20px; background: var(--color-linen); border: 1px solid var(--color-khaki); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; color: var(--color-espresso);">&times;</button>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; align-items: center;">
+          <div>
+            <span class="badge-tag badge-gold" id="spotlightCategory" style="margin-bottom: 12px; display: inline-block;">RESIDENCE PREVIEW</span>
+            <h2 id="spotlightTitle" style="font-family: var(--font-serif); font-size: 2rem; color: var(--color-espresso); margin-bottom: 8px;">Property Name</h2>
+            <p id="spotlightLoc" style="font-weight: 600; color: var(--color-cocoa); margin-bottom: 8px;"></p>
+            <p id="spotlightSpecs" style="color: var(--color-camel-dark); font-size: 0.95rem; margin-bottom: 16px;"></p>
+            <p id="spotlightDesc" style="line-height: 1.7; color: var(--color-espresso); margin-bottom: 24px;"></p>
+            <h4 style="margin-bottom: 12px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-cocoa);">Curated Inclusions</h4>
+            <div id="spotlightAmenities" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px;"></div>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <a href="/waitlist/" class="btn btn-primary btn-large">Reserve via VIP Waitlist</a>
+              <a href="/host/" class="btn btn-secondary btn-large">Host a Similar Property</a>
+            </div>
+          </div>
+          <div>
+            <img id="spotlightImg" src="/assets/images/villa.jpg" alt="Stay Preview" style="width: 100%; height: 380px; object-fit: cover; border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stays Grid -->
+    <div class="stays-grid" id="staysCatalogGrid">
+      <!-- Injected by staysData.js -->
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="mobile-bottom-nav">
+    <a href="/" class="mobile-nav-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <span>Home</span>
+    </a>
+    <a href="/stays/" class="mobile-nav-item active">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>Browse</span>
+    </a>
+    <a href="/host/" class="mobile-nav-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v6M9 14h6"/></svg>
+      <span>Host</span>
+    </a>
+    <a href="/admin/" class="mobile-nav-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      <span>Portal</span>
+    </a>
+  </nav>
+
+  <script src="/assets/js/main.js"></script>
+  <script type="module">
+    import { LUXEA_STAYS, renderStaysGrid } from '/assets/js/modules/staysData.js';
+    import { initCurrencyToggle, refreshPrices } from '/assets/js/modules/currency.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCurrencyToggle();
+      renderStaysGrid('staysCatalogGrid');
+      refreshPrices();
+
+      // Category filter buttons
+      const pillBtns = document.querySelectorAll('#categoryPills .pill-btn');
+      pillBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          pillBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const filter = btn.getAttribute('data-filter');
+          renderStaysGrid('staysCatalogGrid', filter);
+          refreshPrices();
+          attachDetailListeners();
+        });
+      });
+
+      // Filter select dropdowns
+      const filterLoc = document.getElementById('filterLocation');
+      const filterStyle = document.getElementById('filterStyle');
+      const applyBtn = document.getElementById('applyFiltersBtn');
+
+      applyBtn?.addEventListener('click', () => {
+        const style = filterStyle.value;
+        const loc = filterLoc.value;
+        
+        let filtered = LUXEA_STAYS;
+        if (style !== 'all') {
+          filtered = filtered.filter(s => s.category === style);
+        }
+        if (loc !== 'all') {
+          filtered = filtered.filter(s => s.location.toLowerCase().includes(loc.toLowerCase()));
+        }
+
+        const grid = document.getElementById('staysCatalogGrid');
+        grid.innerHTML = '';
+        if (filtered.length === 0) {
+          grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px 20px; color: var(--color-cocoa);">No residences match this exact filter criteria. Try selecting "All Destinations" or browse our full collection.</div>';
+          return;
+        }
+
+        filtered.forEach(stay => {
+          const card = document.createElement('div');
+          card.className = 'stay-card';
+          card.setAttribute('data-category', stay.category);
+          card.setAttribute('data-id', stay.id);
+          card.innerHTML = `
+            <div class="stay-thumb-wrap">
+              <img src="${stay.image}" alt="${stay.name}" class="stay-thumb" loading="lazy">
+              <div class="thumb-top-badges">
+                <span class="badge-tag badge-gold">Verified Partner</span>
+                <span class="badge-tag badge-white">Exclusive</span>
+              </div>
+            </div>
+            <div class="stay-info">
+              <div class="stay-pricing-row">
+                <div class="stay-price">
+                  <span class="price-num" data-usd="${stay.usdPrice}" data-kes="${stay.kesPrice}">$${stay.usdPrice}</span>
+                  <span class="price-period">/ night</span>
+                </div>
+                <span class="stay-rating">${stay.rating}</span>
+              </div>
+              <h3 class="stay-name">${stay.name}</h3>
+              <p class="stay-loc">${stay.location}</p>
+              <div class="stay-features">${stay.specs}</div>
+              <div class="stay-card-bottom">
+                <button class="btn btn-secondary btn-sm open-stay-detail-btn" data-stay-id="${stay.id}">View Details</button>
+                <a href="/waitlist/" class="btn btn-primary btn-sm">Waitlist Access</a>
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+        refreshPrices();
+        attachDetailListeners();
+      });
+
+      // Inline Stay Spotlight (NO MODAL)
+      function attachDetailListeners() {
+        document.querySelectorAll('.open-stay-detail-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const stayId = btn.getAttribute('data-stay-id');
+            const stay = LUXEA_STAYS.find(s => s.id === stayId);
+            if (!stay) return;
+
+            const section = document.getElementById('staySpotlightSection');
+            document.getElementById('spotlightTitle').textContent = stay.name;
+            document.getElementById('spotlightCategory').textContent = stay.category.toUpperCase() + ' • ' + stay.specs;
+            document.getElementById('spotlightLoc').textContent = '📍 ' + stay.location;
+            document.getElementById('spotlightSpecs').textContent = stay.rating + ' • $' + stay.usdPrice + '/night';
+            document.getElementById('spotlightDesc').textContent = stay.description;
+            document.getElementById('spotlightImg').src = stay.image;
+
+            const amenitiesContainer = document.getElementById('spotlightAmenities');
+            amenitiesContainer.innerHTML = '';
+            stay.amenities.forEach(am => {
+              const chip = document.createElement('span');
+              chip.className = 'badge-tag badge-gold';
+              chip.textContent = am;
+              amenitiesContainer.appendChild(chip);
+            });
+
+            section.classList.remove('hidden');
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        });
+      }
+
+      document.getElementById('closeSpotlightBtn')?.addEventListener('click', () => {
+        document.getElementById('staySpotlightSection').classList.add('hidden');
+      });
+
+      attachDetailListeners();
+    });
+  </script>
+</body>
+</html>

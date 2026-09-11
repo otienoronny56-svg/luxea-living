@@ -46,12 +46,12 @@
 
       <!-- Desktop Nav Links -->
       <nav class="desktop-nav" aria-label="Primary Navigation">
-        <a href="index.html" class="nav-link active">Home</a>
-        <a href="stays.html" class="nav-link">Curated Stays</a>
+        <a href="/" class="nav-link active">Home</a>
+        <a href="/stays/" class="nav-link">Curated Stays</a>
         <a href="#experience" class="nav-link">The Standard</a>
-        <a href="host.html" class="nav-link">For Hosts</a>
-        <a href="#waitlist-section" class="nav-link">Guest Waitlist</a>
-        <a href="admin.html" class="nav-link">Internal Portal</a>
+        <a href="/host/" class="nav-link">For Hosts</a>
+        <a href="/waitlist/" class="nav-link">Guest Waitlist</a>
+        <a href="/admin/" class="nav-link">Internal Portal</a>
       </nav>
 
       <!-- Header Action Buttons -->
@@ -60,11 +60,11 @@
           <span class="currency-label">USD ($)</span>
         </button>
 
-        <a href="host.html" class="btn btn-secondary">
+        <a href="/host/" class="btn btn-secondary">
           <span>Host a Property</span>
         </a>
 
-        <a href="#waitlist-section" class="btn btn-primary">
+        <a href="/waitlist/" class="btn btn-primary">
           <span>Join VIP Waitlist</span>
         </a>
       </div>
@@ -89,11 +89,11 @@
 
           <!-- Dual Action CTAs -->
           <div class="hero-cta-group">
-            <a href="#waitlist-section" class="btn btn-primary btn-large">
+            <a href="/waitlist/" class="btn btn-primary btn-large">
               <span>Join Guest Waitlist</span>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-            <a href="host.html" class="btn btn-outline btn-large">
+            <a href="/host/" class="btn btn-outline btn-large">
               <span>Register as a Host Partner</span>
             </a>
           </div>
@@ -211,18 +211,18 @@
             <li><span class="perk-check">✓</span> Flexible M-Pesa &amp; Bank Transfer payout schedule</li>
             <li><span class="perk-check">✓</span> Dedicated host success manager in Nairobi &amp; Mombasa</li>
           </ul>
-          <a href="host.html" class="btn btn-primary btn-large">
+          <a href="/host/" class="btn btn-primary btn-large">
             <span>Open Host Registration Form</span>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
         </div>
         <div class="host-banner-visual">
-          <img src="assets/images/penthouse.jpg" alt="Luxea Living host interior" class="host-banner-img">
+          <img src="/assets/images/penthouse.jpg" alt="Luxea Living host interior" class="host-banner-img">
         </div>
       </div>
     </section>
 
-    <!-- GUEST WAITLIST SECTION -->
+    <!-- GUEST WAITLIST SECTION (NO MODALS - Direct In-Page VIP Pass Generation) -->
     <section class="container" id="waitlist-section" style="margin: 60px auto 80px;">
       <div style="background: linear-gradient(135deg, #FFFFFF, var(--color-linen)); border: 1px solid var(--color-khaki); border-radius: var(--radius-xl); padding: 50px; text-align: center; max-width: 800px; margin: 0 auto; box-shadow: var(--shadow-md);">
         <span class="badge-tag badge-gold">EXCLUSIVE ACCESS</span>
@@ -231,55 +231,53 @@
           We are launching in curated drops across Kenya's most desirable pockets. Join the waitlist to receive private invitations, preview rates, and $100 travel credit on your first stay.
         </p>
         
-        <form class="inline-waitlist-form" id="inlineWaitlistForm" style="max-width: 600px; margin: 0 auto 16px;">
-          <div style="display: flex; gap: 10px; background: #FFFFFF; padding: 6px; border-radius: var(--radius-pill); border: 1px solid var(--color-khaki);">
-            <input type="text" id="inlineGuestName" class="form-control" style="flex: 1; border: none;" placeholder="Your full name" required>
-            <input type="email" id="inlineGuestEmail" class="form-control" style="flex: 1; border: none;" placeholder="Your email address" required>
-            <button type="submit" class="btn btn-primary">Get Early Invite</button>
+        <div id="inlineWaitlistFormContainer">
+          <form class="inline-waitlist-form" id="inlineWaitlistForm" style="max-width: 600px; margin: 0 auto 16px;">
+            <div style="display: flex; gap: 10px; background: #FFFFFF; padding: 6px; border-radius: var(--radius-pill); border: 1px solid var(--color-khaki);">
+              <input type="text" id="inlineGuestName" class="form-control" style="flex: 1; border: none;" placeholder="Your full name" required>
+              <input type="email" id="inlineGuestEmail" class="form-control" style="flex: 1; border: none;" placeholder="Your email address" required>
+              <button type="submit" class="btn btn-primary">Get Early Invite</button>
+            </div>
+          </form>
+          <small style="color: var(--color-cocoa);">No spam. Only private invitations and bespoke property debuts. Or visit our <a href="/waitlist/" style="text-decoration: underline; color: var(--color-camel-dark);">dedicated VIP Waitlist page</a>.</small>
+        </div>
+
+        <!-- In-Page VIP Pass Card (Appears inline without any popup modal) -->
+        <div class="waitlist-card-result hidden" id="waitlistResultCard" style="max-width: 500px; margin: 24px auto 0;">
+          <div class="vip-pass">
+            <div class="pass-header">
+              <div class="pass-logo">LUXEA LIVING</div>
+              <span class="pass-tag">VIP PRIORITY PASS</span>
+            </div>
+            <div class="pass-number">
+              <span class="number-label">WAITLIST POSITION</span>
+              <span class="number-val" id="vipPositionNumber">#1249</span>
+            </div>
+            <div class="pass-details">
+              <div>
+                <span class="p-sub">MEMBER NAME</span>
+                <strong id="vipMemberName">Guest</strong>
+              </div>
+              <div>
+                <span class="p-sub">ACCESS TIER</span>
+                <strong>Founding Circle</strong>
+              </div>
+            </div>
+            <div class="pass-barcode">
+              <div class="barcode-lines"></div>
+              <span class="barcode-text" id="vipCodeText">LXA-PASS-2026</span>
+            </div>
           </div>
-        </form>
-        <small style="color: var(--color-cocoa);">No spam. Only private invitations and bespoke property debuts.</small>
+          <p style="text-align: center; margin: 20px 0 16px;">🎉 Your VIP priority pass has been confirmed. We look forward to hosting you.</p>
+          <div style="display: flex; gap: 12px; justify-content: center;">
+            <button class="btn btn-secondary" id="copyShareLinkBtn">Copy Invite Link</button>
+            <a href="/stays/" class="btn btn-primary">Browse Curated Stays</a>
+          </div>
+        </div>
+
       </div>
     </section>
   </main>
-
-  <!-- VIP WAITLIST MODAL -->
-  <div class="lux-modal-overlay" id="waitlistModalOverlay" role="dialog" aria-modal="true">
-    <div class="lux-modal-container" style="max-width: 520px; padding: 30px;">
-      <div class="modal-header" style="padding: 0 0 20px;">
-        <span class="modal-eyebrow">EXCLUSIVE ACCESS</span>
-        <button class="modal-close-btn" id="closeWaitlistModalBtn">&times;</button>
-      </div>
-      <div class="waitlist-card-result hidden" id="waitlistResultCard">
-        <div class="vip-pass">
-          <div class="pass-header">
-            <div class="pass-logo">LUXEA LIVING</div>
-            <span class="pass-tag">VIP PRIORITY PASS</span>
-          </div>
-          <div class="pass-number">
-            <span class="number-label">WAITLIST POSITION</span>
-            <span class="number-val" id="vipPositionNumber">#1249</span>
-          </div>
-          <div class="pass-details">
-            <div>
-              <span class="p-sub">MEMBER NAME</span>
-              <strong id="vipMemberName">Guest</strong>
-            </div>
-            <div>
-              <span class="p-sub">ACCESS TIER</span>
-              <strong>Founding Circle</strong>
-            </div>
-          </div>
-          <div class="pass-barcode">
-            <div class="barcode-lines"></div>
-            <span class="barcode-text" id="vipCodeText">LXA-PASS-2026</span>
-          </div>
-        </div>
-        <p style="text-align: center; margin-bottom: 20px;">🎉 Your VIP priority pass has been confirmed. We look forward to hosting you.</p>
-        <button class="btn btn-secondary btn-block" id="copyShareLinkBtn">Copy Invite Link</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Footer -->
   <footer class="lux-footer">
@@ -298,10 +296,10 @@
 
       <div class="footer-links-col">
         <h4 class="footer-heading">Platform</h4>
-        <a href="stays.html" class="footer-link">Curated Stays</a>
-        <a href="host.html" class="footer-link">Become a Host</a>
-        <a href="#waitlist-section" class="footer-link">Guest Waitlist</a>
-        <a href="admin.html" class="footer-link">Internal Portal</a>
+        <a href="/stays/" class="footer-link">Curated Stays</a>
+        <a href="/host/" class="footer-link">Become a Host</a>
+        <a href="/waitlist/" class="footer-link">Guest Waitlist</a>
+        <a href="/admin/" class="footer-link">Internal Portal</a>
       </div>
 
       <div class="footer-links-col">
@@ -315,43 +313,39 @@
       <div class="footer-links-col">
         <h4 class="footer-heading">Host Partner Program</h4>
         <p class="footer-note">List your villa or luxury penthouse:</p>
-        <a href="host.html" class="btn btn-secondary btn-sm">Host Registration Form</a>
+        <a href="/host/" class="btn btn-secondary btn-sm">Host Registration Form</a>
       </div>
     </div>
   </footer>
 
   <!-- Mobile Bottom Nav -->
   <nav class="mobile-bottom-nav">
-    <a href="index.html" class="mobile-nav-item active">
+    <a href="/" class="mobile-nav-item active">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
       <span>Home</span>
     </a>
-    <a href="stays.html" class="mobile-nav-item">
+    <a href="/stays/" class="mobile-nav-item">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <span>Browse</span>
     </a>
-    <a href="host.html" class="mobile-nav-item">
+    <a href="/host/" class="mobile-nav-item">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v6M9 14h6"/></svg>
       <span>Host</span>
     </a>
-    <a href="admin.html" class="mobile-nav-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    <a href="/admin/" class="mobile-nav-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
       <span>Admin</span>
     </a>
   </nav>
 
-  <script src="assets/js/main.js"></script>
+  <script src="/assets/js/main.js"></script>
   <script type="module">
-    import { initCurrency } from './assets/js/modules/currency.js';
-    import { initWaitlist } from './assets/js/modules/waitlist.js';
+    import { initCurrency } from '/assets/js/modules/currency.js';
+    import { initWaitlist } from '/assets/js/modules/waitlist.js';
 
     document.addEventListener('DOMContentLoaded', () => {
       initCurrency();
       initWaitlist();
-
-      document.getElementById('closeWaitlistModalBtn')?.addEventListener('click', () => {
-        document.getElementById('waitlistModalOverlay')?.classList.remove('active');
-      });
     });
   </script>
 </body>

@@ -52,8 +52,13 @@ export function initWaitlist() {
     if (nameEl) nameEl.textContent = fullName;
     if (codeEl) codeEl.textContent = passCode;
 
+    const inlineContainer = document.getElementById('inlineWaitlistFormContainer');
+    if (inlineContainer) inlineContainer.classList.add('hidden');
     if (waitlistFormBody) waitlistFormBody.classList.add('hidden');
-    if (waitlistResultCard) waitlistResultCard.classList.remove('hidden');
+    if (waitlistResultCard) {
+      waitlistResultCard.classList.remove('hidden');
+      waitlistResultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
     if (waitlistModal) waitlistModal.classList.add('active');
 
     if (window.showToast) {

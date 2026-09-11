@@ -1,0 +1,114 @@
+/* ==========================================================================
+   LUXEA LIVING — VIP WAITLIST PAGE (waitlist.css)
+   Dedicated scoped stylesheet for /waitlist/
+   ========================================================================== */
+
+.waitlist-page-container {
+  max-width: 680px;
+  margin: 50px auto 90px;
+}
+
+.waitlist-card-box {
+  background: linear-gradient(135deg, #FFFFFF, var(--color-linen));
+  border: 1px solid var(--color-khaki);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  box-shadow: var(--shadow-luxury);
+}
+
+.waitlist-header-block {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.waitlist-title {
+  font-family: var(--font-serif);
+  font-size: 2.8rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+  margin: 12px 0 10px;
+  letter-spacing: -0.01em;
+}
+
+.waitlist-subtitle {
+  color: var(--color-cocoa);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.waitlist-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.waitlist-dest-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.waitlist-check-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--color-espresso);
+  background: var(--color-white);
+  border: 1px solid var(--color-khaki-light);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.waitlist-check-option:hover {
+  border-color: var(--color-camel);
+  background: var(--color-linen);
+}
+
+.waitlist-check-option input[type="checkbox"] {
+  accent-color: var(--color-espresso);
+  width: 16px;
+  height: 16px;
+}
+
+.waitlist-result-pane {
+  animation: fadeIn 0.4s ease;
+}
+
+.waitlist-success-msg {
+  text-align: center;
+  margin: 24px 0 20px;
+  color: var(--color-espresso);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.waitlist-action-row {
+  display: flex;
+  gap: 14px;
+}
+
+@media (max-width: 640px) {
+  .waitlist-page-container {
+    margin: 24px 16px 80px;
+  }
+
+  .waitlist-card-box {
+    padding: 24px 18px;
+  }
+
+  .waitlist-title {
+    font-size: 2.2rem;
+  }
+
+  .waitlist-dest-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .waitlist-action-row {
+    flex-direction: column;
+  }
+}

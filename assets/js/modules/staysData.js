@@ -13,7 +13,7 @@ export const LUXEA_STAYS = [
     kesPrice: 84500,
     rating: '★ 4.98 (28)',
     specs: '4 Beds • 4.5 Baths • 5,400 sqft',
-    image: 'assets/images/villa.jpg',
+    image: '/assets/images/villa.jpg',
     description: 'An oceanfront sanctuary framed by swaying palms and azure waters. Features expansive living pavilions, travertine sun terraces, private ocean-view infinity pool, dedicated butler, and resident private chef preparing coastal Swahili-fusion gourmet dining.',
     amenities: ['Private Beach Access', 'Infinity Pool', 'Starlink 250Mbps WiFi', 'Private Chef & Butler', '24/7 Gated Security', 'Backup Solar & Generator', 'Air Conditioning']
   },
@@ -26,7 +26,7 @@ export const LUXEA_STAYS = [
     kesPrice: 62400,
     rating: '★ 4.96 (19)',
     specs: '3 Beds • 3.5 Baths • 3,800 sqft',
-    image: 'assets/images/penthouse.jpg',
+    image: '/assets/images/penthouse.jpg',
     description: 'Perched high above Nairobi with dual-aspect skyline vistas. Features soaring double-height ceilings, bespoke camel leather accents, curated contemporary African art, marble kitchen island, and high-speed executive boardroom setup.',
     amenities: ['Sky Terrace & Fire Pit', 'Ultra High-Speed Fiber', 'Heated Rooftop Pool', 'Concierge & Chauffeur Staging', 'Biometric Access', 'Full Acoustic Glazing']
   },
@@ -39,7 +39,7 @@ export const LUXEA_STAYS = [
     kesPrice: 50700,
     rating: '★ 4.94 (34)',
     specs: '3 Beds • 3 Baths • 3,200 sqft',
-    image: 'assets/images/townhouse.jpg',
+    image: '/assets/images/townhouse.jpg',
     description: 'Nestled amidst the serene indigenous forest of Karen. An architectural residence highlighting natural timber, floor-to-ceiling glass pavilions, organic herb gardens, and an evening fire pit courtyard designed for intimate gatherings.',
     amenities: ['Private Forest Courtyard', 'Outdoor Fire Pit', 'Wood-burning Fireplace', 'Chef Kitchen', 'Dedicated Workspace', 'Tesla/EV Charging', 'Housekeeping']
   },
@@ -52,7 +52,7 @@ export const LUXEA_STAYS = [
     kesPrice: 28600,
     rating: '★ 5.0 (14)',
     specs: '1 Bed • 1 Bath • 1,150 sqft',
-    image: 'assets/images/suite.jpg',
+    image: '/assets/images/suite.jpg',
     description: 'A serene boutique sanctuary tailored for romantic escapes and discerning executive stays. Fitted with natural organic linen bedding, brass fittings, private terrace overlooking coffee orchards, and an artisan coffee station.',
     amenities: ['Private Garden Balcony', 'Smart 65" OLED TV', 'Artisan Coffee Bar', 'High-Speed WiFi', 'Secure Parking', 'Premium Toiletries']
   }
@@ -93,8 +93,8 @@ export function renderStaysGrid(containerId, category = 'all') {
         <p class="stay-loc">${stay.location}</p>
         <div class="stay-features">${stay.specs}</div>
         <div class="stay-card-bottom">
-          <button class="btn btn-secondary btn-sm open-stay-modal-btn" data-stay-id="${stay.id}">View Details</button>
-          <a href="index.html#waitlist-section" class="btn btn-primary btn-sm">Waitlist Access</a>
+          <button class="btn btn-secondary btn-sm open-stay-detail-btn" data-stay-id="${stay.id}">View Details</button>
+          <a href="/waitlist/" class="btn btn-primary btn-sm">Waitlist Access</a>
         </div>
       </div>
     `;
