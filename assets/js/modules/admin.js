@@ -554,18 +554,29 @@ export function initAdminDashboard() {
 
     const availMap = JSON.parse(localStorage.getItem('luxea_host_avail_map') || '{}');
 
-    const filtered = cachedStays.filter(s =>
-      !query ||
-      (s.name || '').toLowerCase().includes(query) ||
-      (s.city || '').toLowerCase().includes(query) ||
-      (s.area || '').toLowerCase().includes(query) ||
-      (s.property_type || '').toLowerCase().includes(query)
-    );
+    const filtered = cachedStays.filter(s => {
+      const host = cachedHosts.find(h => (h.ref_id || h.refId) === (s.host_ref_id || s.hostRefId));
+      const hostName = host ? (host.full_name || host.fullName || '') : '';
+      return (
+        !query ||
+        (s.name || '').toLowerCase().includes(query) ||
+        (s.city || '').toLowerCase().includes(query) ||
+        (s.area || '').toLowerCase().includes(query) ||
+        (s.property_type || '').toLowerCase().includes(query) ||
+        (s.host_ref_id || '').toLowerCase().includes(query) ||
+        hostName.toLowerCase().includes(query)
+      );
+    });
 
     filtered.forEach(stay => {
       const isAvail = availMap[stay.id] !== undefined ? availMap[stay.id] : (stay.is_available !== false);
       const usdPrice = stay.price_per_night_usd || Math.round((stay.price_per_night_kes || stay.kesPrice || 0) / 130);
       const kesPrice = stay.price_per_night_kes || (usdPrice * 130);
+
+      const host = cachedHosts.find(h => (h.ref_id || h.refId) === (stay.host_ref_id || stay.hostRefId));
+      const hostName = host ? (host.full_name || host.fullName) : 'Luxea Prime Owner';
+      const hostRef = host ? (host.ref_id || host.refId) : (stay.host_ref_id || 'Verified Partner');
+      const hostPhone = host ? (host.phone || '') : '';
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -576,6 +587,17 @@ export function initAdminDashboard() {
         <td>
           <div class="host-cell-name">${stay.name}</div>
           <div class="host-cell-sub">ID: ${stay.slug || stay.id}</div>
+        </td>
+
+        <td>
+          <div class="host-cell-name" style="font-weight: 600;">${hostName}</div>
+          <div class="host-cell-sub" style="margin-top: 3px; display: flex; align-items: center; gap: 4px;">
+            <button class="btn-table-action btn-copy-ref copy-ref-btn" data-ref="${hostRef}" title="Click to copy Host Ref ID" style="padding: 2px 7px; font-size: 0.68rem;">
+              <span>${hostRef}</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
+          </div>
+          ${hostPhone ? `<div style="font-size: 0.72rem; color: var(--color-cocoa); margin-top: 2px;">${hostPhone}</div>` : ''}
         </td>
 
         <td>
@@ -608,6 +630,16 @@ export function initAdminDashboard() {
       `;
 
       staysTableBody.appendChild(tr);
+    });
+
+    // Bind copy buttons in stays table
+    staysTableBody.querySelectorAll('.copy-ref-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ref = btn.getAttribute('data-ref');
+        navigator.clipboard.writeText(ref);
+        if (window.showToast) window.showToast(`📋 Copied Host Ref: ${ref}`);
+      });
     });
 
     // Bind real-time availability switches
