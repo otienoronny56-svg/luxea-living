@@ -452,8 +452,8 @@
       cached.unshift(hostData);
       localStorage.setItem('luxea_host_applications', JSON.stringify(cached));
 
-      // 📨 Dispatch automated Host Welcome & Inspection roadmap email via Edge Function
-      this.sendAutomatedEmail('host_welcome', dbRow);
+      // 📨 Dispatch Stage 1: Waiting for Verification & Audit email via Edge Function
+      this.sendAutomatedEmail('host_waiting_verification', dbRow);
 
       return dbRow;
     },
@@ -580,11 +580,20 @@
             .eq('ref_id', refId)
             .select();
 
-          if (error) console.warn('Supabase host review status update error:', error.message);
-          else console.log('✅ Supabase host review status updated:', data);
+          if (error) {
+            console.warn('Supabase host review status update error:', error.message);
+          } else {
+            console.log('✅ Supabase host review status updated:', data);
+            if (newStatus === 'approved' && data && data.length > 0) {
+              // 📨 Trigger Stage 2: Verification Approved & Account Activation invitation
+              this.sendAutomatedEmail('host_approved', data[0]);
+            }
+          }
         } catch (err) {
           console.error('Supabase host status update exception:', err);
         }
+      } else if (newStatus === 'approved' && idx !== -1) {
+        this.sendAutomatedEmail('host_approved', cached[idx]);
       }
 
       window.dispatchEvent(new CustomEvent('luxea:host_updated', {

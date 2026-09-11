@@ -5,14 +5,13 @@
  * Powered by Resend with verified domain: luxealiving.co.ke
  * Completely secure: RESEND_API_KEY is an encrypted environment secret in Supabase.
  * 
- * Supports:
- * 1. Host Application Confirmation & Inspection Roadmap (host_welcome)
- * 2. VIP Founding Circle Guest Welcome & Digital Pass (guest_welcome)
- * 3. Executive Super Admin Realtime Alerts
- * 4. Supabase Database Webhook payloads (INSERT on lux_hosts or lux_waitlist)
+ * Features:
+ * 1. Stage 1: Host Application Received & Verification In Progress (host_waiting_verification)
+ * 2. Stage 2: Host Property Approved & Account Activation Invitation (host_approved)
+ * 3. Guest VIP Founding Circle Welcome & Digital Pass (guest_welcome)
+ * 4. Executive Realtime Super Admin Alerts
  */
 
-// Simple Deno server
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -22,6 +21,7 @@ const corsHeaders = {
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const SENDER_EMAIL = Deno.env.get('SENDER_EMAIL') || 'LUXEA LIVING Concierge <concierge@luxealiving.co.ke>';
 const ADMIN_EMAIL = 'otienoronny56@gmail.com';
+const APP_BASE_URL = 'https://luxealiving.co.ke';
 
 // In-memory 60-second deduplication cache to prevent duplicate sends
 const recentDispatches = new Map<string, number>();
@@ -45,7 +45,6 @@ function isDuplicate(type: string, email: string): boolean {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -65,10 +64,15 @@ Deno.serve(async (req) => {
     let emailType = payload.type || payload.event || '';
     let record = payload.record || payload.data || payload;
 
-    // Detect Supabase Database Webhook payloads
-    if (payload.table === 'lux_hosts' && payload.type === 'INSERT') {
-      emailType = 'host_welcome';
-      record = payload.record || {};
+    // Detect Supabase Database Webhook & Trigger payloads
+    if (payload.table === 'lux_hosts') {
+      if (payload.type === 'INSERT') {
+        emailType = 'host_waiting_verification';
+        record = payload.record || {};
+      } else if (payload.type === 'UPDATE' && payload.record && payload.record.review_status === 'approved') {
+        emailType = 'host_approved';
+        record = payload.record || {};
+      }
     } else if (payload.table === 'lux_waitlist' && payload.type === 'INSERT') {
       emailType = 'guest_welcome';
       record = payload.record || {};
@@ -77,9 +81,13 @@ Deno.serve(async (req) => {
     const results = [];
 
     // =========================================================================
-    // 1. HOST PARTNER WELCOME & INSPECTION ROADMAP
+    // 1. STAGE 1: HOST APPLICATION RECEIVED & WAITING FOR VERIFICATION
     // =========================================================================
-    if (emailType === 'host_welcome' || emailType === 'host_registration') {
+    if (
+      emailType === 'host_waiting_verification' ||
+      emailType === 'host_welcome' ||
+      emailType === 'host_registration'
+    ) {
       const hostEmail = record.email;
       const hostName = record.full_name || record.fullName || 'Host Partner';
       const refId = record.ref_id || record.refId || 'LXH-PENDING';
@@ -90,16 +98,16 @@ Deno.serve(async (req) => {
       const payoutMethod = record.payout_method || (record.payoutDetails && record.payoutDetails.method) || 'Registered Account';
 
       if (hostEmail) {
-        if (isDuplicate('host_welcome', hostEmail)) {
-          console.log(`⏳ Debounced duplicate host_welcome send for ${hostEmail}`);
-          results.push({ recipient: hostEmail, type: 'host_welcome', status: 'debounced_duplicate' });
+        if (isDuplicate('host_waiting_verification', hostEmail)) {
+          console.log(`⏳ Debounced duplicate host_waiting_verification send for ${hostEmail}`);
+          results.push({ recipient: hostEmail, type: 'host_waiting_verification', status: 'debounced_duplicate' });
         } else {
-        const hostHtml = `
+          const waitingHtml = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Welcome to Luxea Living Host Partnership</title>
+<title>Application Received — Verification In Progress | Luxea Living</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0B0806; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #EDE8E3;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0B0806; padding: 40px 16px;">
@@ -111,30 +119,34 @@ Deno.serve(async (req) => {
           <tr>
             <td style="padding: 36px 40px 24px; text-align: center; border-bottom: 1px solid rgba(178, 135, 86, 0.15); background: linear-gradient(180deg, rgba(178, 135, 86, 0.08) 0%, rgba(19, 14, 10, 0) 100%);">
               <div style="font-size: 22px; letter-spacing: 5px; font-weight: 700; color: #D4AF37; margin-bottom: 6px;">LUXEA LIVING</div>
-              <div style="font-size: 11px; letter-spacing: 2px; color: #A0958C; text-transform: uppercase;">Curated Residences • Host Partnership Division</div>
+              <div style="font-size: 11px; letter-spacing: 2px; color: #A0958C; text-transform: uppercase;">Curated Residences • Host Onboarding Desk</div>
             </td>
           </tr>
 
           <!-- Hero Body -->
           <tr>
             <td style="padding: 36px 40px;">
-              <div style="display: inline-block; background: rgba(178, 135, 86, 0.15); border: 1px solid rgba(178, 135, 86, 0.4); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: #D4AF37; font-weight: 600; letter-spacing: 1px; margin-bottom: 16px;">
-                PARTNER DOSSIER ON FILE
+              <!-- Verification Pending Status Chip -->
+              <div style="display: inline-block; background: rgba(234, 179, 8, 0.12); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 20px; padding: 5px 14px; font-size: 11px; color: #FACC15; font-weight: 700; letter-spacing: 1px; margin-bottom: 16px;">
+                ⏳ APPLICATION RECEIVED — VERIFICATION IN PROGRESS
               </div>
               <h1 style="font-size: 22px; color: #FFFFFF; font-weight: 600; margin: 0 0 16px; line-height: 1.3;">
-                Welcome to the Collective, ${hostName}
+                Thank You, ${hostName}
               </h1>
               <p style="font-size: 14px; line-height: 1.7; color: #C5BCB3; margin: 0 0 24px;">
-                Thank you for applying to list your property with Luxea Living. Your partner application has been safely logged in our central property registry and assigned an official tracking reference:
+                Your property registration for <strong style="color: #EDE8E3;">${propName}</strong> has been logged into the Luxea Living property registry. Before any stay goes live, our curation committee conducts a mandatory compliance &amp; standard verification.
               </p>
 
               <!-- Reference Badge Card -->
               <table width="100%" cellpadding="0" cellspacing="0" style="background: rgba(11, 8, 6, 0.7); border: 1px solid #B28756; border-radius: 8px; margin-bottom: 28px;">
                 <tr>
                   <td style="padding: 18px 24px;">
-                    <div style="font-size: 11px; color: #8F847C; text-transform: uppercase; letter-spacing: 1.5px;">Official Application Reference</div>
+                    <div style="font-size: 11px; color: #8F847C; text-transform: uppercase; letter-spacing: 1.5px;">Application Tracking Ref ID</div>
                     <div style="font-size: 20px; color: #D4AF37; font-family: monospace; font-weight: 700; letter-spacing: 1px; margin-top: 4px;">
                       ${refId}
+                    </div>
+                    <div style="font-size: 12px; color: #FACC15; margin-top: 6px; font-weight: 600;">
+                      Current Status: Pending Curatorial Audit
                     </div>
                   </td>
                 </tr>
@@ -142,15 +154,15 @@ Deno.serve(async (req) => {
 
               <!-- Property Summary Card -->
               <div style="font-size: 12px; color: #D4AF37; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 12px;">
-                Registered Asset Summary
+                Submitted Asset Information
               </div>
               <table width="100%" cellpadding="0" cellspacing="0" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; margin-bottom: 28px;">
                 <tr>
-                  <td style="padding: 14px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px; color: #8F847C;">Residence Name</td>
+                  <td style="padding: 14px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px; color: #8F847C;">Property Name</td>
                   <td style="padding: 14px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px; color: #EDE8E3; font-weight: 600; text-align: right;">${propName}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 14px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px; color: #8F847C;">Category &amp; Specs</td>
+                  <td style="padding: 14px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px; color: #8F847C;">Classification</td>
                   <td style="padding: 14px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px; color: #EDE8E3; font-weight: 600; text-align: right;">${propType} • ${bedrooms} Bedroom(s)</td>
                 </tr>
                 <tr>
@@ -159,13 +171,13 @@ Deno.serve(async (req) => {
                 </tr>
                 <tr>
                   <td style="padding: 14px 18px; font-size: 13px; color: #8F847C;">Payout Channel</td>
-                  <td style="padding: 14px 18px; font-size: 13px; color: #4ADE80; font-weight: 600; text-align: right;">${payoutMethod} (Verified)</td>
+                  <td style="padding: 14px 18px; font-size: 13px; color: #4ADE80; font-weight: 600; text-align: right;">${payoutMethod}</td>
                 </tr>
               </table>
 
-              <!-- What Happens Next Roadmap -->
+              <!-- What We Are Verifying -->
               <div style="font-size: 12px; color: #D4AF37; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 14px;">
-                Your Partnership Roadmap
+                The 3-Point Luxea Verification Procedure
               </div>
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 28px;">
                 <tr>
@@ -173,9 +185,9 @@ Deno.serve(async (req) => {
                     <div style="width: 22px; height: 22px; border-radius: 50%; background: #B28756; color: #0B0806; font-size: 12px; font-weight: 700; text-align: center; line-height: 22px;">1</div>
                   </td>
                   <td style="padding-bottom: 16px;">
-                    <strong style="color: #FFFFFF; font-size: 13px;">Curatorial Audit (24 Hours)</strong>
+                    <strong style="color: #FFFFFF; font-size: 13px;">Regulatory &amp; Identity Audit</strong>
                     <div style="font-size: 12px; color: #A0958C; line-height: 1.5; margin-top: 2px;">
-                      Our luxury standards desk cross-checks your safety standards, furnishing tier, and KRA/ID compliance.
+                      Verification of National ID/Passport, KRA PIN compliance, and property title / operating authority.
                     </div>
                   </td>
                 </tr>
@@ -184,9 +196,9 @@ Deno.serve(async (req) => {
                     <div style="width: 22px; height: 22px; border-radius: 50%; background: #B28756; color: #0B0806; font-size: 12px; font-weight: 700; text-align: center; line-height: 22px;">2</div>
                   </td>
                   <td style="padding-bottom: 16px;">
-                    <strong style="color: #FFFFFF; font-size: 13px;">On-Site Audit &amp; Pro Photography</strong>
+                    <strong style="color: #FFFFFF; font-size: 13px;">Physical or Digital Property Inspection</strong>
                     <div style="font-size: 12px; color: #A0958C; line-height: 1.5; margin-top: 2px;">
-                      A concierge field auditor verifies WiFi speed, security measures, linen standards, and captures high-resolution imagery.
+                      Audit of WiFi speeds (minimum 50Mbps), acoustic quality, air conditioning, furnishing condition, and safety equipment.
                     </div>
                   </td>
                 </tr>
@@ -195,19 +207,26 @@ Deno.serve(async (req) => {
                     <div style="width: 22px; height: 22px; border-radius: 50%; background: #B28756; color: #0B0806; font-size: 12px; font-weight: 700; text-align: center; line-height: 22px;">3</div>
                   </td>
                   <td>
-                    <strong style="color: #FFFFFF; font-size: 13px;">Live Listing &amp; Booking Activation</strong>
+                    <strong style="color: #FFFFFF; font-size: 13px;">Official Approval &amp; Password Setup Invitation</strong>
                     <div style="font-size: 12px; color: #A0958C; line-height: 1.5; margin-top: 2px;">
-                      Your residence goes live for VIP guests, with direct payout automation and dedicated 24/7 guest concierge staging.
+                      Once verified, you will receive an official approval email with a link to activate your host account, set a secure password, or continue with Google.
                     </div>
                   </td>
                 </tr>
               </table>
 
+              <div style="background: rgba(178, 135, 86, 0.08); border-left: 3px solid #D4AF37; padding: 14px 18px; margin-bottom: 26px; border-radius: 4px;">
+                <div style="font-size: 12px; color: #D4AF37; font-weight: bold;">Expected Verification Timeframe</div>
+                <div style="font-size: 13px; color: #C5BCB3; margin-top: 4px; line-height: 1.5;">
+                  Our concierge desk typically completes review within <strong>24 to 48 business hours</strong>. You do not need to resubmit your application.
+                </div>
+              </div>
+
               <!-- Contact Button -->
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
                 <tr>
                   <td align="center">
-                    <a href="https://wa.me/254722345891?text=${encodeURIComponent('Hello Luxea Concierge, inquiring about host application ' + refId)}" style="display: inline-block; background: #B28756; color: #0B0806; font-weight: 700; font-size: 13px; text-decoration: none; padding: 14px 28px; border-radius: 8px; letter-spacing: 0.5px;">
+                    <a href="https://wa.me/254722345891?text=${encodeURIComponent('Hello Luxea Concierge, checking verification status for application ' + refId)}" style="display: inline-block; background: #B28756; color: #0B0806; font-weight: 700; font-size: 13px; text-decoration: none; padding: 14px 28px; border-radius: 8px; letter-spacing: 0.5px;">
                       Direct WhatsApp with Host Concierge ↗
                     </a>
                   </td>
@@ -216,8 +235,7 @@ Deno.serve(async (req) => {
 
               <p style="font-size: 13px; color: #8F847C; line-height: 1.6; margin: 0;">
                 Warm regards,<br>
-                <strong style="color: #EDE8E3;">Ronald Otieno</strong><br>
-                Founder &amp; Managing Director<br>
+                <strong style="color: #EDE8E3;">The Onboarding Desk</strong><br>
                 <span style="color: #D4AF37;">Luxea Living Kenya</span>
               </p>
             </td>
@@ -228,7 +246,7 @@ Deno.serve(async (req) => {
             <td style="padding: 24px 40px; background: #0E0A07; border-top: 1px solid rgba(178, 135, 86, 0.15); text-align: center;">
               <div style="font-size: 11px; color: #6D635B; line-height: 1.6;">
                 Luxea Living Residences • Nairobi, Ruaka, Westlands, Diani Beach, Karen<br>
-                Official inquiries: concierge@luxealiving.co.ke • <a href="https://luxealiving.co.ke" style="color: #B28756; text-decoration: none;">luxealiving.co.ke</a>
+                Official inquiries: concierge@luxealiving.co.ke • <a href="${APP_BASE_URL}" style="color: #B28756; text-decoration: none;">luxealiving.co.ke</a>
               </div>
             </td>
           </tr>
@@ -239,29 +257,29 @@ Deno.serve(async (req) => {
   </table>
 </body>
 </html>
-        `;
+          `;
 
-        const hostRes = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: SENDER_EMAIL,
-            to: [hostEmail],
-            subject: `Welcome to Luxea Living — Partner Application Received [${refId}]`,
-            html: hostHtml,
-          }),
-        });
+          const waitingRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: SENDER_EMAIL,
+              to: [hostEmail],
+              subject: `Application Received: Under Verification & Audit [${refId}] | Luxea Living`,
+              html: waitingHtml,
+            }),
+          });
 
-        const hostResult = await hostRes.json();
-        results.push({ recipient: hostEmail, type: 'host_welcome', resend: hostResult });
-        console.log(`✅ Host welcome sent to ${hostEmail}:`, hostResult);
+          const waitingResult = await waitingRes.json();
+          results.push({ recipient: hostEmail, type: 'host_waiting_verification', resend: waitingResult });
+          console.log(`✅ Host waiting verification email sent to ${hostEmail}:`, waitingResult);
         }
       }
 
-      // Also send notification to Admin (Ronald)
+      // Alert Admin (Ronald)
       try {
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -272,19 +290,18 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             from: SENDER_EMAIL,
             to: [ADMIN_EMAIL],
-            subject: `🔔 New Host Application: ${hostName} (${refId})`,
+            subject: `🔔 New Host Application to Audit: ${hostName} (${refId})`,
             html: `
               <div style="font-family: sans-serif; background: #0B0806; color: #EDE8E3; padding: 24px; border-radius: 8px;">
-                <h2 style="color: #D4AF37; margin: 0 0 12px;">New Host Partner Submission</h2>
+                <h2 style="color: #D4AF37; margin: 0 0 12px;">New Host Application Pending Audit</h2>
                 <p><strong>Host:</strong> ${hostName} (&lt;${hostEmail}&gt;)</p>
-                <p><strong>Phone:</strong> ${record.phone || 'N/A'}</p>
                 <p><strong>Property:</strong> ${propName} (${propType})</p>
                 <p><strong>Location:</strong> ${location}</p>
                 <p><strong>Ref ID:</strong> ${refId}</p>
                 <p><strong>Payout:</strong> ${payoutMethod}</p>
                 <div style="margin-top: 18px;">
-                  <a href="https://luxealiving.co.ke/admin/" style="background: #B28756; color: #000; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px;">
-                    Review in Super Admin Console ↗
+                  <a href="${APP_BASE_URL}/admin/" style="background: #B28756; color: #000; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px;">
+                    Review &amp; Approve in Super Admin ↗
                   </a>
                 </div>
               </div>
@@ -297,7 +314,158 @@ Deno.serve(async (req) => {
     }
 
     // =========================================================================
-    // 2. VIP FOUNDING CIRCLE GUEST WELCOME & DIGITAL PASS
+    // 2. STAGE 2: HOST VERIFICATION APPROVED & ACCOUNT ACTIVATION / PASSWORD SETUP
+    // =========================================================================
+    if (emailType === 'host_approved' || emailType === 'host_verification_approved') {
+      const hostEmail = record.email;
+      const hostName = record.full_name || record.fullName || 'Host Partner';
+      const refId = record.ref_id || record.refId || 'LXH-PARTNER';
+      const propName = record.property_name || record.propertyName || 'Curated Residence';
+      const propType = record.property_type || record.propertyType || 'Residence';
+      const activationUrl = `${APP_BASE_URL}/host/activate/?ref=${refId}&email=${encodeURIComponent(hostEmail)}`;
+
+      if (hostEmail) {
+        if (isDuplicate('host_approved', hostEmail)) {
+          console.log(`⏳ Debounced duplicate host_approved send for ${hostEmail}`);
+          results.push({ recipient: hostEmail, type: 'host_approved', status: 'debounced_duplicate' });
+        } else {
+          const approvedHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Verification Approved! Activate Your Luxea Host Account</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0B0806; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #EDE8E3;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0B0806; padding: 40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #130E0A; border: 1px solid rgba(74, 222, 128, 0.4); border-radius: 12px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+          
+          <!-- Header Banner -->
+          <tr>
+            <td style="padding: 36px 40px 24px; text-align: center; border-bottom: 1px solid rgba(74, 222, 128, 0.2); background: linear-gradient(180deg, rgba(74, 222, 128, 0.08) 0%, rgba(19, 14, 10, 0) 100%);">
+              <div style="font-size: 22px; letter-spacing: 5px; font-weight: 700; color: #D4AF37; margin-bottom: 6px;">LUXEA LIVING</div>
+              <div style="font-size: 11px; letter-spacing: 2px; color: #4ADE80; text-transform: uppercase; font-weight: 700;">Executive Curation Committee • Verification Ratified</div>
+            </td>
+          </tr>
+
+          <!-- Main Content -->
+          <tr>
+            <td style="padding: 36px 40px;">
+              <!-- Approved Badge -->
+              <div style="display: inline-block; background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.4); border-radius: 20px; padding: 5px 16px; font-size: 11px; color: #4ADE80; font-weight: 700; letter-spacing: 1px; margin-bottom: 16px;">
+                ✓ PROPERTY VERIFICATION OFFICIALLY APPROVED
+              </div>
+              <h1 style="font-size: 24px; color: #FFFFFF; font-weight: 600; margin: 0 0 16px; line-height: 1.3;">
+                Congratulations, ${hostName}!
+              </h1>
+              <p style="font-size: 14px; line-height: 1.7; color: #C5BCB3; margin: 0 0 24px;">
+                We are delighted to inform you that your property <strong style="color: #EDE8E3;">${propName}</strong> has completed and passed our strict curatorial audit and compliance checks.
+              </p>
+              <p style="font-size: 14px; line-height: 1.7; color: #C5BCB3; margin: 0 0 28px;">
+                To complete your onboarding, access your <strong>Host Partner Command Suite</strong>, manage your live calendar, and receive verified guest bookings, please activate your account below:
+              </p>
+
+              <!-- Activation CTA Box -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1B1510 0%, #0E0A07 100%); border: 1px solid #B28756; border-radius: 10px; margin-bottom: 30px; text-align: center;">
+                <tr>
+                  <td style="padding: 30px 24px;">
+                    <div style="font-size: 11px; letter-spacing: 2px; color: #A0958C; text-transform: uppercase;">Host Partner Ref: ${refId}</div>
+                    <div style="font-size: 18px; color: #FFFFFF; font-weight: 600; margin: 6px 0 20px;">
+                      Activate Your Host Account
+                    </div>
+                    <a href="${activationUrl}" style="display: inline-block; background: #D4AF37; color: #0B0806; font-weight: 700; font-size: 14px; text-decoration: none; padding: 16px 36px; border-radius: 8px; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);">
+                      Set Password &amp; Activate Host Suite ↗
+                    </a>
+                    <div style="font-size: 12px; color: #8F847C; margin-top: 14px;">
+                      You will be asked to set a secure password or continue with Google.
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- What You Can Do in the Portal -->
+              <div style="font-size: 12px; color: #D4AF37; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 14px;">
+                What Unlocks in Your Host Suite
+              </div>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 28px;">
+                <tr>
+                  <td width="28" valign="top" style="color: #4ADE80; font-size: 16px; line-height: 1.2;">✓</td>
+                  <td style="padding-bottom: 12px; font-size: 13px; color: #C5BCB3; line-height: 1.5;">
+                    <strong style="color: #FFFFFF;">Realtime Availability Control:</strong> Toggle your residence live or blackout specific dates at will with instant synchronization.
+                  </td>
+                </tr>
+                <tr>
+                  <td width="28" valign="top" style="color: #4ADE80; font-size: 16px; line-height: 1.2;">✓</td>
+                  <td style="padding-bottom: 12px; font-size: 13px; color: #C5BCB3; line-height: 1.5;">
+                    <strong style="color: #FFFFFF;">VIP Guest Staging:</strong> Receive confirmed bookings from verified Founding Circle members with automated concierge check-in.
+                  </td>
+                </tr>
+                <tr>
+                  <td width="28" valign="top" style="color: #4ADE80; font-size: 16px; line-height: 1.2;">✓</td>
+                  <td style="font-size: 13px; color: #C5BCB3; line-height: 1.5;">
+                    <strong style="color: #FFFFFF;">Automated Payouts:</strong> Direct remittances straight to your verified M-Pesa or Bank Account upon guest arrival.
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Direct Link Fallback -->
+              <p style="font-size: 12px; color: #6D635B; line-height: 1.5; margin: 0 0 24px; word-break: break-all;">
+                If the button above does not work, paste this activation URL into your browser:<br>
+                <a href="${activationUrl}" style="color: #B28756;">${activationUrl}</a>
+              </p>
+
+              <p style="font-size: 13px; color: #8F847C; line-height: 1.6; margin: 0;">
+                Welcome to our family of elite property partners,<br>
+                <strong style="color: #EDE8E3;">Ronald Otieno</strong><br>
+                Founder &amp; Managing Director<br>
+                <span style="color: #D4AF37;">Luxea Living Kenya</span>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 40px; background: #0E0A07; border-top: 1px solid rgba(178, 135, 86, 0.15); text-align: center;">
+              <div style="font-size: 11px; color: #6D635B; line-height: 1.6;">
+                Luxea Living Residences • Nairobi, Ruaka, Westlands, Diani Beach, Karen<br>
+                Official inquiries: concierge@luxealiving.co.ke • <a href="${APP_BASE_URL}" style="color: #B28756; text-decoration: none;">luxealiving.co.ke</a>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+          `;
+
+          const approvedRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: SENDER_EMAIL,
+              to: [hostEmail],
+              subject: `🎉 Verification Approved! Activate Your Luxea Host Account [${refId}]`,
+              html: approvedHtml,
+            }),
+          });
+
+          const approvedResult = await approvedRes.json();
+          results.push({ recipient: hostEmail, type: 'host_approved', resend: approvedResult });
+          console.log(`✅ Host approved email sent to ${hostEmail}:`, approvedResult);
+        }
+      }
+    }
+
+    // =========================================================================
+    // 3. VIP FOUNDING CIRCLE GUEST WELCOME & DIGITAL PASS
     // =========================================================================
     if (emailType === 'guest_welcome' || emailType === 'waitlist_welcome' || emailType === 'member_welcome') {
       const guestEmail = record.email;
@@ -312,7 +480,7 @@ Deno.serve(async (req) => {
           console.log(`⏳ Debounced duplicate guest_welcome send for ${guestEmail}`);
           results.push({ recipient: guestEmail, type: 'guest_welcome', status: 'debounced_duplicate' });
         } else {
-        const guestHtml = `
+          const guestHtml = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -414,7 +582,7 @@ Deno.serve(async (req) => {
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
                 <tr>
                   <td align="center">
-                    <a href="https://luxealiving.co.ke/stays/" style="display: inline-block; background: #B28756; color: #0B0806; font-weight: 700; font-size: 13px; text-decoration: none; padding: 14px 32px; border-radius: 8px; letter-spacing: 0.5px;">
+                    <a href="${APP_BASE_URL}/stays/" style="display: inline-block; background: #B28756; color: #0B0806; font-weight: 700; font-size: 13px; text-decoration: none; padding: 14px 32px; border-radius: 8px; letter-spacing: 0.5px;">
                       Explore Curated Stays Catalog ↗
                     </a>
                   </td>
@@ -434,7 +602,7 @@ Deno.serve(async (req) => {
             <td style="padding: 24px 40px; background: #0E0A07; border-top: 1px solid rgba(178, 135, 86, 0.15); text-align: center;">
               <div style="font-size: 11px; color: #6D635B; line-height: 1.6;">
                 Luxea Living Residences • Nairobi, Ruaka, Westlands, Diani Beach, Karen<br>
-                Direct Concierge: concierge@luxealiving.co.ke • <a href="https://luxealiving.co.ke" style="color: #B28756; text-decoration: none;">luxealiving.co.ke</a>
+                Direct Concierge: concierge@luxealiving.co.ke • <a href="${APP_BASE_URL}" style="color: #B28756; text-decoration: none;">luxealiving.co.ke</a>
               </div>
             </td>
           </tr>
@@ -445,25 +613,25 @@ Deno.serve(async (req) => {
   </table>
 </body>
 </html>
-        `;
+          `;
 
-        const guestRes = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: SENDER_EMAIL,
-            to: [guestEmail],
-            subject: `Welcome to the Founding Circle — Your Luxea Living Pass [${passNumber}]`,
-            html: guestHtml,
-          }),
-        });
+          const guestRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: SENDER_EMAIL,
+              to: [guestEmail],
+              subject: `Welcome to the Founding Circle — Your Luxea Living Pass [${passNumber}]`,
+              html: guestHtml,
+            }),
+          });
 
-        const guestResult = await guestRes.json();
-        results.push({ recipient: guestEmail, type: 'guest_welcome', resend: guestResult });
-        console.log(`✅ Guest welcome sent to ${guestEmail}:`, guestResult);
+          const guestResult = await guestRes.json();
+          results.push({ recipient: guestEmail, type: 'guest_welcome', resend: guestResult });
+          console.log(`✅ Guest welcome sent to ${guestEmail}:`, guestResult);
         }
       }
 
@@ -487,7 +655,7 @@ Deno.serve(async (req) => {
                 <p><strong>Pass Code:</strong> ${passCode}</p>
                 <p><strong>Preferred Hubs:</strong> ${destinations}</p>
                 <div style="margin-top: 18px;">
-                  <a href="https://luxealiving.co.ke/admin/" style="background: #B28756; color: #000; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px;">
+                  <a href="${APP_BASE_URL}/admin/" style="background: #B28756; color: #000; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px;">
                     View Waitlist in Super Admin ↗
                   </a>
                 </div>
