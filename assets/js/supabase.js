@@ -452,6 +452,9 @@
       cached.unshift(hostData);
       localStorage.setItem('luxea_host_applications', JSON.stringify(cached));
 
+      // 📨 Dispatch automated Host Welcome & Inspection roadmap email via Edge Function
+      this.sendAutomatedEmail('host_welcome', dbRow);
+
       return dbRow;
     },
 
@@ -486,7 +489,43 @@
       cached.unshift(guestData);
       localStorage.setItem('luxea_waitlist_guests', JSON.stringify(cached));
 
+      // 📨 Dispatch automated VIP Founding Circle welcome & digital pass email via Edge Function
+      this.sendAutomatedEmail('guest_welcome', dbRow);
+
       return dbRow;
+    },
+
+    /**
+     * Dispatch automated email via Supabase Edge Function & Resend
+     * (Zero API keys exposed to browser)
+     */
+    sendAutomatedEmail: async function (type, record) {
+      if (!record || !record.email) return null;
+      console.log(`📨 Triggering automated ${type} email for: ${record.email}`);
+
+      const client = this.getClient();
+      try {
+        if (client && client.functions) {
+          const { data, error } = await client.functions.invoke('luxea-mailer', {
+            body: { type, record }
+          });
+          if (error) console.warn('Supabase functions.invoke mailer notice:', error);
+          else console.log('✅ Automated email dispatched via Edge Function:', data);
+          return data;
+        } else {
+          const res = await fetch('https://abzcabiqdkmfaijnqbkf.supabase.co/functions/v1/luxea-mailer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type, record })
+          });
+          const data = await res.json();
+          console.log('✅ Automated email dispatched via Edge API:', data);
+          return data;
+        }
+      } catch (err) {
+        console.warn('Mailer dispatch exception (non-blocking):', err);
+        return null;
+      }
     },
 
     // =========================================================================
