@@ -380,6 +380,57 @@
   }
 }
 
+/* 2. Dual Filter Chip Rows (Locations & Property Types) */
+.landing-filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.filter-chip-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0 6px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: #FFFFFF;
+  border: 1px solid var(--color-khaki-light);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-espresso);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  box-shadow: 0 1px 4px rgba(74, 52, 42, 0.03);
+  flex-shrink: 0;
+}
+
+.filter-chip:hover:not(.active) {
+  border-color: var(--color-camel);
+  background: var(--color-linen);
+}
+
+.filter-chip.active {
+  background: var(--color-espresso);
+  color: #FFFFFF;
+  border-color: var(--color-espresso);
+  box-shadow: 0 2px 8px rgba(74, 52, 42, 0.15);
+}
+
 /* ==========================================================================
    LOCATION SHELVES & GEOLOCATION (Airbnb Kenya Reference Style)
    ========================================================================== */
@@ -394,6 +445,7 @@
   margin-bottom: 28px;
   box-shadow: 0 4px 16px rgba(74, 52, 42, 0.04);
   gap: 16px;
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .perm-banner-left {
@@ -426,6 +478,45 @@
   font-size: 0.8rem;
   color: var(--color-cocoa);
   margin: 0;
+}
+
+.perm-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.perm-banner-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--color-khaki-light);
+  color: var(--color-cocoa);
+  font-size: 1.2rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.perm-banner-close-btn:hover {
+  background: var(--color-linen);
+  color: var(--color-espresso);
+  border-color: var(--color-camel);
+}
+
+.empty-filter-state {
+  text-align: center;
+  padding: 42px 20px;
+  background: #FFFFFF;
+  border: 1px solid var(--color-khaki-light);
+  border-radius: 22px;
+  margin: 16px 0 36px;
+  box-shadow: 0 4px 18px rgba(74, 52, 42, 0.04);
 }
 
 /* Location Shelf Section */

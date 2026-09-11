@@ -59,13 +59,57 @@
     </div>
 
 
-    <!-- 3. PROPERTY TYPE SCROLL PILLS (Phone 1) -->
-    <div class="property-type-scroll" id="propTypeScroll">
-      <a href="/stays/" class="prop-pill active">All</a>
-      <a href="/stays/?filter=villa" class="prop-pill"><span>🏝️</span> Ocean Villas</a>
-      <a href="/stays/?filter=penthouse" class="prop-pill"><span>🏙️</span> Penthouses</a>
-      <a href="/stays/?filter=townhouse" class="prop-pill"><span>🏡</span> Townhomes</a>
-      <a href="/stays/?filter=suite" class="prop-pill"><span>🛏️</span> Suites</a>
+    <!-- 2. DUAL FILTER SYSTEM (Locations & Property Types) -->
+    <div class="landing-filter-container">
+      <!-- Row 1: Location Filter Chips -->
+      <div class="filter-chip-row location-chip-row" id="locationFilterRow" aria-label="Filter by Location">
+        <button class="filter-chip location-chip active" data-loc="all">
+          <span>🌍</span> All Kenya
+        </button>
+        <button class="filter-chip location-chip" data-loc="near_me">
+          <span>📍</span> Stays Near You
+        </button>
+        <button class="filter-chip location-chip" data-loc="ruaka">
+          <span>📍</span> Ruaka
+        </button>
+        <button class="filter-chip location-chip" data-loc="westlands">
+          <span>📍</span> Westlands
+        </button>
+        <button class="filter-chip location-chip" data-loc="roysambu">
+          <span>📍</span> Roysambu
+        </button>
+        <button class="filter-chip location-chip" data-loc="mombasa">
+          <span>🏖️</span> Mombasa &amp; Diani
+        </button>
+        <button class="filter-chip location-chip" data-loc="karen">
+          <span>🌲</span> Karen &amp; Kitisuru
+        </button>
+        <button class="filter-chip location-chip" data-loc="naivasha">
+          <span>🦩</span> Naivasha
+        </button>
+      </div>
+
+      <!-- Row 2: Property Type Filter Chips (Airbnbs, Hotels, Villas, Penthouses, Townhomes) -->
+      <div class="filter-chip-row type-chip-row" id="typeFilterRow" aria-label="Filter by Property Type">
+        <button class="filter-chip type-chip active" data-type="all">
+          <span>✨</span> All Types
+        </button>
+        <button class="filter-chip type-chip" data-type="apartment">
+          <span>🏢</span> Apartments &amp; BnBs
+        </button>
+        <button class="filter-chip type-chip" data-type="villa">
+          <span>🏝️</span> Luxury Villas
+        </button>
+        <button class="filter-chip type-chip" data-type="hotel">
+          <span>🏨</span> Boutique Hotels
+        </button>
+        <button class="filter-chip type-chip" data-type="penthouse">
+          <span>🏙️</span> Sky Penthouses
+        </button>
+        <button class="filter-chip type-chip" data-type="townhouse">
+          <span>🏡</span> Townhomes
+        </button>
+      </div>
     </div>
 
     <!-- LOCATION SHELVES & GEOLOCATION DISCOVERY (Airbnb Kenya Reference) -->

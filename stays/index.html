@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Browse Stays | Luxea Living</title>
-  <meta name="description" content="Browse curated luxury residences, beachfront villas, and sky penthouses across Kenya and beyond.">
+  <meta name="description" content="Browse curated luxury residences, boutique hotels, modern airbnbs, and oceanfront villas across Kenya and beyond.">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,35 +57,48 @@
       <div class="browse-head-row">
         <h1 class="browse-page-title">Browse</h1>
         <div class="browse-tools">
-          <button class="icon-tool-btn" title="Map View" id="mapToggleBtn" aria-label="Map view">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-          </button>
-          <button class="filter-pill-btn" id="filterModalBtn">
+          <button class="filter-pill-btn" id="filterModalBtn" aria-label="Open filter settings">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
             <span>Filters</span>
-            <span class="filter-badge-count">2</span>
+            <span class="filter-badge-count" id="activeFilterBadge" style="display: none;">0</span>
           </button>
         </div>
       </div>
 
-      <!-- Horizontal Dropdown Filter Pills (Phone 2) -->
-      <div class="browse-filter-pills" id="browseFilterPills">
-        <button class="drop-pill active" data-filter="all">All Kenya ⌵</button>
-        <button class="drop-pill" data-filter="villa">Ocean Villas ⌵</button>
-        <button class="drop-pill" data-filter="penthouse">Penthouses ⌵</button>
-        <button class="drop-pill" data-filter="townhouse">Townhomes ⌵</button>
-        <button class="drop-pill" data-filter="suite">Suites ⌵</button>
+      <!-- DUAL FILTER PILLS ROW -->
+      <div class="browse-filter-stack">
+        <!-- Row 1: Location Filter Pills -->
+        <div class="browse-filter-pills" id="locationFilterPills" aria-label="Filter by Location">
+          <button class="drop-pill active" data-loc="all">🌍 All Kenya</button>
+          <button class="drop-pill" data-loc="near_me">📍 Near You</button>
+          <button class="drop-pill" data-loc="ruaka">📍 Ruaka</button>
+          <button class="drop-pill" data-loc="westlands">📍 Westlands</button>
+          <button class="drop-pill" data-loc="roysambu">📍 Roysambu</button>
+          <button class="drop-pill" data-loc="mombasa">🏖️ Mombasa &amp; Diani</button>
+          <button class="drop-pill" data-loc="karen">🌲 Karen &amp; Kitisuru</button>
+          <button class="drop-pill" data-loc="naivasha">🦩 Naivasha</button>
+        </div>
+
+        <!-- Row 2: Property Type Filter Pills -->
+        <div class="browse-filter-pills" id="typeFilterPills" aria-label="Filter by Property Type">
+          <button class="drop-pill active" data-type="all">✨ All Types</button>
+          <button class="drop-pill" data-type="apartment">🏢 Apartments &amp; BnBs</button>
+          <button class="drop-pill" data-type="villa">🏝️ Luxury Villas</button>
+          <button class="drop-pill" data-type="hotel">🏨 Boutique Hotels</button>
+          <button class="drop-pill" data-type="penthouse">🏙️ Sky Penthouses</button>
+          <button class="drop-pill" data-type="townhouse">🏡 Townhomes</button>
+        </div>
       </div>
 
       <!-- Results Subhead Row (Phone 2) -->
       <div class="results-subhead">
-        <span id="resultsCount">4 curated stays</span>
-        <span>Sort: Curated ⌵</span>
+        <span id="resultsCount">Loading curated stays...</span>
+        <span id="activeFilterSummary" style="font-size: 0.8rem; color: var(--color-camel-dark);">Showing all stays</span>
       </div>
 
       <!-- Vertical Luxury Property Feed (Phone 2) -->
       <div class="browse-feed" id="browseFeedContainer">
-        <!-- Injected dynamically via JS or rendered inline below -->
+        <!-- Injected dynamically via JS -->
       </div>
     </div>
 
@@ -182,34 +195,7 @@
       <!-- Nearby Amenities List (Phone 3) -->
       <h3 class="amenities-section-title">Curated Inclusions</h3>
       <div class="amenities-list" id="detailAmenitiesList">
-        <div class="amenity-row">
-          <div class="amenity-left">
-            <span>🏖️</span>
-            <span>Private White Sand Beach Access</span>
-          </div>
-          <span class="amenity-dist">0.1 mi</span>
-        </div>
-        <div class="amenity-row">
-          <div class="amenity-left">
-            <span>🏊</span>
-            <span>Oceanview Infinity Pool</span>
-          </div>
-          <span class="amenity-dist">Private</span>
-        </div>
-        <div class="amenity-row">
-          <div class="amenity-left">
-            <span>👨‍🍳</span>
-            <span>Resident Chef &amp; Dedicated Butler</span>
-          </div>
-          <span class="amenity-dist">Included</span>
-        </div>
-        <div class="amenity-row">
-          <div class="amenity-left">
-            <span>📶</span>
-            <span>Starlink Ultra High-Speed WiFi</span>
-          </div>
-          <span class="amenity-dist">250 Mbps</span>
-        </div>
+        <!-- Injected dynamically -->
       </div>
 
       <!-- Fixed Sticky Bottom Bar (Phone 3) -->
@@ -223,6 +209,76 @@
     </div>
 
   </main>
+
+  <!-- ==========================================================================
+       BOTTOM SHEET / SLIDE-UP FILTER MODAL
+       ========================================================================== -->
+  <div class="filter-modal-backdrop" id="filterModalBackdrop">
+    <div class="filter-bottom-sheet" id="filterBottomSheet" role="dialog" aria-modal="true" aria-labelledby="filterModalTitle">
+      <div class="filter-sheet-header">
+        <h2 class="filter-sheet-title" id="filterModalTitle">Filters</h2>
+        <button class="filter-sheet-close" id="closeFilterModalBtn" aria-label="Close filters">&times;</button>
+      </div>
+
+      <div class="filter-sheet-body">
+        <!-- Section 1: Property Types -->
+        <div class="filter-group">
+          <label class="filter-group-label">Property Type</label>
+          <div class="sheet-pill-grid" id="modalTypeGrid">
+            <button class="sheet-pill active" data-type="all">All Types</button>
+            <button class="sheet-pill" data-type="apartment">Apartments &amp; BnBs</button>
+            <button class="sheet-pill" data-type="villa">Luxury Villas</button>
+            <button class="sheet-pill" data-type="hotel">Boutique Hotels</button>
+            <button class="sheet-pill" data-type="penthouse">Sky Penthouses</button>
+            <button class="sheet-pill" data-type="townhouse">Townhomes</button>
+          </div>
+        </div>
+
+        <!-- Section 2: Locations -->
+        <div class="filter-group">
+          <label class="filter-group-label">Destination in Kenya</label>
+          <div class="sheet-pill-grid" id="modalLocGrid">
+            <button class="sheet-pill active" data-loc="all">All Kenya</button>
+            <button class="sheet-pill" data-loc="near_me">📍 Near You</button>
+            <button class="sheet-pill" data-loc="ruaka">Ruaka</button>
+            <button class="sheet-pill" data-loc="westlands">Westlands</button>
+            <button class="sheet-pill" data-loc="roysambu">Roysambu</button>
+            <button class="sheet-pill" data-loc="mombasa">Mombasa &amp; Diani</button>
+            <button class="sheet-pill" data-loc="karen">Karen &amp; Kitisuru</button>
+            <button class="sheet-pill" data-loc="naivasha">Naivasha</button>
+          </div>
+        </div>
+
+        <!-- Section 3: Price Range -->
+        <div class="filter-group">
+          <label class="filter-group-label">Price per Night</label>
+          <div class="sheet-pill-grid" id="modalPriceGrid">
+            <button class="sheet-pill active" data-price="all">Any Price</button>
+            <button class="sheet-pill" data-price="under_15k">Under KSh 15,000</button>
+            <button class="sheet-pill" data-price="15k_40k">KSh 15k – 40k</button>
+            <button class="sheet-pill" data-price="luxury_40k">KSh 40k+ Luxury</button>
+          </div>
+        </div>
+
+        <!-- Section 4: Bedrooms -->
+        <div class="filter-group">
+          <label class="filter-group-label">Bedrooms</label>
+          <div class="sheet-pill-grid" id="modalBedsGrid">
+            <button class="sheet-pill active" data-beds="all">Any</button>
+            <button class="sheet-pill" data-beds="1">1 Bed</button>
+            <button class="sheet-pill" data-beds="2">2 Beds</button>
+            <button class="sheet-pill" data-beds="3">3+ Beds</button>
+            <button class="sheet-pill" data-beds="4">4+ Beds</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-sheet-footer">
+        <button class="btn btn-outline btn-sm" id="resetModalFiltersBtn">Clear All</button>
+        <button class="btn btn-primary btn-sm" id="applyModalFiltersBtn">Show Stays</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Mobile Bottom Nav -->
   <nav class="mobile-bottom-nav">
@@ -249,6 +305,19 @@
     import { LUXEA_STAYS } from '/assets/js/modules/staysData.js';
     import { initCurrencyToggle, refreshPrices } from '/assets/js/modules/currency.js';
 
+    // Haversine distance calculator
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * (Math.PI / 180);
+      const dLon = (lon2 - lon1) * (Math.PI / 180);
+      const a = 
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       initCurrencyToggle();
 
@@ -257,19 +326,152 @@
       const detailView = document.getElementById('detailView');
       const backBtn = document.getElementById('backToBrowseBtn');
       const resultsCount = document.getElementById('resultsCount');
+      const filterBadge = document.getElementById('activeFilterBadge');
+      const activeFilterSummary = document.getElementById('activeFilterSummary');
 
-      function renderFeed(filter = 'all') {
+      // Modal Elements
+      const filterModalBtn = document.getElementById('filterModalBtn');
+      const filterModalBackdrop = document.getElementById('filterModalBackdrop');
+      const closeFilterModalBtn = document.getElementById('closeFilterModalBtn');
+      const resetModalFiltersBtn = document.getElementById('resetModalFiltersBtn');
+      const applyModalFiltersBtn = document.getElementById('applyModalFiltersBtn');
+
+      // State
+      let activeLoc = 'all';
+      let activeType = 'all';
+      let activePrice = 'all';
+      let activeBeds = 'all';
+
+      // Restore cached GPS
+      const cachedLat = localStorage.getItem('luxea_user_lat');
+      const cachedLng = localStorage.getItem('luxea_user_lng');
+      let userCoords = (cachedLat && cachedLng) 
+        ? { latitude: parseFloat(cachedLat), longitude: parseFloat(cachedLng) } 
+        : null;
+
+      function updateFilterBadge() {
+        let count = 0;
+        if (activeLoc !== 'all') count++;
+        if (activeType !== 'all') count++;
+        if (activePrice !== 'all') count++;
+        if (activeBeds !== 'all') count++;
+
+        if (count > 0) {
+          filterBadge.textContent = count;
+          filterBadge.style.display = 'inline-flex';
+        } else {
+          filterBadge.style.display = 'none';
+        }
+      }
+
+      function filterAndSortStays() {
+        let items = [...LUXEA_STAYS];
+
+        // 1. Calculate distances if coords available
+        if (userCoords) {
+          items = items.map(s => ({
+            ...s,
+            distanceKm: calculateDistance(userCoords.latitude, userCoords.longitude, s.lat, s.lng)
+          }));
+        }
+
+        // 2. Filter by Location
+        if (activeLoc !== 'all' && activeLoc !== 'near_me') {
+          items = items.filter(s => {
+            if (activeLoc === 'ruaka') return s.locationGroup === 'ruaka' || s.city.toLowerCase().includes('ruaka');
+            if (activeLoc === 'westlands') return s.locationGroup === 'westlands' || s.city.toLowerCase().includes('westlands');
+            if (activeLoc === 'roysambu') return s.locationGroup === 'roysambu' || s.city.toLowerCase().includes('roysambu');
+            if (activeLoc === 'mombasa') return s.locationGroup === 'mombasa' || s.city.toLowerCase().includes('mombasa') || s.city.toLowerCase().includes('diani');
+            if (activeLoc === 'karen') return s.locationGroup === 'karen' || s.city.toLowerCase().includes('karen') || s.city.toLowerCase().includes('kitisuru');
+            if (activeLoc === 'naivasha') return s.locationGroup === 'naivasha' || s.city.toLowerCase().includes('naivasha');
+            return s.locationGroup === activeLoc;
+          });
+        }
+
+        // 3. Filter by Property Type (Apartments/BnBs, Villas, Hotels, Penthouses, Townhomes)
+        if (activeType !== 'all') {
+          items = items.filter(s => {
+            if (activeType === 'apartment') return s.propertyType === 'apartment' || s.category === 'apartment';
+            if (activeType === 'villa') return s.propertyType === 'villa' || s.category === 'villa';
+            if (activeType === 'hotel') return s.propertyType === 'hotel' || s.category === 'hotel' || s.category === 'suite';
+            if (activeType === 'penthouse') return s.propertyType === 'penthouse' || s.category === 'penthouse';
+            if (activeType === 'townhouse') return s.propertyType === 'townhouse' || s.category === 'townhouse';
+            return s.propertyType === activeType || s.category === activeType;
+          });
+        }
+
+        // 4. Filter by Price
+        if (activePrice !== 'all') {
+          items = items.filter(s => {
+            if (activePrice === 'under_15k') return s.kesPrice < 15000;
+            if (activePrice === '15k_40k') return s.kesPrice >= 15000 && s.kesPrice <= 40000;
+            if (activePrice === 'luxury_40k') return s.kesPrice > 40000;
+            return true;
+          });
+        }
+
+        // 5. Filter by Bedrooms
+        if (activeBeds !== 'all') {
+          const minB = parseInt(activeBeds);
+          items = items.filter(s => {
+            const match = s.specs.match(/(\d+)\s*Bed/);
+            const beds = match ? parseInt(match[1]) : 1;
+            return beds >= minB;
+          });
+        }
+
+        // 6. Proximity Sorting if 'near_me' is picked
+        if (activeLoc === 'near_me' && userCoords) {
+          items.sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
+        }
+
+        return items;
+      }
+
+      function renderFeed() {
         feedContainer.innerHTML = '';
-        const f = filter.toLowerCase();
-        const items = f === 'all' 
-          ? LUXEA_STAYS 
-          : LUXEA_STAYS.filter(s => 
-              s.category === f || 
-              s.locationGroup === f || 
-              s.city.toLowerCase().includes(f) ||
-              s.location.toLowerCase().includes(f)
-            );
-        resultsCount.textContent = `${items.length} curated stays`;
+        const items = filterAndSortStays();
+
+        resultsCount.textContent = `${items.length} curated stay${items.length === 1 ? '' : 's'}`;
+
+        let summaryText = 'All Kenya';
+        if (activeLoc !== 'all') {
+          const locName = {
+            near_me: 'Near You',
+            ruaka: 'Ruaka',
+            westlands: 'Westlands',
+            roysambu: 'Roysambu',
+            mombasa: 'Mombasa & Diani',
+            karen: 'Karen & Kitisuru',
+            naivasha: 'Naivasha'
+          }[activeLoc] || activeLoc;
+          summaryText = `${locName}`;
+        }
+        if (activeType !== 'all') {
+          const typeName = {
+            apartment: 'Apartments & BnBs',
+            villa: 'Villas',
+            hotel: 'Hotels',
+            penthouse: 'Penthouses',
+            townhouse: 'Townhomes'
+          }[activeType] || activeType;
+          summaryText += ` • ${typeName}`;
+        }
+        activeFilterSummary.textContent = summaryText;
+        updateFilterBadge();
+
+        if (items.length === 0) {
+          feedContainer.innerHTML = `
+            <div class="empty-browse-card">
+              <div style="font-size: 2.2rem; margin-bottom: 10px;">🏡</div>
+              <h3 style="font-size: 1.1rem; color: var(--color-espresso); margin-bottom: 6px;">No Stays Match This Filter</h3>
+              <p style="font-size: 0.85rem; color: var(--color-cocoa); margin-bottom: 18px;">Try selecting another location or expanding property types.</p>
+              <button class="btn btn-primary btn-sm" id="feedClearFiltersBtn">Reset All Filters</button>
+            </div>
+          `;
+          feedContainer.querySelector('#feedClearFiltersBtn')?.addEventListener('click', resetAllFilters);
+          return;
+        }
 
         items.forEach(stay => {
           const card = document.createElement('div');
@@ -278,23 +480,24 @@
             <div class="browse-card-media">
               <img src="${stay.image}" alt="${stay.name}" loading="lazy">
               <div class="card-top-left">
-                <span class="tag-badge">Verified Partner</span>
+                <span class="tag-badge">${stay.propertyTypeName || 'Verified Partner'}</span>
               </div>
               <div class="card-top-right">
-                <button class="card-heart-btn" aria-label="Save" onclick="event.stopPropagation()">
+                <button class="card-heart-btn" aria-label="Save to wishlist" onclick="event.stopPropagation(); this.classList.toggle('active')">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 </button>
               </div>
             </div>
             <div class="browse-card-body">
               <div class="card-main-price-row">
-                <span class="card-large-price price-num" data-usd="${stay.usdPrice}" data-kes="${stay.kesPrice}">$${stay.usdPrice}<small style="font-size: 0.8rem; font-weight: normal; color: var(--color-cocoa);"> / night</small></span>
+                <span class="card-large-price price-num" data-usd="${stay.usdPrice}" data-kes="${stay.kesPrice}">KSh ${(stay.kesPrice).toLocaleString()}<small style="font-size: 0.8rem; font-weight: normal; color: var(--color-cocoa);"> / night</small></span>
                 <span class="card-specs-text">${stay.specs.split('•')[0]} • ${stay.specs.split('•')[1] || ''}</span>
               </div>
               <div class="card-address-row">
                 <div>
                   <h3 class="card-title-text">${stay.name}</h3>
                   <p class="card-loc-text">${stay.location}</p>
+                  ${stay.distanceKm !== undefined && userCoords ? `<p style="font-size: 0.75rem; color: #2F7A4D; font-weight: 600; margin-top: 3px;">📍 ${stay.distanceKm.toFixed(1)} km from you</p>` : ''}
                 </div>
                 <span class="verified-pill-icon">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -320,7 +523,7 @@
         const priceEl = document.getElementById('detailPriceNum');
         priceEl.setAttribute('data-usd', stay.usdPrice);
         priceEl.setAttribute('data-kes', stay.kesPrice);
-        priceEl.innerHTML = `$${stay.usdPrice}<small style="font-size: 0.9rem; color: var(--color-cocoa); font-weight: normal;"> / night</small>`;
+        priceEl.innerHTML = `KSh ${(stay.kesPrice).toLocaleString()}<small style="font-size: 0.9rem; color: var(--color-cocoa); font-weight: normal;"> / night</small>`;
 
         document.getElementById('detailStayTitle').textContent = stay.name;
         document.getElementById('detailStayLoc').textContent = stay.location;
@@ -362,25 +565,174 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
 
-      // Filter pills
-      const filterPills = document.querySelectorAll('#browseFilterPills .drop-pill');
-      filterPills.forEach(pill => {
+      function syncPillUI() {
+        // Sync Location Pills
+        document.querySelectorAll('#locationFilterPills .drop-pill').forEach(p => {
+          p.classList.toggle('active', p.getAttribute('data-loc') === activeLoc);
+        });
+        document.querySelectorAll('#modalLocGrid .sheet-pill').forEach(p => {
+          p.classList.toggle('active', p.getAttribute('data-loc') === activeLoc);
+        });
+
+        // Sync Type Pills
+        document.querySelectorAll('#typeFilterPills .drop-pill').forEach(p => {
+          p.classList.toggle('active', p.getAttribute('data-type') === activeType);
+        });
+        document.querySelectorAll('#modalTypeGrid .sheet-pill').forEach(p => {
+          p.classList.toggle('active', p.getAttribute('data-type') === activeType);
+        });
+
+        // Sync Modal Price Pills
+        document.querySelectorAll('#modalPriceGrid .sheet-pill').forEach(p => {
+          p.classList.toggle('active', p.getAttribute('data-price') === activePrice);
+        });
+
+        // Sync Modal Beds Pills
+        document.querySelectorAll('#modalBedsGrid .sheet-pill').forEach(p => {
+          p.classList.toggle('active', p.getAttribute('data-beds') === activeBeds);
+        });
+      }
+
+      function resetAllFilters() {
+        activeLoc = 'all';
+        activeType = 'all';
+        activePrice = 'all';
+        activeBeds = 'all';
+        syncPillUI();
+        renderFeed();
+      }
+
+      function requestBrowserLocation() {
+        if (!navigator.geolocation) {
+          if (window.showToast) window.showToast('Geolocation is not supported by your browser.');
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            userCoords = pos.coords;
+            localStorage.setItem('luxea_user_lat', pos.coords.latitude.toString());
+            localStorage.setItem('luxea_user_lng', pos.coords.longitude.toString());
+            localStorage.setItem('luxea_location_enabled', 'true');
+            activeLoc = 'near_me';
+            syncPillUI();
+            if (window.showToast) window.showToast('Showing stays closest to your location.');
+            renderFeed();
+          },
+          (err) => {
+            console.warn('Geolocation error:', err.message);
+            if (window.showToast) window.showToast('Could not retrieve location. Showing all Kenya.');
+            activeLoc = 'all';
+            syncPillUI();
+            renderFeed();
+          },
+          { timeout: 8000, enableHighAccuracy: false }
+        );
+      }
+
+      // Location Pill Clicks
+      document.querySelectorAll('#locationFilterPills .drop-pill').forEach(pill => {
         pill.addEventListener('click', () => {
-          filterPills.forEach(p => p.classList.remove('active'));
-          pill.classList.add('active');
-          renderFeed(pill.getAttribute('data-filter'));
+          const loc = pill.getAttribute('data-loc');
+          activeLoc = loc;
+          if (loc === 'near_me' && !userCoords) {
+            requestBrowserLocation();
+          } else {
+            syncPillUI();
+            renderFeed();
+          }
         });
       });
 
-      // Check URL parameters for initial category filter
-      const urlParams = new URLSearchParams(window.location.search);
-      const initialFilter = urlParams.get('filter') || 'all';
-      renderFeed(initialFilter);
+      // Type Pill Clicks
+      document.querySelectorAll('#typeFilterPills .drop-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          activeType = pill.getAttribute('data-type');
+          syncPillUI();
+          renderFeed();
+        });
+      });
 
-      const activePill = document.querySelector(`#browseFilterPills [data-filter="${initialFilter}"]`);
-      if (activePill) {
-        filterPills.forEach(p => p.classList.remove('active'));
-        activePill.classList.add('active');
+      // Modal Triggers
+      filterModalBtn.addEventListener('click', () => {
+        syncPillUI();
+        filterModalBackdrop.classList.add('open');
+      });
+
+      closeFilterModalBtn.addEventListener('click', () => {
+        filterModalBackdrop.classList.remove('open');
+      });
+
+      filterModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === filterModalBackdrop) {
+          filterModalBackdrop.classList.remove('open');
+        }
+      });
+
+      // Modal Pill Selection
+      document.querySelectorAll('#modalLocGrid .sheet-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          activeLoc = pill.getAttribute('data-loc');
+          if (activeLoc === 'near_me' && !userCoords) {
+            requestBrowserLocation();
+          }
+          syncPillUI();
+        });
+      });
+
+      document.querySelectorAll('#modalTypeGrid .sheet-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          activeType = pill.getAttribute('data-type');
+          syncPillUI();
+        });
+      });
+
+      document.querySelectorAll('#modalPriceGrid .sheet-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          activePrice = pill.getAttribute('data-price');
+          syncPillUI();
+        });
+      });
+
+      document.querySelectorAll('#modalBedsGrid .sheet-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          activeBeds = pill.getAttribute('data-beds');
+          syncPillUI();
+        });
+      });
+
+      resetModalFiltersBtn.addEventListener('click', () => {
+        resetAllFilters();
+      });
+
+      applyModalFiltersBtn.addEventListener('click', () => {
+        renderFeed();
+        filterModalBackdrop.classList.remove('open');
+      });
+
+      // Check URL parameters on load
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlLoc = urlParams.get('loc');
+      const urlFilter = urlParams.get('filter') || urlParams.get('type');
+      const urlNear = urlParams.get('near');
+      const stayId = urlParams.get('id');
+
+      if (urlLoc) activeLoc = urlLoc;
+      if (urlFilter) activeType = urlFilter;
+      if (urlNear === 'true') {
+        activeLoc = 'near_me';
+        if (!userCoords) requestBrowserLocation();
+      }
+
+      syncPillUI();
+      renderFeed();
+
+      // If specific stay ID in query, open directly
+      if (stayId) {
+        const targetStay = LUXEA_STAYS.find(s => s.id === stayId);
+        if (targetStay) {
+          showDetailView(targetStay);
+        }
       }
     });
   </script>
