@@ -1,0 +1,275 @@
+/* ==========================================================================
+   LUXEA LIVING — STAYS CATALOG STYLES (stays.css)
+   Filter Pills, Search Panel, Grid of Properties, Stay Details Modal
+   ========================================================================== */
+
+.stays-page-header {
+  padding: 50px 0 30px;
+  text-align: center;
+}
+
+.stays-page-title {
+  font-size: 3.2rem;
+  margin-bottom: 12px;
+}
+
+/* Discovery Search Strip */
+.search-panel {
+  background-color: var(--color-linen-surface);
+  border: 1px solid var(--color-khaki);
+  border-radius: var(--radius-xl);
+  padding: 14px 20px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.search-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 12px;
+}
+
+.search-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-cocoa);
+  margin-bottom: 4px;
+}
+
+.search-select {
+  border: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.search-divider {
+  width: 1px;
+  height: 40px;
+  background-color: var(--color-linen);
+}
+
+/* Category Filter Pills */
+.filter-pills-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+  justify-content: center;
+}
+
+.pill-btn {
+  background-color: var(--color-linen-surface);
+  border: 1px solid var(--color-khaki);
+  border-radius: var(--radius-pill);
+  padding: 8px 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-cocoa);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pill-btn:hover {
+  border-color: var(--color-camel);
+  color: var(--color-espresso);
+}
+
+.pill-btn.active {
+  background-color: var(--color-espresso);
+  color: var(--color-linen);
+  border-color: var(--color-espresso);
+}
+
+/* Stays Grid */
+.stays-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 30px;
+  margin-bottom: 70px;
+}
+
+.stay-card {
+  background-color: var(--color-linen-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(215, 201, 184, 0.5);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.stay-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-camel);
+}
+
+.stay-thumb-wrap {
+  position: relative;
+  aspect-ratio: 16 / 11;
+  overflow: hidden;
+}
+
+.stay-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.stay-card:hover .stay-thumb {
+  transform: scale(1.05);
+}
+
+.thumb-top-badges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.stay-heart-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-espresso);
+  transition: var(--transition);
+}
+
+.stay-heart-btn:hover {
+  background: #FFFFFF;
+  color: #C0392B;
+}
+
+.stay-info {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.stay-pricing-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.price-num {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+}
+
+.price-period {
+  font-size: 0.75rem;
+  color: var(--color-cocoa);
+}
+
+.stay-rating {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.stay-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stay-loc {
+  font-size: 0.85rem;
+  color: var(--color-cocoa);
+  margin-bottom: 12px;
+}
+
+.stay-features {
+  font-size: 0.8rem;
+  color: var(--color-cocoa);
+  margin-bottom: 18px;
+  line-height: 1.4;
+}
+
+.stay-card-bottom {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.stay-card-bottom .btn {
+  flex: 1;
+}
+
+/* Stay Detail Modal */
+.stay-detail-container {
+  max-width: 700px;
+}
+
+.stay-detail-media {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+.detail-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stay-detail-content {
+  padding: 26px 32px 32px;
+}
+
+.detail-amenities-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0 24px;
+}
+
+.amenity-chip {
+  background-color: var(--color-linen);
+  border: 1px solid var(--color-khaki-light);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+}
+
+@media (max-width: 768px) {
+  .search-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-divider {
+    width: 100%;
+    height: 1px;
+  }
+}

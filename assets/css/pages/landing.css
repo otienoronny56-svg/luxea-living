@@ -1,0 +1,293 @@
+/* ==========================================================================
+   LUXEA LIVING — LANDING PAGE STYLES (landing.css)
+   Hero section, Discovery Bar, Why Luxea Standard, Early Drops
+   ========================================================================== */
+
+/* Hero */
+.hero-section {
+  padding: 70px 0 50px;
+  position: relative;
+  background: radial-gradient(circle at 85% 15%, rgba(215, 201, 184, 0.35) 0%, transparent 55%);
+}
+
+.hero-container {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 50px;
+  align-items: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--color-linen);
+  border: 1px solid var(--color-khaki);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-cocoa);
+  letter-spacing: 0.03em;
+  margin-bottom: 24px;
+}
+
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  background-color: var(--color-camel);
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.3); }
+}
+
+.hero-title {
+  font-size: 3.8rem;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  margin-bottom: 22px;
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  line-height: 1.65;
+  color: var(--color-cocoa);
+  max-width: 540px;
+  margin-bottom: 36px;
+}
+
+.hero-cta-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 44px;
+}
+
+.hero-metrics {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(215, 201, 184, 0.6);
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-number {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+  line-height: 1;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-cocoa);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.metric-divider {
+  width: 1px;
+  height: 36px;
+  background-color: var(--color-khaki);
+}
+
+/* Featured Preview Card */
+.featured-stay-card {
+  background-color: var(--color-linen-surface);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-luxury);
+  border: 1px solid rgba(215, 201, 184, 0.6);
+  transition: var(--transition);
+}
+
+.featured-stay-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 60px rgba(74, 52, 42, 0.2);
+}
+
+.card-image-wrap {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-content {
+  padding: 22px;
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.card-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.card-location {
+  font-size: 0.85rem;
+  color: var(--color-cocoa);
+}
+
+.card-specs {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.82rem;
+  color: var(--color-cocoa);
+  padding: 14px 0;
+  border-top: 1px solid var(--color-linen);
+  border-bottom: 1px solid var(--color-linen);
+  margin-bottom: 16px;
+}
+
+/* Why Luxea Standard Section */
+.standard-section {
+  padding: 80px 0;
+  background-color: var(--color-linen);
+  border-top: 1px solid var(--color-khaki-light);
+  border-bottom: 1px solid var(--color-khaki-light);
+}
+
+.standard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 50px;
+  align-items: center;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.feature-card {
+  background-color: var(--color-linen-surface);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  border: 1px solid rgba(215, 201, 184, 0.45);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.feature-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-camel);
+  box-shadow: var(--shadow-md);
+}
+
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-linen);
+  color: var(--color-camel-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.feature-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.feature-desc {
+  font-size: 0.85rem;
+  color: var(--color-cocoa);
+  line-height: 1.5;
+}
+
+/* Host Callout Banner */
+.host-banner-card {
+  background-color: var(--color-espresso);
+  color: var(--color-linen);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  box-shadow: var(--shadow-luxury);
+  margin: 60px 0;
+}
+
+.host-banner-text {
+  padding: 60px 50px;
+}
+
+.host-banner-title {
+  color: var(--color-linen);
+  font-size: 3rem;
+  margin-bottom: 18px;
+}
+
+.host-banner-desc {
+  color: var(--color-khaki);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.host-perks-list {
+  list-style: none;
+  margin-bottom: 36px;
+}
+
+.host-perks-list li {
+  font-size: 0.95rem;
+  color: var(--color-linen);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.perk-check {
+  color: var(--color-camel);
+  font-weight: 700;
+}
+
+.host-banner-visual {
+  position: relative;
+  min-height: 380px;
+}
+
+.host-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 1024px) {
+  .hero-container, .standard-grid, .host-banner-card {
+    grid-template-columns: 1fr;
+  }
+}

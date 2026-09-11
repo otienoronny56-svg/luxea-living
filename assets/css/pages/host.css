@@ -1,0 +1,396 @@
+/* ==========================================================================
+   LUXEA LIVING — HOST REGISTRATION STYLES (host.css)
+   Multi-step wizard, progress bar, file dropzones, payout details, signature
+   ========================================================================== */
+
+.host-portal-wrapper {
+  max-width: 860px;
+  margin: 40px auto 80px;
+  background-color: var(--color-linen-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-khaki);
+  box-shadow: var(--shadow-luxury);
+  overflow: hidden;
+}
+
+.host-hero-header {
+  padding: 50px 40px 30px;
+  background: linear-gradient(135deg, var(--color-linen) 0%, var(--color-linen-light) 100%);
+  border-bottom: 1px solid var(--color-khaki-light);
+  text-align: center;
+}
+
+.host-hero-title {
+  font-size: 2.8rem;
+  margin: 10px 0;
+}
+
+.host-hero-subtitle {
+  max-width: 580px;
+  margin: 0 auto;
+  font-size: 1.05rem;
+}
+
+/* Stepper */
+.form-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 40px;
+  background-color: var(--color-linen-light);
+  border-bottom: 1px solid var(--color-khaki-light);
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-cocoa);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.step-item.active {
+  color: var(--color-espresso);
+}
+
+.step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: var(--color-khaki);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.step-item.active .step-num {
+  background-color: var(--color-camel);
+}
+
+.step-item.completed .step-num {
+  background-color: var(--color-espresso);
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background-color: var(--color-khaki-light);
+  margin: 0 10px;
+}
+
+/* Host Form Panes */
+.host-form {
+  padding: 40px;
+}
+
+.form-step-pane {
+  display: none;
+}
+
+.form-step-pane.active {
+  display: block;
+  animation: fadeIn 0.25s ease-in;
+}
+
+.pane-header {
+  margin-bottom: 26px;
+}
+
+.pane-title {
+  font-size: 1.6rem;
+  margin-bottom: 6px;
+}
+
+.pane-desc {
+  font-size: 0.9rem;
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px 16px;
+}
+
+.col-full { grid-column: span 6; }
+.col-half { grid-column: span 3; }
+.col-third { grid-column: span 2; }
+
+/* Radio Pills */
+.radio-pill-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.radio-pill {
+  cursor: pointer;
+}
+
+.radio-pill input {
+  display: none;
+}
+
+.radio-pill span {
+  display: inline-block;
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-linen);
+  border: 1px solid var(--color-khaki);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-cocoa);
+  transition: var(--transition);
+}
+
+.radio-pill input:checked + span {
+  background-color: var(--color-espresso);
+  color: var(--color-linen);
+  border-color: var(--color-espresso);
+}
+
+/* Amenities Grid */
+.amenities-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.amenity-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--color-linen-light);
+  border: 1px solid var(--color-khaki-light);
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.amenity-checkbox:hover {
+  background-color: var(--color-linen);
+  border-color: var(--color-khaki);
+}
+
+.amenity-checkbox input:checked + span {
+  font-weight: 700;
+  color: var(--color-espresso);
+}
+
+/* Payment Method Toggle */
+.payment-method-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.method-card {
+  cursor: pointer;
+}
+
+.method-card input {
+  display: none;
+}
+
+.method-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--color-khaki);
+  background-color: var(--color-linen-light);
+  transition: var(--transition);
+}
+
+.method-card input:checked + .method-box {
+  border-color: var(--color-camel);
+  background-color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(178, 150, 125, 0.2);
+}
+
+.method-icon-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.mpesa-bg {
+  background-color: #008751;
+  color: #FFFFFF;
+}
+
+.bank-bg {
+  background-color: var(--color-espresso);
+  color: #FFFFFF;
+}
+
+.method-info strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--color-espresso);
+}
+
+.method-info span {
+  font-size: 0.75rem;
+  color: var(--color-cocoa);
+}
+
+/* Dropzones */
+.file-dropzone {
+  border: 2px dashed var(--color-khaki);
+  border-radius: var(--radius-md);
+  padding: 28px;
+  text-align: center;
+  background-color: var(--color-linen-light);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.file-dropzone:hover {
+  border-color: var(--color-camel);
+  background-color: var(--color-linen);
+}
+
+.dropzone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-cocoa);
+}
+
+.dropzone-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+}
+
+.dropzone-sub {
+  font-size: 0.75rem;
+  color: var(--color-cocoa);
+}
+
+.photos-preview-gallery {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.photo-thumb-item {
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--color-khaki);
+}
+
+/* Declaration & Signature */
+.declaration-box {
+  background-color: var(--color-linen-light);
+  padding: 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-khaki);
+}
+
+.decl-heading {
+  font-size: 1.15rem;
+  margin-bottom: 12px;
+}
+
+.signature-row {
+  display: flex;
+  gap: 18px;
+  margin-top: 16px;
+}
+
+.sig-font {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Pane Actions */
+.pane-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-linen);
+}
+
+/* Success Card */
+.form-success-pane {
+  padding: 60px 40px;
+  text-align: center;
+}
+
+.success-icon-wrap {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background-color: var(--color-linen);
+  color: var(--color-camel-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.success-title {
+  font-size: 2.4rem;
+  margin: 12px 0 8px;
+}
+
+.application-summary-card {
+  background-color: var(--color-linen-light);
+  border: 1px solid var(--color-khaki);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  max-width: 500px;
+  margin: 24px auto 32px;
+  text-align: left;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-khaki-light);
+  font-size: 0.9rem;
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.sum-code {
+  font-family: monospace;
+  color: var(--color-camel-dark);
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .col-half, .col-third { grid-column: span 6; }
+  .payment-method-toggle { grid-template-columns: 1fr; }
+  .signature-row { flex-direction: column; }
+  .host-form { padding: 24px 20px; }
+  .form-stepper { padding: 14px 16px; overflow-x: auto; }
+}

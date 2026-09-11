@@ -1,0 +1,354 @@
+/* ==========================================================================
+   LUXEA LIVING — CORE DESIGN SYSTEM & VARIABLES
+   Palette Reference:
+   - Linen:    #F5F1EA
+   - Khaki:    #D7C9B8
+   - Camel:    #B2967D
+   - Cocoa:    #7D5A44
+   - Espresso: #4A342A
+   ========================================================================== */
+
+:root {
+  --color-linen: #F5F1EA;
+  --color-linen-light: #FAF8F5;
+  --color-linen-surface: #FFFFFF;
+  --color-khaki: #D7C9B8;
+  --color-khaki-light: #EFE8DF;
+  --color-camel: #B2967D;
+  --color-camel-dark: #9A7E66;
+  --color-camel-light: #DFC7B2;
+  --color-cocoa: #7D5A44;
+  --color-cocoa-deep: #634330;
+  --color-espresso: #4A342A;
+  --color-espresso-rich: #32211A;
+  
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  --shadow-sm: 0 2px 8px rgba(74, 52, 42, 0.05);
+  --shadow-md: 0 8px 24px rgba(74, 52, 42, 0.08);
+  --shadow-lg: 0 16px 40px rgba(74, 52, 42, 0.12);
+  --shadow-luxury: 0 24px 50px rgba(74, 52, 42, 0.16);
+  
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 9999px;
+  
+  --transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Reset & Box Sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  background-color: var(--color-linen-light);
+  color: var(--color-espresso);
+}
+
+body {
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  background-color: var(--color-linen-light);
+  color: var(--color-espresso);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Containers */
+.container {
+  width: 100%;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* Typography */
+h1, h2, h3, h4, .serif-font {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--color-espresso);
+  line-height: 1.15;
+}
+
+p {
+  color: var(--color-cocoa);
+  font-size: 1rem;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+em {
+  font-style: italic;
+  font-family: var(--font-serif);
+  color: var(--color-camel-dark);
+}
+
+/* ==========================================================================
+   TOP ANNOUNCEMENT BAR
+   ========================================================================== */
+.announcement-bar {
+  background-color: var(--color-espresso);
+  color: var(--color-linen);
+  font-size: 0.82rem;
+  padding: 8px 0;
+  position: relative;
+  z-index: 101;
+  letter-spacing: 0.02em;
+}
+
+.announcement-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+.announcement-close {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--color-khaki);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 2px 8px;
+  transition: var(--transition);
+}
+
+.announcement-close:hover {
+  color: var(--color-linen);
+}
+
+/* ==========================================================================
+   HEADER & NAVIGATION
+   ========================================================================== */
+.lux-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: rgba(250, 248, 245, 0.94);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(215, 201, 184, 0.4);
+  transition: var(--transition);
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 76px;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-monogram {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, var(--color-espresso), var(--color-cocoa));
+  color: var(--color-linen);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(74, 52, 42, 0.15);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-family: var(--font-serif);
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.brand-sub {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  color: var(--color-camel-dark);
+}
+
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav-link {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--color-cocoa);
+  transition: var(--transition);
+  position: relative;
+  padding: 6px 0;
+}
+
+.nav-link.active,
+.nav-link:hover {
+  color: var(--color-espresso);
+}
+
+.nav-link.active::after,
+.nav-link:hover::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-camel);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.lux-footer {
+  background-color: var(--color-linen);
+  border-top: 1px solid var(--color-khaki);
+  padding: 70px 0 30px;
+  margin-top: 60px;
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 50px;
+}
+
+.footer-tagline {
+  font-size: 0.9rem;
+  margin: 16px 0 20px;
+  max-width: 280px;
+}
+
+.footer-copy {
+  font-size: 0.78rem;
+  color: var(--color-cocoa);
+}
+
+.footer-heading {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-espresso);
+  margin-bottom: 18px;
+}
+
+.footer-link {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--color-cocoa);
+  margin-bottom: 10px;
+  transition: var(--transition);
+}
+
+.footer-link:hover {
+  color: var(--color-espresso);
+  transform: translateX(2px);
+}
+
+.footer-note {
+  font-size: 0.82rem;
+  margin-bottom: 12px;
+}
+
+/* ==========================================================================
+   MOBILE FLOATING BOTTOM NAV BAR
+   ========================================================================== */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(18px);
+  border-top: 1px solid var(--color-khaki-light);
+  z-index: 95;
+  box-shadow: 0 -4px 20px rgba(74, 52, 42, 0.08);
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.mobile-nav-item {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--color-cocoa);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.mobile-nav-item.active,
+.mobile-nav-item:hover {
+  color: var(--color-espresso);
+}
+
+.mobile-nav-item.active svg {
+  stroke: var(--color-camel);
+  stroke-width: 2.3;
+}
+
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none;
+  }
+  .mobile-bottom-nav {
+    display: flex;
+  }
+  body {
+    padding-bottom: 70px;
+  }
+  .footer-container {
+    grid-template-columns: 1fr;
+  }
+}

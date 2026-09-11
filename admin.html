@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internal Partner Console | Luxea Living</title>
+  <meta name="description" content="Manage host applications, waitlist records, and Supabase integration for Luxea Living.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages/admin.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="lux-header">
+    <div class="container nav-container">
+      <a href="index.html" class="brand-logo">
+        <span class="brand-monogram">L</span>
+        <div class="brand-text">
+          <span class="brand-name">Luxea</span>
+          <span class="brand-sub">CONSOLE</span>
+        </div>
+      </a>
+
+      <nav class="desktop-nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="stays.html" class="nav-link">Browse Stays</a>
+        <a href="host.html" class="nav-link">Host Registration</a>
+        <a href="admin.html" class="nav-link active">Admin Portal</a>
+      </nav>
+
+      <div class="header-actions">
+        <div class="supabase-status-chip" id="supabaseStatusChip">
+          <span class="supabase-status-dot connected"></span>
+          <span>Supabase: Connected (abzcabikdkmfaijnqbkf)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container admin-page-container">
+    <!-- Header Card -->
+    <div class="admin-header-card">
+      <div>
+        <span class="badge-tag badge-gold">INTERNAL MANAGEMENT</span>
+        <h1 class="admin-main-title">Partner Submissions &amp; Waitlist</h1>
+        <p>Live synchronized records from Supabase tables (<code>lux_hosts</code> and <code>lux_waitlist</code>).</p>
+      </div>
+
+      <div class="admin-actions-cluster">
+        <button class="btn btn-secondary btn-sm" id="exportHostsCsvBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span>Export Hosts CSV</span>
+        </button>
+        <button class="btn btn-secondary btn-sm" id="exportGuestsCsvBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span>Export Waitlist CSV</span>
+        </button>
+        <a href="https://supabase.com/dashboard/project/abzcabikdkmfaijnqbkf" target="_blank" class="btn btn-primary btn-sm">
+          <span>Open Supabase Cloud ↗</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Admin Tabs -->
+    <div class="admin-tabs-nav">
+      <button class="admin-tab-link active" id="tabHostsBtn">
+        <span>Host Partner Applications</span>
+        <span class="tab-badge" id="hostTabCounter">0</span>
+      </button>
+      <button class="admin-tab-link" id="tabGuestsBtn">
+        <span>Guest VIP Waitlist</span>
+        <span class="tab-badge" id="guestTabCounter">0</span>
+      </button>
+    </div>
+
+    <!-- Search Toolbar -->
+    <div class="admin-toolbar-card">
+      <div class="admin-search-box">
+        <input type="text" id="adminSearchInput" class="form-control" placeholder="Search by name, property, phone, county, ref ID...">
+      </div>
+    </div>
+
+    <!-- Hosts Table View -->
+    <div id="hostsViewPane" class="table-responsive-box">
+      <table class="lux-data-table">
+        <thead>
+          <tr>
+            <th>Ref ID</th>
+            <th>Host Name &amp; Contact</th>
+            <th>Property Name</th>
+            <th>Location</th>
+            <th>Type / Specs</th>
+            <th>Payout</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="hostsTableBody">
+          <!-- Populated by admin.js -->
+        </tbody>
+      </table>
+      <div id="hostsEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
+        No host applications found. Submissions from <a href="host.html" style="color: var(--color-camel-dark); text-decoration: underline;">host.html</a> will appear here.
+      </div>
+    </div>
+
+    <!-- Guests Table View -->
+    <div id="guestsViewPane" class="table-responsive-box hidden" style="margin-top: 10px;">
+      <table class="lux-data-table">
+        <thead>
+          <tr>
+            <th>Pass #</th>
+            <th>Guest Name</th>
+            <th>Email Address</th>
+            <th>Phone</th>
+            <th>Preferred Stays</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody id="guestsTableBody">
+          <!-- Populated by admin.js -->
+        </tbody>
+      </table>
+      <div id="guestsEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
+        No waitlist signups recorded yet.
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/js/main.js"></script>
+  <script type="module">
+    import { initAdminDashboard } from './assets/js/modules/admin.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initAdminDashboard();
+
+      const tabHosts = document.getElementById('tabHostsBtn');
+      const tabGuests = document.getElementById('tabGuestsBtn');
+      const hostsPane = document.getElementById('hostsViewPane');
+      const guestsPane = document.getElementById('guestsViewPane');
+
+      tabHosts?.addEventListener('click', () => {
+        tabHosts.classList.add('active');
+        tabGuests.classList.remove('active');
+        hostsPane.classList.remove('hidden');
+        guestsPane.classList.add('hidden');
+      });
+
+      tabGuests?.addEventListener('click', () => {
+        tabGuests.classList.add('active');
+        tabHosts.classList.remove('active');
+        guestsPane.classList.remove('hidden');
+        hostsPane.classList.add('hidden');
+      });
+    });
+  </script>
+</body>
+</html>
