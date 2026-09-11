@@ -47,13 +47,21 @@
 
     try {
       realtimeChannel = supabase
-        .channel('lux_realtime_properties')
+        .channel('lux_realtime_all')
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'lux_properties' },
           (payload) => {
             console.log('⚡ Supabase Realtime [lux_properties]:', payload);
             window.dispatchEvent(new CustomEvent('luxea:property_updated', { detail: payload }));
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'lux_hosts' },
+          (payload) => {
+            console.log('⚡ Supabase Realtime [lux_hosts]:', payload);
+            window.dispatchEvent(new CustomEvent('luxea:host_updated', { detail: payload }));
           }
         )
         .subscribe((status) => {
@@ -510,6 +518,131 @@
         } catch (e) {}
       }
       return JSON.parse(localStorage.getItem('luxea_waitlist_guests') || '[]');
+    },
+
+    // 6. UPDATE HOST APPLICATION REVIEW STATUS
+    updateHostStatus: async function (refId, newStatus) {
+      console.log(`Updating host application ${refId} -> ${newStatus}`);
+
+      // Update local cache
+      const cached = JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
+      const idx = cached.findIndex(h => (h.refId || h.ref_id) === refId);
+      if (idx !== -1) {
+        cached[idx].review_status = newStatus;
+        localStorage.setItem('luxea_host_applications', JSON.stringify(cached));
+      }
+
+      const client = this.getClient();
+      if (client) {
+        try {
+          const { data, error } = await client
+            .from('lux_hosts')
+            .update({ review_status: newStatus, updated_at: new Date().toISOString() })
+            .eq('ref_id', refId)
+            .select();
+
+          if (error) console.warn('Supabase host review status update error:', error.message);
+          else console.log('✅ Supabase host review status updated:', data);
+        } catch (err) {
+          console.error('Supabase host status update exception:', err);
+        }
+      }
+
+      window.dispatchEvent(new CustomEvent('luxea:host_updated', {
+        detail: { eventType: 'UPDATE', refId, newStatus }
+      }));
+
+      return { success: true, refId, newStatus };
+    }
+  };
+
+  // =========================================================================
+  // SUPER ADMIN AUTHENTICATION GATEWAY
+  // Credentials: otienoronny56@gmail.com / Luxeaadmin
+  // =========================================================================
+  window.LuxeaAuth = {
+    SUPER_ADMIN_EMAIL: 'otienoronny56@gmail.com',
+
+    isAdminLoggedIn: function () {
+      try {
+        const sess = JSON.parse(localStorage.getItem('luxea_admin_session') || '{}');
+        return !!(sess && sess.email && sess.email.toLowerCase() === this.SUPER_ADMIN_EMAIL.toLowerCase() && sess.isSuperAdmin);
+      } catch (e) {
+        return false;
+      }
+    },
+
+    loginAdmin: async function (email, password) {
+      const cleanEmail = (email || '').trim().toLowerCase();
+      const cleanPass = (password || '').trim();
+
+      const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
+
+      // 1. Try Supabase Auth first
+      if (client && client.auth) {
+        try {
+          const { data, error } = await client.auth.signInWithPassword({
+            email: cleanEmail,
+            password: cleanPass
+          });
+          if (!error && data && data.user) {
+            const sessionData = {
+              email: data.user.email,
+              id: data.user.id,
+              isSuperAdmin: cleanEmail === this.SUPER_ADMIN_EMAIL.toLowerCase(),
+              name: 'Ronald Otieno (Super Admin)',
+              role: 'Super Administrator',
+              token: data.session?.access_token,
+              loggedInAt: new Date().toISOString()
+            };
+            localStorage.setItem('luxea_admin_session', JSON.stringify(sessionData));
+            return { success: true, user: sessionData };
+          }
+        } catch (e) {
+          console.warn('Supabase Auth signIn attempt:', e);
+        }
+      }
+
+      // 2. Direct Super Admin Credential Check
+      if (cleanEmail === this.SUPER_ADMIN_EMAIL.toLowerCase() && cleanPass === 'Luxeaadmin') {
+        const sessionData = {
+          email: this.SUPER_ADMIN_EMAIL,
+          isSuperAdmin: true,
+          name: 'Ronald Otieno',
+          role: 'Super Administrator',
+          loggedInAt: new Date().toISOString()
+        };
+        localStorage.setItem('luxea_admin_session', JSON.stringify(sessionData));
+
+        // Background registration attempt on Supabase Auth
+        if (client && client.auth) {
+          client.auth.signUp({
+            email: this.SUPER_ADMIN_EMAIL,
+            password: 'Luxeaadmin'
+          }).catch(() => {});
+        }
+
+        return { success: true, user: sessionData };
+      }
+
+      return { success: false, message: 'Invalid admin credentials. Access restricted to Super Admin.' };
+    },
+
+    logoutAdmin: async function () {
+      localStorage.removeItem('luxea_admin_session');
+      const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
+      if (client && client.auth) {
+        try { await client.auth.signOut(); } catch (e) {}
+      }
+      return { success: true };
+    },
+
+    getCurrentAdmin: function () {
+      try {
+        return JSON.parse(localStorage.getItem('luxea_admin_session') || 'null');
+      } catch (e) {
+        return null;
+      }
     }
   };
 
