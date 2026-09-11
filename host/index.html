@@ -45,7 +45,7 @@
     </div>
   </header>
 
-  <main class="container">
+  <main class="host-main-container">
     <div class="host-portal-wrapper">
       
       <!-- Host Portal Utility Bar (Subtle & Private) -->
@@ -94,62 +94,169 @@
           </p>
         </div>
 
-        <!-- Dynamic Progress Indicator Bar -->
-        <div class="progress-indicator-bar">
-          <div class="progress-meta">
-            <span class="progress-step-text" id="progressStepLabel">Step 1 of 5: Personal Details</span>
-            <span class="progress-percent" id="progressPercentLabel">20% Completed</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="progressFill" style="width: 20%;"></div>
-          </div>
-        </div>
+        <div class="host-layout-split">
+          <!-- LEFT SIDEBAR COMPANION (Fills laptop screen real estate with high-value guidance) -->
+          <aside class="host-sidebar-companion">
+            <!-- Card 1: Live Application Steps -->
+            <div class="companion-card">
+              <span class="companion-tag">ONBOARDING STAGES</span>
+              <div class="companion-steps-list">
+                <div class="companion-step-item active" data-step-ref="1">
+                  <div class="c-step-num">1</div>
+                  <div class="c-step-info">
+                    <strong>Personal Identity</strong>
+                    <span>Legal name, contact &amp; KRA PIN</span>
+                  </div>
+                </div>
+                <div class="companion-step-item" data-step-ref="2">
+                  <div class="c-step-num">2</div>
+                  <div class="c-step-info">
+                    <strong>Property Details</strong>
+                    <span>Location, type &amp; Google pin</span>
+                  </div>
+                </div>
+                <div class="companion-step-item" data-step-ref="3">
+                  <div class="c-step-num">3</div>
+                  <div class="c-step-info">
+                    <strong>Unit &amp; Amenities</strong>
+                    <span>Capacity &amp; luxury features</span>
+                  </div>
+                </div>
+                <div class="companion-step-item" data-step-ref="4">
+                  <div class="c-step-num">4</div>
+                  <div class="c-step-info">
+                    <strong>Payout Setup</strong>
+                    <span>M-Pesa or Bank settlements</span>
+                  </div>
+                </div>
+                <div class="companion-step-item" data-step-ref="5">
+                  <div class="c-step-num">5</div>
+                  <div class="c-step-info">
+                    <strong>Review &amp; Sign</strong>
+                    <span>Documents &amp; digital signature</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        <!-- Stepper Progress with Subtitles -->
-        <div class="form-stepper">
-          <div class="step-item active" data-step="1">
-            <span class="step-num">1</span>
-            <div class="step-content">
-              <span class="step-title">Personal</span>
-              <span class="step-sub">Identity &amp; Contact</span>
+            <!-- Card 2: Partner Privileges -->
+            <div class="companion-card">
+              <span class="companion-tag">HOST PRIVILEGES</span>
+              <h4 class="perks-title">Why Top Property Owners Partner With Luxea</h4>
+              <ul class="companion-perks-list">
+                <li>
+                  <span class="perk-icon">⚡</span>
+                  <div>
+                    <strong>Automated Payouts</strong>
+                    <span>Instant disbursement on check-in day via M-Pesa or Bank.</span>
+                  </div>
+                </li>
+                <li>
+                  <span class="perk-icon">🛡️</span>
+                  <div>
+                    <strong>KSh 10M Protection</strong>
+                    <span>Full property damage coverage &amp; guest identity security.</span>
+                  </div>
+                </li>
+                <li>
+                  <span class="perk-icon">💎</span>
+                  <div>
+                    <strong>Pre-Vetted VIP Guests</strong>
+                    <span>Corporate leaders, visiting diplomats, and luxury families.</span>
+                  </div>
+                </li>
+                <li>
+                  <span class="perk-icon">✨</span>
+                  <div>
+                    <strong>0% Upfront Onboarding</strong>
+                    <span>Zero setup fees. We only earn a standard commission on completed bookings.</span>
+                  </div>
+                </li>
+              </ul>
             </div>
-          </div>
-          <div class="step-line"></div>
-          <div class="step-item" data-step="2">
-            <span class="step-num">2</span>
-            <div class="step-content">
-              <span class="step-title">Property</span>
-              <span class="step-sub">Location &amp; Type</span>
-            </div>
-          </div>
-          <div class="step-line"></div>
-          <div class="step-item" data-step="3">
-            <span class="step-num">3</span>
-            <div class="step-content">
-              <span class="step-title">Unit &amp; Amenities</span>
-              <span class="step-sub">Rooms &amp; Inclusions</span>
-            </div>
-          </div>
-          <div class="step-line"></div>
-          <div class="step-item" data-step="4">
-            <span class="step-num">4</span>
-            <div class="step-content">
-              <span class="step-title">Payout</span>
-              <span class="step-sub">M-Pesa / Bank</span>
-            </div>
-          </div>
-          <div class="step-line"></div>
-          <div class="step-item" data-step="5">
-            <span class="step-num">5</span>
-            <div class="step-content">
-              <span class="step-title">Verification</span>
-              <span class="step-sub">Review &amp; Sign</span>
-            </div>
-          </div>
-        </div>
 
-        <!-- Dedicated Full-Page Multi-Step Form -->
-        <form id="luxeaHostForm" class="host-form" novalidate>
+            <!-- Card 3: Dedicated Nairobi Host Concierge Desk -->
+            <div class="companion-card">
+              <span class="companion-tag">DEDICATED SUPPORT</span>
+              <div class="concierge-box">
+                <div class="concierge-avatar">🏛️</div>
+                <div>
+                  <strong>Nairobi Host Concierge</strong>
+                  <span>Westlands, Nairobi Office</span>
+                </div>
+              </div>
+              <p class="concierge-desc">
+                Need guidance completing your application? Our host onboarding specialists are ready to assist you.
+              </p>
+              <div class="concierge-contact-row">
+                <span>💬 WhatsApp / Phone:</span>
+                <strong>+254 700 892 341</strong>
+              </div>
+              <div class="concierge-contact-row">
+                <span>✉️ Email:</span>
+                <strong>host-concierge@luxealiving.co.ke</strong>
+              </div>
+            </div>
+          </aside>
+
+          <!-- RIGHT MAIN PANE (Generous & Expansive Form Panes) -->
+          <div class="host-form-main-pane">
+            <!-- Dynamic Progress Indicator Bar -->
+            <div class="progress-indicator-bar">
+              <div class="progress-meta">
+                <span class="progress-step-text" id="progressStepLabel">Step 1 of 5: Personal Details</span>
+                <span class="progress-percent" id="progressPercentLabel">20% Completed</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width: 20%;"></div>
+              </div>
+            </div>
+
+            <!-- Stepper Progress with Subtitles -->
+            <div class="form-stepper">
+              <div class="step-item active" data-step="1">
+                <span class="step-num">1</span>
+                <div class="step-content">
+                  <span class="step-title">Personal</span>
+                  <span class="step-sub">Identity &amp; Contact</span>
+                </div>
+              </div>
+              <div class="step-line"></div>
+              <div class="step-item" data-step="2">
+                <span class="step-num">2</span>
+                <div class="step-content">
+                  <span class="step-title">Property</span>
+                  <span class="step-sub">Location &amp; Type</span>
+                </div>
+              </div>
+              <div class="step-line"></div>
+              <div class="step-item" data-step="3">
+                <span class="step-num">3</span>
+                <div class="step-content">
+                  <span class="step-title">Unit &amp; Amenities</span>
+                  <span class="step-sub">Rooms &amp; Inclusions</span>
+                </div>
+              </div>
+              <div class="step-line"></div>
+              <div class="step-item" data-step="4">
+                <span class="step-num">4</span>
+                <div class="step-content">
+                  <span class="step-title">Payout</span>
+                  <span class="step-sub">M-Pesa / Bank</span>
+                </div>
+              </div>
+              <div class="step-line"></div>
+              <div class="step-item" data-step="5">
+                <span class="step-num">5</span>
+                <div class="step-content">
+                  <span class="step-title">Verification</span>
+                  <span class="step-sub">Review &amp; Sign</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dedicated Full-Page Multi-Step Form -->
+            <form id="luxeaHostForm" class="host-form" novalidate>
 
           <!-- STEP 1: A. PERSONAL DETAILS -->
           <div class="form-step-pane active" id="stepPane1">
@@ -273,38 +380,54 @@
                 </div>
               </div>
 
-              <div class="form-group col-half">
-                <label for="propertyCounty" class="form-label">County <span class="required">*</span></label>
-                <input type="text" id="propertyCounty" class="form-control" list="countySuggestions" placeholder="e.g. Nairobi, Kwale (Diani), Nakuru (Naivasha)" required>
-                <datalist id="countySuggestions">
-                  <option value="Nairobi"></option>
-                  <option value="Mombasa"></option>
-                  <option value="Kwale (Diani Beach)"></option>
-                  <option value="Nakuru (Naivasha)"></option>
-                  <option value="Kilifi (Watamu &amp; Malindi)"></option>
-                  <option value="Kiambu"></option>
-                  <option value="Nanyuki (Laikipia)"></option>
-                  <option value="Kisumu"></option>
-                </datalist>
-                <small class="field-hint">Primary Kenyan region where the residence is situated.</small>
-              </div>
+              <!-- Automated Location & Maps Section (No manual County/Area typing!) -->
+              <div class="form-group col-full location-autofill-box">
+                <div class="loc-autofill-head">
+                  <label class="form-label" for="propertyMaps" style="margin: 0;">Property Location &amp; Pin <span class="required">*</span></label>
+                  <button type="button" class="btn-location-detect" id="useMyLocationBtn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                    </svg>
+                    <span>Use My Current Location</span>
+                  </button>
+                </div>
 
-              <div class="form-group col-half">
-                <label for="propertyArea" class="form-label">Area / Suburb <span class="required">*</span></label>
-                <input type="text" id="propertyArea" class="form-control" placeholder="e.g. Karen, Westlands, Diani Beach, Nyali" required>
-                <small class="field-hint">Neighborhood, estate, or beachfront locality.</small>
+                <div class="maps-input-wrapper">
+                  <input type="url" id="propertyMaps" class="form-control" placeholder="Paste Google Maps link (e.g. https://maps.app.goo.gl/... or https://maps.google.com/?q=...)" required>
+                </div>
+                <small class="field-hint">
+                  📍 Click <strong>"Use My Current Location"</strong> or paste a Google Maps link — County and Suburb will be automatically identified for you.
+                </small>
+
+                <!-- Live Location Resolution Badge -->
+                <div class="location-detected-badge hidden" id="locationDetectedBadge">
+                  <span class="loc-badge-icon">📍</span>
+                  <div class="loc-badge-info">
+                    <span class="loc-badge-title">Auto-Detected Location:</span>
+                    <strong id="detectedLocationText">—</strong>
+                  </div>
+                  <button type="button" class="btn-edit-loc" id="editLocationToggleBtn">Edit Details</button>
+                </div>
+
+                <!-- Hidden/Editable Location Inputs (for database storage) -->
+                <div class="location-hidden-fields hidden" id="locationHiddenFields">
+                  <div class="form-grid" style="margin-top: 14px;">
+                    <div class="form-group col-half">
+                      <label for="propertyCounty" class="form-label" style="font-size:0.8rem;">County</label>
+                      <input type="text" id="propertyCounty" class="form-control" placeholder="e.g. Nairobi">
+                    </div>
+                    <div class="form-group col-half">
+                      <label for="propertyArea" class="form-label" style="font-size:0.8rem;">Area / Suburb</label>
+                      <input type="text" id="propertyArea" class="form-control" placeholder="e.g. Karen">
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class="form-group col-full">
                 <label for="propertyAddress" class="form-label">Physical Address &amp; Access Notes <span class="required">*</span></label>
                 <textarea id="propertyAddress" rows="2" class="form-control" placeholder="Street name, landmark, gate/court number, or building name..." required></textarea>
-                <small class="field-hint">Used by our onboarding team for property inspection.</small>
-              </div>
-
-              <div class="form-group col-full">
-                <label for="propertyMaps" class="form-label">Google Maps Pin Link <span class="required">*</span></label>
-                <input type="url" id="propertyMaps" class="form-control" placeholder="https://maps.app.goo.gl/... or https://maps.google.com/?q=..." required>
-                <small class="field-hint">📍 Open Google Maps, drop a pin at your residence gate, tap Share &gt; Copy Link, and paste here.</small>
+                <small class="field-hint">Specific gate or road landmarks for verified guest arrivals and our inspection team.</small>
               </div>
             </div>
 
@@ -633,9 +756,9 @@
             <button type="button" class="btn btn-secondary" id="trackFromSuccessBtn">Track Application Status</button>
             <a href="/" class="btn btn-primary">Return to Homepage</a>
           </div>
-        </div>
-
-      </div> <!-- /#hostRegisterView -->
+        </div> <!-- /.host-form-main-pane -->
+      </div> <!-- /.host-layout-split -->
+    </div> <!-- /#hostRegisterView -->
 
       <!-- VIEW 2: ACCESS GATED (When unverified user tries to access host dashboard) -->
       <div id="hostGatedView" class="hidden">

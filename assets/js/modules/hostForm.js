@@ -92,6 +92,14 @@ export function initHostForm(formId = 'luxeaHostForm') {
       item.classList.toggle('completed', s < step);
     });
 
+    document.querySelectorAll('.companion-step-item').forEach(item => {
+      const s = parseInt(item.getAttribute('data-step-ref'));
+      if (s) {
+        item.classList.toggle('active', s === step);
+        item.classList.toggle('completed', s < step);
+      }
+    });
+
     updateProgress(step);
 
     if (step === 5) {
@@ -104,10 +112,19 @@ export function initHostForm(formId = 'luxeaHostForm') {
     }
   }
 
-  // Allow clicking on completed steps in top stepper
+  // Allow clicking on completed steps in top stepper and companion sidebar
   document.querySelectorAll('.step-item').forEach(item => {
     item.addEventListener('click', () => {
       const s = parseInt(item.getAttribute('data-step'));
+      if (s && (s < currentStep || validateStep(currentStep))) {
+        goToStep(s);
+      }
+    });
+  });
+
+  document.querySelectorAll('.companion-step-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const s = parseInt(item.getAttribute('data-step-ref'));
       if (s && (s < currentStep || validateStep(currentStep))) {
         goToStep(s);
       }
@@ -209,24 +226,22 @@ export function initHostForm(formId = 'luxeaHostForm') {
         if (!firstInvalid) firstInvalid = prop;
         valid = false;
       }
-      if (!county.value.trim()) {
-        setFieldError(county, 'Please select or enter the county where the stay is located.');
-        if (!firstInvalid) firstInvalid = county;
+      if (!maps.value.trim()) {
+        setFieldError(maps, 'Please click "Use My Current Location" or paste a Google Maps link.');
+        if (!firstInvalid) firstInvalid = maps;
         valid = false;
-      }
-      if (!area.value.trim()) {
-        setFieldError(area, 'Please specify the neighborhood or suburb (e.g. Karen, Westlands).');
-        if (!firstInvalid) firstInvalid = area;
-        valid = false;
+      } else {
+        // Ensure county and area are autofilled for database storage
+        if (county && !county.value.trim()) {
+          county.value = 'Nairobi';
+        }
+        if (area && !area.value.trim()) {
+          area.value = 'Karen / Westlands';
+        }
       }
       if (!addr.value.trim()) {
         setFieldError(addr, 'Please provide the physical street, building, or gate details.');
         if (!firstInvalid) firstInvalid = addr;
-        valid = false;
-      }
-      if (!maps.value.trim()) {
-        setFieldError(maps, 'Please paste a Google Maps link to assist our onboarding team.');
-        if (!firstInvalid) firstInvalid = maps;
         valid = false;
       }
     } else if (step === 3) {
@@ -451,8 +466,228 @@ export function initHostForm(formId = 'luxeaHostForm') {
     window.dispatchEvent(new CustomEvent('luxea:dataUpdated'));
   });
 
+  // Automated Location & Google Maps Autofill Engine
+  initLocationAutofill();
+
   // Application Status Lookup Handler
   initStatusLookup();
+}
+
+/**
+ * Automated Location & Google Maps Autofill Engine
+ * Eliminates manual typing of County & Area by resolving from live GPS or Google Maps pin links.
+ */
+function initLocationAutofill() {
+  const myLocBtn = document.getElementById('useMyLocationBtn');
+  const mapsInput = document.getElementById('propertyMaps');
+  const badge = document.getElementById('locationDetectedBadge');
+  const badgeText = document.getElementById('detectedLocationText');
+  const editToggleBtn = document.getElementById('editLocationToggleBtn');
+  const hiddenFields = document.getElementById('locationHiddenFields');
+  const countyInput = document.getElementById('propertyCounty');
+  const areaInput = document.getElementById('propertyArea');
+
+  function setDetectedLocation(county, area, source = 'gps') {
+    if (countyInput) countyInput.value = county;
+    if (areaInput) areaInput.value = area;
+    if (badge && badgeText) {
+      badgeText.textContent = `${area ? area + ', ' : ''}${county} (${source === 'gps' ? 'Live GPS Device' : 'Maps Pin'})`;
+      badge.classList.remove('hidden');
+    }
+  }
+
+  // Edit toggle listener
+  if (editToggleBtn && hiddenFields) {
+    editToggleBtn.addEventListener('click', () => {
+      const isHidden = hiddenFields.classList.toggle('hidden');
+      editToggleBtn.textContent = isHidden ? 'Edit Details' : 'Hide Details';
+    });
+  }
+
+  // Common Kenyan destination keyword lookup from text/URL
+  function parseLocationKeywords(str) {
+    const s = str.toLowerCase();
+    const map = [
+      { key: 'karen', county: 'Nairobi', area: 'Karen' },
+      { key: 'westlands', county: 'Nairobi', area: 'Westlands' },
+      { key: 'kilimani', county: 'Nairobi', area: 'Kilimani' },
+      { key: 'kileleshwa', county: 'Nairobi', area: 'Kileleshwa' },
+      { key: 'lavington', county: 'Nairobi', area: 'Lavington' },
+      { key: 'muthaiga', county: 'Nairobi', area: 'Muthaiga' },
+      { key: 'spring valley', county: 'Nairobi', area: 'Spring Valley' },
+      { key: 'gigiri', county: 'Nairobi', area: 'Gigiri' },
+      { key: 'runda', county: 'Nairobi', area: 'Runda' },
+      { key: 'diani', county: 'Kwale', area: 'Diani Beach' },
+      { key: 'tiwi', county: 'Kwale', area: 'Tiwi' },
+      { key: 'galu', county: 'Kwale', area: 'Galu Kinondo' },
+      { key: 'naivasha', county: 'Nakuru', area: 'Naivasha' },
+      { key: 'nakuru', county: 'Nakuru', area: 'Nakuru' },
+      { key: 'nyali', county: 'Mombasa', area: 'Nyali' },
+      { key: 'bamburi', county: 'Mombasa', area: 'Bamburi' },
+      { key: 'shanzu', county: 'Mombasa', area: 'Shanzu' },
+      { key: 'watamu', county: 'Kilifi', area: 'Watamu' },
+      { key: 'malindi', county: 'Kilifi', area: 'Malindi' },
+      { key: 'kilifi', county: 'Kilifi', area: 'Kilifi Creek' },
+      { key: 'lamu', county: 'Lamu', area: 'Shela / Lamu Island' },
+      { key: 'nanyuki', county: 'Laikipia', area: 'Nanyuki' },
+      { key: 'eldoret', county: 'Uasin Gishu', area: 'Eldoret' },
+      { key: 'kisumu', county: 'Kisumu', area: 'Kisumu / Riat' }
+    ];
+
+    for (const item of map) {
+      if (s.includes(item.key)) {
+        return { county: item.county, area: item.area };
+      }
+    }
+    return null;
+  }
+
+  // Kenyan Regional Lat/Lon Bounding Heuristics
+  function inferFromCoords(lat, lon) {
+    if (lat >= -1.45 && lat <= -1.15 && lon >= 36.65 && lon <= 37.10) {
+      if (lat < -1.28) return { county: 'Nairobi', area: 'Karen' };
+      if (lat >= -1.28 && lon < 36.83) return { county: 'Nairobi', area: 'Westlands' };
+      return { county: 'Nairobi', area: 'Nairobi Metropolis' };
+    }
+    if (lat >= -4.45 && lat <= -4.15 && lon >= 39.50 && lon <= 39.65) {
+      return { county: 'Kwale', area: 'Diani Beach' };
+    }
+    if (lat >= -4.15 && lat <= -3.95 && lon >= 39.60 && lon <= 39.80) {
+      return { county: 'Mombasa', area: 'Nyali' };
+    }
+    if (lat >= -0.90 && lat <= -0.65 && lon >= 36.25 && lon <= 36.55) {
+      return { county: 'Nakuru', area: 'Naivasha' };
+    }
+    if (lat >= -3.40 && lat <= -3.15 && lon >= 39.90 && lon <= 40.25) {
+      return { county: 'Kilifi', area: 'Watamu & Malindi' };
+    }
+    if (lat >= -0.10 && lat <= 0.20 && lon >= 36.90 && lon <= 37.20) {
+      return { county: 'Laikipia', area: 'Nanyuki' };
+    }
+    return { county: 'Nairobi', area: 'Kenya' };
+  }
+
+  // Reverse geocoding with graceful fallback
+  async function reverseGeocode(lat, lon) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+        { signal: controller.signal, headers: { 'Accept': 'application/json' } }
+      );
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        const addr = data.address || {};
+        const county = addr.county || addr.state || addr.city || 'Nairobi';
+        const area = addr.suburb || addr.neighbourhood || addr.quarter || addr.town || addr.village || addr.city_district || 'Prime Suburb';
+        const cleanCounty = county.replace(/ county/i, '').trim();
+        return { county: cleanCounty, area };
+      }
+    } catch (e) {
+      // Ignore network / timeout errors, fallback to heuristics
+    }
+    return inferFromCoords(lat, lon);
+  }
+
+  // "Use My Current Location" button handler
+  if (myLocBtn) {
+    myLocBtn.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        if (window.showToast) window.showToast('Geolocation is not supported by your browser.');
+        return;
+      }
+
+      const origHtml = myLocBtn.innerHTML;
+      myLocBtn.classList.add('loc-detecting');
+      myLocBtn.disabled = true;
+      myLocBtn.innerHTML = `
+        <span class="spinner-small" style="display:inline-block; width:13px; height:13px; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin 0.8s linear infinite;"></span>
+        <span>Detecting coordinates...</span>
+      `;
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          // Set maps link automatically
+          if (mapsInput) {
+            mapsInput.value = `https://www.google.com/maps?q=${lat.toFixed(6)},${lon.toFixed(6)}`;
+          }
+
+          const geo = await reverseGeocode(lat, lon);
+          setDetectedLocation(geo.county, geo.area, 'gps');
+
+          myLocBtn.classList.remove('loc-detecting');
+          myLocBtn.disabled = false;
+          myLocBtn.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Location Detected</span>
+          `;
+
+          if (window.showToast) {
+            window.showToast(`📍 Auto-detected: ${geo.area}, ${geo.county} County`);
+          }
+
+          setTimeout(() => {
+            myLocBtn.innerHTML = origHtml;
+          }, 3500);
+        },
+        (error) => {
+          console.warn('Geolocation error:', error);
+          myLocBtn.classList.remove('loc-detecting');
+          myLocBtn.disabled = false;
+          myLocBtn.innerHTML = origHtml;
+          if (window.showToast) {
+            window.showToast('Could not retrieve live GPS. Please paste your Google Maps link.');
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    });
+  }
+
+  // Google Maps link input listener (paste / change)
+  if (mapsInput) {
+    const handleMapsInput = async () => {
+      const val = mapsInput.value.trim();
+      if (!val) return;
+
+      // 1. Try coordinate extraction from URL (@lat,lon or ?q=lat,lon or ll=lat,lon)
+      const coordMatch = val.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || 
+                         val.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/) ||
+                         val.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+      if (coordMatch) {
+        const lat = parseFloat(coordMatch[1]);
+        const lon = parseFloat(coordMatch[2]);
+        const geo = await reverseGeocode(lat, lon);
+        setDetectedLocation(geo.county, geo.area, 'link');
+        return;
+      }
+
+      // 2. Try keyword extraction from URL / text
+      const matched = parseLocationKeywords(val);
+      if (matched) {
+        setDetectedLocation(matched.county, matched.area, 'link');
+        return;
+      }
+
+      // 3. Fallback: If it's a valid link, default to Nairobi Prime
+      if (val.startsWith('http')) {
+        if (!countyInput?.value.trim()) {
+          setDetectedLocation('Nairobi', 'Nairobi Metropolis', 'link');
+        }
+      }
+    };
+
+    mapsInput.addEventListener('change', handleMapsInput);
+    mapsInput.addEventListener('paste', () => setTimeout(handleMapsInput, 150));
+  }
 }
 
 /**

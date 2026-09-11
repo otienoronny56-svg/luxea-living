@@ -1,11 +1,15 @@
-/* ==========================================================================
-   LUXEA LIVING — HOST REGISTRATION STYLES (host.css)
-   Multi-step wizard, progress bar, file dropzones, payout details, signature
-   ========================================================================== */
+/* Responsive Full-Width Luxury Layout for Laptop & Desktop Screens */
+.host-main-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 20px auto 80px;
+  padding: 0 32px;
+}
 
 .host-portal-wrapper {
-  max-width: 860px;
-  margin: 40px auto 80px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
   background-color: var(--color-linen-surface);
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-khaki);
@@ -13,8 +17,200 @@
   overflow: hidden;
 }
 
+/* 2-Column Split Layout for Laptop & Desktop */
+.host-layout-split {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  border-top: 1px solid var(--color-khaki-light);
+}
+
+.host-sidebar-companion {
+  background-color: var(--color-linen-light);
+  border-right: 1px solid var(--color-khaki-light);
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.host-form-main-pane {
+  background-color: var(--color-linen-surface);
+  min-width: 0;
+}
+
+.companion-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-khaki-light);
+  border-radius: var(--radius-md);
+  padding: 22px 20px;
+  box-shadow: 0 2px 8px rgba(74, 52, 42, 0.04);
+}
+
+.companion-tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  color: var(--color-camel-dark);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.companion-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.companion-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-linen-light);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.companion-step-item:hover {
+  background: #FFFFFF;
+  border-color: var(--color-khaki);
+}
+
+.companion-step-item.active {
+  background: #FFFFFF;
+  border-color: var(--color-camel);
+  box-shadow: 0 2px 8px rgba(178, 135, 86, 0.15);
+}
+
+.companion-step-item.completed .c-step-num {
+  background: #2E7D32;
+  color: #FFFFFF;
+}
+
+.c-step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-khaki);
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.companion-step-item.active .c-step-num {
+  background: var(--color-camel-dark);
+}
+
+.c-step-info strong {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--color-espresso);
+  line-height: 1.2;
+}
+
+.c-step-info span {
+  font-size: 0.72rem;
+  color: var(--color-cocoa-light);
+}
+
+.perks-title {
+  font-size: 0.96rem;
+  color: var(--color-espresso);
+  margin: 0 0 8px;
+  line-height: 1.3;
+}
+
+.companion-perks-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.companion-perks-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.perk-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.companion-perks-list li strong {
+  display: block;
+  font-size: 0.84rem;
+  color: var(--color-espresso);
+  margin-bottom: 2px;
+}
+
+.companion-perks-list li span {
+  font-size: 0.75rem;
+  color: var(--color-cocoa);
+  line-height: 1.35;
+}
+
+.concierge-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.concierge-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(178, 135, 86, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.concierge-desc {
+  font-size: 0.78rem;
+  color: var(--color-cocoa);
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
+.concierge-contact-row {
+  font-size: 0.78rem;
+  color: var(--color-espresso);
+  margin-bottom: 6px;
+}
+
+.concierge-contact-row span {
+  color: var(--color-cocoa-light);
+}
+
+@media (max-width: 1024px) {
+  .host-layout-split {
+    grid-template-columns: 1fr;
+  }
+  .host-sidebar-companion {
+    border-right: none;
+    border-bottom: 1px solid var(--color-khaki-light);
+    order: 2;
+  }
+  .host-main-container {
+    padding: 0 16px;
+  }
+}
+
 .host-hero-header {
-  padding: 50px 40px 30px;
+  padding: 44px 40px 24px;
   background: linear-gradient(135deg, var(--color-linen) 0%, var(--color-linen-light) 100%);
   border-bottom: 1px solid var(--color-khaki-light);
   text-align: center;
@@ -383,6 +579,100 @@
 
 .property-type-card input:checked + .prop-card-inner .prop-card-title {
   color: var(--color-camel-dark);
+}
+
+/* Automated Location & GPS Autofill Section */
+.location-autofill-box {
+  background: var(--color-linen-light);
+  border: 1px solid var(--color-khaki-light);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  margin-top: 6px;
+}
+
+.loc-autofill-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn-location-detect {
+  background: #FFFFFF;
+  border: 1px solid var(--color-camel);
+  color: var(--color-camel-dark);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: var(--transition-fast);
+  box-shadow: 0 2px 6px rgba(178, 135, 86, 0.12);
+}
+
+.btn-location-detect:hover {
+  background: var(--color-camel-dark);
+  color: #FFFFFF;
+  border-color: var(--color-camel-dark);
+  transform: translateY(-1px);
+}
+
+.btn-location-detect.loc-detecting {
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.location-detected-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FFFFFF;
+  border: 1px solid #4ADE80;
+  border-left: 4px solid #2E7D32;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-top: 12px;
+  animation: fadeIn 0.25s ease-in;
+}
+
+.loc-badge-icon {
+  font-size: 1.2rem;
+}
+
+.loc-badge-info {
+  flex: 1;
+}
+
+.loc-badge-title {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-cocoa-light);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.loc-badge-info strong {
+  font-size: 0.88rem;
+  color: #1B5E20;
+}
+
+.btn-edit-loc {
+  background: transparent;
+  border: none;
+  color: var(--color-camel-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 /* Amenities Category Headers */
