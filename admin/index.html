@@ -25,27 +25,19 @@
   <!-- Header -->
   <header class="lux-header">
     <div class="container nav-container">
-      <a href="/" class="brand-logo">
-        <span class="brand-monogram">L</span>
-        <span class="brand-name">Luxea</span>
-      </a>
-
-      <nav class="desktop-nav">
-        <a href="/stays/" class="nav-link">Stays</a>
-        <a href="/host/" class="nav-link">Host</a>
-        <a href="/waitlist/" class="nav-link">Waitlist</a>
-        <a href="/admin/" class="nav-link active">Admin</a>
-      </nav>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="/" class="brand-logo">
+          <span class="brand-monogram">L</span>
+          <span class="brand-name">Luxea</span>
+        </a>
+        <span class="badge-tag chip-neutral" style="font-size: 0.72rem; padding: 4px 10px; font-weight: 700;">Executive Console</span>
+      </div>
 
       <div class="header-actions">
-        <div class="supabase-status-chip" id="systemStatusChip">
-          <span class="supabase-status-dot connected"></span>
-          <span>Live Cloud Engine</span>
-        </div>
-        <span id="superAdminBadge" class="badge-tag badge-gold hidden" style="font-size: 0.75rem; padding: 5px 10px;">
-          👑 Super Admin: Ronald
-        </span>
-        <button class="btn btn-outline btn-sm hidden" id="adminLogoutBtn">Sign Out</button>
+        <a href="/" class="btn btn-ghost btn-sm" style="font-size: 0.8rem; text-decoration: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+          <span>Live Site</span>
+        </a>
       </div>
     </div>
   </header>

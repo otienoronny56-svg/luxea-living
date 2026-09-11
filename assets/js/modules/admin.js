@@ -68,7 +68,7 @@ export function initAdminDashboard() {
       dashboardView?.classList.remove('hidden');
       adminBadge?.classList.remove('hidden');
       logoutBtn?.classList.remove('hidden');
-      if (admin && admin.name) {
+      if (admin && admin.name && adminBadge) {
         adminBadge.textContent = `👑 Super Admin: ${admin.name.split(' ')[0]}`;
       }
       loadDashboardData();
