@@ -2,15 +2,19 @@
 
 Find a home that elevates life. Curated luxury villas, penthouses, and bespoke residences across Kenya.
 
-## Structure
+## Project Structure
 - `index.html`: Main landing page, curated collection showcase, and VIP waitlist.
-- `host.html`: Founding Partner / Host registration wizard (5 steps with file uploads).
-- `stays.html`: Stays catalog with filters and property details modal.
-- `admin.html`: Internal management portal with Supabase live sync & CSV export.
+- `stays/`: Stays catalog with location/category filters, near-me sorting, and details modal.
+- `host/`: Founding Partner / Host registration wizard (5 steps with Supabase file uploads).
+- `admin/`: Super Admin Console with authentication gateway (`otienoronny56@gmail.com`), host vetting, inspections, and live availability controls.
+  - `admin/login/`: Direct login redirect entry point.
+- `waitlist/`: Standalone VIP founding membership waitlist page.
+- `sql/`: Database schemas and migrations (`01_luxea_supabase_schema.sql`).
+- `docs/`: Reference documents and onboarding resources.
 - `assets/css/`: Modular design system (`main.css`, `components.css`, `pages/`).
 - `assets/js/`: Modular JavaScript (`config.js`, `supabase.js`, `modules/`).
-- `luxea_supabase_schema.sql`: SQL database schema for Supabase.
 
 ## Supabase Integration
 - Project Reference: `abzcabikdkmfaijnqbkf`
-- Prefix: `lux_` (`lux_hosts`, `lux_waitlist`, `lux_properties`, bucket: `lux_documents`)
+- Database Tables: `lux_hosts`, `lux_properties`, `lux_waitlist`
+- Storage Buckets: `lux_listings` (property photos), `lux_documents` (host IDs, verification)
