@@ -98,54 +98,22 @@ em {
 }
 
 /* ==========================================================================
-   TOP ANNOUNCEMENT BAR
+   TOP ANNOUNCEMENT BAR (Hidden for minimal luxury aesthetic)
    ========================================================================== */
 .announcement-bar {
-  background-color: var(--color-espresso);
-  color: var(--color-linen);
-  font-size: 0.82rem;
-  padding: 8px 0;
-  position: relative;
-  z-index: 101;
-  letter-spacing: 0.02em;
-}
-
-.announcement-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  position: relative;
-}
-
-.announcement-close {
-  position: absolute;
-  right: 24px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--color-khaki);
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 2px 8px;
-  transition: var(--transition);
-}
-
-.announcement-close:hover {
-  color: var(--color-linen);
+  display: none;
 }
 
 /* ==========================================================================
-   HEADER & NAVIGATION
+   HEADER & NAVIGATION — ULTRA MINIMALIST LUXURY
    ========================================================================== */
 .lux-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: rgba(250, 248, 245, 0.94);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(215, 201, 184, 0.4);
+  background-color: rgba(250, 248, 245, 0.96);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(215, 201, 184, 0.35);
   transition: var(--transition);
 }
 
@@ -153,62 +121,54 @@ em {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 76px;
+  height: 68px;
+  gap: 24px;
 }
 
 .brand-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
 }
 
 .brand-monogram {
-  width: 42px;
-  height: 42px;
-  background: linear-gradient(135deg, var(--color-espresso), var(--color-cocoa));
+  width: 36px;
+  height: 36px;
+  background: var(--color-espresso);
   color: var(--color-linen);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-serif);
-  font-size: 1.6rem;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(74, 52, 42, 0.15);
-}
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .brand-name {
   font-family: var(--font-serif);
-  font-size: 1.55rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 600;
   color: var(--color-espresso);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   line-height: 1;
-}
-
-.brand-sub {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  color: var(--color-camel-dark);
 }
 
 .desktop-nav {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 36px;
 }
 
 .nav-link {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--color-cocoa);
-  transition: var(--transition);
+  letter-spacing: 0.02em;
+  transition: var(--transition-fast);
   position: relative;
   padding: 6px 0;
 }
@@ -218,21 +178,38 @@ em {
   color: var(--color-espresso);
 }
 
-.nav-link.active::after,
-.nav-link:hover::after {
+.nav-link.active::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 2px;
-  background-color: var(--color-camel);
+  height: 1.5px;
+  background-color: var(--color-espresso);
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.currency-toggle {
+  background: transparent;
+  border: 1px solid var(--color-khaki);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.currency-toggle:hover {
+  background: var(--color-linen);
+  border-color: var(--color-camel);
 }
 
 /* ==========================================================================

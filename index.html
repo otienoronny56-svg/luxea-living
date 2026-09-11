@@ -3,349 +3,227 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Luxea Living | Curated Luxury Stays &amp; Host Partner Portal</title>
-  <meta name="description" content="Find a home that elevates life. Curated luxury properties, bespoke villas, and penthouses in Kenya and beyond. Join our exclusive guest waitlist or register as a founding host.">
+  <title>Luxea Living | Luxury Stays &amp; Residences</title>
+  <meta name="description" content="Curated luxury residences, beachfront villas, and sky penthouses across Kenya and beyond.">
   
-  <!-- Google Fonts -->
+  <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Modular CSS System -->
-  <link rel="stylesheet" href="assets/css/main.css">
-  <link rel="stylesheet" href="assets/css/components.css">
-  <link rel="stylesheet" href="assets/css/pages/landing.css">
+  <!-- Modular CSS -->
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/pages/landing.css">
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
 
-  <!-- Supabase JS Client & Config -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/config.js"></script>
-  <script src="assets/js/supabase.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/supabase.js"></script>
 </head>
 <body>
 
-  <!-- Top Announcement Bar -->
-  <div class="announcement-bar" id="announcementBar">
-    <div class="container announcement-content">
-      <span>✨ <strong>Early Access Phase:</strong> Host applications are now open for Kenya's luxury residences. Join the waitlist for exclusive launch benefits.</span>
-      <button class="announcement-close" id="closeAnnouncement" aria-label="Dismiss banner">&times;</button>
-    </div>
-  </div>
-
-  <!-- Main Navigation Header -->
-  <header class="lux-header" id="mainHeader">
+  <!-- Top Clean Header -->
+  <header class="lux-header">
     <div class="container nav-container">
-      <a href="index.html" class="brand-logo">
+      <a href="/" class="brand-logo">
         <span class="brand-monogram">L</span>
-        <div class="brand-text">
-          <span class="brand-name">Luxea</span>
-          <span class="brand-sub">LIVING</span>
-        </div>
+        <span class="brand-name">Luxea</span>
       </a>
 
-      <!-- Desktop Nav Links -->
-      <nav class="desktop-nav" aria-label="Primary Navigation">
-        <a href="/" class="nav-link active">Home</a>
-        <a href="/stays/" class="nav-link">Curated Stays</a>
-        <a href="#experience" class="nav-link">The Standard</a>
-        <a href="/host/" class="nav-link">For Hosts</a>
-        <a href="/waitlist/" class="nav-link">Guest Waitlist</a>
-        <a href="/admin/" class="nav-link">Internal Portal</a>
+      <nav class="desktop-nav">
+        <a href="/stays/" class="nav-link">Browse</a>
+        <a href="/host/" class="nav-link">Host</a>
+        <a href="/waitlist/" class="nav-link">Waitlist</a>
       </nav>
 
-      <!-- Header Action Buttons -->
       <div class="header-actions">
-        <button class="currency-toggle" id="currencyToggle" title="Toggle Currency (USD / KES)">
+        <button class="currency-toggle" id="currencyToggle" aria-label="Toggle currency">
           <span class="currency-label">USD ($)</span>
         </button>
-
-        <a href="/host/" class="btn btn-secondary">
-          <span>Host a Property</span>
-        </a>
-
-        <a href="/waitlist/" class="btn btn-primary">
-          <span>Join VIP Waitlist</span>
-        </a>
+        <a href="/waitlist/" class="btn btn-primary btn-sm">Join Waitlist</a>
       </div>
     </div>
   </header>
 
-  <main>
-    <!-- HERO SECTION -->
-    <section class="hero-section" id="hero">
-      <div class="container hero-container">
-        <div class="hero-text-col">
-          <div class="hero-badge">
-            <span class="badge-dot"></span>
-            <span>Bespoke Residences &amp; Exclusive Retreats</span>
-          </div>
-          <h1 class="hero-title">
-            Find a home that <em>elevates life.</em>
-          </h1>
-          <p class="hero-subtitle">
-            Curated luxury villas, sky penthouses, and private estates. Experience effortless hospitality crafted for the discerning traveler, and elite earning potential for distinguished hosts.
-          </p>
-
-          <!-- Dual Action CTAs -->
-          <div class="hero-cta-group">
-            <a href="/waitlist/" class="btn btn-primary btn-large">
-              <span>Join Guest Waitlist</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-            <a href="/host/" class="btn btn-outline btn-large">
-              <span>Register as a Host Partner</span>
-            </a>
-          </div>
-
-          <!-- Waitlist Stats Bar -->
-          <div class="hero-metrics">
-            <div class="metric-item">
-              <span class="metric-number" id="guestCountDisplay">1,248+</span>
-              <span class="metric-label">Guests Waiting</span>
-            </div>
-            <div class="metric-divider"></div>
-            <div class="metric-item">
-              <span class="metric-number" id="hostCountDisplay">46</span>
-              <span class="metric-label">Curated Hosts</span>
-            </div>
-            <div class="metric-divider"></div>
-            <div class="metric-item">
-              <span class="metric-number">100%</span>
-              <span class="metric-label">Verified Standards</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Hero Visual Feature -->
-        <div class="hero-visual-col">
-          <div class="featured-stay-card">
-            <div class="card-image-wrap">
-              <img src="assets/images/villa.jpg" alt="Villa Seraphina, Diani Beach" class="card-img">
-              <div style="position: absolute; top: 16px; left: 16px; display: flex; gap: 8px;">
-                <span class="badge-tag badge-white">Verified Luxury</span>
-                <span class="badge-tag badge-gold">Featured Stay</span>
-              </div>
-            </div>
-            <div class="card-content">
-              <div class="card-header-row">
-                <div>
-                  <h3 class="card-title">Villa Seraphina Oceanfront</h3>
-                  <p class="card-location">Diani Beach, Galu Coastal Reserve</p>
-                </div>
-                <div style="text-align: right;">
-                  <span class="price-num" data-usd="580" data-kes="75400">$580</span>
-                  <span style="font-size: 0.75rem; color: var(--color-cocoa);">/ night</span>
-                </div>
-              </div>
-              <div class="card-specs">
-                <span>4 Beds</span> • <span>4.5 Baths</span> • <span>5,200 sqft</span>
-              </div>
-              <a href="stays.html" class="btn btn-primary btn-block">Explore Stay Details</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- THE LUXEA STANDARD / WHY LUXEA -->
-    <section class="standard-section" id="experience">
-      <div class="container">
-        <div class="standard-grid">
-          <div class="standard-header-card">
-            <span class="badge-tag badge-gold">THE LUXEA STANDARD</span>
-            <h2 style="font-size: 2.8rem; margin: 12px 0 16px;">Elevating every moment of your stay.</h2>
-            <p style="margin-bottom: 24px;">Unlike mass rental marketplaces, every Luxea Living residence undergoes physical on-site auditing to ensure uncompromised privacy, bespoke finishes, and premium comfort.</p>
-            <a href="stays.html" class="btn btn-secondary">Explore All Stays</a>
-          </div>
-
-          <!-- Features Cards -->
-          <div class="features-grid">
-            <div class="feature-card">
-              <div class="feature-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              </div>
-              <h3 class="feature-title">Verified Identity &amp; Security</h3>
-              <p class="feature-desc">All guests and hosts undergo biometric and government ID verification prior to stay confirmation.</p>
-            </div>
-
-            <div class="feature-card">
-              <div class="feature-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              </div>
-              <h3 class="feature-title">Instant Payouts via M-Pesa</h3>
-              <p class="feature-desc">Seamless automated settlements directly through M-Pesa and local/international bank transfers.</p>
-            </div>
-
-            <div class="feature-card">
-              <div class="feature-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              </div>
-              <h3 class="feature-title">Curated Aesthetic Philosophy</h3>
-              <p class="feature-desc">Linen, warm timbers, travertine and natural light. Only homes that breathe tranquility are accepted.</p>
-            </div>
-
-            <div class="feature-card">
-              <div class="feature-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-              </div>
-              <h3 class="feature-title">Founding Partner Privileges</h3>
-              <p class="feature-desc">0% listing fees for the first 60 days, priority placement in high-spending corporate &amp; expat channels.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- FOR HOSTS BANNER -->
-    <section class="container" id="host-banner-section">
-      <div class="host-banner-card">
-        <div class="host-banner-text">
-          <span class="badge-tag badge-gold">EARLY PARTNER PROGRAM</span>
-          <h2 class="host-banner-title">Host with Luxea Living</h2>
-          <p class="host-banner-desc">
-            Own a distinguished villa, apartment, or sanctuary? We connect you with top-tier international travelers, diplomats, and luxury staycationers. Complete your founding partner application today.
-          </p>
-          <ul class="host-perks-list">
-            <li><span class="perk-check">✓</span> Rapid onboarding review within 24 hours</li>
-            <li><span class="perk-check">✓</span> Flexible M-Pesa &amp; Bank Transfer payout schedule</li>
-            <li><span class="perk-check">✓</span> Dedicated host success manager in Nairobi &amp; Mombasa</li>
-          </ul>
-          <a href="/host/" class="btn btn-primary btn-large">
-            <span>Open Host Registration Form</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-        <div class="host-banner-visual">
-          <img src="/assets/images/penthouse.jpg" alt="Luxea Living host interior" class="host-banner-img">
-        </div>
-      </div>
-    </section>
-
-    <!-- GUEST WAITLIST SECTION (NO MODALS - Direct In-Page VIP Pass Generation) -->
-    <section class="container" id="waitlist-section" style="margin: 60px auto 80px;">
-      <div style="background: linear-gradient(135deg, #FFFFFF, var(--color-linen)); border: 1px solid var(--color-khaki); border-radius: var(--radius-xl); padding: 50px; text-align: center; max-width: 800px; margin: 0 auto; box-shadow: var(--shadow-md);">
-        <span class="badge-tag badge-gold">EXCLUSIVE ACCESS</span>
-        <h2 style="font-size: 2.8rem; margin: 12px 0 14px;">Be first through the door.</h2>
-        <p style="margin-bottom: 28px; max-width: 600px; margin-left: auto; margin-right: auto;">
-          We are launching in curated drops across Kenya's most desirable pockets. Join the waitlist to receive private invitations, preview rates, and $100 travel credit on your first stay.
-        </p>
-        
-        <div id="inlineWaitlistFormContainer">
-          <form class="inline-waitlist-form" id="inlineWaitlistForm" style="max-width: 600px; margin: 0 auto 16px;">
-            <div style="display: flex; gap: 10px; background: #FFFFFF; padding: 6px; border-radius: var(--radius-pill); border: 1px solid var(--color-khaki);">
-              <input type="text" id="inlineGuestName" class="form-control" style="flex: 1; border: none;" placeholder="Your full name" required>
-              <input type="email" id="inlineGuestEmail" class="form-control" style="flex: 1; border: none;" placeholder="Your email address" required>
-              <button type="submit" class="btn btn-primary">Get Early Invite</button>
-            </div>
-          </form>
-          <small style="color: var(--color-cocoa);">No spam. Only private invitations and bespoke property debuts. Or visit our <a href="/waitlist/" style="text-decoration: underline; color: var(--color-camel-dark);">dedicated VIP Waitlist page</a>.</small>
-        </div>
-
-        <!-- In-Page VIP Pass Card (Appears inline without any popup modal) -->
-        <div class="waitlist-card-result hidden" id="waitlistResultCard" style="max-width: 500px; margin: 24px auto 0;">
-          <div class="vip-pass">
-            <div class="pass-header">
-              <div class="pass-logo">LUXEA LIVING</div>
-              <span class="pass-tag">VIP PRIORITY PASS</span>
-            </div>
-            <div class="pass-number">
-              <span class="number-label">WAITLIST POSITION</span>
-              <span class="number-val" id="vipPositionNumber">#1249</span>
-            </div>
-            <div class="pass-details">
-              <div>
-                <span class="p-sub">MEMBER NAME</span>
-                <strong id="vipMemberName">Guest</strong>
-              </div>
-              <div>
-                <span class="p-sub">ACCESS TIER</span>
-                <strong>Founding Circle</strong>
-              </div>
-            </div>
-            <div class="pass-barcode">
-              <div class="barcode-lines"></div>
-              <span class="barcode-text" id="vipCodeText">LXA-PASS-2026</span>
-            </div>
-          </div>
-          <p style="text-align: center; margin: 20px 0 16px;">🎉 Your VIP priority pass has been confirmed. We look forward to hosting you.</p>
-          <div style="display: flex; gap: 12px; justify-content: center;">
-            <button class="btn btn-secondary" id="copyShareLinkBtn">Copy Invite Link</button>
-            <a href="/stays/" class="btn btn-primary">Browse Curated Stays</a>
-          </div>
-        </div>
-
-      </div>
-    </section>
-  </main>
-
-  <!-- Footer -->
-  <footer class="lux-footer">
-    <div class="container footer-container">
-      <div class="footer-brand-col">
-        <div class="brand-logo">
-          <span class="brand-monogram">L</span>
-          <div class="brand-text">
-            <span class="brand-name">Luxea</span>
-            <span class="brand-sub">LIVING</span>
-          </div>
-        </div>
-        <p class="footer-tagline">Curated luxury properties and refined stays in the neighborhoods you love.</p>
-        <p class="footer-copy">&copy; 2026 Luxea Living Ltd. All rights reserved.</p>
-      </div>
-
-      <div class="footer-links-col">
-        <h4 class="footer-heading">Platform</h4>
-        <a href="/stays/" class="footer-link">Curated Stays</a>
-        <a href="/host/" class="footer-link">Become a Host</a>
-        <a href="/waitlist/" class="footer-link">Guest Waitlist</a>
-        <a href="/admin/" class="footer-link">Internal Portal</a>
-      </div>
-
-      <div class="footer-links-col">
-        <h4 class="footer-heading">Locations</h4>
-        <span class="footer-link">Nairobi • Karen &amp; Westlands</span>
-        <span class="footer-link">Diani Beach &amp; Coast</span>
-        <span class="footer-link">Great Rift Valley &amp; Naivasha</span>
-        <span class="footer-link">Watamu Sanctuary</span>
-      </div>
-
-      <div class="footer-links-col">
-        <h4 class="footer-heading">Host Partner Program</h4>
-        <p class="footer-note">List your villa or luxury penthouse:</p>
-        <a href="/host/" class="btn btn-secondary btn-sm">Host Registration Form</a>
+  <main class="landing-content">
+    
+    <!-- 1. HERO BANNER CARD (Phone 1) -->
+    <div class="mobile-hero-banner">
+      <img src="/assets/images/villa.jpg" alt="Villa Seraphina" class="hero-bg-img">
+      <div class="hero-overlay">
+        <h1 class="hero-title-clean">Find a home that elevates life.</h1>
+        <p class="hero-subtitle-clean">Curated properties in the neighborhoods you love.</p>
       </div>
     </div>
-  </footer>
 
-  <!-- Mobile Bottom Nav -->
+    <!-- 2. SEGMENTED SWITCHER (Phone 1: Rent / Buy / Sell -> Stays / Host / Waitlist) -->
+    <div class="segmented-switcher">
+      <a href="/stays/" class="segment-btn active">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 2-2 2m-6 6 7 7a2 2 0 0 1-2.83 2.83l-5.66-5.66a8 8 0 1 1 11.31-11.31z"/></svg>
+        <span>Stays</span>
+      </a>
+      <a href="/host/" class="segment-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Host</span>
+      </a>
+      <a href="/waitlist/" class="segment-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>Waitlist</span>
+      </a>
+    </div>
+
+    <!-- 3. PROPERTY TYPE SCROLL PILLS (Phone 1) -->
+    <div class="property-type-scroll" id="propTypeScroll">
+      <a href="/stays/" class="prop-pill active">All</a>
+      <a href="/stays/?filter=villa" class="prop-pill"><span>🏝️</span> Ocean Villas</a>
+      <a href="/stays/?filter=penthouse" class="prop-pill"><span>🏙️</span> Penthouses</a>
+      <a href="/stays/?filter=townhouse" class="prop-pill"><span>🏡</span> Townhomes</a>
+      <a href="/stays/?filter=suite" class="prop-pill"><span>🛏️</span> Suites</a>
+    </div>
+
+    <!-- 4. FEATURED AREA CARD (Phone 1) -->
+    <a href="/stays/" class="featured-area-card">
+      <div class="featured-area-info">
+        <span class="area-tag">Featured Destination</span>
+        <h3 class="area-name">Diani Beach &amp; Galu</h3>
+        <p class="area-desc">Powder white sands, turquoise waters, and private chef-serviced ocean villas.</p>
+        <div class="area-stats">
+          <span>18 Residences</span>
+          <span class="dot-sep">•</span>
+          <span>Avg. $550/nt</span>
+        </div>
+      </div>
+      <div class="featured-area-thumb">
+        <img src="/assets/images/villa.jpg" alt="Diani Beach">
+      </div>
+    </a>
+
+    <!-- 5. CURATED FOR YOU SECTION (Phone 1) -->
+    <div class="section-head-row">
+      <h2 class="section-head-title">Curated For You</h2>
+      <a href="/stays/" class="section-see-all">See all &rarr;</a>
+    </div>
+
+    <div class="curated-scroll-row">
+      <!-- Card 1 -->
+      <a href="/stays/" class="curated-card">
+        <div class="curated-card-thumb">
+          <img src="/assets/images/villa.jpg" alt="Villa">
+          <span class="curated-badge">Verified</span>
+          <button class="curated-heart" aria-label="Save" onclick="event.preventDefault()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="curated-card-info">
+          <div class="curated-price-row">
+            <span class="curated-price price-num" data-usd="650" data-kes="84500">$650<small style="font-size: 0.72rem; font-weight: normal; color: var(--color-cocoa);"> /nt</small></span>
+            <span class="curated-specs">4 bd • 4.5 ba</span>
+          </div>
+          <h4 class="curated-name">Grand Oasis Infinity Villa</h4>
+          <p class="curated-loc">Galu Beach, Diani</p>
+        </div>
+      </a>
+
+      <!-- Card 2 -->
+      <a href="/stays/" class="curated-card">
+        <div class="curated-card-thumb">
+          <img src="/assets/images/penthouse.jpg" alt="Penthouse">
+          <span class="curated-badge">Exclusive</span>
+          <button class="curated-heart" aria-label="Save" onclick="event.preventDefault()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="curated-card-info">
+          <div class="curated-price-row">
+            <span class="curated-price price-num" data-usd="480" data-kes="62400">$480<small style="font-size: 0.72rem; font-weight: normal; color: var(--color-cocoa);"> /nt</small></span>
+            <span class="curated-specs">3 bd • 3.5 ba</span>
+          </div>
+          <h4 class="curated-name">Skyline Duplex Loft</h4>
+          <p class="curated-loc">Westlands, Nairobi</p>
+        </div>
+      </a>
+
+      <!-- Card 3 -->
+      <a href="/stays/" class="curated-card">
+        <div class="curated-card-thumb">
+          <img src="/assets/images/townhouse.jpg" alt="Townhouse">
+          <span class="curated-badge">Verified</span>
+          <button class="curated-heart" aria-label="Save" onclick="event.preventDefault()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="curated-card-info">
+          <div class="curated-price-row">
+            <span class="curated-price price-num" data-usd="390" data-kes="50700">$390<small style="font-size: 0.72rem; font-weight: normal; color: var(--color-cocoa);"> /nt</small></span>
+            <span class="curated-specs">3 bd • 3 ba</span>
+          </div>
+          <h4 class="curated-name">Botanica Courtyard</h4>
+          <p class="curated-loc">Karen, Nairobi</p>
+        </div>
+      </a>
+
+      <!-- Card 4 -->
+      <a href="/stays/" class="curated-card">
+        <div class="curated-card-thumb">
+          <img src="/assets/images/suite.jpg" alt="Suite">
+          <span class="curated-badge">New</span>
+          <button class="curated-heart" aria-label="Save" onclick="event.preventDefault()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="curated-card-info">
+          <div class="curated-price-row">
+            <span class="curated-price price-num" data-usd="220" data-kes="28600">$220<small style="font-size: 0.72rem; font-weight: normal; color: var(--color-cocoa);"> /nt</small></span>
+            <span class="curated-specs">1 bd • 1 ba</span>
+          </div>
+          <h4 class="curated-name">Olive Garden Balcony Suite</h4>
+          <p class="curated-loc">Kitisuru, Nairobi</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- 6. HOSTING CALLOUT (Minimal) -->
+    <a href="/host/" class="featured-area-card" style="margin-top: 10px; background: linear-gradient(135deg, #FFFFFF, var(--color-linen));">
+      <div class="featured-area-info">
+        <span class="area-tag">Partner Program</span>
+        <h3 class="area-name">Host with Luxea</h3>
+        <p class="area-desc">List your luxury residence with Kenya's premier boutique stay network. Automated M-Pesa &amp; Bank payouts.</p>
+        <span class="btn btn-secondary btn-sm" style="margin-top: 6px; display: inline-flex;">Start Registration &rarr;</span>
+      </div>
+      <div class="featured-area-thumb">
+        <img src="/assets/images/penthouse.jpg" alt="Host with Luxea">
+      </div>
+    </a>
+
+  </main>
+
+  <!-- Mobile Bottom Nav (Exact Match to Phone 1) -->
   <nav class="mobile-bottom-nav">
     <a href="/" class="mobile-nav-item active">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-      <span>Home</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>Discover</span>
     </a>
     <a href="/stays/" class="mobile-nav-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
       <span>Browse</span>
     </a>
     <a href="/host/" class="mobile-nav-item">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v6M9 14h6"/></svg>
       <span>Host</span>
     </a>
-    <a href="/admin/" class="mobile-nav-item">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-      <span>Admin</span>
+    <a href="/waitlist/" class="mobile-nav-item">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>Waitlist</span>
     </a>
   </nav>
 
   <script src="/assets/js/main.js"></script>
   <script type="module">
     import { initCurrency } from '/assets/js/modules/currency.js';
-    import { initWaitlist } from '/assets/js/modules/waitlist.js';
-
     document.addEventListener('DOMContentLoaded', () => {
       initCurrency();
-      initWaitlist();
     });
   </script>
 </body>
