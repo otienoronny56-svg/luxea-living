@@ -368,7 +368,7 @@ export function initAdminDashboard() {
     }
     if (hostsEmpty) hostsEmpty.classList.add('hidden');
 
-    filtered.forEach(h => {
+    filtered.forEach((h, idx) => {
       const ref = h.refId || h.ref_id;
       const name = h.fullName || h.full_name;
       const phone = h.phone || '';
@@ -389,22 +389,22 @@ export function initAdminDashboard() {
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>
-          <button class="btn-table-action btn-copy-ref copy-ref-btn" data-ref="${ref}" title="Click to copy Ref ID">
-            <span>${ref}</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          </button>
+        <td style="text-align: center; color: var(--color-cocoa-light); font-weight: 700; font-size: 0.78rem; width: 42px;">
+          ${idx + 1}
         </td>
 
         <td>
-          <div class="host-cell-name">${name}</div>
-          <div class="host-cell-sub">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <span>${email}</span>
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span class="host-cell-name">${name}</span>
+            <button class="btn-copy-micro copy-ref-btn" data-ref="${ref}" title="Click to copy Ref ID: ${ref}">
+              <span>${ref}</span>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            </button>
           </div>
-          <div class="host-cell-sub">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            <span>${phone}</span>
+          <div class="host-cell-sub" style="margin-top: 3px;">
+            <span title="${email}" style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>
+            <span>•</span>
+            <span style="white-space: nowrap;">${phone}</span>
           </div>
         </td>
 
@@ -414,38 +414,38 @@ export function initAdminDashboard() {
         </td>
 
         <td>
-          <span style="font-weight: 600; font-size: 0.82rem;">${type}</span>
+          <span style="font-weight: 600; font-size: 0.78rem; color: #241812;">${type}</span>
         </td>
 
         <td>
-          <span class="status-chip ${payMethod === 'M-Pesa' ? 'status-active' : 'chip-neutral'}">${payMethod}</span>
-          <div style="font-family: monospace; font-size: 0.74rem; color: var(--color-cocoa); margin-top: 3px;">
+          <span class="status-chip ${payMethod === 'M-Pesa' ? 'status-active' : 'chip-neutral'}" style="padding: 2px 7px; font-size: 0.68rem;">${payMethod}</span>
+          <div style="font-family: monospace; font-size: 0.72rem; color: var(--color-cocoa); margin-top: 2px;">
             ${payNumber}
           </div>
         </td>
 
         <td>
-          <div style="display: flex; gap: 4px; flex-direction: column;">
-            ${idUrl ? `<a href="${idUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect" style="padding: 2px 8px; font-size: 0.68rem; justify-content: center;">📄 ID Document ↗</a>` : `<span style="font-size: 0.72rem; color: #888;">ID on File</span>`}
-            <span style="font-size: 0.72rem; color: #B28756; font-weight: 700;">📷 ${Array.isArray(photoUrls) ? photoUrls.length : 3} Verified Photos</span>
+          <div style="display: flex; gap: 3px; flex-direction: column;">
+            ${idUrl ? `<a href="${idUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect" style="padding: 2px 7px; font-size: 0.68rem; justify-content: center;">📄 ID Document ↗</a>` : `<span style="font-size: 0.7rem; color: #888;">ID on File</span>`}
+            <span style="font-size: 0.7rem; color: #B28756; font-weight: 700;">📷 ${Array.isArray(photoUrls) ? photoUrls.length : 3} Photos</span>
           </div>
         </td>
 
         <td>
           <!-- Quick Inline Status Switcher -->
-          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}">
+          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="padding: 4px 8px; font-size: 0.74rem;">
             <option value="pending_review" ${status === 'pending_review' ? 'selected' : ''}>⏳ Pending</option>
             <option value="approved" ${status === 'approved' ? 'selected' : ''}>✅ Approved</option>
             <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
           </select>
         </td>
 
-        <td>
-          <div class="table-action-btns">
-            <a href="/admin/host-dossier.html?ref=${ref}" class="btn-table-action btn-inspect" title="Open full host application dossier">
-              <span>Inspect Dossier ↗</span>
+        <td style="text-align: right;">
+          <div class="table-action-btns" style="justify-content: flex-end;">
+            <a href="/admin/host-dossier.html?ref=${ref}" class="btn-table-action btn-inspect" title="Open full host application dossier" style="padding: 4px 8px; font-size: 0.72rem;">
+              <span>Inspect ↗</span>
             </a>
-            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-wa-action" title="Open direct WhatsApp conversation with host">
+            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-wa-action" title="Open direct WhatsApp conversation with host" style="padding: 4px 8px; font-size: 0.72rem;">
               <span>WhatsApp</span>
             </a>
           </div>

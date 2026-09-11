@@ -19,9 +19,22 @@ const corsHeaders = {
 };
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-const SENDER_EMAIL = Deno.env.get('SENDER_EMAIL') || 'LUXEA LIVING Concierge <concierge@luxealiving.co.ke>';
 const ADMIN_EMAIL = 'otienoronny56@gmail.com';
 const APP_BASE_URL = 'https://luxealiving.co.ke';
+
+/**
+ * Format sender with unmistakable brand authority so email clients (Gmail, Apple Mail)
+ * prominently display "Luxea Living" or "Luxea Living | Partner Desk" rather than generic "concierge".
+ */
+function getSenderEmail(displayName: string = 'Luxea Living'): string {
+  const custom = Deno.env.get('SENDER_EMAIL');
+  let emailAddr = 'concierge@luxealiving.co.ke';
+  if (custom) {
+    const match = custom.match(/<([^>]+)>/);
+    emailAddr = match ? match[1] : custom.trim();
+  }
+  return `"${displayName}" <${emailAddr}>`;
+}
 
 // In-memory 60-second deduplication cache to prevent duplicate sends
 const recentDispatches = new Map<string, number>();
@@ -266,7 +279,7 @@ Deno.serve(async (req) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              from: SENDER_EMAIL,
+              from: getSenderEmail('Luxea Living | Partner Desk'),
               to: [hostEmail],
               subject: `Application Received: Under Verification & Audit [${refId}] | Luxea Living`,
               html: waitingHtml,
@@ -501,7 +514,7 @@ Deno.serve(async (req) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              from: SENDER_EMAIL,
+              from: getSenderEmail('Luxea Living | Partner Desk'),
               to: [hostEmail],
               subject: `🎉 Verification Approved! Activate Your Luxea Host Account [${refId}]`,
               html: approvedHtml,
@@ -518,13 +531,12 @@ Deno.serve(async (req) => {
     // =========================================================================
     // 3. VIP FOUNDING CIRCLE GUEST WELCOME & DIGITAL PASS
     // =========================================================================
-    if (emailType === 'guest_welcome' || emailType === 'waitlist_welcome' || emailType === 'member_welcome') {
+    if (emailType === 'guest_welcome' || emailType === 'waitlist_signup') {
       const guestEmail = record.email;
-      const guestName = record.full_name || record.fullName || 'Valued Member';
-      const passNumber = record.pass_number || record.passNumber || 'LX-2026-FOUNDING';
-      const passCode = record.pass_code || record.passCode || 'LUXEA-VIP';
-      const destinations = record.preferred_destinations || record.preferredDestinations || 'Ruaka, Westlands, Diani Coast, Karen';
-      const tier = record.tier || 'Founding Circle';
+      const guestName = record.full_name || record.name || 'Founding Circle Member';
+      const passNumber = record.pass_number || `LX-FOUNDING-${Math.floor(100 + Math.random() * 900)}`;
+      const passCode = record.pass_code || Math.random().toString(36).substring(2, 8).toUpperCase();
+      const destinations = record.preferred_destinations || 'Nairobi & Coast Curated Stays';
 
       if (guestEmail) {
         if (isDuplicate('guest_welcome', guestEmail)) {
@@ -536,7 +548,7 @@ Deno.serve(async (req) => {
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Welcome to the Luxea Living Founding Circle</title>
+<title>Welcome to the Founding Circle | Luxea Living</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0B0806; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #EDE8E3;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0B0806; padding: 40px 16px;">
@@ -548,93 +560,92 @@ Deno.serve(async (req) => {
           <tr>
             <td style="padding: 36px 40px 24px; text-align: center; border-bottom: 1px solid rgba(178, 135, 86, 0.15); background: linear-gradient(180deg, rgba(178, 135, 86, 0.08) 0%, rgba(19, 14, 10, 0) 100%);">
               <div style="font-size: 22px; letter-spacing: 5px; font-weight: 700; color: #D4AF37; margin-bottom: 6px;">LUXEA LIVING</div>
-              <div style="font-size: 11px; letter-spacing: 2px; color: #A0958C; text-transform: uppercase;">Curated Residences • Founding Circle VIP</div>
+              <div style="font-size: 11px; letter-spacing: 2px; color: #A0958C; text-transform: uppercase;">Curated Private Residences • Kenya</div>
             </td>
           </tr>
 
-          <!-- Main Content -->
+          <!-- Hero Body -->
           <tr>
             <td style="padding: 36px 40px;">
-              <div style="display: inline-block; background: rgba(178, 135, 86, 0.15); border: 1px solid rgba(178, 135, 86, 0.4); border-radius: 20px; padding: 4px 14px; font-size: 12px; color: #D4AF37; font-weight: 600; letter-spacing: 1px; margin-bottom: 16px;">
-                ${tier.toUpperCase()} MEMBERSHIP
+              <!-- Welcome Chip -->
+              <div style="display: inline-block; background: rgba(178, 135, 86, 0.15); border: 1px solid #B28756; border-radius: 20px; padding: 5px 14px; font-size: 11px; color: #D4AF37; font-weight: 700; letter-spacing: 1px; margin-bottom: 16px;">
+                ✦ FOUNDING CIRCLE INDUCTION
               </div>
-              <h1 style="font-size: 22px; color: #FFFFFF; font-weight: 600; margin: 0 0 16px; line-height: 1.3;">
-                Welcome to the Circle, ${guestName}
+              <h1 style="font-size: 24px; color: #FFFFFF; font-weight: 600; margin: 0 0 16px; line-height: 1.3;">
+                Welcome to Quiet Luxury, ${guestName}
               </h1>
               <p style="font-size: 14px; line-height: 1.7; color: #C5BCB3; margin: 0 0 24px;">
-                You are now officially inducted into Kenya's premier curated residences collective. Your digital membership credentials have been minted and linked to your profile:
+                You are officially inducted into the <strong style="color: #EDE8E3;">Luxea Living Founding Circle</strong>. As an inaugural member, you receive privileged access to Kenya's most distinguished private architectural villas, penthouses, and bespoke concierge staging.
               </p>
 
               <!-- VIP Digital Pass Card -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1B1510 0%, #0E0A07 100%); border: 1px solid #B28756; border-radius: 10px; margin-bottom: 28px; box-shadow: inset 0 1px 0 rgba(212, 175, 55, 0.3);">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #1C1510 0%, #0E0B08 100%); border: 1px solid #D4AF37; border-radius: 12px; margin-bottom: 28px; box-shadow: inset 0 1px 0 rgba(212, 175, 55, 0.3);">
                 <tr>
                   <td style="padding: 24px;">
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td>
-                          <div style="font-size: 10px; letter-spacing: 2px; color: #A0958C; text-transform: uppercase;">VIP Membership Pass</div>
-                          <div style="font-size: 22px; color: #D4AF37; font-family: monospace; font-weight: 700; letter-spacing: 1.5px; margin-top: 4px;">
-                            ${passNumber}
+                          <div style="font-size: 10px; letter-spacing: 2px; color: #B28756; text-transform: uppercase; font-weight: 700;">VIP Digital Pass</div>
+                          <div style="font-size: 18px; font-weight: 700; color: #FFFFFF; margin-top: 4px;">Founding Member</div>
+                        </td>
+                        <td align="right">
+                          <div style="display: inline-block; border: 1px solid #D4AF37; padding: 4px 10px; border-radius: 4px; font-size: 10px; color: #D4AF37; font-weight: 700; letter-spacing: 1px;">
+                            INDUCTION 2026
                           </div>
-                        </td>
-                        <td align="right" valign="top">
-                          <span style="font-size: 11px; background: rgba(212, 175, 55, 0.15); border: 1px solid #D4AF37; color: #D4AF37; padding: 3px 10px; border-radius: 4px; font-weight: 600;">
-                            ACTIVE
-                          </span>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colspan="2" style="padding-top: 20px; border-top: 1px dashed rgba(178, 135, 86, 0.2); margin-top: 16px;">
-                          <table width="100%" cellpadding="0" cellspacing="0">
-                            <tr>
-                              <td>
-                                <div style="font-size: 10px; color: #8F847C; text-transform: uppercase;">Pass Code</div>
-                                <div style="font-size: 13px; color: #EDE8E3; font-family: monospace; font-weight: 600; margin-top: 2px;">${passCode}</div>
-                              </td>
-                              <td align="right">
-                                <div style="font-size: 10px; color: #8F847C; text-transform: uppercase;">Tier</div>
-                                <div style="font-size: 13px; color: #D4AF37; font-weight: 600; margin-top: 2px;">${tier}</div>
-                              </td>
-                            </tr>
-                          </table>
                         </td>
                       </tr>
                     </table>
+
+                    <div style="margin: 20px 0; border-top: 1px dashed rgba(178, 135, 86, 0.3); border-bottom: 1px dashed rgba(178, 135, 86, 0.3); padding: 14px 0;">
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td>
+                            <div style="font-size: 10px; color: #8F847C; text-transform: uppercase;">Pass Number</div>
+                            <div style="font-size: 14px; font-family: monospace; font-weight: 700; color: #D4AF37; margin-top: 2px;">${passNumber}</div>
+                          </td>
+                          <td align="right">
+                            <div style="font-size: 10px; color: #8F847C; text-transform: uppercase;">Invitation Key</div>
+                            <div style="font-size: 14px; font-family: monospace; font-weight: 700; color: #EDE8E3; margin-top: 2px;">${passCode}</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+
+                    <div style="font-size: 11px; color: #A0958C;">
+                      Preferred Locales: <span style="color: #EDE8E3;">${destinations}</span>
+                    </div>
                   </td>
                 </tr>
               </table>
 
-              <!-- Exclusive Founding Privileges -->
+              <!-- Exclusive Privileges -->
               <div style="font-size: 12px; color: #D4AF37; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 14px;">
-                Your Exclusive Privileges
+                Your Exclusive Founding Privileges
               </div>
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 28px;">
                 <tr>
-                  <td width="28" valign="top" style="color: #D4AF37; font-size: 16px; line-height: 1.2;">✦</td>
-                  <td style="padding-bottom: 12px; font-size: 13px; color: #C5BCB3; line-height: 1.5;">
-                    <strong style="color: #FFFFFF;">Priority Reservation Rights:</strong> Instant first-access booking across Ruaka penthouses, Westlands sky duplexes, Diani oceanfront infinity villas, and Karen sanctuaries.
+                  <td style="padding: 10px 0; font-size: 13px; color: #C5BCB3; line-height: 1.6;">
+                    <strong style="color: #FFFFFF;">First Access to Rare Stays:</strong> Priority reservation windows 48 hours before general public release for seasonal holiday releases in Karen, Muthaiga, and Diani Beach.
                   </td>
                 </tr>
                 <tr>
-                  <td width="28" valign="top" style="color: #D4AF37; font-size: 16px; line-height: 1.2;">✦</td>
-                  <td style="padding-bottom: 12px; font-size: 13px; color: #C5BCB3; line-height: 1.5;">
+                  <td style="padding: 10px 0; font-size: 13px; color: #C5BCB3; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.05);">
                     <strong style="color: #FFFFFF;">Bespoke Concierge Staging:</strong> Complimentary private airport transfers, high-speed fiber guarantee, and pre-stocked artisanal refreshments upon arrival.
                   </td>
                 </tr>
                 <tr>
-                  <td width="28" valign="top" style="color: #D4AF37; font-size: 16px; line-height: 1.2;">✦</td>
-                  <td style="font-size: 13px; color: #C5BCB3; line-height: 1.5;">
-                    <strong style="color: #FFFFFF;">Preferred Pricing &amp; Extended Stays:</strong> Founding rates locked for your first 12 months with flexible cancellation terms.
+                  <td style="padding: 10px 0; font-size: 13px; color: #C5BCB3; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <strong style="color: #FFFFFF;">Direct Host Access:</strong> Personalized itineraries curated directly by our local property custodians.
                   </td>
                 </tr>
               </table>
 
               <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 28px 0 24px;">
                 <tr>
                   <td align="center">
-                    <a href="${APP_BASE_URL}/stays/" style="display: inline-block; background: #B28756; color: #0B0806; font-weight: 700; font-size: 13px; text-decoration: none; padding: 14px 32px; border-radius: 8px; letter-spacing: 0.5px;">
-                      Explore Curated Stays Catalog ↗
+                    <a href="${APP_BASE_URL}/stays/" style="display: inline-block; background: linear-gradient(135deg, #D4AF37 0%, #B28756 100%); color: #0B0806; font-weight: 700; font-size: 14px; text-decoration: none; padding: 15px 36px; border-radius: 8px; letter-spacing: 0.5px; box-shadow: 0 4px 14px rgba(178, 135, 86, 0.4);">
+                      Explore Curated Stays Portfolio →
                     </a>
                   </td>
                 </tr>
@@ -673,7 +684,7 @@ Deno.serve(async (req) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              from: SENDER_EMAIL,
+              from: getSenderEmail('Luxea Living | Private Stays'),
               to: [guestEmail],
               subject: `Welcome to the Founding Circle — Your Luxea Living Pass [${passNumber}]`,
               html: guestHtml,
@@ -695,7 +706,7 @@ Deno.serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: SENDER_EMAIL,
+            from: getSenderEmail('Luxea Living System'),
             to: [ADMIN_EMAIL],
             subject: `✨ New VIP Founding Member: ${guestName} (${passNumber})`,
             html: `

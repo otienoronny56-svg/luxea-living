@@ -612,11 +612,11 @@
   background: #FBF9F5;
   color: #241812;
   font-family: var(--font-sans);
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 16px 18px;
+  letter-spacing: 0.04em;
+  padding: 13px 10px;
   border-bottom: 1px solid rgba(178, 150, 125, 0.2);
   white-space: nowrap;
   position: sticky;
@@ -625,11 +625,33 @@
 }
 
 .lux-data-table tbody td {
-  padding: 16px 18px;
+  padding: 12px 10px;
   border-bottom: 1px solid rgba(178, 150, 125, 0.1);
   color: #241812;
   vertical-align: middle;
   transition: background 0.15s ease;
+}
+
+.btn-copy-micro {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(178, 150, 125, 0.1);
+  border: 1px solid rgba(178, 150, 125, 0.25);
+  color: var(--color-camel-dark);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-copy-micro:hover {
+  background: var(--color-camel-dark);
+  color: #FFFFFF;
+  border-color: var(--color-camel-dark);
 }
 
 .lux-data-table tbody tr:hover td {
