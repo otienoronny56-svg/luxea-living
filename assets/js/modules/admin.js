@@ -25,7 +25,10 @@ export function initAdminDashboard() {
   const hostsTableBody = document.getElementById('hostsTableBody');
   const staysTableBody = document.getElementById('staysTableBody');
   const guestsTableBody = document.getElementById('guestsTableBody');
+  const hostWaitlistTableBody = document.getElementById('hostWaitlistTableBody');
   const hostsEmpty = document.getElementById('hostsEmptyState');
+  const guestsEmpty = document.getElementById('guestsEmptyState');
+  const hostWaitlistEmpty = document.getElementById('hostWaitlistEmptyState');
   const searchInput = document.getElementById('adminSearchInput');
   const statusPillsWrap = document.getElementById('statusPillsFilter');
 
@@ -33,13 +36,16 @@ export function initAdminDashboard() {
   const tabHosts = document.getElementById('tabHostsBtn');
   const tabStays = document.getElementById('tabStaysBtn');
   const tabGuests = document.getElementById('tabGuestsBtn');
+  const tabHostWaitlist = document.getElementById('tabHostWaitlistBtn');
   const hostsPane = document.getElementById('hostsViewPane');
   const staysPane = document.getElementById('staysViewPane');
   const guestsPane = document.getElementById('guestsViewPane');
+  const hostWaitlistPane = document.getElementById('hostWaitlistViewPane');
 
   // CSV Export Buttons
   const exportHostsBtn = document.getElementById('exportHostsCsvBtn');
   const exportGuestsBtn = document.getElementById('exportGuestsCsvBtn');
+  const exportHostWaitlistBtn = document.getElementById('exportHostWaitlistCsvBtn');
 
   // Inspection Modal
   const inspectModal = document.getElementById('hostInspectModal');
@@ -56,6 +62,7 @@ export function initAdminDashboard() {
   let cachedHosts = [];
   let cachedStays = [];
   let cachedGuests = [];
+  let cachedHostWaitlist = [];
   let currentStatusFilter = 'all';
 
   // =========================================================================
@@ -121,10 +128,14 @@ export function initAdminDashboard() {
       cachedHosts = await window.LuxeaDB.fetchHosts();
       cachedGuests = await window.LuxeaDB.fetchWaitlist();
       cachedStays = await window.LuxeaDB.fetchProperties();
+      cachedHostWaitlist = typeof window.LuxeaDB.fetchHostWaitlist === 'function'
+        ? await window.LuxeaDB.fetchHostWaitlist()
+        : JSON.parse(localStorage.getItem('luxea_host_waitlist') || '[]');
     } else {
       cachedHosts = JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
       cachedGuests = JSON.parse(localStorage.getItem('luxea_waitlist_guests') || '[]');
       cachedStays = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+      cachedHostWaitlist = JSON.parse(localStorage.getItem('luxea_host_waitlist') || '[]');
     }
 
     // Fallback stays catalog
@@ -156,6 +167,7 @@ export function initAdminDashboard() {
     const rejectedHosts = cachedHosts.filter(h => h.review_status === 'rejected').length;
     const totalStays = cachedStays.length;
     const totalGuests = cachedGuests.length;
+    const totalHostWaitlist = cachedHostWaitlist.length;
 
     // Top KPI Numbers
     const elTotalHosts = document.getElementById('metricTotalHosts');
@@ -174,9 +186,11 @@ export function initAdminDashboard() {
     const tHost = document.getElementById('hostTabCounter');
     const tStays = document.getElementById('staysTabCounter');
     const tGuest = document.getElementById('guestTabCounter');
+    const tHostWaitlist = document.getElementById('hostWaitlistTabCounter');
     if (tHost) tHost.textContent = totalHosts;
     if (tStays) tStays.textContent = totalStays;
     if (tGuest) tGuest.textContent = totalGuests;
+    if (tHostWaitlist) tHostWaitlist.textContent = totalHostWaitlist;
 
     // Filter pill count badges
     const pAll = document.getElementById('pillCountAll');
@@ -337,6 +351,7 @@ export function initAdminDashboard() {
     renderHostsTable(filterQuery, currentStatusFilter);
     renderStaysTable(filterQuery);
     renderGuestsTable(filterQuery);
+    renderHostWaitlistTable(filterQuery);
   }
 
   // =========================================================================
@@ -752,6 +767,89 @@ export function initAdminDashboard() {
   }
 
   // =========================================================================
+  // 6B. HOST PARTNER WAITLIST TABLE (partners.luxealiving.co.ke)
+  // =========================================================================
+  function renderHostWaitlistTable(query = '') {
+    if (!hostWaitlistTableBody) return;
+    hostWaitlistTableBody.innerHTML = '';
+
+    const filtered = cachedHostWaitlist.filter(h =>
+      !query ||
+      (h.full_name || h.fullName || '').toLowerCase().includes(query) ||
+      (h.email || '').toLowerCase().includes(query) ||
+      (h.phone || '').includes(query) ||
+      (h.property_name || h.propertyName || '').toLowerCase().includes(query) ||
+      (h.region || '').toLowerCase().includes(query) ||
+      (h.property_type || h.propertyType || '').toLowerCase().includes(query) ||
+      (h.pass_number || h.passNumber || '').toLowerCase().includes(query)
+    );
+
+    if (filtered.length === 0) {
+      if (hostWaitlistEmpty) hostWaitlistEmpty.classList.remove('hidden');
+      return;
+    }
+    if (hostWaitlistEmpty) hostWaitlistEmpty.classList.add('hidden');
+
+    filtered.forEach(item => {
+      const pass = item.pass_number || item.passNumber || '#LXA-HOST';
+      const name = item.full_name || item.fullName || 'Founding Host';
+      const email = item.email || '';
+      const phone = item.phone || '—';
+      const propName = item.property_name || item.propertyName || 'Luxury Residence';
+      const propType = item.property_type || item.propertyType || 'Villa';
+      const beds = item.bedrooms || 1;
+      const region = item.region || 'Kenya';
+      const readiness = item.operational_status || item.operationalStatus || 'Active';
+      const link = item.portfolio_link || item.portfolioLink || '';
+      const notes = item.notes || '';
+      const tier = item.tier || 'Founding Host Partner';
+      const date = item.created_at ? new Date(item.created_at).toLocaleDateString('en-GB') : (item.timestamp || 'Recent');
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <strong style="font-family: monospace; color: #D4AF37;">${pass}</strong>
+        </td>
+        <td>
+          <div class="host-cell-name">${name}</div>
+        </td>
+        <td>
+          <a href="mailto:${email}" style="color: #4A342A; text-decoration: underline;">${email}</a>
+        </td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span>${phone}</span>
+            ${phone && phone !== '—' ? `<a href="https://wa.me/${phone.replace(/[^0-9]/g, '')}" target="_blank" title="Chat on WhatsApp" style="color: #22C55E; font-size: 13px; text-decoration: none;">💬</a>` : ''}
+          </div>
+        </td>
+        <td>
+          <strong>${propName}</strong><br>
+          <small style="color: var(--color-cocoa);">${propType} • ${beds} Beds</small>
+        </td>
+        <td>
+          <span style="font-weight: 600;">${region}</span>
+        </td>
+        <td>
+          <span class="status-chip chip-neutral">${readiness}</span>
+        </td>
+        <td>
+          ${link ? `<a href="${link}" target="_blank" style="color: #B28756; text-decoration: underline; font-size: 0.78rem;" title="${link}">View Link ↗</a><br>` : ''}
+          ${notes ? `<small style="color: var(--color-cocoa); font-style: italic;" title="${notes}">"${notes.slice(0, 30)}${notes.length > 30 ? '...' : ''}"</small>` : '<span style="color: #A3968B;">—</span>'}
+        </td>
+        <td>
+          <span class="status-chip chip-gold">${tier}</span><br>
+          <small style="color: #22C55E; font-weight: 600;">0% for 90d</small>
+        </td>
+        <td>
+          <small style="color: var(--color-cocoa);">${date}</small>
+        </td>
+      `;
+
+      hostWaitlistTableBody.appendChild(tr);
+    });
+  }
+
+  // =========================================================================
   // 7. TOOLBAR, SEARCH & FILTER EVENTS
   // =========================================================================
   searchInput?.addEventListener('input', () => {
@@ -772,15 +870,18 @@ export function initAdminDashboard() {
   tabHosts?.addEventListener('click', () => switchTab('hosts'));
   tabStays?.addEventListener('click', () => switchTab('stays'));
   tabGuests?.addEventListener('click', () => switchTab('guests'));
+  tabHostWaitlist?.addEventListener('click', () => switchTab('hostWaitlist'));
 
   function switchTab(tab) {
     tabHosts?.classList.toggle('active', tab === 'hosts');
     tabStays?.classList.toggle('active', tab === 'stays');
     tabGuests?.classList.toggle('active', tab === 'guests');
+    tabHostWaitlist?.classList.toggle('active', tab === 'hostWaitlist');
 
     hostsPane?.classList.toggle('hidden', tab !== 'hosts');
     staysPane?.classList.toggle('hidden', tab !== 'stays');
     guestsPane?.classList.toggle('hidden', tab !== 'guests');
+    hostWaitlistPane?.classList.toggle('hidden', tab !== 'hostWaitlist');
   }
 
   // =========================================================================
@@ -829,6 +930,32 @@ export function initAdminDashboard() {
     ]);
 
     downloadCsv('luxea_vip_waitlist.csv', [headers.join(','), ...rows.map(r => r.join(','))].join('\n'));
+  });
+
+  exportHostWaitlistBtn?.addEventListener('click', () => {
+    if (cachedHostWaitlist.length === 0) {
+      if (window.showToast) window.showToast('No host waitlist members to export.');
+      return;
+    }
+
+    const headers = ['Pass #', 'Full Name', 'Email', 'Phone', 'Property Name', 'Property Type', 'Bedrooms', 'Region', 'Readiness', 'Portfolio Link', 'Notes', 'Tier', 'Date'];
+    const rows = cachedHostWaitlist.map(h => [
+      `"${h.pass_number || h.passNumber || ''}"`,
+      `"${h.full_name || h.fullName || ''}"`,
+      `"${h.email || ''}"`,
+      `"${h.phone || ''}"`,
+      `"${h.property_name || h.propertyName || ''}"`,
+      `"${h.property_type || h.propertyType || ''}"`,
+      h.bedrooms || 1,
+      `"${h.region || ''}"`,
+      `"${h.operational_status || h.operationalStatus || ''}"`,
+      `"${h.portfolio_link || h.portfolioLink || ''}"`,
+      `"${(h.notes || '').replace(/"/g, '""')}"`,
+      `"${h.tier || 'Founding Host Partner'}"`,
+      `"${h.created_at || h.timestamp || ''}"`
+    ]);
+
+    downloadCsv('luxea_founding_host_waitlist.csv', [headers.join(','), ...rows.map(r => r.join(','))].join('\n'));
   });
 
   function downloadCsv(filename, content) {

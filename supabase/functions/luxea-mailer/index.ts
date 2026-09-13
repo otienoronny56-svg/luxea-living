@@ -89,6 +89,9 @@ Deno.serve(async (req) => {
     } else if (payload.table === 'lux_waitlist' && payload.type === 'INSERT') {
       emailType = 'guest_welcome';
       record = payload.record || {};
+    } else if (payload.table === 'lux_host_waitlist' && payload.type === 'INSERT') {
+      emailType = 'host_waitlist_welcome';
+      record = payload.record || {};
     }
 
     const results = [];
@@ -727,6 +730,233 @@ Deno.serve(async (req) => {
         });
       } catch (adminErr) {
         console.warn('Admin alert error:', adminErr);
+      }
+    }
+
+    // =========================================================================
+    // 4. FOUNDING HOST WAITLIST WELCOME & PRIORITY PASS DISPATCH
+    // =========================================================================
+    if (
+      emailType === 'host_waitlist_welcome' ||
+      emailType === 'host_waitlist' ||
+      emailType === 'partner_waitlist'
+    ) {
+      const hostEmail = record.email;
+      const hostName = record.full_name || record.fullName || 'Founding Partner';
+      const passNumber = record.pass_number || record.passNumber || '#LXA-HOST-001';
+      const passCode = record.pass_code || record.passCode || 'LXA-FOUNDING';
+      const propName = record.property_name || record.propertyName || 'Luxury Residence';
+      const propType = record.property_type || record.propertyType || 'Villa / Penthouse';
+      const region = record.region || 'Kenya';
+      const bedrooms = record.bedrooms || 1;
+      const phone = record.phone || 'Not provided';
+      const operationalStatus = record.operational_status || record.operationalStatus || 'Active / Ready';
+      const portfolioLink = record.portfolio_link || record.portfolioLink || '';
+      const notes = record.notes || '';
+
+      if (hostEmail) {
+        if (isDuplicate('host_waitlist_welcome', hostEmail)) {
+          console.log(`⏳ Debounced duplicate host_waitlist_welcome for ${hostEmail}`);
+          results.push({ recipient: hostEmail, type: 'host_waitlist_welcome', status: 'debounced_duplicate' });
+        } else {
+          const hostWaitlistHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Founding Host Partner Pass | Luxea Living</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0B0806; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #EDE8E3;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #0B0806; padding: 40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 620px; background-color: #140E0A; border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.8);">
+          
+          <!-- Header Banner -->
+          <tr>
+            <td style="padding: 38px 40px 26px; text-align: center; border-bottom: 1px solid rgba(212, 175, 55, 0.2); background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, rgba(20, 14, 10, 0) 100%);">
+              <div style="font-size: 24px; letter-spacing: 6px; font-weight: 700; color: #D4AF37; margin-bottom: 6px;">LUXEA LIVING</div>
+              <div style="font-size: 11px; letter-spacing: 2.5px; color: #A0958C; text-transform: uppercase;">Founding Host Circle • Executive Partner Desk</div>
+            </td>
+          </tr>
+
+          <!-- Hero Body -->
+          <tr>
+            <td style="padding: 36px 40px;">
+              <div style="display: inline-block; background: rgba(212, 175, 55, 0.15); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 20px; padding: 5px 16px; font-size: 11px; color: #F5D77F; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px;">
+                ✦ FOUNDING HOST PARTNER INDUCTION
+              </div>
+
+              <h1 style="font-size: 24px; color: #FFFFFF; font-weight: 600; margin: 0 0 16px; line-height: 1.3;">
+                Welcome to the Circle, ${hostName}.
+              </h1>
+
+              <p style="font-size: 14px; line-height: 1.7; color: #C5BCB3; margin: 0 0 24px;">
+                Thank you for reserving your position as a founding host partner on Luxea Living. We are curating Kenya's most remarkable private villas, sky penthouses, and architectural safari sanctuaries. Your registration for <strong style="color: #EDE8E3;">${propName}</strong> has been priority-queued for pre-launch partner briefings.
+              </p>
+
+              <!-- VIP Founding Host Digital Pass -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 28px 0; background: linear-gradient(135deg, #1C1510 0%, #2A1F17 100%); border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 10px; overflow: hidden; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);">
+                <tr>
+                  <td style="padding: 24px 28px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 16px;">
+                      <tr>
+                        <td>
+                          <div style="font-size: 10px; color: #A0958C; text-transform: uppercase; letter-spacing: 1.5px;">Founding Host Partner</div>
+                          <div style="font-size: 17px; font-weight: 700; color: #FFFFFF; margin-top: 4px;">${hostName}</div>
+                        </td>
+                        <td align="right">
+                          <span style="display: inline-block; background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ADE80; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">PRIORITY ACCESS</span>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div style="background: rgba(0, 0, 0, 0.35); border-radius: 8px; padding: 14px 18px; margin-bottom: 16px;">
+                      <table width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td>
+                            <div style="font-size: 10px; color: #8F847C; text-transform: uppercase;">Pass Number</div>
+                            <div style="font-size: 16px; font-family: monospace; font-weight: 700; color: #D4AF37; margin-top: 2px;">${passNumber}</div>
+                          </td>
+                          <td align="right">
+                            <div style="font-size: 10px; color: #8F847C; text-transform: uppercase;">Partner Key</div>
+                            <div style="font-size: 16px; font-family: monospace; font-weight: 700; color: #EDE8E3; margin-top: 2px;">${passCode}</div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+
+                    <div style="font-size: 12px; color: #A0958C; line-height: 1.6;">
+                      <div>Property: <strong style="color: #EDE8E3;">${propName}</strong> (${propType} • ${bedrooms} Beds)</div>
+                      <div>Location: <strong style="color: #EDE8E3;">${region}</strong></div>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Locked-In Founding Partner Perks -->
+              <div style="font-size: 12px; color: #D4AF37; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 14px;">
+                Your Guaranteed Founding Partner Privileges
+              </div>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 28px;">
+                <tr>
+                  <td style="padding: 10px 0; font-size: 13px; color: #C5BCB3; line-height: 1.6;">
+                    <strong style="color: #FFFFFF;">0% Commission for 90 Days:</strong> Enjoy zero host platform service fees during the initial 90-day launch period — retain 100% of your listed nightly revenue.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; font-size: 13px; color: #C5BCB3; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <strong style="color: #FFFFFF;">Complimentary Architectural Staging:</strong> Our media team provides high-definition 4K interior styling, twilight captures, and drone videography at no cost.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; font-size: 13px; color: #C5BCB3; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <strong style="color: #FFFFFF;">Verified Diplomatic &amp; Executive Clientele:</strong> Pre-screened corporate executives, luxury travelers, and long-stay expatriates with verified IDs.
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; font-size: 13px; color: #C5BCB3; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <strong style="color: #FFFFFF;">Automated Settlements:</strong> Instant direct disbursements straight to your preferred M-Pesa or Kenyan Bank Account upon guest check-in.
+                  </td>
+                </tr>
+              </table>
+
+              <!-- What Happens Next -->
+              <div style="background: rgba(255,255,255,0.02); border-left: 3px solid #D4AF37; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-bottom: 28px;">
+                <div style="font-size: 13px; font-weight: 700; color: #EDE8E3; margin-bottom: 6px;">What to Expect Next</div>
+                <div style="font-size: 13px; color: #A0958C; line-height: 1.6;">
+                  Our Partner Desk will review your property profile. As we prepare for private platform activation, we will send updates directly to <strong style="color: #EDE8E3;">${hostEmail}</strong> with scheduled photography dates and your early listing activation portal.
+                </div>
+              </div>
+
+              <p style="font-size: 13px; color: #8F847C; line-height: 1.6; margin: 0;">
+                Sincerely,<br>
+                <strong style="color: #EDE8E3;">The Executive Host Committee</strong><br>
+                <span style="color: #D4AF37;">Luxea Living Kenya</span>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 24px 40px; background: #0E0A07; border-top: 1px solid rgba(212, 175, 55, 0.15); text-align: center;">
+              <div style="font-size: 11px; color: #6D635B; line-height: 1.6;">
+                Luxea Living Residences • Nairobi, Ruaka, Westlands, Diani Beach, Karen, Naivasha<br>
+                Direct Partner Desk: partner@luxealiving.co.ke • <a href="https://partners.luxealiving.co.ke" style="color: #B28756; text-decoration: none;">partners.luxealiving.co.ke</a>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+          `;
+
+          const hostRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: getSenderEmail('Luxea Living | Partner Desk'),
+              to: [hostEmail],
+              subject: `Founding Host Partner Pass [${passNumber}] — Welcome to Luxea Living`,
+              html: hostWaitlistHtml,
+            }),
+          });
+
+          const hostResult = await hostRes.json();
+          results.push({ recipient: hostEmail, type: 'host_waitlist_welcome', resend: hostResult });
+          console.log(`✅ Host waitlist welcome sent to ${hostEmail}:`, hostResult);
+        }
+      }
+
+      // Executive Admin Alert to Ronald
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: getSenderEmail('Luxea Partner Alert'),
+            to: [ADMIN_EMAIL],
+            subject: `🌟 New Host Partner Waitlist: ${hostName} (${propType} in ${region})`,
+            html: `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0B0806; color: #EDE8E3; padding: 28px; border-radius: 10px; border: 1px solid #D4AF37;">
+                <div style="font-size: 12px; letter-spacing: 2px; color: #D4AF37; text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">LUXEA LIVING PARTNER DESK</div>
+                <h2 style="color: #FFFFFF; margin: 0 0 16px;">New Founding Host Waitlist Submission</h2>
+                
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+                  <tr><td style="padding: 6px 0; color: #8F847C;">Host Name:</td><td style="padding: 6px 0; font-weight: bold; color: #FFF;">${hostName}</td></tr>
+                  <tr><td style="padding: 6px 0; color: #8F847C;">Email:</td><td style="padding: 6px 0;"><a href="mailto:${hostEmail}" style="color: #D4AF37;">${hostEmail}</a></td></tr>
+                  <tr><td style="padding: 6px 0; color: #8F847C;">Phone / WhatsApp:</td><td style="padding: 6px 0;"><a href="https://wa.me/${phone.replace(/[^0-9]/g, '')}" style="color: #4ADE80;">${phone}</a></td></tr>
+                  <tr><td style="padding: 6px 0; color: #8F847C;">Property Name:</td><td style="padding: 6px 0; font-weight: bold; color: #FFF;">${propName}</td></tr>
+                  <tr><td style="padding: 6px 0; color: #8F847C;">Property Type:</td><td style="padding: 6px 0;">${propType} (${bedrooms} Bedrooms)</td></tr>
+                  <tr><td style="padding: 6px 0; color: #8F847C;">Region / Hub:</td><td style="padding: 6px 0; font-weight: bold; color: #FFF;">${region}</td></tr>
+                  <tr><td style="padding: 6px 0; color: #8F847C;">Operational Status:</td><td style="padding: 6px 0;">${operationalStatus}</td></tr>
+                  ${portfolioLink ? `<tr><td style="padding: 6px 0; color: #8F847C;">Portfolio / Link:</td><td style="padding: 6px 0;"><a href="${portfolioLink}" target="_blank" style="color: #38BDF8;">${portfolioLink}</a></td></tr>` : ''}
+                  ${notes ? `<tr><td style="padding: 6px 0; color: #8F847C;">Notes / Questions:</td><td style="padding: 6px 0; font-style: italic; color: #C5BCB3;">"${notes}"</td></tr>` : ''}
+                  <tr><td style="padding: 6px 0; color: #8F847C;">Pass Number:</td><td style="padding: 6px 0; font-family: monospace; color: #D4AF37; font-weight: bold;">${passNumber} (${passCode})</td></tr>
+                </table>
+
+                <div style="margin-top: 20px;">
+                  <a href="${APP_BASE_URL}/admin/" style="background: linear-gradient(135deg, #D4AF37 0%, #B28756 100%); color: #000; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; display: inline-block;">
+                    View in Super Admin Dashboard →
+                  </a>
+                </div>
+              </div>
+            `,
+          }),
+        });
+      } catch (adminErr) {
+        console.warn('Admin host waitlist alert error:', adminErr);
       }
     }
 

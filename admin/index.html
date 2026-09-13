@@ -309,7 +309,11 @@
           </button>
           <button class="btn btn-secondary btn-sm" id="exportGuestsCsvBtn" title="Download guest VIP waitlist as CSV">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            <span>Export Waitlist CSV</span>
+            <span>Export Guests CSV</span>
+          </button>
+          <button class="btn btn-secondary btn-sm" id="exportHostWaitlistCsvBtn" title="Download host partner waitlist as CSV">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            <span>Export Host Waitlist</span>
           </button>
           <button class="btn btn-primary btn-sm" id="refreshAdminDataBtn" title="Sync live updates">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -340,6 +344,10 @@
         <button class="admin-tab-link" id="tabGuestsBtn">
           <span>Guest VIP Waitlist</span>
           <span class="tab-badge" id="guestTabCounter">0</span>
+        </button>
+        <button class="admin-tab-link" id="tabHostWaitlistBtn">
+          <span>Host Waitlist (partners.)</span>
+          <span class="tab-badge" id="hostWaitlistTabCounter" style="background: rgba(212, 175, 55, 0.2); color: #9A7B0C;">0</span>
         </button>
       </div>
 
@@ -436,6 +444,32 @@
         </table>
         <div id="guestsEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
           No waitlist signups recorded yet. Submissions from <a href="/waitlist/" style="color: var(--color-camel-dark); text-decoration: underline;">/waitlist/</a> will appear here.
+        </div>
+      </div>
+
+      <!-- VIEW 4: HOST PARTNER WAITLIST (partners.luxealiving.co.ke) -->
+      <div id="hostWaitlistViewPane" class="table-responsive-box hidden" style="margin-top: 10px;">
+        <table class="lux-data-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">Host Pass #</th>
+              <th>Partner Name</th>
+              <th>Email</th>
+              <th>WhatsApp / Phone</th>
+              <th>Residence &amp; Type</th>
+              <th>Region</th>
+              <th>Readiness</th>
+              <th>Link / Notes</th>
+              <th>Perk Tier</th>
+              <th>Registered</th>
+            </tr>
+          </thead>
+          <tbody id="hostWaitlistTableBody">
+            <!-- Injected by admin.js -->
+          </tbody>
+        </table>
+        <div id="hostWaitlistEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
+          No host waitlist signups recorded yet. Submissions from <a href="/partners/" target="_blank" style="color: var(--color-camel-dark); text-decoration: underline;">partners.luxealiving.co.ke</a> will appear here.
         </div>
       </div>
 

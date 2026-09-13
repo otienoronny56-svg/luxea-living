@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Founding Host Circle | Luxea Living Partners</title>
+  <meta name="description" content="Register your luxury residence as a founding partner on Luxea Living. 0% commission for 90 days, complimentary 4K architectural photography, pre-vetted executive guests.">
+  <meta name="keywords" content="luxury host waitlist, Airbnb Kenya, Nairobi luxury villas, Diani beachfront rentals, property management Kenya">
+  
+  <!-- Open Graph / Meta -->
+  <meta property="og:title" content="Founding Host Circle | Luxea Living Partners">
+  <meta property="og:description" content="Join Kenya's premier luxury living collective. Secure early access, zero commission fees, and complimentary media staging.">
+  <meta property="og:type" content="website">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/pages/partners.css">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%23140E0A' stroke='%23D4AF37' stroke-width='4'/><text x='50%' y='60%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='46' fill='%23D4AF37'>L</text></svg>">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/supabase.js"></script>
+</head>
+<body class="partner-body">
+
+  <!-- Dedicated Host Partner Header -->
+  <header class="partner-nav-bar">
+    <div class="container partner-nav-content">
+      <a href="/partners/" class="partner-logo-group">
+        <div class="partner-monogram">L</div>
+        <div class="partner-brand-text">
+          <span class="partner-brand-title">LUXEA LIVING</span>
+          <span class="partner-brand-badge">PARTNER PORTAL</span>
+        </div>
+      </a>
+
+      <nav class="partner-nav-links">
+        <a href="#perks" class="partner-nav-link">Founding Privileges</a>
+        <a href="#projections" class="partner-nav-link">Earnings Projection</a>
+        <a href="#hostRegistrationSection" class="btn-partner-cta js-scroll-to-register">
+          <span>Join Host Waitlist</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="partner-hero">
+    <div class="container">
+      <div class="partner-badge-pill">
+        <span class="partner-badge-dot"></span>
+        <span>FOUNDING HOST CIRCLE • LIMITED PRE-LAUNCH ADMISSIONS</span>
+      </div>
+
+      <h1 class="partner-hero-headline">
+        Elevate your property to Kenya's most <span class="gold-highlight">discerning clientele.</span>
+      </h1>
+
+      <p class="partner-hero-subtext">
+        Join an invitation-only collective of distinguished residences across Nairobi, Diani Beach, Naivasha, and the Maasai Mara. Lock in 0% commission for 90 days, bespoke architectural media staging, and verified executive travelers.
+      </p>
+
+      <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 50px;">
+        <a href="#hostRegistrationSection" class="btn-partner-cta js-scroll-to-register" style="padding: 14px 28px; font-size: 15px;">
+          <span>Reserve Founding Partner Position</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="https://wa.me/254700000000?text=Hello%20Luxea%20Living%20Partner%20Desk,%20I%20am%20a%20luxury%20property%20owner%20interested%20in%20joining%20the%20Founding%20Host%20Circle." target="_blank" class="btn-pass-copy" style="padding: 14px 24px; text-decoration: none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
+          <span>Speak to Partner Concierge</span>
+        </a>
+      </div>
+
+      <!-- Key Perks Grid -->
+      <div class="partner-perks-grid" id="perks">
+        <div class="partner-perk-card">
+          <div class="perk-icon-wrap">⚡</div>
+          <h3 class="perk-heading">0% Host Commission</h3>
+          <p class="perk-desc">Enjoy zero platform service fees for your first 90 days. Keep 100% of your listed nightly revenue.</p>
+        </div>
+
+        <div class="partner-perk-card">
+          <div class="perk-icon-wrap">📸</div>
+          <h3 class="perk-heading">Complimentary 4K Media</h3>
+          <p class="perk-desc">Our media team captures magazine-grade HDR photography, twilight captures, and 4K aerial drone tours at no cost.</p>
+        </div>
+
+        <div class="partner-perk-card">
+          <div class="perk-icon-wrap">🛡️</div>
+          <h3 class="perk-heading">Vetted Executive Guests</h3>
+          <p class="perk-desc">Strict identity verification and security screening for corporate executives, diplomats, and international travelers.</p>
+        </div>
+
+        <div class="partner-perk-card">
+          <div class="perk-icon-wrap">💳</div>
+          <h3 class="perk-heading">Direct &amp; Rapid Payouts</h3>
+          <p class="perk-desc">Automated settlements via M-Pesa or Kenyan Bank SWIFT transfers triggered promptly upon guest check-in.</p>
+        </div>
+      </div>
+
+      <!-- Interactive Revenue Projection Card -->
+      <div class="partner-revenue-box" id="projections">
+        <div class="revenue-box-header">
+          <div>
+            <h2 class="revenue-box-title">Projected Residence Yield</h2>
+            <p class="revenue-box-subtitle">Estimated returns based on historical prime luxury occupancy in Kenya.</p>
+          </div>
+          <div class="revenue-selectors">
+            <div class="revenue-select-group">
+              <label for="calcPropertyType">Property Style</label>
+              <select id="calcPropertyType">
+                <option value="Luxury Villa" selected>Luxury Villa (Diani / Karen)</option>
+                <option value="Sky Penthouse">Sky Penthouse (Westlands / Kilimani)</option>
+                <option value="Lakefront Estate">Lakefront Estate (Naivasha)</option>
+                <option value="Boutique Safari Lodge">Safari Sanctuary (Mara / Nanyuki)</option>
+                <option value="Serviced Executive Suite">Serviced Executive Suite</option>
+              </select>
+            </div>
+            <div class="revenue-select-group">
+              <label for="calcBedrooms">Bedrooms</label>
+              <select id="calcBedrooms">
+                <option value="1">1 Bedroom</option>
+                <option value="2">2 Bedrooms</option>
+                <option value="3" selected>3 Bedrooms</option>
+                <option value="4">4 Bedrooms</option>
+                <option value="5">5+ Bedrooms / Estate</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="revenue-metrics-grid">
+          <div class="revenue-metric-tile">
+            <div class="metric-label">Estimated Monthly Revenue</div>
+            <div class="metric-value gold" id="calcMonthlyEstimate">KES 930,000</div>
+            <div class="metric-sub">▲ At ~62% curated occupancy</div>
+          </div>
+          <div class="revenue-metric-tile">
+            <div class="metric-label">Projected Annual Gross Yield</div>
+            <div class="metric-value" id="calcAnnualEstimate">KES 11,160,000</div>
+            <div class="metric-sub">Direct host net payout</div>
+          </div>
+          <div class="revenue-metric-tile">
+            <div class="metric-label">Founding 90-Day Fee Savings</div>
+            <div class="metric-value" id="calcFeeSavings" style="color: #4ADE80;">KES 418,500</div>
+            <div class="metric-sub">✓ 0% commission founding privilege</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Main Split Section: Guidance & Host Waitlist Form -->
+  <section class="container" id="hostRegistrationSection">
+    <div class="partner-main-grid">
+      
+      <!-- Left Narrative / Roadmap -->
+      <div class="partner-narrative">
+        <span class="partner-narrative-tag">JOIN THE FOUNDING CIRCLE</span>
+        <h2 class="partner-narrative-title">Seamless onboarding. Extraordinary returns.</h2>
+        <p class="partner-narrative-p">
+          We understand your property is a high-value architectural asset. By joining our early host waitlist, you bypass complex bureaucratic friction while locking in founding partner commission rates and dedicated management support.
+        </p>
+
+        <div class="partner-steps-box">
+          <div class="partner-step-item">
+            <div class="partner-step-num">1</div>
+            <div class="partner-step-body">
+              <strong>Reserve Early Position</strong>
+              <span>Submit your property overview. We do not require sensitive KRA or lease documents at this stage.</span>
+            </div>
+          </div>
+
+          <div class="partner-step-item">
+            <div class="partner-step-num">2</div>
+            <div class="partner-step-body">
+              <strong>Curatorial Review &amp; Updates</strong>
+              <span>Receive automated rollout briefings directly to your email with our staging guidelines and calendar milestones.</span>
+            </div>
+          </div>
+
+          <div class="partner-step-item">
+            <div class="partner-step-num">3</div>
+            <div class="partner-step-body">
+              <strong>Media Shoot &amp; Staging</strong>
+              <span>Our visual production team schedules a bespoke 4K photography and aerial drone session for your residence.</span>
+            </div>
+          </div>
+
+          <div class="partner-step-item">
+            <div class="partner-step-num">4</div>
+            <div class="partner-step-body">
+              <strong>Priority VIP Launch</strong>
+              <span>Your residence is spotlighted exclusively to verified founding guests and international corporate accounts.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="partner-support-card">
+          <div style="font-size: 24px;">💬</div>
+          <div class="partner-support-info">
+            <strong>Have an active portfolio or questions?</strong>
+            <span>Direct WhatsApp Host Concierge: <a href="https://wa.me/254700000000" target="_blank">+254 700 000 000</a></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Form & Pass Card Container -->
+      <div class="partner-form-card">
+        
+        <!-- Interactive Registration Form -->
+        <div id="hostWaitlistFormContainer">
+          <div class="partner-form-header">
+            <h2 class="partner-form-title">Founding Host Waitlist</h2>
+            <p class="partner-form-sub">Provide your residence details to receive your digital partner pass and launch updates via email.</p>
+          </div>
+
+          <form id="luxeaHostWaitlistForm">
+            
+            <div class="form-group-partner">
+              <label for="hostFullName">Full Legal / Brand Name <span class="req">*</span></label>
+              <input type="text" id="hostFullName" class="partner-input" placeholder="e.g. Ronald Kipchumba or Karen Palms Holdings" required>
+            </div>
+
+            <div class="partner-form-row">
+              <div class="form-group-partner">
+                <label for="hostEmail">Email Address <span class="req">*</span></label>
+                <input type="email" id="hostEmail" class="partner-input" placeholder="owner@residence.com" required>
+              </div>
+
+              <div class="form-group-partner">
+                <label for="hostPhone">WhatsApp / Phone <span class="req">*</span></label>
+                <input type="tel" id="hostPhone" class="partner-input" placeholder="+254 700 000 000" required>
+              </div>
+            </div>
+
+            <div class="form-group-partner">
+              <label for="hostPropertyName">Residence / Property Name <span class="req">*</span></label>
+              <input type="text" id="hostPropertyName" class="partner-input" placeholder="e.g. The Sanctuary Villa, Sky Heights Penthouse" required>
+            </div>
+
+            <div class="partner-form-row">
+              <div class="form-group-partner">
+                <label for="hostPropertyType">Property Classification <span class="req">*</span></label>
+                <select id="hostPropertyType" class="partner-input" required>
+                  <option value="Luxury Villa" selected>Luxury Private Villa</option>
+                  <option value="Sky Penthouse">Architectural Sky Penthouse</option>
+                  <option value="Lakefront Estate">Lakefront / Country Estate</option>
+                  <option value="Boutique Safari Lodge">Boutique Bush &amp; Safari Lodge</option>
+                  <option value="Serviced Executive Suite">Serviced Executive Suite</option>
+                </select>
+              </div>
+
+              <div class="form-group-partner">
+                <label for="hostRegion">Location / Region <span class="req">*</span></label>
+                <select id="hostRegion" class="partner-input" required>
+                  <option value="Nairobi - Karen / Langata" selected>Nairobi — Karen &amp; Lang'ata</option>
+                  <option value="Nairobi - Westlands / Spring Valley">Nairobi — Westlands &amp; Spring Valley</option>
+                  <option value="Nairobi - Runda / Muthaiga / Gigiri">Nairobi — Runda &amp; Muthaiga</option>
+                  <option value="Nairobi - Kilimani / Kileleshwa">Nairobi — Kilimani &amp; Kileleshwa</option>
+                  <option value="Coast - Diani Beach">Coast — Diani Beach</option>
+                  <option value="Coast - Watamu & Kilifi">Coast — Watamu &amp; Kilifi</option>
+                  <option value="Coast - Lamu Island">Coast — Lamu Island</option>
+                  <option value="Rift Valley - Naivasha">Rift Valley — Naivasha</option>
+                  <option value="Safari - Maasai Mara">Safari — Maasai Mara</option>
+                  <option value="Safari - Nanyuki & Mt. Kenya">Safari — Nanyuki &amp; Mt. Kenya</option>
+                  <option value="Other Kenyan Destination">Other Curated Location</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="partner-form-row">
+              <div class="form-group-partner">
+                <label for="hostBedrooms">Bedrooms <span class="req">*</span></label>
+                <select id="hostBedrooms" class="partner-input" required>
+                  <option value="1">1 Bedroom / Studio</option>
+                  <option value="2">2 Bedrooms</option>
+                  <option value="3" selected>3 Bedrooms</option>
+                  <option value="4">4 Bedrooms</option>
+                  <option value="5">5+ Bedrooms Estate</option>
+                </select>
+              </div>
+
+              <div class="form-group-partner">
+                <label for="hostStatus">Current Readiness <span class="req">*</span></label>
+                <select id="hostStatus" class="partner-input" required>
+                  <option value="Currently Active on Airbnb / Private" selected>Active on Airbnb / Booking</option>
+                  <option value="Newly Furnished & Ready">Newly Furnished &amp; Ready</option>
+                  <option value="Final Stage Furnishing">In Final Stage Furnishing</option>
+                  <option value="Under Development / Renovation">Under Development / Renovation</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group-partner">
+              <label for="hostPortfolioLink">Listing / Photos Link <span style="color: var(--partner-text-muted); font-weight: normal;">(Optional)</span></label>
+              <input type="url" id="hostPortfolioLink" class="partner-input" placeholder="Airbnb link, Instagram, Google Drive folder, or website">
+            </div>
+
+            <div class="form-group-partner">
+              <label for="hostNotes">Special Amenities or Notes <span style="color: var(--partner-text-muted); font-weight: normal;">(Optional)</span></label>
+              <textarea id="hostNotes" class="partner-input" rows="2" placeholder="e.g. Infinity heated pool, backup solar, private chef quarters..."></textarea>
+            </div>
+
+            <div class="partner-perk-callout">
+              <span class="callout-shield">🛡️</span>
+              <span><strong>Guaranteed Founding Perk:</strong> 0% commission for 90 days + Free 4K HDR media staging automatically locked to your pass.</span>
+            </div>
+
+            <button type="submit" class="btn-submit-partner">
+              <span>Secure Founding Host Position</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+
+            <p class="partner-terms-note">
+              By joining, you will receive launch updates and partner briefs directly at your email. Zero spam. Unsubscribe at any time.
+            </p>
+          </form>
+        </div>
+
+        <!-- VIP Founding Host Digital Pass Result Card (Appears on submit) -->
+        <div id="hostWaitlistResultCard" class="hidden partner-result-pane">
+          
+          <div class="partner-gold-pass">
+            <div class="pass-top-row">
+              <div class="pass-monogram-tag">
+                <div class="pass-m-box">L</div>
+                <div class="pass-title-text">FOUNDING HOST PARTNER</div>
+              </div>
+              <span class="pass-status-badge">POSITION LOCKED ✓</span>
+            </div>
+
+            <div class="pass-credential-box">
+              <div class="pass-cred-grid">
+                <div>
+                  <div class="cred-sub">HOST PASS NUMBER</div>
+                  <div class="cred-val" id="partnerPassNumber">#LXA-HOST-0142</div>
+                </div>
+                <div style="text-align: right;">
+                  <div class="cred-sub">FOUNDING KEY</div>
+                  <div class="cred-val key" id="partnerPassCode">LXA-PTR-8820</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="pass-details-row">
+              <div>
+                <div class="pass-det-label">PARTNER NAME</div>
+                <div class="pass-det-value" id="partnerPassHostName">Ronald Kipchumba</div>
+              </div>
+              <div>
+                <div class="pass-det-label">PROPERTY OVERVIEW</div>
+                <div class="pass-det-value" id="partnerPassPropInfo">The Sanctuary Villa • 3 Beds</div>
+              </div>
+            </div>
+
+            <div class="pass-details-row" style="margin-bottom: 16px;">
+              <div>
+                <div class="pass-det-label">LOCATION HUB</div>
+                <div class="pass-det-value" id="partnerPassRegion">Nairobi — Karen</div>
+              </div>
+              <div>
+                <div class="pass-det-label">PRIVILEGE TIER</div>
+                <div class="pass-det-value" style="color: var(--partner-gold);">Founding Circle (0% Fees)</div>
+              </div>
+            </div>
+
+            <div class="pass-perk-summary">
+              ✦ <strong>Locked Privileges:</strong> 0% Commission for first 90 days • Complimentary 4K Media &amp; Drone Shoot • Priority Placement.
+            </div>
+          </div>
+
+          <div class="partner-email-alert">
+            <div style="font-size: 20px; margin-bottom: 6px;">📩</div>
+            <div id="partnerEmailNotice">
+              Your priority briefing and verified pass credentials have been dispatched to your email.
+            </div>
+          </div>
+
+          <div class="partner-action-row">
+            <button type="button" class="btn-pass-copy" id="copyPartnerPassBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Copy Founding Pass Credentials</span>
+            </button>
+            <a href="https://wa.me/254700000000?text=Hello%20Luxea%20Living,%20I%20just%20reserved%20my%20Founding%20Host%20Partner%20Pass%20on%20partners.luxealiving.co.ke!" target="_blank" class="btn-whatsapp-concierge">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2z"/></svg>
+              <span>Connect on WhatsApp with Partner Desk</span>
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Standalone Footer -->
+  <footer class="partner-footer">
+    <div class="container">
+      <div class="footer-copy">
+        <strong style="color: #EDE8E3;">Luxea Living Kenya — Host Partner Desk</strong><br>
+        Curating distinguished residences in Nairobi, Diani Beach, Naivasha, and the Maasai Mara.<br>
+        Partner Inquiries: <a href="mailto:partner@luxealiving.co.ke">partner@luxealiving.co.ke</a> • Portal: <a href="https://partners.luxealiving.co.ke">partners.luxealiving.co.ke</a><br>
+        &copy; 2026 Luxea Living. All rights reserved. Founding Host Privileges subject to property curation standards.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Initialize Host Waitlist Module -->
+  <script type="module">
+    import { initHostWaitlist } from '/assets/js/modules/hostWaitlist.js';
+
+    // Simple toast helper if not globally loaded
+    if (!window.showToast) {
+      window.showToast = function(msg) {
+        let container = document.getElementById('toastContainer');
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'toastContainer';
+          container.className = 'toast-container';
+          document.body.appendChild(container);
+        }
+        const toast = document.createElement('div');
+        toast.className = 'toast toast-success';
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+      };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initHostWaitlist();
+    });
+  </script>
+</body>
+</html>

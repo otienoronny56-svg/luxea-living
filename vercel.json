@@ -2,6 +2,18 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "partners.luxealiving.co.ke"
+        }
+      ],
+      "destination": "/partners/index.html"
+    },
+    { "source": "/partners", "destination": "/partners/index.html" },
+    { "source": "/partners/", "destination": "/partners/index.html" },
     { "source": "/admin/login", "destination": "/admin/index.html" },
     { "source": "/admin/login/", "destination": "/admin/index.html" },
     { "source": "/admin/host-dossier", "destination": "/admin/host-dossier.html" },

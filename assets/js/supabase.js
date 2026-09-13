@@ -495,6 +495,64 @@
       return dbRow;
     },
 
+    // =========================================================================
+    // 4B. HOST PARTNER WAITLIST (Founding Host Partners)
+    // =========================================================================
+    submitHostWaitlist: async function (hostData) {
+      const client = this.getClient();
+
+      const dbRow = {
+        pass_number: hostData.passNumber,
+        pass_code: hostData.passCode,
+        full_name: hostData.fullName,
+        email: hostData.email,
+        phone: hostData.phone || '',
+        property_name: hostData.propertyName || 'Luxury Residence',
+        property_type: hostData.propertyType || 'Villa',
+        region: hostData.region || 'Nairobi',
+        bedrooms: hostData.bedrooms ? Number(hostData.bedrooms) : 1,
+        operational_status: hostData.operationalStatus || 'Active',
+        portfolio_link: hostData.portfolioLink || '',
+        notes: hostData.notes || '',
+        tier: 'Founding Host Partner',
+        commission_perk: '0% for 90 Days',
+        status: 'waitlisted'
+      };
+
+      if (client) {
+        try {
+          const { data, error } = await client.from('lux_host_waitlist').insert([dbRow]);
+          if (error) console.error('Error inserting into lux_host_waitlist:', error);
+          else console.log('✅ Record inserted into lux_host_waitlist:', data);
+        } catch (err) {
+          console.error('Supabase host waitlist insert exception:', err);
+        }
+      }
+
+      const cached = JSON.parse(localStorage.getItem('luxea_host_waitlist') || '[]');
+      cached.unshift({ ...hostData, id: `host-waitlist-${Date.now()}` });
+      localStorage.setItem('luxea_host_waitlist', JSON.stringify(cached));
+
+      // 📨 Dispatch automated Founding Host Welcome & Priority Pass email via Edge Function
+      this.sendAutomatedEmail('host_waitlist_welcome', dbRow);
+
+      return dbRow;
+    },
+
+    fetchHostWaitlist: async function () {
+      const client = this.getClient();
+      if (client) {
+        try {
+          const { data, error } = await client
+            .from('lux_host_waitlist')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!error && data) return data;
+        } catch (e) {}
+      }
+      return JSON.parse(localStorage.getItem('luxea_host_waitlist') || '[]');
+    },
+
     /**
      * Dispatch automated email via Supabase Edge Function & Resend
      * (Zero API keys exposed to browser)
