@@ -453,7 +453,7 @@ export function initAdminDashboard() {
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td style="text-align: center; color: var(--color-cocoa-light); font-weight: 700; font-size: 0.76rem; width: 38px;">
+        <td style="text-align: center; color: var(--color-cocoa-light); font-weight: 700; font-size: 0.76rem; width: 36px;">
           ${idx + 1}
         </td>
 
@@ -466,9 +466,7 @@ export function initAdminDashboard() {
             </button>
           </div>
           <div class="host-cell-sub" style="margin-top: 2px;">
-            <span style="white-space: nowrap;">${phone}</span>
-            <span>•</span>
-            <span title="${email}" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>
+            <span title="${email}" style="color: var(--color-cocoa); font-size: 0.76rem; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>
           </div>
         </td>
 
@@ -482,18 +480,16 @@ export function initAdminDashboard() {
         </td>
 
         <td>
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span class="status-chip ${payMethod === 'M-Pesa' ? 'status-active' : 'chip-neutral'}" style="padding: 1px 6px; font-size: 0.68rem;">${payMethod}</span>
-            ${idUrl ? `<a href="${idUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect" style="padding: 1px 6px; font-size: 0.66rem;">ID ↗</a>` : `<span style="font-size: 0.68rem; color: #888;">ID on file</span>`}
-            <span style="font-size: 0.7rem; color: #B28756; font-weight: 700;">📷 ${Array.isArray(photoUrls) ? photoUrls.length : 3}</span>
-          </div>
-          <div style="font-family: monospace; font-size: 0.72rem; color: var(--color-cocoa); margin-top: 2px;">
-            ${payNumber}
+          <div style="font-weight: 600; font-size: 0.84rem; color: #241812;">${phone}</div>
+          <div style="margin-top: 2px;">
+            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" style="color: #1E8449; font-size: 0.74rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;">
+              <span>💬 WhatsApp</span>
+            </a>
           </div>
         </td>
 
         <td>
-          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="padding: 4px 8px; font-size: 0.74rem; width: 100%;">
+          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="padding: 5px 10px; font-size: 0.76rem; width: 100%; min-width: 125px;">
             <option value="pending_review" ${status === 'pending_review' ? 'selected' : ''}>⏳ Pending</option>
             <option value="approved" ${status === 'approved' ? 'selected' : ''}>✅ Approved</option>
             <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
@@ -502,12 +498,9 @@ export function initAdminDashboard() {
 
         <td style="text-align: right;">
           <div class="table-action-btns" style="justify-content: flex-end; gap: 4px;">
-            <a href="/admin/host-dossier.html?ref=${ref}" class="btn-table-action btn-inspect" title="Open full host application dossier" style="padding: 4px 8px; font-size: 0.72rem;">
+            <button type="button" class="btn-table-action btn-inspect trigger-inspect-btn" data-ref="${ref}" title="Inspect full application dossier (photos, payout, KYC)" style="padding: 5px 10px; font-size: 0.74rem; font-weight: 700;">
               <span>Inspect ↗</span>
-            </a>
-            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-wa-action" title="Open direct WhatsApp conversation with host" style="padding: 4px 8px; font-size: 0.72rem;">
-              <span>💬 Chat</span>
-            </a>
+            </button>
           </div>
         </td>
       `;
@@ -547,6 +540,15 @@ export function initAdminDashboard() {
         }
       });
     });
+
+    // 3. Inspect Modal trigger
+    hostsTableBody.querySelectorAll('.trigger-inspect-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ref = btn.getAttribute('data-ref');
+        openInspectModal(ref);
+      });
+    });
   }
 
   // =========================================================================
@@ -557,7 +559,12 @@ export function initAdminDashboard() {
     if (!host || !inspectModal) return;
 
     currentInspectedRef = refId;
-    if (inspectRefBadge) inspectRefBadge.textContent = refId;
+    if (inspectRefBadge) {
+      inspectRefBadge.innerHTML = `
+        <span>${refId}</span>
+        <a href="/admin/host-dossier.html?ref=${refId}" target="_blank" rel="noopener noreferrer" style="color: #241812; font-size: 0.72rem; text-decoration: underline; margin-left: 10px; font-weight: 600;">Open Separate Page ↗</a>
+      `;
+    }
     if (inspectTitle) inspectTitle.textContent = `${host.fullName || host.full_name} — ${host.propertyName || host.property_name}`;
 
     const status = host.review_status || 'pending_review';
@@ -579,12 +586,17 @@ export function initAdminDashboard() {
       photosHtml = `<p style="font-size: 0.82rem; color: var(--color-cocoa);">Standard luxury property staging photos on file.</p>`;
     }
 
+    const idDocUrl = host.id_document_url;
+
     if (inspectBody) {
       inspectBody.innerHTML = `
         <div class="inspect-item">
           <span class="inspect-label">Host Partner Details</span>
           <div class="inspect-val"><strong>Name:</strong> ${host.fullName || host.full_name}</div>
-          <div class="inspect-val"><strong>National ID / Passport:</strong> ${host.nationalId || host.national_id}</div>
+          <div class="inspect-val">
+            <strong>National ID / Passport:</strong> ${host.nationalId || host.national_id || 'On File'}
+            ${idDocUrl ? `<a href="${idDocUrl}" target="_blank" rel="noopener noreferrer" style="color: #B28756; font-size: 0.75rem; text-decoration: underline; margin-left: 8px; font-weight: 700;">View Document ↗</a>` : ''}
+          </div>
           <div class="inspect-val"><strong>KRA PIN:</strong> ${host.kraPin || host.kra_pin || 'On File'}</div>
           <div class="inspect-val"><strong>Phone:</strong> ${host.phone}</div>
           <div class="inspect-val"><strong>Email:</strong> ${host.email}</div>
