@@ -249,6 +249,45 @@ textarea.form-control {
   text-decoration: underline;
 }
 
+/* Floating WhatsApp Support Button */
+.floating-whatsapp-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #25D366;
+  color: #FFFFFF;
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.floating-whatsapp-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(37, 211, 102, 0.6);
+  color: #FFFFFF;
+}
+
+.floating-whatsapp-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.floating-whatsapp-btn span.whatsapp-label {
+  display: inline-block;
+  white-space: nowrap;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 640px) {
   .partner-page-container {
@@ -289,6 +328,20 @@ textarea.form-control {
 
   .form-control {
     font-size: 16px; /* Prevents auto-zoom on mobile iOS */
+  }
+
+  .floating-whatsapp-btn {
+    bottom: 20px;
+    right: 20px;
+    padding: 12px;
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    justify-content: center;
+  }
+
+  .floating-whatsapp-btn span.whatsapp-label {
+    display: none;
   }
 }
 
