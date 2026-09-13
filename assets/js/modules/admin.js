@@ -453,7 +453,7 @@ export function initAdminDashboard() {
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td style="text-align: center; color: var(--color-cocoa-light); font-weight: 700; font-size: 0.78rem; width: 42px;">
+        <td style="text-align: center; color: var(--color-cocoa-light); font-weight: 700; font-size: 0.76rem; width: 38px;">
           ${idx + 1}
         </td>
 
@@ -465,39 +465,35 @@ export function initAdminDashboard() {
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             </button>
           </div>
-          <div class="host-cell-sub" style="margin-top: 3px;">
-            <span title="${email}" style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>
-            <span>•</span>
+          <div class="host-cell-sub" style="margin-top: 2px;">
             <span style="white-space: nowrap;">${phone}</span>
+            <span>•</span>
+            <span title="${email}" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>
           </div>
         </td>
 
         <td>
           <div class="host-cell-name">${prop}</div>
-          <div class="host-cell-sub">${loc}</div>
+          <div class="host-cell-sub" style="margin-top: 2px;">
+            <span style="font-weight: 600; color: #241812;">${type}</span>
+            <span>•</span>
+            <span>${loc}</span>
+          </div>
         </td>
 
         <td>
-          <span style="font-weight: 600; font-size: 0.78rem; color: #241812;">${type}</span>
-        </td>
-
-        <td>
-          <span class="status-chip ${payMethod === 'M-Pesa' ? 'status-active' : 'chip-neutral'}" style="padding: 2px 7px; font-size: 0.68rem;">${payMethod}</span>
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span class="status-chip ${payMethod === 'M-Pesa' ? 'status-active' : 'chip-neutral'}" style="padding: 1px 6px; font-size: 0.68rem;">${payMethod}</span>
+            ${idUrl ? `<a href="${idUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect" style="padding: 1px 6px; font-size: 0.66rem;">ID ↗</a>` : `<span style="font-size: 0.68rem; color: #888;">ID on file</span>`}
+            <span style="font-size: 0.7rem; color: #B28756; font-weight: 700;">📷 ${Array.isArray(photoUrls) ? photoUrls.length : 3}</span>
+          </div>
           <div style="font-family: monospace; font-size: 0.72rem; color: var(--color-cocoa); margin-top: 2px;">
             ${payNumber}
           </div>
         </td>
 
         <td>
-          <div style="display: flex; gap: 3px; flex-direction: column;">
-            ${idUrl ? `<a href="${idUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect" style="padding: 2px 7px; font-size: 0.68rem; justify-content: center;">📄 ID Document ↗</a>` : `<span style="font-size: 0.7rem; color: #888;">ID on File</span>`}
-            <span style="font-size: 0.7rem; color: #B28756; font-weight: 700;">📷 ${Array.isArray(photoUrls) ? photoUrls.length : 3} Photos</span>
-          </div>
-        </td>
-
-        <td>
-          <!-- Quick Inline Status Switcher -->
-          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="padding: 4px 8px; font-size: 0.74rem;">
+          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="padding: 4px 8px; font-size: 0.74rem; width: 100%;">
             <option value="pending_review" ${status === 'pending_review' ? 'selected' : ''}>⏳ Pending</option>
             <option value="approved" ${status === 'approved' ? 'selected' : ''}>✅ Approved</option>
             <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
@@ -505,12 +501,12 @@ export function initAdminDashboard() {
         </td>
 
         <td style="text-align: right;">
-          <div class="table-action-btns" style="justify-content: flex-end;">
+          <div class="table-action-btns" style="justify-content: flex-end; gap: 4px;">
             <a href="/admin/host-dossier.html?ref=${ref}" class="btn-table-action btn-inspect" title="Open full host application dossier" style="padding: 4px 8px; font-size: 0.72rem;">
               <span>Inspect ↗</span>
             </a>
             <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-wa-action" title="Open direct WhatsApp conversation with host" style="padding: 4px 8px; font-size: 0.72rem;">
-              <span>WhatsApp</span>
+              <span>💬 Chat</span>
             </a>
           </div>
         </td>
@@ -689,50 +685,36 @@ export function initAdminDashboard() {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <img src="${stay.cover_image_url || stay.image || '/assets/images/villa.jpg'}" alt="${stay.name}" class="stay-table-thumb">
-        </td>
-
-        <td>
-          <div class="host-cell-name">${stay.name}</div>
-          <div class="host-cell-sub">ID: ${stay.slug || stay.id}</div>
-        </td>
-
-        <td>
-          <div class="host-cell-name" style="font-weight: 600;">${hostName}</div>
-          <div class="host-cell-sub" style="margin-top: 3px; display: flex; align-items: center; gap: 4px;">
-            <button class="btn-table-action btn-copy-ref copy-ref-btn" data-ref="${hostRef}" title="Click to copy Host Ref ID" style="padding: 2px 7px; font-size: 0.68rem;">
-              <span>${hostRef}</span>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            </button>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="${stay.cover_image_url || stay.image || '/assets/images/hero-1.webp'}" alt="${stay.name}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0;" loading="lazy">
+            <div>
+              <div class="host-cell-name">${stay.name}</div>
+              <span class="status-chip chip-neutral" style="padding: 1px 6px; font-size: 0.66rem; margin-top: 2px;">${stay.property_type || stay.category || 'Apartment'}</span>
+            </div>
           </div>
-          ${hostPhone ? `<div style="font-size: 0.72rem; color: var(--color-cocoa); margin-top: 2px;">${hostPhone}</div>` : ''}
         </td>
 
         <td>
-          <span style="font-weight: 600;">${stay.city || 'Nairobi'}</span><br>
-          <small style="color: var(--color-cocoa);">${stay.area || stay.county || 'Kenya'}</small>
+          <div style="font-weight: 600; font-size: 0.82rem; color: #241812;">${stay.city || 'Nairobi'}, ${stay.area || stay.county || 'Kenya'}</div>
+          <div class="host-cell-sub" style="margin-top: 2px;">Owner: ${hostName}</div>
         </td>
 
         <td>
-          <span class="status-chip chip-neutral" style="text-transform: uppercase;">${stay.property_type || stay.category || 'Apartment'}</span>
-        </td>
-
-        <td>
-          <div style="font-weight: 800; color: #241812;">$${usdPrice} <span style="font-size: 0.72rem; color: var(--color-cocoa);">/ night</span></div>
-          <small style="color: var(--color-camel-dark); font-weight: 600;">KES ${kesPrice.toLocaleString()}</small>
+          <div style="font-weight: 700; color: #241812; font-size: 0.86rem;">$${usdPrice} <span style="font-size: 0.7rem; color: var(--color-cocoa);">/nt</span></div>
+          <small style="color: var(--color-camel-dark); font-weight: 600; font-size: 0.72rem;">KES ${kesPrice.toLocaleString()}</small>
         </td>
 
         <td>
           <label class="lux-toggle-switch">
             <input type="checkbox" class="lux-toggle-input admin-stay-avail-toggle" data-id="${stay.id || stay.slug}" ${isAvail ? 'checked' : ''}>
             <span class="lux-toggle-slider"></span>
-            <span class="lux-toggle-status-text">${isAvail ? 'Live & Bookable' : 'Unavailable'}</span>
+            <span class="lux-toggle-status-text" style="font-size: 0.74rem;">${isAvail ? 'Live' : 'Hidden'}</span>
           </label>
         </td>
 
-        <td>
-          <a href="/stays/?id=${stay.id || stay.slug}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect">
-            <span>Live View ↗</span>
+        <td style="text-align: right;">
+          <a href="/stays/?id=${stay.id || stay.slug}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect" style="padding: 4px 8px; font-size: 0.72rem;">
+            <span>Preview ↗</span>
           </a>
         </td>
       `;
@@ -796,19 +778,33 @@ export function initAdminDashboard() {
       const tier = guest.tier || 'Founding Circle';
       const date = guest.created_at ? new Date(guest.created_at).toLocaleDateString('en-GB') : 'Recent';
 
+      const digitsOnly = phone.replace(/[^0-9]/g, '');
+      const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
+      const waUrl = digitsOnly ? `https://wa.me/${waNumber}` : '';
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <strong style="font-family: monospace; color: #B28756;">${pass}</strong>
+          <strong style="font-family: monospace; color: #B28756; font-size: 0.8rem;">${pass}</strong>
         </td>
         <td>
           <div class="host-cell-name">${name}</div>
+          <div class="host-cell-sub" style="margin-top: 2px;">
+            <span>${phone}</span>
+            ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
+            <span>•</span>
+            <span title="${email}" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>
+          </div>
         </td>
-        <td>${email}</td>
-        <td>${phone}</td>
-        <td><small style="color: var(--color-cocoa);">${dest}</small></td>
-        <td><span class="status-chip chip-gold">${tier}</span></td>
-        <td><small style="color: var(--color-cocoa);">${date}</small></td>
+        <td>
+          <div style="font-weight: 500; color: #241812; font-size: 0.8rem;">${dest}</div>
+        </td>
+        <td>
+          <span class="status-chip chip-gold" style="padding: 2px 8px; font-size: 0.72rem;">${tier}</span>
+        </td>
+        <td style="text-align: right;">
+          <small style="color: var(--color-cocoa); font-weight: 600;">${date}</small>
+        </td>
       `;
 
       guestsTableBody.appendChild(tr);
@@ -854,43 +850,44 @@ export function initAdminDashboard() {
       const tier = item.tier || 'Founding Host Partner';
       const date = item.created_at ? new Date(item.created_at).toLocaleDateString('en-GB') : (item.timestamp || 'Recent');
 
+      const digitsOnly = phone.replace(/[^0-9]/g, '');
+      const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
+      const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${name}, this is Ronald from Luxea Living regarding your host registration (${pass}).`)}` : '';
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <strong style="font-family: monospace; color: #D4AF37;">${pass}</strong>
-        </td>
-        <td>
-          <div class="host-cell-name">${name}</div>
-        </td>
-        <td>
-          <a href="mailto:${email}" style="color: #4A342A; text-decoration: underline;">${email}</a>
-        </td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span>${phone}</span>
-            ${phone && phone !== '—' ? `<a href="https://wa.me/${phone.replace(/[^0-9]/g, '')}" target="_blank" title="Chat on WhatsApp" style="color: #22C55E; font-size: 13px; text-decoration: none;">💬</a>` : ''}
+          <strong style="font-family: monospace; color: #D4AF37; font-size: 0.8rem;">${pass}</strong>
+          <div style="margin-top: 2px;">
+            <span class="status-chip chip-gold" style="padding: 1px 6px; font-size: 0.65rem;">${tier}</span>
           </div>
         </td>
         <td>
-          <strong>${propName}</strong><br>
-          <small style="color: var(--color-cocoa);">${propType} • ${beds} Beds</small>
+          <div class="host-cell-name">${name}</div>
+          <div class="host-cell-sub" style="margin-top: 2px;">
+            <span>${phone}</span>
+            ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
+            <span>•</span>
+            <span title="${email}" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>
+          </div>
         </td>
         <td>
-          <span style="font-weight: 600;">${region}</span>
+          <div style="font-weight: 700; color: #241812; font-size: 0.85rem;">${propName}</div>
+          <div class="host-cell-sub" style="margin-top: 2px;">
+            <span>${propType} • ${beds} Bed</span>
+            <span>•</span>
+            <span style="font-weight: 600;">${region}</span>
+          </div>
         </td>
         <td>
-          <span class="status-chip chip-neutral">${readiness}</span>
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span class="status-chip ${readiness.toLowerCase().includes('ready') ? 'chip-green' : 'chip-neutral'}" style="padding: 1px 6px; font-size: 0.68rem;">${readiness}</span>
+            <span style="color: #22C55E; font-weight: 700; font-size: 0.7rem;">0% (90d)</span>
+          </div>
+          ${link ? `<div style="margin-top: 2px;"><a href="${link}" target="_blank" rel="noopener noreferrer" style="color: #B28756; text-decoration: underline; font-size: 0.72rem;">Portfolio Link ↗</a></div>` : ''}
         </td>
-        <td>
-          ${link ? `<a href="${link}" target="_blank" style="color: #B28756; text-decoration: underline; font-size: 0.78rem;" title="${link}">View Link ↗</a><br>` : ''}
-          ${notes ? `<small style="color: var(--color-cocoa); font-style: italic;" title="${notes}">"${notes.slice(0, 30)}${notes.length > 30 ? '...' : ''}"</small>` : '<span style="color: #A3968B;">—</span>'}
-        </td>
-        <td>
-          <span class="status-chip chip-gold">${tier}</span><br>
-          <small style="color: #22C55E; font-weight: 600;">0% for 90d</small>
-        </td>
-        <td>
-          <small style="color: var(--color-cocoa);">${date}</small>
+        <td style="text-align: right;">
+          <small style="color: var(--color-cocoa); font-weight: 600;">${date}</small>
         </td>
       `;
 

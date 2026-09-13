@@ -19,6 +19,8 @@
   min-height: 100vh;
   background-color: var(--color-linen-light);
   width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* LEFT SIDEBAR PANEL */
@@ -222,8 +224,10 @@
 .admin-workspace {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
   padding: 24px 32px 80px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .workspace-topbar {
@@ -951,40 +955,46 @@
   background: #FFFFFF;
   border: 1px solid rgba(178, 150, 125, 0.22);
   border-radius: 20px;
-  overflow-x: auto;
+  overflow-x: hidden;
   box-shadow: 0 6px 24px rgba(36, 24, 18, 0.04);
+  width: 100%;
+  max-width: 100%;
 }
 
 .lux-data-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   text-align: left;
-  font-size: 0.86rem;
+  font-size: 0.82rem;
 }
 
 .lux-data-table thead th {
   background: #FBF9F5;
   color: #241812;
   font-family: var(--font-sans);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 13px 10px;
+  padding: 12px 10px;
   border-bottom: 1px solid rgba(178, 150, 125, 0.2);
-  white-space: nowrap;
+  white-space: normal;
   position: sticky;
   top: 0;
   z-index: 10;
+  overflow: hidden;
 }
 
 .lux-data-table tbody td {
-  padding: 12px 10px;
+  padding: 10px 10px;
   border-bottom: 1px solid rgba(178, 150, 125, 0.1);
   color: #241812;
   vertical-align: middle;
   transition: background 0.15s ease;
+  word-break: break-word;
+  overflow: hidden;
 }
 
 .btn-copy-micro {
