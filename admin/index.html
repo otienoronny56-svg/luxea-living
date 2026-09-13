@@ -119,6 +119,16 @@
 
         <!-- Navigation Registries & Actions -->
         <nav class="admin-sidebar-nav">
+          <div class="sidebar-section-title">Command Overview</div>
+
+          <button type="button" class="sidebar-nav-item" id="tabOverviewBtn">
+            <span class="nav-item-left">
+              <span class="nav-icon">📊</span>
+              <span>Executive Overview</span>
+            </span>
+            <span class="domain-tag">HQ</span>
+          </button>
+
           <div class="sidebar-section-title">Command Registries</div>
 
           <button type="button" class="sidebar-nav-item active" id="tabHostsBtn">
@@ -243,6 +253,9 @@
             <div>
               <span class="badge-tag badge-gold" style="font-size: 0.68rem; padding: 2px 8px;">SUPER ADMIN COMMAND</span>
               <h1 class="workspace-view-title" id="adminViewTitle">Host Applications</h1>
+              <p id="adminViewSub" style="color: var(--color-cocoa); font-size: 0.82rem; margin: 2px 0 0;">
+                Curatorial vetting, identity verification documents, and payout routing.
+              </p>
             </div>
           </div>
 
@@ -258,329 +271,549 @@
           </div>
         </div>
 
-        <!-- Top Executive Metrics Grid -->
-        <div class="admin-metrics-grid">
-        <div class="stat-metric-card">
-          <div class="metric-card-top">
-            <span class="metric-label">Total Host Partners</span>
-            <span class="metric-trend-chip chip-neutral" id="trendHostsTotal">Live DB</span>
-          </div>
-          <div class="metric-val" id="metricTotalHosts">0</div>
-          <div class="metric-sub">Across Nairobi, Coast &amp; Rift Valley</div>
-        </div>
-
-        <div class="stat-metric-card">
-          <div class="metric-card-top">
-            <span class="metric-label" style="color: #9A7B0C;">Pending Vetting</span>
-            <span class="metric-trend-chip chip-amber" id="trendPendingBadge">Action Req</span>
-          </div>
-          <div class="metric-val" style="color: #9A7B0C;" id="metricPendingHosts">0</div>
-          <div class="metric-sub">Awaiting document verification</div>
-        </div>
-
-        <div class="stat-metric-card">
-          <div class="metric-card-top">
-            <span class="metric-label" style="color: #1E8449;">Approved Partners</span>
-            <span class="metric-trend-chip chip-green" id="trendApprovedBadge">Verified</span>
-          </div>
-          <div class="metric-val" style="color: #1E8449;" id="metricApprovedHosts">0</div>
-          <div class="metric-sub">Active contracted properties</div>
-        </div>
-
-        <div class="stat-metric-card">
-          <div class="metric-card-top">
-            <span class="metric-label">Live Stays Catalog</span>
-            <span class="metric-trend-chip chip-gold" id="trendStaysLive">100% Active</span>
-          </div>
-          <div class="metric-val" id="metricTotalStays">0</div>
-          <div class="metric-sub">Bookable residences online</div>
-        </div>
-
-        <div class="stat-metric-card">
-          <div class="metric-card-top">
-            <span class="metric-label">VIP Guest Waitlist</span>
-            <span class="metric-trend-chip chip-neutral" id="trendWaitlistTier">Founding</span>
-          </div>
-          <div class="metric-val" id="metricTotalGuests">0</div>
-          <div class="metric-sub">Founding Circle passholders</div>
-        </div>
-      </div>
-
-      <!-- ======================================================================
-           EXECUTIVE ANALYTICS & PORTFOLIO BREAKDOWN HUB
-           ====================================================================== -->
-      <div class="admin-analytics-hub">
-        
-        <!-- Widget 1: Revenue Economics & Portfolio Valuation -->
-        <div class="analytics-card">
-          <div class="analytics-card-header">
-            <div class="analytics-title-group">
-              <span class="analytics-badge">PORTFOLIO ECONOMICS</span>
-              <h3 class="analytics-title">Projected Nightly Valuation</h3>
-            </div>
-            <span class="analytics-chip-gold">Active Catalog</span>
-          </div>
-
-          <div class="portfolio-val-cluster">
-            <div class="val-primary">
-              <span class="val-currency">$</span>
-              <span class="val-number" id="analyticsTotalUsd">0</span>
-              <span class="val-tag">USD / Night</span>
-            </div>
-            <div class="val-secondary">
-              ≈ KES <strong id="analyticsTotalKes">0</strong> / Night
-            </div>
-          </div>
-
-          <div class="economics-grid">
-            <div class="econ-item">
-              <span class="econ-label">Average Daily Rate (ADR)</span>
-              <span class="econ-val" id="analyticsAdr">$0 / night</span>
-            </div>
-            <div class="econ-item">
-              <span class="econ-label">Catalog Bookability</span>
-              <span class="econ-val" id="analyticsOccupancy">100% Active</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Widget 2: Regional Inventory Distribution -->
-        <div class="analytics-card">
-          <div class="analytics-card-header">
-            <div class="analytics-title-group">
-              <span class="analytics-badge">GEOGRAPHIC FOOTPRINT</span>
-              <h3 class="analytics-title">Regional Distribution</h3>
-            </div>
-            <span class="analytics-chip-neutral" id="analyticsTotalRegions">4 Prime Hubs</span>
-          </div>
-
-          <div class="regional-bars-wrap" id="analyticsRegionsList">
-            <!-- Injected dynamically by admin.js -->
-            <div class="region-row">
-              <div class="region-meta">
-                <span class="region-name">Ruaka &amp; Northern Bypass</span>
-                <span class="region-count" id="regCountRuaka">2 Stays (40%)</span>
+        <!-- ==================================================================
+             VIEW 0: EXECUTIVE OVERVIEW (HQ COMMAND DASHBOARD)
+             ================================================================== -->
+        <div id="viewOverview" class="admin-view-page hidden">
+          <!-- Top Executive Metrics Grid -->
+          <div class="admin-metrics-grid">
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Total Host Partners</span>
+                <span class="metric-trend-chip chip-neutral" id="trendHostsTotal">Live DB</span>
               </div>
-              <div class="region-track">
-                <div class="region-fill" id="regBarRuaka" style="width: 40%;"></div>
+              <div class="metric-val" id="metricTotalHosts">0</div>
+              <div class="metric-sub">Across Nairobi, Coast &amp; Rift Valley</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label" style="color: #9A7B0C;">Pending Vetting</span>
+                <span class="metric-trend-chip chip-amber" id="trendPendingBadge">Action Req</span>
+              </div>
+              <div class="metric-val" style="color: #9A7B0C;" id="metricPendingHosts">0</div>
+              <div class="metric-sub">Awaiting document verification</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label" style="color: #1E8449;">Approved Partners</span>
+                <span class="metric-trend-chip chip-green" id="trendApprovedBadge">Verified</span>
+              </div>
+              <div class="metric-val" style="color: #1E8449;" id="metricApprovedHosts">0</div>
+              <div class="metric-sub">Active contracted properties</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Live Stays Catalog</span>
+                <span class="metric-trend-chip chip-gold" id="trendStaysLive">100% Active</span>
+              </div>
+              <div class="metric-val" id="metricTotalStays">0</div>
+              <div class="metric-sub">Bookable residences online</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">VIP Guest Waitlist</span>
+                <span class="metric-trend-chip chip-neutral" id="trendWaitlistTier">Founding</span>
+              </div>
+              <div class="metric-val" id="metricTotalGuests">0</div>
+              <div class="metric-sub">Founding Circle passholders</div>
+            </div>
+          </div>
+
+          <!-- Executive Analytics & Portfolio Breakdown Hub -->
+          <div class="admin-analytics-hub">
+            <!-- Widget 1: Revenue Economics & Portfolio Valuation -->
+            <div class="analytics-card">
+              <div class="analytics-card-header">
+                <div class="analytics-title-group">
+                  <span class="analytics-badge">PORTFOLIO ECONOMICS</span>
+                  <h3 class="analytics-title">Projected Nightly Valuation</h3>
+                </div>
+                <span class="analytics-chip-gold">Active Catalog</span>
+              </div>
+
+              <div class="portfolio-val-cluster">
+                <div class="val-primary">
+                  <span class="val-currency">$</span>
+                  <span class="val-number" id="analyticsTotalUsd">0</span>
+                  <span class="val-tag">USD / Night</span>
+                </div>
+                <div class="val-secondary">
+                  ≈ KES <strong id="analyticsTotalKes">0</strong> / Night
+                </div>
+              </div>
+
+              <div class="economics-grid">
+                <div class="econ-item">
+                  <span class="econ-label">Average Daily Rate (ADR)</span>
+                  <span class="econ-val" id="analyticsAdr">$0 / night</span>
+                </div>
+                <div class="econ-item">
+                  <span class="econ-label">Catalog Bookability</span>
+                  <span class="econ-val" id="analyticsOccupancy">100% Active</span>
+                </div>
               </div>
             </div>
-            <div class="region-row">
-              <div class="region-meta">
-                <span class="region-name">Westlands Skyline</span>
-                <span class="region-count" id="regCountWestlands">1 Stay (20%)</span>
-              </div>
-              <div class="region-track">
-                <div class="region-fill" id="regBarWestlands" style="width: 20%;"></div>
-              </div>
-            </div>
-            <div class="region-row">
-              <div class="region-meta">
-                <span class="region-name">Mombasa &amp; Diani Coast</span>
-                <span class="region-count" id="regCountCoast">1 Stay (20%)</span>
-              </div>
-              <div class="region-track">
-                <div class="region-fill" id="regBarCoast" style="width: 20%;"></div>
-              </div>
-            </div>
-            <div class="region-row">
-              <div class="region-meta">
-                <span class="region-name">Karen &amp; Kitisuru Sanctuary</span>
-                <span class="region-count" id="regCountKaren">1 Stay (20%)</span>
-              </div>
-              <div class="region-track">
-                <div class="region-fill" id="regBarKaren" style="width: 20%;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- Widget 3: Category Mix & Host Vetting Pipeline -->
-        <div class="analytics-card">
-          <div class="analytics-card-header">
-            <div class="analytics-title-group">
-              <span class="analytics-badge">INVENTORY &amp; PIPELINE</span>
-              <h3 class="analytics-title">Category Mix &amp; Funnel</h3>
-            </div>
-            <span class="analytics-chip-green">Realtime Vetting</span>
-          </div>
-
-          <div class="category-pills-cluster" id="analyticsCategoryPills">
-            <div class="cat-pill">
-              <span class="cat-icon">🏙️</span>
-              <span class="cat-label">Penthouses</span>
-              <span class="cat-count" id="catCountPenthouse">2</span>
-            </div>
-            <div class="cat-pill">
-              <span class="cat-icon">🌊</span>
-              <span class="cat-label">Beach Villas</span>
-              <span class="cat-count" id="catCountVilla">1</span>
-            </div>
-            <div class="cat-pill">
-              <span class="cat-icon">🏡</span>
-              <span class="cat-label">Townhomes</span>
-              <span class="cat-count" id="catCountTownhouse">1</span>
-            </div>
-            <div class="cat-pill">
-              <span class="cat-icon">✨</span>
-              <span class="cat-label">Modern Suites</span>
-              <span class="cat-count" id="catCountApartment">1</span>
-            </div>
-          </div>
-
-          <div class="pipeline-progress-wrap">
-            <span class="pipeline-label">Host Partner Vetting Funnel</span>
-            <div class="funnel-steps">
-              <div class="funnel-step">
-                <span class="f-num" id="funnelTotal">0</span>
-                <span class="f-label">Submitted</span>
+            <!-- Widget 2: Regional Inventory Distribution -->
+            <div class="analytics-card">
+              <div class="analytics-card-header">
+                <div class="analytics-title-group">
+                  <span class="analytics-badge">GEOGRAPHIC FOOTPRINT</span>
+                  <h3 class="analytics-title">Regional Distribution</h3>
+                </div>
+                <span class="analytics-chip-neutral" id="analyticsTotalRegions">4 Prime Hubs</span>
               </div>
-              <div class="funnel-arrow">→</div>
-              <div class="funnel-step">
-                <span class="f-num" id="funnelReview">0</span>
-                <span class="f-label">In Review</span>
+
+              <div class="regional-bars-wrap" id="analyticsRegionsList">
+                <!-- Injected dynamically by admin.js -->
               </div>
-              <div class="funnel-arrow">→</div>
-              <div class="funnel-step f-approved">
-                <span class="f-num" id="funnelApproved">0</span>
-                <span class="f-label">Approved</span>
+            </div>
+
+            <!-- Widget 3: Category Mix & Host Vetting Pipeline -->
+            <div class="analytics-card">
+              <div class="analytics-card-header">
+                <div class="analytics-title-group">
+                  <span class="analytics-badge">INVENTORY &amp; PIPELINE</span>
+                  <h3 class="analytics-title">Category Mix &amp; Funnel</h3>
+                </div>
+                <span class="analytics-chip-green">Realtime Vetting</span>
+              </div>
+
+              <div class="category-pills-cluster" id="analyticsCategoryPills">
+                <div class="cat-pill">
+                  <span class="cat-icon">🏙️</span>
+                  <span class="cat-label">Penthouses</span>
+                  <span class="cat-count" id="catCountPenthouse">2</span>
+                </div>
+                <div class="cat-pill">
+                  <span class="cat-icon">🌊</span>
+                  <span class="cat-label">Beach Villas</span>
+                  <span class="cat-count" id="catCountVilla">1</span>
+                </div>
+                <div class="cat-pill">
+                  <span class="cat-icon">🏡</span>
+                  <span class="cat-label">Townhomes</span>
+                  <span class="cat-count" id="catCountTownhouse">1</span>
+                </div>
+                <div class="cat-pill">
+                  <span class="cat-icon">✨</span>
+                  <span class="cat-label">Modern Suites</span>
+                  <span class="cat-count" id="catCountApartment">1</span>
+                </div>
+              </div>
+
+              <div class="pipeline-progress-wrap">
+                <span class="pipeline-label">Host Partner Vetting Funnel</span>
+                <div class="funnel-steps">
+                  <div class="funnel-step">
+                    <span class="f-num" id="funnelTotal">0</span>
+                    <span class="f-label">Submitted</span>
+                  </div>
+                  <div class="funnel-arrow">→</div>
+                  <div class="funnel-step">
+                    <span class="f-num" id="funnelReview">0</span>
+                    <span class="f-label">In Review</span>
+                  </div>
+                  <div class="funnel-arrow">→</div>
+                  <div class="funnel-step f-approved">
+                    <span class="f-num" id="funnelApproved">0</span>
+                    <span class="f-label">Approved</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- Quick Jump Navigation Cards -->
+          <div class="admin-quick-jump-grid">
+            <div class="quick-jump-card" id="jumpToHostsCard" style="cursor: pointer;">
+              <div class="jump-icon">📋</div>
+              <div class="jump-meta">
+                <h4>Host Vetting Desk</h4>
+                <p>Audit incoming host partner dossiers, inspect ID verification documents, and approve payouts.</p>
+              </div>
+              <span class="jump-arrow">Open Host Applications →</span>
+            </div>
+
+            <div class="quick-jump-card" id="jumpToStaysCard" style="cursor: pointer;">
+              <div class="jump-icon">🏡</div>
+              <div class="jump-meta">
+                <h4>Live Stays Catalog</h4>
+                <p>Inspect bookable residences, nightly pricing, active inventory, and live availability toggles.</p>
+              </div>
+              <span class="jump-arrow">Open Stays Catalog →</span>
+            </div>
+
+            <div class="quick-jump-card" id="jumpToGuestsCard" style="cursor: pointer;">
+              <div class="jump-icon">✨</div>
+              <div class="jump-meta">
+                <h4>VIP Guest Waitlist</h4>
+                <p>Review high-net-worth passholders, priority destination interests, and export member rosters.</p>
+              </div>
+              <span class="jump-arrow">Open Guest Waitlist →</span>
+            </div>
+
+            <div class="quick-jump-card" id="jumpToWaitlistCard" style="cursor: pointer;">
+              <div class="jump-icon">🤝</div>
+              <div class="jump-meta">
+                <h4>Founding Host Waitlist</h4>
+                <p>Manage founding property owners registered on partners.luxealiving.co.ke with 0% launch perks.</p>
+              </div>
+              <span class="jump-arrow">Open Host Waitlist →</span>
+            </div>
+          </div>
         </div>
 
-      </div>
+        <!-- ==================================================================
+             VIEW 1: HOST APPLICATIONS
+             ================================================================== -->
+        <div id="viewHosts" class="admin-view-page">
+          <!-- Host Header Metrics -->
+          <div class="admin-metrics-grid">
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Total Applications</span>
+                <span class="metric-trend-chip chip-neutral">Incoming</span>
+              </div>
+              <div class="metric-val" id="hostCardTotal">0</div>
+              <div class="metric-sub">Submitted via /host/ onboarding</div>
+            </div>
 
-      <!-- Urgent Action Required Banner (Visible when pending applications exist) -->
-      <div id="pendingAuditBanner" class="pending-alert-banner hidden">
-        <div class="pending-alert-content">
-          <span class="pulsing-beacon-dot"></span>
-          <span><strong>Action Required:</strong> <span id="pendingBannerCount">1</span> host application(s) awaiting curatorial audit and approval.</span>
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label" style="color: #9A7B0C;">Pending Vetting</span>
+                <span class="metric-trend-chip chip-amber" id="hostCardPendingBadge">Action Req</span>
+              </div>
+              <div class="metric-val" style="color: #9A7B0C;" id="hostCardPending">0</div>
+              <div class="metric-sub">Requires KYC document audit</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label" style="color: #1E8449;">Approved Partners</span>
+                <span class="metric-trend-chip chip-green">Verified</span>
+              </div>
+              <div class="metric-val" style="color: #1E8449;" id="hostCardApproved">0</div>
+              <div class="metric-sub">Active contracted properties</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label" style="color: #C0392B;">Archived / Rejected</span>
+                <span class="metric-trend-chip chip-neutral">Declined</span>
+              </div>
+              <div class="metric-val" style="color: #C0392B;" id="hostCardRejected">0</div>
+              <div class="metric-sub">Did not meet luxury baseline</div>
+            </div>
+          </div>
+
+          <!-- Urgent Action Required Banner (Visible when pending applications exist) -->
+          <div id="pendingAuditBanner" class="pending-alert-banner hidden">
+            <div class="pending-alert-content">
+              <span class="pulsing-beacon-dot"></span>
+              <span><strong>Action Required:</strong> <span id="pendingBannerCount">1</span> host application(s) awaiting curatorial audit and approval.</span>
+            </div>
+            <a href="#" id="pendingBannerLink" class="btn-banner-review">Review Latest Dossier ↗</a>
+          </div>
+
+          <!-- Toolbar / Fast Search & Status Pills -->
+          <div class="admin-toolbar-card">
+            <div class="admin-search-box">
+              <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="adminSearchInput" class="form-control" placeholder="Search by name, property, phone, county, ref ID, or email...">
+            </div>
+
+            <div class="status-pills-filter" id="statusPillsFilter">
+              <button type="button" class="status-pill active" data-status="all">
+                <span>All</span>
+                <span class="pill-count" id="pillCountAll">0</span>
+              </button>
+              <button type="button" class="status-pill pill-amber" data-status="pending_review">
+                <span>⏳ Pending</span>
+                <span class="pill-count" id="pillCountPending">0</span>
+              </button>
+              <button type="button" class="status-pill pill-green" data-status="approved">
+                <span>✅ Approved</span>
+                <span class="pill-count" id="pillCountApproved">0</span>
+              </button>
+              <button type="button" class="status-pill pill-red" data-status="rejected">
+                <span>❌ Rejected</span>
+                <span class="pill-count" id="pillCountRejected">0</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- VIEW 1: HOSTS APPLICATIONS TABLE -->
+          <div id="hostsViewPane" class="table-responsive-box">
+            <table class="lux-data-table">
+              <thead>
+                <tr>
+                  <th style="width: 42px; text-align: center;">#</th>
+                  <th style="min-width: 160px;">Host &amp; Contact</th>
+                  <th style="min-width: 140px;">Property &amp; Area</th>
+                  <th style="width: 100px;">Type / Specs</th>
+                  <th style="width: 110px;">Payout Method</th>
+                  <th style="width: 110px;">Verification</th>
+                  <th style="width: 115px;">Review Status</th>
+                  <th style="width: 140px; text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="hostsTableBody">
+                <!-- Injected by admin.js -->
+              </tbody>
+            </table>
+            <div id="hostsEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
+              No host applications found. Partner submissions from <a href="/host/" style="color: var(--color-camel-dark); text-decoration: underline;">/host/</a> will appear here instantly.
+            </div>
+          </div>
         </div>
-        <a href="#" id="pendingBannerLink" class="btn-banner-review">Review Latest Dossier ↗</a>
-      </div>
 
-      <!-- Toolbar / Fast Search & Status Pills -->
-      <div class="admin-toolbar-card">
-        <div class="admin-search-box">
-          <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" id="adminSearchInput" class="form-control" placeholder="Search by name, property, phone, county, ref ID, or email...">
+        <!-- ==================================================================
+             VIEW 2: LIVE STAYS CATALOG
+             ================================================================== -->
+        <div id="viewStays" class="admin-view-page hidden">
+          <!-- Stays Header Metrics -->
+          <div class="admin-metrics-grid">
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Live Stays Catalog</span>
+                <span class="metric-trend-chip chip-gold">100% Active</span>
+              </div>
+              <div class="metric-val" id="staysCardTotal">0</div>
+              <div class="metric-sub">Bookable residences online</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Projected Nightly Valuation</span>
+                <span class="metric-trend-chip chip-neutral">USD / Night</span>
+              </div>
+              <div class="metric-val" id="staysCardUsd">$0</div>
+              <div class="metric-sub" id="staysCardKes">≈ KES 0 / Night</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Average Daily Rate (ADR)</span>
+                <span class="metric-trend-chip chip-neutral">Benchmark</span>
+              </div>
+              <div class="metric-val" id="staysCardAdr">$0 / night</div>
+              <div class="metric-sub">Average bookable pricing</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Catalog Bookability</span>
+                <span class="metric-trend-chip chip-green">Live Online</span>
+              </div>
+              <div class="metric-val" style="color: #1E8449;">100% Active</div>
+              <div class="metric-sub">Ready for guest reservations</div>
+            </div>
+          </div>
+
+          <!-- Stays Toolbar -->
+          <div class="admin-toolbar-card">
+            <div class="admin-search-box">
+              <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="staysSearchInput" class="form-control" placeholder="Search stays by title, owner, area, category, or nightly price...">
+            </div>
+            <a href="/stays/" target="_blank" class="btn btn-primary btn-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+              <span>View Public Catalog ↗</span>
+            </a>
+          </div>
+
+          <!-- VIEW 2: LIVE STAYS & INVENTORY -->
+          <div id="staysViewPane" class="table-responsive-box">
+            <table class="lux-data-table">
+              <thead>
+                <tr>
+                  <th style="width: 90px;">Photo</th>
+                  <th style="min-width: 200px;">Stay Title</th>
+                  <th style="min-width: 170px;">Property Owner</th>
+                  <th>Location</th>
+                  <th>Category</th>
+                  <th>Nightly Rate</th>
+                  <th>Live Guest Availability</th>
+                  <th style="width: 130px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="staysTableBody">
+                <!-- Injected by admin.js -->
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div class="status-pills-filter" id="statusPillsFilter">
-          <button type="button" class="status-pill active" data-status="all">
-            <span>All</span>
-            <span class="pill-count" id="pillCountAll">0</span>
-          </button>
-          <button type="button" class="status-pill pill-amber" data-status="pending_review">
-            <span>⏳ Pending</span>
-            <span class="pill-count" id="pillCountPending">0</span>
-          </button>
-          <button type="button" class="status-pill pill-green" data-status="approved">
-            <span>✅ Approved</span>
-            <span class="pill-count" id="pillCountApproved">0</span>
-          </button>
-          <button type="button" class="status-pill pill-red" data-status="rejected">
-            <span>❌ Rejected</span>
-            <span class="pill-count" id="pillCountRejected">0</span>
-          </button>
+        <!-- ==================================================================
+             VIEW 3: VIP GUEST WAITLIST
+             ================================================================== -->
+        <div id="viewGuests" class="admin-view-page hidden">
+          <!-- Guest Header Metrics -->
+          <div class="admin-metrics-grid">
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">VIP Guest Waitlist</span>
+                <span class="metric-trend-chip chip-gold">Founding</span>
+              </div>
+              <div class="metric-val" id="guestsCardTotal">0</div>
+              <div class="metric-sub">Founding Circle passholders</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Passholder Status</span>
+                <span class="metric-trend-chip chip-neutral">Batch 1</span>
+              </div>
+              <div class="metric-val" style="font-size: 1.4rem;">Founding Circle</div>
+              <div class="metric-sub">Guaranteed launch priority</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Top Preferred Hubs</span>
+                <span class="metric-trend-chip chip-neutral">Hotspots</span>
+              </div>
+              <div class="metric-val" style="font-size: 1.4rem;">Nairobi &amp; Diani</div>
+              <div class="metric-sub">Followed by Mara &amp; Naivasha</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Guest Roster Export</span>
+                <span class="metric-trend-chip chip-neutral">CSV</span>
+              </div>
+              <div style="margin-top: 6px;">
+                <button type="button" class="btn btn-secondary btn-sm" id="exportGuestsCsvBtnInline" style="width: 100%;">
+                  📥 Export Guests CSV
+                </button>
+              </div>
+              <div class="metric-sub" style="margin-top: 6px;">Live synced roster</div>
+            </div>
+          </div>
+
+          <!-- Guest Toolbar -->
+          <div class="admin-toolbar-card">
+            <div class="admin-search-box">
+              <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="guestsSearchInput" class="form-control" placeholder="Search guests by pass #, name, email, phone, or preferred destination...">
+            </div>
+            <a href="/waitlist/" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration: none; font-size: 0.8rem;">
+              <span>Public Guest Waitlist ↗</span>
+            </a>
+          </div>
+
+          <!-- VIEW 3: GUESTS WAITLIST -->
+          <div id="guestsViewPane" class="table-responsive-box">
+            <table class="lux-data-table">
+              <thead>
+                <tr>
+                  <th style="width: 130px;">Pass #</th>
+                  <th>Guest Name</th>
+                  <th>Email Address</th>
+                  <th>Phone</th>
+                  <th>Preferred Destinations</th>
+                  <th>Tier</th>
+                  <th>Joined Date</th>
+                </tr>
+              </thead>
+              <tbody id="guestsTableBody">
+                <!-- Injected by admin.js -->
+              </tbody>
+            </table>
+            <div id="guestsEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
+              No waitlist signups recorded yet. Submissions from <a href="/waitlist/" style="color: var(--color-camel-dark); text-decoration: underline;">/waitlist/</a> will appear here.
+            </div>
+          </div>
         </div>
-      </div>
 
-      <!-- VIEW 1: HOSTS APPLICATIONS TABLE -->
-      <div id="hostsViewPane" class="table-responsive-box">
-        <table class="lux-data-table">
-          <thead>
-            <tr>
-              <th style="width: 42px; text-align: center;">#</th>
-              <th style="min-width: 160px;">Host &amp; Contact</th>
-              <th style="min-width: 140px;">Property &amp; Area</th>
-              <th style="width: 100px;">Type / Specs</th>
-              <th style="width: 110px;">Payout Method</th>
-              <th style="width: 110px;">Verification</th>
-              <th style="width: 115px;">Review Status</th>
-              <th style="width: 140px; text-align: right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="hostsTableBody">
-            <!-- Injected by admin.js -->
-          </tbody>
-        </table>
-        <div id="hostsEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
-          No host applications found. Partner submissions from <a href="/host/" style="color: var(--color-camel-dark); text-decoration: underline;">/host/</a> will appear here instantly.
+        <!-- ==================================================================
+             VIEW 4: HOST PARTNER WAITLIST (partners.luxealiving.co.ke)
+             ================================================================== -->
+        <div id="viewHostWaitlist" class="admin-view-page hidden">
+          <!-- Host Waitlist Header Metrics -->
+          <div class="admin-metrics-grid">
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Registered Founding Hosts</span>
+                <span class="metric-trend-chip chip-gold" style="color: #9A7B0C; background: rgba(212, 175, 55, 0.15);">Early Custodians</span>
+              </div>
+              <div class="metric-val" id="waitlistCardTotal">0</div>
+              <div class="metric-sub">From partners.luxealiving.co.ke</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Turnkey Readiness</span>
+                <span class="metric-trend-chip chip-green">Ready Now</span>
+              </div>
+              <div class="metric-val" id="waitlistCardReady">0</div>
+              <div class="metric-sub">Properties ready for onboarding</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Founding Privileges</span>
+                <span class="metric-trend-chip chip-gold">90 Days</span>
+              </div>
+              <div class="metric-val" style="font-size: 1.4rem; color: #B28756;">0% Commission</div>
+              <div class="metric-sub">Complimentary 4K HDR Drone Shoot</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Direct Standalone Site</span>
+                <span class="metric-trend-chip chip-neutral">Live</span>
+              </div>
+              <div style="margin-top: 6px;">
+                <a href="/partners/" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+                  <span>Open partners. ↗</span>
+                </a>
+              </div>
+              <div class="metric-sub" style="margin-top: 6px;">Dedicated host landing page</div>
+            </div>
+          </div>
+
+          <!-- Host Waitlist Toolbar -->
+          <div class="admin-toolbar-card">
+            <div class="admin-search-box">
+              <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="hostWaitlistSearchInput" class="form-control" placeholder="Search waitlist hosts by partner name, email, phone, residence, county, or pass #...">
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" id="exportHostWaitlistCsvBtnInline">
+              📥 Export Waitlist CSV
+            </button>
+          </div>
+
+          <!-- Table Container -->
+          <div id="hostWaitlistViewPane" class="table-responsive-box">
+            <table class="lux-data-table">
+              <thead>
+                <tr>
+                  <th style="width: 140px;">Host Pass #</th>
+                  <th>Partner Name</th>
+                  <th>Email</th>
+                  <th>WhatsApp / Phone</th>
+                  <th>Residence &amp; Type</th>
+                  <th>Region</th>
+                  <th>Readiness</th>
+                  <th>Link / Notes</th>
+                  <th>Perk Tier</th>
+                  <th>Registered</th>
+                </tr>
+              </thead>
+              <tbody id="hostWaitlistTableBody">
+                <!-- Injected by admin.js -->
+              </tbody>
+            </table>
+            <div id="hostWaitlistEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
+              No host waitlist signups recorded yet. Submissions from <a href="/partners/" target="_blank" style="color: var(--color-camel-dark); text-decoration: underline;">partners.luxealiving.co.ke</a> will appear here.
+            </div>
+          </div>
         </div>
-      </div>
-
-      <!-- VIEW 2: LIVE STAYS & INVENTORY -->
-      <div id="staysViewPane" class="table-responsive-box hidden" style="margin-top: 10px;">
-        <table class="lux-data-table">
-          <thead>
-            <tr>
-              <th style="width: 90px;">Photo</th>
-              <th style="min-width: 200px;">Stay Title</th>
-              <th style="min-width: 170px;">Property Owner</th>
-              <th>Location</th>
-              <th>Category</th>
-              <th>Nightly Rate</th>
-              <th>Live Guest Availability</th>
-              <th style="width: 130px;">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="staysTableBody">
-            <!-- Injected by admin.js -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- VIEW 3: GUESTS WAITLIST -->
-      <div id="guestsViewPane" class="table-responsive-box hidden" style="margin-top: 10px;">
-        <table class="lux-data-table">
-          <thead>
-            <tr>
-              <th style="width: 130px;">Pass #</th>
-              <th>Guest Name</th>
-              <th>Email Address</th>
-              <th>Phone</th>
-              <th>Preferred Destinations</th>
-              <th>Tier</th>
-              <th>Joined Date</th>
-            </tr>
-
-          </thead>
-          <tbody id="guestsTableBody">
-            <!-- Injected by admin.js -->
-          </tbody>
-        </table>
-        <div id="guestsEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
-          No waitlist signups recorded yet. Submissions from <a href="/waitlist/" style="color: var(--color-camel-dark); text-decoration: underline;">/waitlist/</a> will appear here.
-        </div>
-      </div>
-
-      <!-- VIEW 4: HOST PARTNER WAITLIST (partners.luxealiving.co.ke) -->
-      <div id="hostWaitlistViewPane" class="table-responsive-box hidden" style="margin-top: 10px;">
-        <table class="lux-data-table">
-          <thead>
-            <tr>
-              <th style="width: 140px;">Host Pass #</th>
-              <th>Partner Name</th>
-              <th>Email</th>
-              <th>WhatsApp / Phone</th>
-              <th>Residence &amp; Type</th>
-              <th>Region</th>
-              <th>Readiness</th>
-              <th>Link / Notes</th>
-              <th>Perk Tier</th>
-              <th>Registered</th>
-            </tr>
-          </thead>
-          <tbody id="hostWaitlistTableBody">
-            <!-- Injected by admin.js -->
-          </tbody>
-        </table>
-        <div id="hostWaitlistEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
-          No host waitlist signups recorded yet. Submissions from <a href="/partners/" target="_blank" style="color: var(--color-camel-dark); text-decoration: underline;">partners.luxealiving.co.ke</a> will appear here.
-        </div>
-      </div>
       <!-- End hostWaitlistViewPane -->
 
       </main>

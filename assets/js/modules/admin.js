@@ -193,6 +193,36 @@ export function initAdminDashboard() {
     if (elTotalStays) elTotalStays.textContent = totalStays;
     if (elTotalGuests) elTotalGuests.textContent = totalGuests;
 
+    // Dedicated Host View Cards
+    const hostCardTotal = document.getElementById('hostCardTotal');
+    const hostCardPending = document.getElementById('hostCardPending');
+    const hostCardApproved = document.getElementById('hostCardApproved');
+    const hostCardRejected = document.getElementById('hostCardRejected');
+    if (hostCardTotal) hostCardTotal.textContent = totalHosts;
+    if (hostCardPending) hostCardPending.textContent = pendingHosts;
+    if (hostCardApproved) hostCardApproved.textContent = approvedHosts;
+    if (hostCardRejected) hostCardRejected.textContent = rejectedHosts;
+
+    // Dedicated Stays View Cards
+    const staysCardTotal = document.getElementById('staysCardTotal');
+    if (staysCardTotal) staysCardTotal.textContent = totalStays;
+
+    // Dedicated Guest View Cards
+    const guestsCardTotal = document.getElementById('guestsCardTotal');
+    if (guestsCardTotal) guestsCardTotal.textContent = totalGuests;
+
+    // Dedicated Host Waitlist Cards
+    const waitlistCardTotal = document.getElementById('waitlistCardTotal');
+    const waitlistCardReady = document.getElementById('waitlistCardReady');
+    if (waitlistCardTotal) waitlistCardTotal.textContent = totalHostWaitlist;
+    if (waitlistCardReady) {
+      const readyHosts = cachedHostWaitlist.filter(w => {
+        const r = (w.readiness || w.property_ready || '').toLowerCase();
+        return r.includes('immediate') || r.includes('ready') || r.includes('now') || r.includes('active');
+      }).length;
+      waitlistCardReady.textContent = readyHosts || totalHostWaitlist;
+    }
+
     // Tab counters
     const tHost = document.getElementById('hostTabCounter');
     const tStays = document.getElementById('staysTabCounter');
@@ -291,14 +321,22 @@ export function initAdminDashboard() {
 
     if (elTotalUsd) elTotalUsd.textContent = totalUsdVal.toLocaleString();
     if (elTotalKes) elTotalKes.textContent = totalKesVal.toLocaleString();
+    const adr = activeStaysCount > 0 ? Math.round(totalUsdVal / activeStaysCount) : 0;
     if (elAdr) {
-      const adr = activeStaysCount > 0 ? Math.round(totalUsdVal / activeStaysCount) : 0;
       elAdr.textContent = `$${adr.toLocaleString()} / night`;
     }
     if (elOccupancy) {
       const pct = totalStays > 0 ? Math.round((activeStaysCount / totalStays) * 100) : 100;
       elOccupancy.textContent = `${pct}% Bookable (${activeStaysCount}/${totalStays})`;
     }
+
+    // Populate dedicated Stays View card valuations
+    const staysCardUsd = document.getElementById('staysCardUsd');
+    const staysCardKes = document.getElementById('staysCardKes');
+    const staysCardAdr = document.getElementById('staysCardAdr');
+    if (staysCardUsd) staysCardUsd.textContent = `$${totalUsdVal.toLocaleString()}`;
+    if (staysCardKes) staysCardKes.textContent = `≈ KES ${totalKesVal.toLocaleString()} / Night`;
+    if (staysCardAdr) staysCardAdr.textContent = `$${adr.toLocaleString()} / night`;
 
     // =======================================================================
     // ANALYTICS HUB 2: REGIONAL FOOTPRINT
@@ -880,38 +918,94 @@ export function initAdminDashboard() {
   // =========================================================================
   // 7. TAB & SIDEBAR NAVIGATION
   // =========================================================================
+  // =========================================================================
+  // 7. TAB & SIDEBAR NAVIGATION (DEDICATED VIEW PAGES)
+  // =========================================================================
   const adminViewTitle = document.getElementById('adminViewTitle');
+  const adminViewSub = document.getElementById('adminViewSub');
   const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
   const sidebarBackdrop = document.getElementById('sidebarBackdrop');
   const adminSidebar = document.getElementById('adminSidebar');
   const refreshAdminDataBtn = document.getElementById('refreshAdminDataBtn');
 
+  // View elements
+  const tabOverview = document.getElementById('tabOverviewBtn');
+  const viewOverview = document.getElementById('viewOverview');
+  const viewHosts = document.getElementById('viewHosts');
+  const viewStays = document.getElementById('viewStays');
+  const viewGuests = document.getElementById('viewGuests');
+  const viewHostWaitlist = document.getElementById('viewHostWaitlist');
+
+  // Per-view search inputs
+  const staysSearchInput = document.getElementById('staysSearchInput');
+  const guestsSearchInput = document.getElementById('guestsSearchInput');
+  const hostWaitlistSearchInput = document.getElementById('hostWaitlistSearchInput');
+
   const tabTitles = {
-    hosts: 'Host Applications',
-    stays: 'Live Stays & Inventory',
-    guests: 'VIP Guest Waitlist',
-    hostWaitlist: 'Host Partner Waitlist (partners.)'
+    overview: { title: 'Executive Overview', sub: 'High-level command center, portfolio valuation, and platform economics.' },
+    hosts: { title: 'Host Applications', sub: 'Curatorial vetting, identity verification documents, and payout routing.' },
+    stays: { title: 'Live Stays Catalog', sub: 'Active bookable residences published in the live guest collection.' },
+    guests: { title: 'VIP Guest Waitlist', sub: 'Founding Circle passholders with priority destination interests.' },
+    hostWaitlist: { title: 'Host Partner Waitlist (partners.)', sub: 'Founding property custodians registered from partners.luxealiving.co.ke.' }
   };
 
+  tabOverview?.addEventListener('click', () => switchTab('overview'));
   tabHosts?.addEventListener('click', () => switchTab('hosts'));
   tabStays?.addEventListener('click', () => switchTab('stays'));
   tabGuests?.addEventListener('click', () => switchTab('guests'));
   tabHostWaitlist?.addEventListener('click', () => switchTab('hostWaitlist'));
 
+  // Quick Jump cards from Overview
+  document.getElementById('jumpToHostsCard')?.addEventListener('click', () => switchTab('hosts'));
+  document.getElementById('jumpToStaysCard')?.addEventListener('click', () => switchTab('stays'));
+  document.getElementById('jumpToGuestsCard')?.addEventListener('click', () => switchTab('guests'));
+  document.getElementById('jumpToWaitlistCard')?.addEventListener('click', () => switchTab('hostWaitlist'));
+
+  // Per-view Search Listeners
+  staysSearchInput?.addEventListener('input', (e) => {
+    renderStaysTable(e.target.value.toLowerCase().trim());
+  });
+
+  guestsSearchInput?.addEventListener('input', (e) => {
+    renderGuestsTable(e.target.value.toLowerCase().trim());
+  });
+
+  hostWaitlistSearchInput?.addEventListener('input', (e) => {
+    renderHostWaitlistTable(e.target.value.toLowerCase().trim());
+  });
+
+  // Inline Export Triggers
+  document.getElementById('exportGuestsCsvBtnInline')?.addEventListener('click', () => {
+    exportGuestsBtn?.click();
+  });
+
+  document.getElementById('exportHostWaitlistCsvBtnInline')?.addEventListener('click', () => {
+    exportHostWaitlistBtn?.click();
+  });
+
   function switchTab(tab) {
+    tabOverview?.classList.toggle('active', tab === 'overview');
     tabHosts?.classList.toggle('active', tab === 'hosts');
     tabStays?.classList.toggle('active', tab === 'stays');
     tabGuests?.classList.toggle('active', tab === 'guests');
     tabHostWaitlist?.classList.toggle('active', tab === 'hostWaitlist');
 
-    hostsPane?.classList.toggle('hidden', tab !== 'hosts');
-    staysPane?.classList.toggle('hidden', tab !== 'stays');
-    guestsPane?.classList.toggle('hidden', tab !== 'guests');
-    hostWaitlistPane?.classList.toggle('hidden', tab !== 'hostWaitlist');
+    viewOverview?.classList.toggle('hidden', tab !== 'overview');
+    viewHosts?.classList.toggle('hidden', tab !== 'hosts');
+    viewStays?.classList.toggle('hidden', tab !== 'stays');
+    viewGuests?.classList.toggle('hidden', tab !== 'guests');
+    viewHostWaitlist?.classList.toggle('hidden', tab !== 'hostWaitlist');
 
     if (adminViewTitle && tabTitles[tab]) {
-      adminViewTitle.textContent = tabTitles[tab];
+      adminViewTitle.textContent = tabTitles[tab].title;
     }
+    if (adminViewSub && tabTitles[tab]) {
+      adminViewSub.textContent = tabTitles[tab].sub;
+    }
+
+    // Scroll workspace to top smoothly
+    const workspace = document.querySelector('.admin-workspace');
+    if (workspace) workspace.scrollTop = 0;
 
     // Dismiss mobile sidebar drawer if open
     adminSidebar?.classList.remove('open');
