@@ -22,8 +22,8 @@
 </head>
 <body>
 
-  <!-- Header -->
-  <header class="lux-header">
+  <!-- Public Header (Visible when logged out) -->
+  <header class="lux-header" id="adminPublicHeader">
     <div class="container nav-container">
       <div style="display: flex; align-items: center; gap: 12px;">
         <a href="/" class="brand-logo">
@@ -42,7 +42,7 @@
     </div>
   </header>
 
-  <main class="container admin-page-container">
+  <div class="admin-page-container">
 
     <!-- ======================================================================
          SCREEN 1: SUPER ADMIN AUTHENTICATION GATEWAY
@@ -97,10 +97,169 @@
     <!-- ======================================================================
          SCREEN 2: SUPER ADMIN CONSOLE DASHBOARD (Visible when logged in)
          ====================================================================== -->
-    <div id="adminDashboardView" class="hidden">
+    <div id="adminDashboardView" class="admin-app-shell hidden">
       
-      <!-- Top Executive Metrics Grid -->
-      <div class="admin-metrics-grid">
+      <!-- Backdrop for Mobile Drawer Navigation -->
+      <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+      <!-- ======================================================================
+           LEFT PANEL: EXECUTIVE COMMAND SIDEBAR
+           ====================================================================== -->
+      <aside class="admin-sidebar" id="adminSidebar">
+        <!-- Brand & Monogram -->
+        <div class="admin-sidebar-brand">
+          <a href="/" class="admin-brand-link">
+            <span class="brand-monogram">L</span>
+            <div class="admin-brand-meta">
+              <span class="admin-brand-name">Luxea</span>
+              <span class="admin-brand-sub">Executive Console</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- Navigation Registries & Actions -->
+        <nav class="admin-sidebar-nav">
+          <div class="sidebar-section-title">Command Registries</div>
+
+          <button type="button" class="sidebar-nav-item active" id="tabHostsBtn">
+            <span class="nav-item-left">
+              <span class="nav-icon">📋</span>
+              <span>Host Applications</span>
+            </span>
+            <span class="tab-badge" id="hostTabCounter">0</span>
+          </button>
+
+          <button type="button" class="sidebar-nav-item" id="tabStaysBtn">
+            <span class="nav-item-left">
+              <span class="nav-icon">🏡</span>
+              <span>Live Stays Catalog</span>
+            </span>
+            <span class="tab-badge" id="staysTabCounter">0</span>
+          </button>
+
+          <button type="button" class="sidebar-nav-item" id="tabGuestsBtn">
+            <span class="nav-item-left">
+              <span class="nav-icon">✨</span>
+              <span>VIP Guest Waitlist</span>
+            </span>
+            <span class="tab-badge" id="guestTabCounter">0</span>
+          </button>
+
+          <button type="button" class="sidebar-nav-item" id="tabHostWaitlistBtn">
+            <span class="nav-item-left">
+              <span class="nav-icon">🤝</span>
+              <span>Host Waitlist <span class="domain-tag">partners.</span></span>
+            </span>
+            <span class="tab-badge" id="hostWaitlistTabCounter" style="background: rgba(212, 175, 55, 0.2); color: #9A7B0C;">0</span>
+          </button>
+
+          <div class="sidebar-section-title">Data Operations</div>
+
+          <button type="button" class="sidebar-nav-action" id="refreshAdminDataBtn" title="Sync live Supabase updates">
+            <span class="nav-item-left">
+              <span class="nav-icon">🔄</span>
+              <span>Sync Live Engine</span>
+            </span>
+            <span class="domain-tag">Live</span>
+          </button>
+
+          <button type="button" class="sidebar-nav-action" id="exportHostsCsvBtn" title="Download host partner applications roster as CSV">
+            <span class="nav-item-left">
+              <span class="nav-icon">📥</span>
+              <span>Export Hosts CSV</span>
+            </span>
+            <span class="domain-tag">.csv</span>
+          </button>
+
+          <button type="button" class="sidebar-nav-action" id="exportGuestsCsvBtn" title="Download guest VIP waitlist as CSV">
+            <span class="nav-item-left">
+              <span class="nav-icon">📥</span>
+              <span>Export Guests CSV</span>
+            </span>
+            <span class="domain-tag">.csv</span>
+          </button>
+
+          <button type="button" class="sidebar-nav-action" id="exportHostWaitlistCsvBtn" title="Download host partner waitlist as CSV">
+            <span class="nav-item-left">
+              <span class="nav-icon">📥</span>
+              <span>Export Waitlist CSV</span>
+            </span>
+            <span class="domain-tag">.csv</span>
+          </button>
+
+          <div class="sidebar-section-title">Direct Portals</div>
+
+          <a href="/" class="sidebar-nav-action" target="_blank" rel="noopener">
+            <span class="nav-item-left">
+              <span class="nav-icon">🌐</span>
+              <span>Live Guest Site</span>
+            </span>
+            <span class="domain-tag">↗</span>
+          </a>
+
+          <a href="/host/" class="sidebar-nav-action" target="_blank" rel="noopener">
+            <span class="nav-item-left">
+              <span class="nav-icon">🔑</span>
+              <span>Host Onboarding</span>
+            </span>
+            <span class="domain-tag">↗</span>
+          </a>
+
+          <a href="/partners/" class="sidebar-nav-action" target="_blank" rel="noopener">
+            <span class="nav-item-left">
+              <span class="nav-icon">💎</span>
+              <span>Founding Waitlist</span>
+            </span>
+            <span class="domain-tag">↗</span>
+          </a>
+        </nav>
+
+        <!-- Sidebar Footer Profile & Logout -->
+        <div class="admin-sidebar-footer">
+          <div class="admin-user-card">
+            <div class="admin-avatar">👑</div>
+            <div class="admin-user-meta">
+              <strong id="sidebarAdminName">Ronald</strong>
+              <span id="superAdminBadge">Super Admin</span>
+            </div>
+          </div>
+          <button type="button" class="btn-sidebar-logout" id="adminLogoutBtn" title="Sign out of console">
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      <!-- ======================================================================
+           RIGHT WORKSPACE: EXECUTIVE DASHBOARD
+           ====================================================================== -->
+      <main class="admin-workspace">
+
+        <!-- Topbar with mobile toggle and engine status -->
+        <div class="workspace-topbar">
+          <div class="workspace-title-group">
+            <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation menu">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div>
+              <span class="badge-tag badge-gold" style="font-size: 0.68rem; padding: 2px 8px;">SUPER ADMIN COMMAND</span>
+              <h1 class="workspace-view-title" id="adminViewTitle">Host Applications</h1>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="supabase-status-chip">
+              <span class="supabase-status-dot connected" id="supabaseStatusDot"></span>
+              <span id="supabaseStatusText">Supabase Engine Live</span>
+            </div>
+            <a href="/" target="_blank" class="btn btn-ghost btn-sm" style="font-size: 0.8rem; text-decoration: none;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+              <span>Live Site</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Top Executive Metrics Grid -->
+        <div class="admin-metrics-grid">
         <div class="stat-metric-card">
           <div class="metric-card-top">
             <span class="metric-label">Total Host Partners</span>
@@ -292,36 +451,6 @@
 
       </div>
 
-      <!-- Action Header Card -->
-      <div class="admin-header-card">
-        <div>
-          <span class="badge-tag badge-gold">SUPER ADMIN PLATFORM COMMAND</span>
-          <h1 class="admin-main-title">Partner Submissions &amp; Catalog</h1>
-          <p style="color: var(--color-cocoa); font-size: 0.9rem; margin-top: 4px;">
-            Real-time synchronized partner applications, verified payouts, and live portfolio inventory.
-          </p>
-        </div>
-
-        <div class="admin-actions-cluster">
-          <button class="btn btn-secondary btn-sm" id="exportHostsCsvBtn" title="Download host partner applications roster as CSV">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            <span>Export Hosts CSV</span>
-          </button>
-          <button class="btn btn-secondary btn-sm" id="exportGuestsCsvBtn" title="Download guest VIP waitlist as CSV">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            <span>Export Guests CSV</span>
-          </button>
-          <button class="btn btn-secondary btn-sm" id="exportHostWaitlistCsvBtn" title="Download host partner waitlist as CSV">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            <span>Export Host Waitlist</span>
-          </button>
-          <button class="btn btn-primary btn-sm" id="refreshAdminDataBtn" title="Sync live updates">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-            <span>Sync Engine</span>
-          </button>
-        </div>
-      </div>
-
       <!-- Urgent Action Required Banner (Visible when pending applications exist) -->
       <div id="pendingAuditBanner" class="pending-alert-banner hidden">
         <div class="pending-alert-content">
@@ -329,26 +458,6 @@
           <span><strong>Action Required:</strong> <span id="pendingBannerCount">1</span> host application(s) awaiting curatorial audit and approval.</span>
         </div>
         <a href="#" id="pendingBannerLink" class="btn-banner-review">Review Latest Dossier ↗</a>
-      </div>
-
-      <!-- Navigation Tabs with Quick Counters -->
-      <div class="admin-tabs-nav">
-        <button class="admin-tab-link active" id="tabHostsBtn">
-          <span>Host Partner Applications</span>
-          <span class="tab-badge" id="hostTabCounter">0</span>
-        </button>
-        <button class="admin-tab-link" id="tabStaysBtn">
-          <span>Live Stays &amp; Inventory</span>
-          <span class="tab-badge" id="staysTabCounter">0</span>
-        </button>
-        <button class="admin-tab-link" id="tabGuestsBtn">
-          <span>Guest VIP Waitlist</span>
-          <span class="tab-badge" id="guestTabCounter">0</span>
-        </button>
-        <button class="admin-tab-link" id="tabHostWaitlistBtn">
-          <span>Host Waitlist (partners.)</span>
-          <span class="tab-badge" id="hostWaitlistTabCounter" style="background: rgba(212, 175, 55, 0.2); color: #9A7B0C;">0</span>
-        </button>
       </div>
 
       <!-- Toolbar / Fast Search & Status Pills -->
@@ -472,10 +581,16 @@
           No host waitlist signups recorded yet. Submissions from <a href="/partners/" target="_blank" style="color: var(--color-camel-dark); text-decoration: underline;">partners.luxealiving.co.ke</a> will appear here.
         </div>
       </div>
+      <!-- End hostWaitlistViewPane -->
+
+      </main>
+      <!-- End admin-workspace -->
 
     </div>
+    <!-- End adminDashboardView (admin-app-shell) -->
 
-  </main>
+  </div>
+  <!-- End admin-page-container -->
 
   <!-- ======================================================================
        HOST APPLICATION INSPECTION MODAL (Super Admin Detail View)

@@ -69,19 +69,30 @@ export function initAdminDashboard() {
   // 1. AUTHENTICATION GATE
   // =========================================================================
   function checkAuth() {
+    const publicHeader = document.getElementById('adminPublicHeader');
+    const mobileBottomNav = document.querySelector('.mobile-bottom-nav');
+
     if (window.LuxeaAuth && window.LuxeaAuth.isAdminLoggedIn()) {
       const admin = window.LuxeaAuth.getCurrentAdmin();
       loginGateway?.classList.add('hidden');
       dashboardView?.classList.remove('hidden');
+      if (publicHeader) publicHeader.classList.add('hidden');
+      if (mobileBottomNav) mobileBottomNav.classList.add('hidden');
       adminBadge?.classList.remove('hidden');
       logoutBtn?.classList.remove('hidden');
-      if (admin && admin.name && adminBadge) {
-        adminBadge.textContent = `👑 Super Admin: ${admin.name.split(' ')[0]}`;
+
+      if (admin && admin.name) {
+        const firstName = admin.name.split(' ')[0];
+        const sidebarName = document.getElementById('sidebarAdminName');
+        if (sidebarName) sidebarName.textContent = firstName;
+        if (adminBadge) adminBadge.textContent = `Super Admin`;
       }
       loadDashboardData();
     } else {
       loginGateway?.classList.remove('hidden');
       dashboardView?.classList.add('hidden');
+      if (publicHeader) publicHeader.classList.remove('hidden');
+      if (mobileBottomNav) mobileBottomNav.classList.remove('hidden');
       adminBadge?.classList.add('hidden');
       logoutBtn?.classList.add('hidden');
     }
@@ -866,7 +877,22 @@ export function initAdminDashboard() {
     });
   });
 
-  // Tab switching
+  // =========================================================================
+  // 7. TAB & SIDEBAR NAVIGATION
+  // =========================================================================
+  const adminViewTitle = document.getElementById('adminViewTitle');
+  const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+  const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+  const adminSidebar = document.getElementById('adminSidebar');
+  const refreshAdminDataBtn = document.getElementById('refreshAdminDataBtn');
+
+  const tabTitles = {
+    hosts: 'Host Applications',
+    stays: 'Live Stays & Inventory',
+    guests: 'VIP Guest Waitlist',
+    hostWaitlist: 'Host Partner Waitlist (partners.)'
+  };
+
   tabHosts?.addEventListener('click', () => switchTab('hosts'));
   tabStays?.addEventListener('click', () => switchTab('stays'));
   tabGuests?.addEventListener('click', () => switchTab('guests'));
@@ -882,7 +908,34 @@ export function initAdminDashboard() {
     staysPane?.classList.toggle('hidden', tab !== 'stays');
     guestsPane?.classList.toggle('hidden', tab !== 'guests');
     hostWaitlistPane?.classList.toggle('hidden', tab !== 'hostWaitlist');
+
+    if (adminViewTitle && tabTitles[tab]) {
+      adminViewTitle.textContent = tabTitles[tab];
+    }
+
+    // Dismiss mobile sidebar drawer if open
+    adminSidebar?.classList.remove('open');
+    sidebarBackdrop?.classList.remove('active');
   }
+
+  // Mobile Sidebar Drawer Controls
+  sidebarToggleBtn?.addEventListener('click', () => {
+    adminSidebar?.classList.toggle('open');
+    sidebarBackdrop?.classList.toggle('active');
+  });
+
+  sidebarBackdrop?.addEventListener('click', () => {
+    adminSidebar?.classList.remove('open');
+    sidebarBackdrop?.classList.remove('active');
+  });
+
+  // Sync Engine Button
+  refreshAdminDataBtn?.addEventListener('click', async () => {
+    refreshAdminDataBtn.classList.add('rotating');
+    await loadDashboardData();
+    refreshAdminDataBtn.classList.remove('rotating');
+    if (window.showToast) window.showToast('✅ Super Admin data refreshed from Supabase.');
+  });
 
   // =========================================================================
   // 8. CSV EXPORTS
