@@ -452,56 +452,36 @@ export function initAdminDashboard() {
       const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${name}, this is Ronald from Luxea Living regarding your host application (${ref}).`)}`;
 
       const tr = document.createElement('tr');
+      tr.className = 'host-table-row';
+      tr.setAttribute('data-ref', ref);
+      tr.title = 'Click row to inspect full dossier';
       tr.innerHTML = `
-        <td style="text-align: center; color: var(--color-cocoa-light); font-weight: 700; font-size: 0.76rem; width: 36px;">
-          ${idx + 1}
-        </td>
-
         <td>
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span class="host-cell-name">${name}</span>
-            <button class="btn-copy-micro copy-ref-btn" data-ref="${ref}" title="Click to copy Ref ID: ${ref}">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="host-cell-name" style="font-size: 0.94rem; font-weight: 700; color: #241812;">${name}</span>
+            <button type="button" class="btn-copy-micro copy-ref-btn" data-ref="${ref}" title="Click to copy Ref ID: ${ref}">
               <span>${ref}</span>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             </button>
           </div>
-          <div class="host-cell-sub" style="margin-top: 2px;">
-            <span title="${email}" style="color: var(--color-cocoa); font-size: 0.76rem; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>
-          </div>
         </td>
 
         <td>
-          <div class="host-cell-name">${prop}</div>
-          <div class="host-cell-sub" style="margin-top: 2px;">
-            <span style="font-weight: 600; color: #241812;">${type}</span>
-            <span>•</span>
-            <span>${loc}</span>
-          </div>
+          <div style="font-weight: 600; font-size: 0.88rem; color: #241812;">${prop}</div>
+          <div style="font-size: 0.76rem; color: var(--color-cocoa); margin-top: 2px;">${loc}</div>
         </td>
 
         <td>
-          <div style="font-weight: 600; font-size: 0.84rem; color: #241812;">${phone}</div>
-          <div style="margin-top: 2px;">
-            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" style="color: #1E8449; font-size: 0.74rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;">
-              <span>💬 WhatsApp</span>
-            </a>
-          </div>
-        </td>
-
-        <td>
-          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="padding: 5px 10px; font-size: 0.76rem; width: 100%; min-width: 125px;">
-            <option value="pending_review" ${status === 'pending_review' ? 'selected' : ''}>⏳ Pending</option>
+          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="padding: 6px 12px; font-size: 0.78rem; font-weight: 700; width: 100%; min-width: 140px;">
+            <option value="pending_review" ${status === 'pending_review' ? 'selected' : ''}>⏳ Pending Review</option>
             <option value="approved" ${status === 'approved' ? 'selected' : ''}>✅ Approved</option>
             <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
           </select>
         </td>
 
         <td style="text-align: right;">
-          <div class="table-action-btns" style="justify-content: flex-end; gap: 4px;">
-            <button type="button" class="btn-table-action btn-inspect trigger-inspect-btn" data-ref="${ref}" title="Inspect full application dossier (photos, payout, KYC)" style="padding: 5px 10px; font-size: 0.74rem; font-weight: 700;">
-              <span>Inspect ↗</span>
-            </button>
-          </div>
+          <button type="button" class="btn-table-action btn-inspect trigger-inspect-btn" data-ref="${ref}" title="Inspect full application dossier (photos, payout, KYC)" style="padding: 6px 14px; font-size: 0.76rem; font-weight: 700;">
+            <span>Inspect ↗</span>
+          </button>
         </td>
       `;
 
@@ -524,7 +504,9 @@ export function initAdminDashboard() {
 
     // 2. Inline Status Switcher Dropdown
     hostsTableBody.querySelectorAll('.host-status-select').forEach(sel => {
-      sel.addEventListener('change', async () => {
+      sel.addEventListener('click', (e) => e.stopPropagation());
+      sel.addEventListener('change', async (e) => {
+        e.stopPropagation();
         const ref = sel.getAttribute('data-ref');
         const newStatus = sel.value;
 
@@ -541,11 +523,11 @@ export function initAdminDashboard() {
       });
     });
 
-    // 3. Inspect Modal trigger
-    hostsTableBody.querySelectorAll('.trigger-inspect-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const ref = btn.getAttribute('data-ref');
+    // 3. Row click & Inspect Modal trigger
+    hostsTableBody.querySelectorAll('.host-table-row').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('.host-status-select') || e.target.closest('.copy-ref-btn')) return;
+        const ref = row.getAttribute('data-ref');
         openInspectModal(ref);
       });
     });
@@ -587,20 +569,29 @@ export function initAdminDashboard() {
     }
 
     const idDocUrl = host.id_document_url;
+    const phone = host.phone || '';
+    const digitsOnly = phone.replace(/[^0-9]/g, '');
+    const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
+    const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${host.fullName || host.full_name}, this is Ronald from Luxea Living regarding your host application (${refId}).`)}` : '';
 
     if (inspectBody) {
       inspectBody.innerHTML = `
         <div class="inspect-item">
           <span class="inspect-label">Host Partner Details</span>
           <div class="inspect-val"><strong>Name:</strong> ${host.fullName || host.full_name}</div>
-          <div class="inspect-val">
+          <div class="inspect-val" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+            <strong>Phone:</strong> <span>${phone || '—'}</span>
+            ${phone ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-wa-action" style="padding: 2px 8px; font-size: 0.72rem; margin-left: 6px;">💬 Chat on WhatsApp</a>` : ''}
+          </div>
+          <div class="inspect-val" style="margin-top: 4px;">
+            <strong>Email:</strong> <a href="mailto:${host.email}" style="color: var(--color-camel-dark); text-decoration: underline;">${host.email}</a>
+          </div>
+          <div class="inspect-val" style="margin-top: 4px;">
             <strong>National ID / Passport:</strong> ${host.nationalId || host.national_id || 'On File'}
             ${idDocUrl ? `<a href="${idDocUrl}" target="_blank" rel="noopener noreferrer" style="color: #B28756; font-size: 0.75rem; text-decoration: underline; margin-left: 8px; font-weight: 700;">View Document ↗</a>` : ''}
           </div>
-          <div class="inspect-val"><strong>KRA PIN:</strong> ${host.kraPin || host.kra_pin || 'On File'}</div>
-          <div class="inspect-val"><strong>Phone:</strong> ${host.phone}</div>
-          <div class="inspect-val"><strong>Email:</strong> ${host.email}</div>
-          <div class="inspect-val"><strong>Date of Birth:</strong> ${host.dob || '—'}</div>
+          <div class="inspect-val" style="margin-top: 4px;"><strong>KRA PIN:</strong> ${host.kraPin || host.kra_pin || 'On File'}</div>
+          <div class="inspect-val" style="margin-top: 4px;"><strong>Date of Birth:</strong> ${host.dob || '—'}</div>
         </div>
 
         <div class="inspect-item">

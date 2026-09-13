@@ -979,11 +979,11 @@
   background: #FBF9F5;
   color: #241812;
   font-family: var(--font-sans);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 12px 10px;
+  letter-spacing: 0.05em;
+  padding: 16px 20px;
   border-bottom: 1px solid rgba(178, 150, 125, 0.2);
   white-space: normal;
   position: sticky;
@@ -993,13 +993,22 @@
 }
 
 .lux-data-table tbody td {
-  padding: 10px 10px;
+  padding: 16px 20px;
   border-bottom: 1px solid rgba(178, 150, 125, 0.1);
   color: #241812;
   vertical-align: middle;
   transition: background 0.15s ease;
   word-break: break-word;
   overflow: hidden;
+}
+
+.lux-data-table tbody tr {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.lux-data-table tbody tr:hover td {
+  background-color: #F8F4EE;
 }
 
 .btn-copy-micro {
@@ -1022,10 +1031,6 @@
   background: var(--color-camel-dark);
   color: #FFFFFF;
   border-color: var(--color-camel-dark);
-}
-
-.lux-data-table tbody tr:hover td {
-  background-color: #FDFBF7;
 }
 
 .lux-data-table tbody tr:last-child td {
