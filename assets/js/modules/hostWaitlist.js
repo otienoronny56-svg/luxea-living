@@ -166,7 +166,7 @@ export function initHostWaitlist() {
     copyPassBtn.addEventListener('click', () => {
       const code = document.getElementById('partnerPassNumber')?.textContent || 'LXA-HOST';
       const key = document.getElementById('partnerPassCode')?.textContent || '';
-      const textToCopy = `Luxea Living Founding Host Partner Pass: ${code} | Key: ${key} (partners.luxealiving.co.ke)`;
+      const textToCopy = `Luxea Living Founding Host Partner Pass: ${code} | Key: ${key} (0% Fees & Free 4K Media Locked) — partners.luxealiving.co.ke`;
       navigator.clipboard.writeText(textToCopy);
       if (window.showToast) window.showToast('Founding Host credentials copied to clipboard!');
       copyPassBtn.textContent = 'Copied to Clipboard ✓';
@@ -174,6 +174,75 @@ export function initHostWaitlist() {
         copyPassBtn.innerHTML = `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           <span>Copy Founding Pass Credentials</span>
+        `;
+      }, 3000);
+    });
+  }
+
+  // Handle URL referral / invitation context (e.g. ?by=Ronald or ?ref=...)
+  const urlParams = new URLSearchParams(window.location.search);
+  const invitedBy = urlParams.get('by') || urlParams.get('invited_by') || urlParams.get('ref');
+  if (invitedBy) {
+    const cleanName = decodeURIComponent(invitedBy).trim();
+    const badgeTextEl = document.getElementById('inviteBadgeText');
+    const headingEl = document.getElementById('inviteReasonHeading');
+    const descEl = document.getElementById('inviteReasonText');
+
+    if (badgeTextEl) badgeTextEl.textContent = `PERSONAL INVITATION FROM ${cleanName.toUpperCase()}`;
+    if (headingEl) headingEl.textContent = `Why did ${cleanName} send you this link?`;
+    if (descEl) {
+      descEl.innerHTML = `<strong>${cleanName}</strong> nominated your property in Kenya for the <strong>Luxea Living Founding Host Circle</strong>. We are curating 50 distinguished residences across Nairobi, Diani Beach, Naivasha, and the Mara prior to public rollout.`;
+    }
+  }
+
+  // Pre-formatted high-converting invitation message with reason
+  const partnerInviteUrl = window.location.origin.includes('partners')
+    ? window.location.origin
+    : `${window.location.origin}/partners/`;
+
+  const inviteShareMessage = `Hello! I'm sharing this private invitation link with you because your property would be an incredible fit for Luxea Living's Founding Host Circle in Kenya.
+
+Why join as a Founding Host:
+• 0% host fees for your first 90 days (keep 100% of booking revenue)
+• Complimentary 4K HDR architectural photography & video staging (on Luxea)
+• Direct placement with pre-screened executive, diplomatic & international guests
+• Dedicated 1-on-1 host concierge support
+
+Claim your founding pass here: ${partnerInviteUrl}`;
+
+  const waShareUrl = `https://wa.me/?text=${encodeURIComponent(inviteShareMessage)}`;
+
+  // Wire Quick Share buttons (View 1)
+  const quickWaBtn = document.getElementById('quickWaInviteBtn');
+  if (quickWaBtn) quickWaBtn.href = waShareUrl;
+
+  const quickCopyBtn = document.getElementById('quickCopyInviteBtn');
+  if (quickCopyBtn) {
+    quickCopyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(inviteShareMessage);
+      if (window.showToast) window.showToast('Invitation with explanation copied to clipboard!');
+      quickCopyBtn.textContent = 'Copied ✓';
+      setTimeout(() => { quickCopyBtn.textContent = 'Copy Invite Message'; }, 3000);
+    });
+  }
+
+  // Wire Result Card Share buttons (View 2)
+  const shareWaLink = document.getElementById('shareWaInviteLink');
+  if (shareWaLink) shareWaLink.href = waShareUrl;
+
+  const copyShareInviteBtn = document.getElementById('copyShareInviteBtn');
+  if (copyShareInviteBtn) {
+    copyShareInviteBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(inviteShareMessage);
+      if (window.showToast) window.showToast('Invitation with explanation copied to clipboard!');
+      copyShareInviteBtn.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        <span>Copied to Clipboard ✓</span>
+      `;
+      setTimeout(() => {
+        copyShareInviteBtn.innerHTML = `
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span>Copy Invite with Reason</span>
         `;
       }, 3000);
     });

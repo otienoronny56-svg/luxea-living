@@ -96,12 +96,14 @@ export function initWaitlist() {
     });
   }
 
-  // Copy invite link button
+  // Copy invite link button with reason
   const copyBtn = document.getElementById('copyShareLinkBtn');
   if (copyBtn) {
     copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(window.location.origin + window.location.pathname);
-      if (window.showToast) window.showToast('Exclusive invite link copied to clipboard!');
+      const waitlistUrl = `${window.location.origin}/waitlist/`;
+      const textToCopy = `Hey! Here is your exclusive invitation to join the private Founding Circle waitlist for Luxea Living — Kenya’s premier luxury villa and penthouse collective. Claim priority booking privileges and launch credits: ${waitlistUrl}`;
+      navigator.clipboard.writeText(textToCopy);
+      if (window.showToast) window.showToast('Exclusive invite message with reason copied to clipboard!');
     });
   }
 }

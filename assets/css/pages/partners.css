@@ -71,24 +71,245 @@
   gap: 8px;
   justify-content: center;
   flex-wrap: wrap;
-  margin: 20px 0 24px;
+  margin: 16px 0 20px;
 }
 
-.perk-pill {
+/* Dedicated "Why You Were Sent This Link" Callout Box */
+.partner-invite-box {
+  background: linear-gradient(145deg, #FAF7F2, #F4EFE6);
+  border: 1.5px solid var(--color-khaki);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(74, 52, 42, 0.05);
+}
+
+.invite-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.invite-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--color-white);
-  border: 1px solid var(--color-khaki-light);
-  padding: 6px 12px;
+  background: var(--color-espresso);
+  color: var(--color-linen);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
   border-radius: var(--radius-pill);
-  font-size: 0.78rem;
+}
+
+.invite-badge svg {
+  color: var(--color-camel-light);
+}
+
+.invite-counter-tag {
+  font-size: 0.75rem;
   font-weight: 600;
+  color: #8D5B28;
+  background: rgba(178, 135, 86, 0.15);
+  border: 1px solid rgba(178, 135, 86, 0.35);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.invite-title {
+  font-family: var(--font-serif);
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+  margin: 0 0 8px;
+  line-height: 1.25;
+}
+
+.invite-desc {
+  font-size: 0.92rem;
+  color: var(--color-cocoa);
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.invite-desc strong {
   color: var(--color-espresso);
 }
 
-.perk-pill span.icon {
+.invite-reasons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.invite-reason-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--color-khaki-light);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.invite-reason-row:hover {
+  background: #FFFFFF;
+  transform: translateX(3px);
+  border-color: var(--color-khaki);
+}
+
+.reason-icon-wrap {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.reason-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--color-cocoa);
+}
+
+.reason-text strong {
+  color: var(--color-espresso);
+  font-size: 0.9rem;
+}
+
+.invite-action-prompt {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--color-khaki);
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Forward / Share Invitation Component */
+.partner-share-section {
+  margin-top: 24px;
+}
+
+.share-section-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0 16px;
+}
+
+.share-section-divider::before,
+.share-section-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-khaki-light);
+}
+
+.share-section-divider span {
+  padding: 0 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   color: var(--color-camel-dark);
+}
+
+.partner-share-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-khaki);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: 0 2px 8px rgba(74, 52, 42, 0.04);
+}
+
+.share-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.share-card-header .share-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.share-card-header strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--color-espresso);
+  margin-bottom: 4px;
+}
+
+.share-card-header p {
+  font-size: 0.84rem;
+  color: var(--color-cocoa);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.share-btn-row {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-share-action {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-share-copy {
+  background: var(--color-khaki-light);
+  color: var(--color-espresso);
+  border: 1px solid var(--color-khaki);
+}
+
+.btn-share-copy:hover {
+  background: var(--color-khaki);
+  border-color: var(--color-camel-dark);
+}
+
+.btn-share-wa {
+  background: #25D366;
+  color: #FFFFFF;
+  border: 1px solid #1EBE5D;
+}
+
+.btn-share-wa:hover {
+  background: #1EBE5D;
+}
+
+.share-preview-bubble {
+  background: var(--color-linen);
+  border: 1px dashed var(--color-khaki);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: var(--color-cocoa);
+  line-height: 1.4;
+  font-style: italic;
 }
 
 /* Form Styles */
@@ -323,6 +544,18 @@ textarea.form-control {
   }
 
   .partner-action-row {
+    flex-direction: column;
+  }
+
+  .partner-invite-box {
+    padding: 18px 14px;
+  }
+
+  .invite-title {
+    font-size: 1.35rem;
+  }
+
+  .share-btn-row {
     flex-direction: column;
   }
 
