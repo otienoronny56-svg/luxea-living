@@ -697,8 +697,51 @@
           } else {
             console.log('✅ Supabase host review status updated:', data);
             if (newStatus === 'approved' && data && data.length > 0) {
+              const hostDoc = data[0];
+              // Ensure stay is published in lux_properties
+              try {
+                const { data: existingProp } = await client
+                  .from('lux_properties')
+                  .select('id')
+                  .eq('host_ref_id', refId);
+
+                if (!existingProp || existingProp.length === 0) {
+                  const newProp = {
+                    name: hostDoc.property_name || `${hostDoc.full_name}'s Residence`,
+                    slug: (hostDoc.property_name || `stay-${refId}`).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+                    property_type: (hostDoc.property_type || 'Apartment').toLowerCase(),
+                    tagline: `Curated luxury stay in ${hostDoc.area_suburb || hostDoc.county || 'Kenya'}`,
+                    description: hostDoc.host_bio || 'Curated luxury residence verified by Luxea Living.',
+                    county: hostDoc.county || 'Nairobi',
+                    city: hostDoc.area_suburb || 'Nairobi',
+                    area: hostDoc.area_suburb || 'Westlands',
+                    location_group: (hostDoc.area_suburb || hostDoc.county || 'westlands').toLowerCase(),
+                    price_per_night_usd: 150,
+                    price_per_night_kes: 19500,
+                    bedrooms: hostDoc.bedrooms || 2,
+                    bathrooms: hostDoc.bathrooms || 2,
+                    square_feet: 1600,
+                    rating: 5.0,
+                    reviews_count: 1,
+                    cover_image_url: (hostDoc.property_photos_urls && hostDoc.property_photos_urls[0]) || '/assets/images/hero-1.webp',
+                    gallery_images: hostDoc.property_photos_urls || [],
+                    amenities: ['High-Speed WiFi', 'Secure Parking', 'Air Conditioning', 'Private Balcony'],
+                    is_featured: false,
+                    is_active: true,
+                    is_available: true,
+                    host_ref_id: refId,
+                    created_at: new Date().toISOString()
+                  };
+                  await client.from('lux_properties').insert([newProp]);
+                  console.log('✅ Listing automatically published to lux_properties for approved host:', refId);
+                  window.dispatchEvent(new CustomEvent('luxea:property_updated', { detail: { eventType: 'INSERT', new: newProp } }));
+                }
+              } catch (propErr) {
+                console.warn('Auto-publish stay notice:', propErr);
+              }
+
               // 📨 Trigger Stage 2: Verification Approved & Account Activation invitation
-              this.sendAutomatedEmail('host_approved', data[0]);
+              this.sendAutomatedEmail('host_approved', hostDoc);
             }
           }
         } catch (err) {
