@@ -226,6 +226,39 @@ export function initAdminDashboard() {
     }
   });
 
+  // Guarantee LuxeaDB methods if older supabase.js is in browser cache
+  if (window.LuxeaDB) {
+    if (typeof window.LuxeaDB.provisionUser !== 'function') {
+      window.LuxeaDB.provisionUser = async function (accountData) {
+        if (typeof this.sendAutomatedEmail === 'function') {
+          return await this.sendAutomatedEmail('admin_provision_user', accountData);
+        }
+        try {
+          const res = await fetch('https://abzcabiqdkmfaijnqbkf.supabase.co/functions/v1/luxea-mailer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'admin_provision_user', record: accountData })
+          });
+          return await res.json();
+        } catch (e) {
+          return { success: false, error: e.message };
+        }
+      };
+    }
+    if (typeof window.LuxeaDB.fetchProfiles !== 'function') {
+      window.LuxeaDB.fetchProfiles = async function () {
+        const client = this.getClient();
+        if (client) {
+          try {
+            const { data, error } = await client.from('lux_profiles').select('*').order('created_at', { ascending: false });
+            if (!error && data) return data;
+          } catch (e) {}
+        }
+        return [];
+      };
+    }
+  }
+
   // =========================================================================
   // 2. DATA LOADING & ANALYTICS CALCULATION
   // =========================================================================
@@ -240,6 +273,17 @@ export function initAdminDashboard() {
       cachedProfiles = typeof window.LuxeaDB.fetchProfiles === 'function'
         ? await window.LuxeaDB.fetchProfiles()
         : [];
+      
+      // Fallback direct query if cachedProfiles is empty
+      if (!cachedProfiles || cachedProfiles.length === 0) {
+        try {
+          const client = window.LuxeaDB.getClient();
+          if (client) {
+            const { data } = await client.from('lux_profiles').select('*').order('created_at', { ascending: false });
+            if (data && data.length > 0) cachedProfiles = data;
+          }
+        } catch (e) {}
+      }
     } else {
       cachedHosts = JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
       cachedGuests = JSON.parse(localStorage.getItem('luxea_waitlist_guests') || '[]');
@@ -247,6 +291,7 @@ export function initAdminDashboard() {
       cachedHostWaitlist = JSON.parse(localStorage.getItem('luxea_host_waitlist') || '[]');
       cachedProfiles = [];
     }
+
 
     // Fallback stays catalog
     if (!cachedStays || cachedStays.length === 0) {
@@ -1772,7 +1817,19 @@ export function initAdminDashboard() {
 
       if (window.showToast) window.showToast(`Provisioning account for ${accountData.email}...`);
 
-      const res = await window.LuxeaDB.provisionUser(accountData);
+      let res = null;
+      if (window.LuxeaDB && typeof window.LuxeaDB.provisionUser === 'function') {
+        res = await window.LuxeaDB.provisionUser(accountData);
+      } else if (window.LuxeaDB && typeof window.LuxeaDB.sendAutomatedEmail === 'function') {
+        res = await window.LuxeaDB.sendAutomatedEmail('admin_provision_user', accountData);
+      } else {
+        const fetchRes = await fetch('https://abzcabiqdkmfaijnqbkf.supabase.co/functions/v1/luxea-mailer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'admin_provision_user', record: accountData })
+        });
+        res = await fetchRes.json();
+      }
       if (res && res.success) {
         if (window.showToast) {
           window.showToast(`✅ Account successfully created for ${accountData.email}! ${accountData.send_credentials ? 'Credentials dispatched via email.' : ''}`);
