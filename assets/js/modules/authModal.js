@@ -47,10 +47,12 @@ function initSupabaseAuthListener() {
           const fullName = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0];
 
           // Check if Super Admin
-          if (email === 'otienoronny56@gmail.com') {
+          const SUPER_ADMINS = ['otienoronny56@gmail.com', 'dennbarasa@gmail.com'];
+          if (SUPER_ADMINS.includes(email)) {
+            const adminName = email === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno';
             const adminSession = {
-              email: 'otienoronny56@gmail.com',
-              name: fullName || 'Ronald Otieno',
+              email: email,
+              name: fullName || adminName,
               role: 'super_admin',
               isSuperAdmin: true,
               authMethod: session.provider_token ? 'google' : 'supabase_auth',
@@ -62,6 +64,34 @@ function initSupabaseAuthListener() {
             updateHeaderAuthState();
             return;
           }
+
+          // Check role from lux_profiles
+          let profileRole = user.user_metadata?.role;
+          try {
+            const { data: prof } = await client
+              .from('lux_profiles')
+              .select('role, full_name')
+              .eq('id', user.id)
+              .maybeSingle();
+            if (prof && prof.role) {
+              profileRole = prof.role;
+              if (profileRole === 'super_admin' || profileRole === 'admin') {
+                const adminSession = {
+                  email: email,
+                  name: prof.full_name || fullName,
+                  role: profileRole,
+                  isSuperAdmin: true,
+                  authMethod: session.provider_token ? 'google' : 'supabase_auth',
+                  loggedInAt: new Date().toISOString()
+                };
+                localStorage.setItem('luxea_admin_session', JSON.stringify(adminSession));
+                localStorage.setItem('luxea_user_session', JSON.stringify(adminSession));
+                window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: adminSession } }));
+                updateHeaderAuthState();
+                return;
+              }
+            }
+          } catch (e) {}
 
           // Check if registered Host Partner in lux_hosts
           let hostData = null;
@@ -797,10 +827,13 @@ function injectAuthModalHtml() {
       // MODE 3: SIGN IN
       // =========================================================================
       // 1. Super Admin check
-      if (email.toLowerCase() === 'otienoronny56@gmail.com' && pass === 'Luxeaadmin') {
+      const SUPER_ADMINS_LIST = ['otienoronny56@gmail.com', 'dennbarasa@gmail.com'];
+      const cleanEmail = email.toLowerCase().trim();
+      if (SUPER_ADMINS_LIST.includes(cleanEmail) && pass === 'Luxeaadmin') {
+        const defaultName = cleanEmail === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno';
         const sessionData = {
-          email: 'otienoronny56@gmail.com',
-          name: 'Ronald Otieno',
+          email: cleanEmail,
+          name: defaultName,
           role: 'super_admin',
           isSuperAdmin: true,
           loggedInAt: new Date().toISOString()
@@ -811,7 +844,7 @@ function injectAuthModalHtml() {
         window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: sessionData } }));
         window.closeAuthModal();
 
-        if (window.showToast) window.showToast('✅ Welcome back, Super Admin Ronald!');
+        if (window.showToast) window.showToast(`✅ Welcome back, Super Admin ${defaultName.split(' ')[0]}!`);
         setTimeout(() => { window.location.href = '/admin/'; }, 300);
         return;
       }
@@ -827,6 +860,16 @@ function injectAuthModalHtml() {
           let role = data.user.user_metadata?.role || currentAuthRole;
           let hostInfo = null;
 
+          // Check role from lux_profiles
+          try {
+            const { data: prof } = await client
+              .from('lux_profiles')
+              .select('role, full_name')
+              .eq('id', data.user.id)
+              .maybeSingle();
+            if (prof && prof.role) role = prof.role;
+          } catch (e) {}
+
           // Check if host
           try {
             const { data: hostRows } = await client
@@ -836,20 +879,23 @@ function injectAuthModalHtml() {
               .limit(1);
 
             if (hostRows && hostRows.length > 0) {
-              role = 'host';
+              if (role !== 'super_admin' && role !== 'admin') role = 'host';
               hostInfo = hostRows[0];
             }
           } catch (e) {}
 
+          const isSuperAdmin = SUPER_ADMINS_LIST.includes(cleanEmail) || role === 'super_admin';
+          const defaultAdminName = cleanEmail === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno';
+
           const sessionData = {
             email: data.user.email,
             id: data.user.id,
-            name: data.user.user_metadata?.full_name || hostInfo?.full_name || email.split('@')[0],
-            role: role,
+            name: data.user.user_metadata?.full_name || hostInfo?.full_name || (isSuperAdmin ? defaultAdminName : email.split('@')[0]),
+            role: isSuperAdmin ? 'super_admin' : role,
             status: hostInfo ? hostInfo.review_status : undefined,
             refId: hostInfo ? hostInfo.ref_id : undefined,
             propertyName: hostInfo ? hostInfo.property_name : undefined,
-            isSuperAdmin: email.toLowerCase() === 'otienoronny56@gmail.com',
+            isSuperAdmin: isSuperAdmin,
             authMethod: 'supabase_auth',
             loggedInAt: new Date().toISOString()
           };

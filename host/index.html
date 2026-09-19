@@ -916,14 +916,96 @@
 
       // Check current host authentication and verification status
       async function checkHostAccess() {
-        const adminSession = JSON.parse(localStorage.getItem('luxea_admin_session') || 'null');
-        const userSession = JSON.parse(localStorage.getItem('luxea_user_session') || 'null');
+        const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
+        let adminSession = JSON.parse(localStorage.getItem('luxea_admin_session') || 'null');
+        let userSession = JSON.parse(localStorage.getItem('luxea_user_session') || 'null');
+
+        // Check active Supabase Auth user if local sessions need sync
+        if (client && client.auth) {
+          try {
+            const { data: { user } } = await client.auth.getUser();
+            if (user && user.email) {
+              const email = user.email.toLowerCase().trim();
+              if (email === 'otienoronny56@gmail.com' || email === 'dennbarasa@gmail.com') {
+                const superAdmin = {
+                  email: email,
+                  name: email === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno',
+                  role: 'super_admin',
+                  isSuperAdmin: true,
+                  loggedInAt: new Date().toISOString()
+                };
+                localStorage.setItem('luxea_admin_session', JSON.stringify(superAdmin));
+                localStorage.setItem('luxea_user_session', JSON.stringify(superAdmin));
+                return { allowed: true, role: 'super_admin', user: superAdmin, isSuperAdmin: true };
+              }
+
+              // Check lux_profiles
+              const { data: prof } = await client
+                .from('lux_profiles')
+                .select('*')
+                .eq('id', user.id)
+                .maybeSingle();
+
+              if (prof && (prof.role === 'super_admin' || prof.role === 'admin')) {
+                const adminUser = {
+                  email: prof.email || email,
+                  name: prof.full_name || 'Admin',
+                  role: prof.role,
+                  isSuperAdmin: true,
+                  loggedInAt: new Date().toISOString()
+                };
+                localStorage.setItem('luxea_admin_session', JSON.stringify(adminUser));
+                localStorage.setItem('luxea_user_session', JSON.stringify(adminUser));
+                return { allowed: true, role: prof.role, user: adminUser, isSuperAdmin: true };
+              }
+
+              // Check lux_hosts by email
+              const { data: hostRows } = await client
+                .from('lux_hosts')
+                .select('*')
+                .ilike('email', email)
+                .limit(1);
+
+              if (hostRows && hostRows.length > 0) {
+                const hostRec = hostRows[0];
+                const isApproved = hostRec.review_status === 'approved';
+                const hSession = {
+                  email: hostRec.email,
+                  name: hostRec.full_name,
+                  refId: hostRec.ref_id,
+                  propertyName: hostRec.property_name,
+                  role: 'host',
+                  status: hostRec.review_status,
+                  loggedInAt: new Date().toISOString()
+                };
+                localStorage.setItem('luxea_user_session', JSON.stringify(hSession));
+                if (isApproved) return { allowed: true, role: 'host', user: hSession };
+                else return { allowed: false, pending: true, user: hSession };
+              }
+
+              if (prof && prof.role === 'host') {
+                const hSession = {
+                  email: prof.email || email,
+                  name: prof.full_name || 'Host Partner',
+                  role: 'host',
+                  status: 'approved',
+                  loggedInAt: new Date().toISOString()
+                };
+                localStorage.setItem('luxea_user_session', JSON.stringify(hSession));
+                return { allowed: true, role: 'host', user: hSession };
+              }
+            }
+          } catch (e) {
+            console.warn('Supabase auth session lookup:', e);
+          }
+        }
 
         // 1. Super Admin universal override
-        if (adminSession && (adminSession.isSuperAdmin || adminSession.email === 'otienoronny56@gmail.com')) {
+        const SUPER_ADMINS = ['otienoronny56@gmail.com', 'dennbarasa@gmail.com'];
+        if (adminSession && (adminSession.isSuperAdmin || SUPER_ADMINS.includes((adminSession.email || '').toLowerCase()))) {
           return { allowed: true, role: 'super_admin', user: adminSession, isSuperAdmin: true };
         }
-        if (userSession && (userSession.isSuperAdmin || userSession.email === 'otienoronny56@gmail.com')) {
+        if (userSession && (userSession.isSuperAdmin || SUPER_ADMINS.includes((userSession.email || '').toLowerCase()))) {
           return { allowed: true, role: 'super_admin', user: userSession, isSuperAdmin: true };
         }
 
@@ -932,24 +1014,20 @@
           let isApproved = userSession.status === 'approved' || userSession.reviewStatus === 'approved';
 
           // Query Supabase for real-time status if available
-          if (window.LuxeaDB && userSession.refId) {
+          if (client && (userSession.refId || userSession.email)) {
             try {
-              const client = window.LuxeaDB.getClient();
-              if (client) {
-                const { data } = await client
-                  .from('lux_hosts')
-                  .select('review_status, full_name, property_name')
-                  .eq('ref_id', userSession.refId)
-                  .limit(1);
+              let query = client.from('lux_hosts').select('review_status, full_name, property_name');
+              if (userSession.refId) query = query.eq('ref_id', userSession.refId);
+              else query = query.ilike('email', userSession.email);
+              const { data } = await query.limit(1);
 
-                if (data && data.length > 0) {
-                  if (data[0].review_status === 'approved') {
-                    isApproved = true;
-                    userSession.status = 'approved';
-                    localStorage.setItem('luxea_user_session', JSON.stringify(userSession));
-                  } else {
-                    userSession.status = data[0].review_status;
-                  }
+              if (data && data.length > 0) {
+                if (data[0].review_status === 'approved') {
+                  isApproved = true;
+                  userSession.status = 'approved';
+                  localStorage.setItem('luxea_user_session', JSON.stringify(userSession));
+                } else {
+                  userSession.status = data[0].review_status;
                 }
               }
             } catch (err) {

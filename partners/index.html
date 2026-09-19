@@ -35,12 +35,21 @@
 
   <!-- Brand Clean Header (Minimalist & Standalone) -->
   <header class="lux-header">
-    <div class="container nav-container" style="justify-content: center;">
+    <div class="container nav-container" style="display: flex; justify-content: space-between; align-items: center;">
       <a href="/partners/" class="brand-logo" style="display: flex; align-items: center; gap: 10px;">
         <span class="brand-monogram">L</span>
         <span class="brand-name">Luxea</span>
         <span style="font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--color-camel-dark); background: var(--color-khaki-light); padding: 3px 8px; border-radius: var(--radius-pill); border: 1px solid var(--color-khaki);">Partners</span>
       </a>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <a href="/host/?tab=status" class="btn btn-text btn-sm" style="font-size: 0.78rem; text-decoration: none; color: var(--color-camel-dark);">
+          <span>Track Status</span>
+        </a>
+        <a href="/host/?mode=manage" class="btn btn-outline btn-sm" style="font-size: 0.78rem; text-decoration: none; padding: 6px 14px; border-radius: 20px;">
+          <span>Host Dashboard ↗</span>
+        </a>
+      </div>
     </div>
   </header>
 
@@ -62,6 +71,13 @@
           <p class="partner-subtitle">
             Partner your property with Kenya's premier luxury collective. Fill in your details to reserve your founding position and receive private rollout updates via email.
           </p>
+
+          <div style="background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.25); border-radius: 8px; padding: 10px 14px; margin-top: 14px; font-size: 0.8rem; color: var(--color-espresso); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <span>🏡 Already registered or approved as a Host Partner?</span>
+            <a href="/host/?mode=manage" style="color: var(--color-camel-dark); font-weight: 700; text-decoration: underline;">
+              Access Host Suite Dashboard ↗
+            </a>
+          </div>
 
           <!-- 3 Clean Highlight Pills -->
           <div class="partner-perks-strip">

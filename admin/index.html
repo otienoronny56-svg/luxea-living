@@ -174,6 +174,14 @@
             <span class="tab-badge" id="hostWaitlistTabCounter" style="background: rgba(212, 175, 55, 0.2); color: #9A7B0C;">0</span>
           </button>
 
+          <button type="button" class="sidebar-nav-item" id="tabProfilesBtn">
+            <span class="nav-item-left">
+              <span class="nav-icon">👥</span>
+              <span>User Profiles &amp; Roles</span>
+            </span>
+            <span class="tab-badge" id="profilesTabCounter" style="background: rgba(46, 204, 113, 0.2); color: #27AE60;">0</span>
+          </button>
+
           <div class="sidebar-section-title">Data Operations</div>
 
           <button type="button" class="sidebar-nav-action" id="refreshAdminDataBtn" title="Sync live Supabase updates">
@@ -812,6 +820,89 @@
           </div>
         </div>
       <!-- End hostWaitlistViewPane -->
+
+        <!-- ==================================================================
+             VIEW 5: USER PROFILES & ROLES DIRECTORY (lux_profiles)
+             ================================================================== -->
+        <div id="viewProfiles" class="admin-view-page hidden">
+          <!-- Profiles Header Metrics -->
+          <div class="admin-metrics-grid">
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Total Auth Users</span>
+                <span class="metric-trend-chip chip-green">lux_profiles</span>
+              </div>
+              <div class="metric-val" id="profilesCardTotal">0</div>
+              <div class="metric-sub">Registered in Supabase auth.users</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Executive Admins</span>
+                <span class="metric-trend-chip chip-gold">Full Access</span>
+              </div>
+              <div class="metric-val" id="profilesCardAdmins">0</div>
+              <div class="metric-sub">Super Admins &amp; System Admins</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Verified Hosts</span>
+                <span class="metric-trend-chip chip-neutral">Host Suite</span>
+              </div>
+              <div class="metric-val" id="profilesCardHosts">0</div>
+              <div class="metric-sub">Property partners in registry</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">VIP Guests &amp; Members</span>
+                <span class="metric-trend-chip chip-neutral">VIP Circle</span>
+              </div>
+              <div class="metric-val" id="profilesCardMembers">0</div>
+              <div class="metric-sub">Bookers &amp; waitlist passholders</div>
+            </div>
+          </div>
+
+          <!-- Toolbar -->
+          <div class="admin-toolbar-card">
+            <div class="admin-search-box">
+              <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="profilesSearchInput" class="form-control" placeholder="Search profiles by name, email, or role...">
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select id="profilesRoleFilter" class="form-control" style="max-width: 180px; padding: 6px 12px; font-size: 0.85rem; height: 38px;">
+                <option value="all">All Roles</option>
+                <option value="super_admin">Super Admins</option>
+                <option value="admin">System Admins</option>
+                <option value="host">Host Partners</option>
+                <option value="member">Guests / Members</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Profiles Table -->
+          <div class="admin-table-card">
+            <table class="admin-data-table">
+              <thead>
+                <tr>
+                  <th style="width: 28%;">User Identity &amp; Auth ID</th>
+                  <th style="width: 24%;">Email Address</th>
+                  <th style="width: 22%;">System Role &amp; Permission</th>
+                  <th style="width: 14%;">Connected Registry</th>
+                  <th style="width: 12%; text-align: right;">Joined</th>
+                </tr>
+              </thead>
+              <tbody id="profilesTableBody">
+                <!-- Injected dynamically by admin.js -->
+              </tbody>
+            </table>
+            <div id="profilesEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
+              No user profiles found matching your query.
+            </div>
+          </div>
+        </div>
+      <!-- End profilesViewPane -->
 
       </main>
       <!-- End admin-workspace -->

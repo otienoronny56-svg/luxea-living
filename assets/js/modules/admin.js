@@ -26,9 +26,11 @@ export function initAdminDashboard() {
   const staysTableBody = document.getElementById('staysTableBody');
   const guestsTableBody = document.getElementById('guestsTableBody');
   const hostWaitlistTableBody = document.getElementById('hostWaitlistTableBody');
+  const profilesTableBody = document.getElementById('profilesTableBody');
   const hostsEmpty = document.getElementById('hostsEmptyState');
   const guestsEmpty = document.getElementById('guestsEmptyState');
   const hostWaitlistEmpty = document.getElementById('hostWaitlistEmptyState');
+  const profilesEmpty = document.getElementById('profilesEmptyState');
   const searchInput = document.getElementById('adminSearchInput');
   const statusPillsWrap = document.getElementById('statusPillsFilter');
 
@@ -37,10 +39,14 @@ export function initAdminDashboard() {
   const tabStays = document.getElementById('tabStaysBtn');
   const tabGuests = document.getElementById('tabGuestsBtn');
   const tabHostWaitlist = document.getElementById('tabHostWaitlistBtn');
+  const tabProfiles = document.getElementById('tabProfilesBtn');
   const hostsPane = document.getElementById('hostsViewPane');
   const staysPane = document.getElementById('staysViewPane');
   const guestsPane = document.getElementById('guestsViewPane');
   const hostWaitlistPane = document.getElementById('hostWaitlistViewPane');
+  const profilesPane = document.getElementById('viewProfiles');
+  const profilesSearchInput = document.getElementById('profilesSearchInput');
+  const profilesRoleFilter = document.getElementById('profilesRoleFilter');
 
   // CSV Export Buttons
   const exportHostsBtn = document.getElementById('exportHostsCsvBtn');
@@ -63,6 +69,7 @@ export function initAdminDashboard() {
   let cachedStays = [];
   let cachedGuests = [];
   let cachedHostWaitlist = [];
+  let cachedProfiles = [];
   let currentStatusFilter = 'all';
 
   // =========================================================================
@@ -81,10 +88,13 @@ export function initAdminDashboard() {
       admin = window.LuxeaAuth.getCurrentAdmin();
     } else {
       const userSession = JSON.parse(localStorage.getItem('luxea_user_session') || '{}');
-      if (userSession && userSession.email && userSession.email.toLowerCase() === 'otienoronny56@gmail.com') {
+      const email = (userSession?.email || '').toLowerCase().trim();
+      if (email === 'otienoronny56@gmail.com' || email === 'dennbarasa@gmail.com' || userSession.role === 'super_admin' || userSession.isSuperAdmin) {
         isSuperAdmin = true;
         admin = userSession;
-        localStorage.setItem('luxea_admin_session', JSON.stringify(userSession));
+        admin.isSuperAdmin = true;
+        if (!admin.name) admin.name = email === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno';
+        localStorage.setItem('luxea_admin_session', JSON.stringify(admin));
       }
     }
 
@@ -96,7 +106,8 @@ export function initAdminDashboard() {
       adminBadge?.classList.remove('hidden');
       logoutBtn?.classList.remove('hidden');
 
-      const firstName = (admin.name || 'Ronald').split(' ')[0];
+      const adminName = admin.name || (admin.email === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno');
+      const firstName = adminName.split(' ')[0];
       const sidebarName = document.getElementById('sidebarAdminName');
       if (sidebarName) sidebarName.textContent = firstName;
       if (adminBadge) adminBadge.textContent = `Super Admin`;
@@ -179,11 +190,15 @@ export function initAdminDashboard() {
       cachedHostWaitlist = typeof window.LuxeaDB.fetchHostWaitlist === 'function'
         ? await window.LuxeaDB.fetchHostWaitlist()
         : JSON.parse(localStorage.getItem('luxea_host_waitlist') || '[]');
+      cachedProfiles = typeof window.LuxeaDB.fetchProfiles === 'function'
+        ? await window.LuxeaDB.fetchProfiles()
+        : [];
     } else {
       cachedHosts = JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
       cachedGuests = JSON.parse(localStorage.getItem('luxea_waitlist_guests') || '[]');
       cachedStays = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
       cachedHostWaitlist = JSON.parse(localStorage.getItem('luxea_host_waitlist') || '[]');
+      cachedProfiles = [];
     }
 
     // Fallback stays catalog
@@ -216,6 +231,10 @@ export function initAdminDashboard() {
     const totalStays = cachedStays.length;
     const totalGuests = cachedGuests.length;
     const totalHostWaitlist = cachedHostWaitlist.length;
+    const totalProfiles = cachedProfiles.length;
+    const adminProfiles = cachedProfiles.filter(p => p.role === 'super_admin' || p.role === 'admin').length;
+    const hostProfiles = cachedProfiles.filter(p => p.role === 'host').length;
+    const memberProfiles = cachedProfiles.filter(p => !p.role || p.role === 'member' || p.role === 'guest').length;
 
     // Top KPI Numbers
     const elTotalHosts = document.getElementById('metricTotalHosts');
@@ -260,15 +279,27 @@ export function initAdminDashboard() {
       waitlistCardReady.textContent = readyHosts || totalHostWaitlist;
     }
 
+    // Dedicated Profiles Cards
+    const cProfilesTotal = document.getElementById('profilesCardTotal');
+    const cProfilesAdmins = document.getElementById('profilesCardAdmins');
+    const cProfilesHosts = document.getElementById('profilesCardHosts');
+    const cProfilesMembers = document.getElementById('profilesCardMembers');
+    if (cProfilesTotal) cProfilesTotal.textContent = totalProfiles;
+    if (cProfilesAdmins) cProfilesAdmins.textContent = adminProfiles;
+    if (cProfilesHosts) cProfilesHosts.textContent = hostProfiles;
+    if (cProfilesMembers) cProfilesMembers.textContent = memberProfiles;
+
     // Tab counters
     const tHost = document.getElementById('hostTabCounter');
     const tStays = document.getElementById('staysTabCounter');
     const tGuest = document.getElementById('guestTabCounter');
     const tHostWaitlist = document.getElementById('hostWaitlistTabCounter');
+    const tProfiles = document.getElementById('profilesTabCounter');
     if (tHost) tHost.textContent = totalHosts;
     if (tStays) tStays.textContent = totalStays;
     if (tGuest) tGuest.textContent = totalGuests;
     if (tHostWaitlist) tHostWaitlist.textContent = totalHostWaitlist;
+    if (tProfiles) tProfiles.textContent = totalProfiles;
 
     // Filter pill count badges
     const pAll = document.getElementById('pillCountAll');
@@ -438,6 +469,7 @@ export function initAdminDashboard() {
     renderStaysTable(filterQuery);
     renderGuestsTable(filterQuery);
     renderHostWaitlistTable(filterQuery);
+    renderProfilesTable(filterQuery);
   }
 
   // =========================================================================
@@ -936,6 +968,131 @@ export function initAdminDashboard() {
   }
 
   // =========================================================================
+  // 6C. USER PROFILES & ACCESS ROLE MANAGER (lux_profiles)
+  // =========================================================================
+  function renderProfilesTable(query = '', roleFilter = 'all') {
+    if (!profilesTableBody) return;
+    profilesTableBody.innerHTML = '';
+
+    const selectedFilter = roleFilter !== 'all' ? roleFilter : (profilesRoleFilter ? profilesRoleFilter.value : 'all');
+
+    const filtered = cachedProfiles.filter(p => {
+      const name = (p.full_name || '').toLowerCase();
+      const email = (p.email || '').toLowerCase();
+      const role = (p.role || 'member').toLowerCase();
+      const id = (p.id || '').toLowerCase();
+
+      const matchQuery = !query || name.includes(query) || email.includes(query) || role.includes(query) || id.includes(query);
+      const matchRole = selectedFilter === 'all' || role === selectedFilter;
+
+      return matchQuery && matchRole;
+    });
+
+    if (filtered.length === 0) {
+      if (profilesEmpty) profilesEmpty.classList.remove('hidden');
+      return;
+    }
+    if (profilesEmpty) profilesEmpty.classList.add('hidden');
+
+    filtered.forEach(p => {
+      const name = p.full_name || (p.email ? p.email.split('@')[0] : 'User');
+      const email = p.email || '';
+      const currentRole = p.role || 'member';
+      const date = p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB') : 'Recent';
+      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
+
+      // Cross check linked registries
+      let linkedBadge = '<span class="status-chip chip-neutral" style="padding: 1px 6px; font-size: 0.65rem;">Auth Account</span>';
+      const hostMatch = cachedHosts.find(h => (h.email || '').toLowerCase() === email.toLowerCase());
+      const waitlistMatch = cachedGuests.find(g => (g.email || '').toLowerCase() === email.toLowerCase());
+      const hostWaitlistMatch = cachedHostWaitlist.find(hw => (hw.email || '').toLowerCase() === email.toLowerCase());
+
+      if (hostMatch) {
+        linkedBadge = `<span class="status-chip ${hostMatch.review_status === 'approved' ? 'chip-green' : 'chip-gold'}" style="padding: 1px 6px; font-size: 0.65rem;">Host: ${hostMatch.review_status || 'Pending'}</span>`;
+      } else if (hostWaitlistMatch) {
+        linkedBadge = `<span class="status-chip chip-gold" style="padding: 1px 6px; font-size: 0.65rem;">Host Waitlist</span>`;
+      } else if (waitlistMatch) {
+        linkedBadge = `<span class="status-chip chip-green" style="padding: 1px 6px; font-size: 0.65rem;">VIP Waitlist</span>`;
+      }
+
+      const isSuperAdminEmail = email.toLowerCase() === 'otienoronny56@gmail.com' || email.toLowerCase() === 'dennbarasa@gmail.com';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #B28756, #241812); color: #FFF; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+              ${initials}
+            </div>
+            <div>
+              <div class="host-cell-name" style="display: flex; align-items: center; gap: 6px;">
+                <span>${name}</span>
+                ${isSuperAdminEmail ? '<span title="Super Admin" style="font-size: 11px;">👑</span>' : ''}
+              </div>
+              <div class="host-cell-sub" style="font-family: monospace; font-size: 0.72rem; color: #8F847C;" title="Supabase Auth UUID">
+                ${p.id.substring(0, 13)}...
+              </div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <div style="font-weight: 600; color: #241812; font-size: 0.85rem;">${email}</div>
+          ${p.phone ? `<div class="host-cell-sub" style="font-size: 0.75rem;">${p.phone}</div>` : ''}
+        </td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <select class="form-control profile-role-select" data-user-id="${p.id}" data-email="${email}" style="padding: 4px 8px; font-size: 0.8rem; border-radius: 6px; font-weight: 600; cursor: pointer; ${currentRole === 'super_admin' ? 'border-color: #D4AF37; background: rgba(212, 175, 55, 0.08); color: #9A7B0C;' : currentRole === 'admin' ? 'border-color: #3B82F6; color: #1D4ED8;' : currentRole === 'host' ? 'border-color: #10B981; color: #047857;' : 'border-color: #D1D5DB; color: #374151;'}">
+              <option value="super_admin" ${currentRole === 'super_admin' ? 'selected' : ''}>👑 Super Admin</option>
+              <option value="admin" ${currentRole === 'admin' ? 'selected' : ''}>🛡️ System Admin</option>
+              <option value="host" ${currentRole === 'host' ? 'selected' : ''}>🏡 Host Partner</option>
+              <option value="member" ${currentRole === 'member' || !currentRole ? 'selected' : ''}>✨ VIP Member</option>
+            </select>
+          </div>
+        </td>
+        <td>
+          ${linkedBadge}
+        </td>
+        <td style="text-align: right;">
+          <small style="color: var(--color-cocoa); font-weight: 600;">${date}</small>
+        </td>
+      `;
+
+      profilesTableBody.appendChild(tr);
+    });
+
+    // Wire up change listeners on the role dropdowns
+    profilesTableBody.querySelectorAll('.profile-role-select').forEach(select => {
+      select.addEventListener('change', async (e) => {
+        const userId = e.target.dataset.userId;
+        const userEmail = e.target.dataset.email;
+        const newRole = e.target.value;
+
+        select.disabled = true;
+        select.style.opacity = '0.5';
+
+        if (window.showToast) window.showToast(`Updating role to "${newRole}" for ${userEmail}...`);
+
+        if (window.LuxeaDB && typeof window.LuxeaDB.updateProfileRole === 'function') {
+          const res = await window.LuxeaDB.updateProfileRole(userId, newRole);
+          if (res.success) {
+            // Update cached profile
+            const idx = cachedProfiles.findIndex(cp => cp.id === userId);
+            if (idx !== -1) cachedProfiles[idx].role = newRole;
+
+            if (window.showToast) window.showToast(`✅ Successfully updated ${userEmail} role to ${newRole}!`);
+            renderMetricsAndAnalytics();
+          } else {
+            if (window.showToast) window.showToast(`⚠️ Role update error: ${res.error || 'Check database permissions'}`);
+          }
+        }
+        select.disabled = false;
+        select.style.opacity = '1';
+        renderProfilesTable(profilesSearchInput ? profilesSearchInput.value.toLowerCase().trim() : '');
+      });
+    });
+  }
+
+  // =========================================================================
   // 7. TOOLBAR, SEARCH & FILTER EVENTS
   // =========================================================================
   searchInput?.addEventListener('input', () => {
@@ -953,9 +1110,6 @@ export function initAdminDashboard() {
   });
 
   // =========================================================================
-  // 7. TAB & SIDEBAR NAVIGATION
-  // =========================================================================
-  // =========================================================================
   // 7. TAB & SIDEBAR NAVIGATION (DEDICATED VIEW PAGES)
   // =========================================================================
   const adminViewTitle = document.getElementById('adminViewTitle');
@@ -972,6 +1126,7 @@ export function initAdminDashboard() {
   const viewStays = document.getElementById('viewStays');
   const viewGuests = document.getElementById('viewGuests');
   const viewHostWaitlist = document.getElementById('viewHostWaitlist');
+  const viewProfiles = document.getElementById('viewProfiles');
 
   // Per-view search inputs
   const staysSearchInput = document.getElementById('staysSearchInput');
@@ -983,7 +1138,8 @@ export function initAdminDashboard() {
     hosts: { title: 'Host Applications', sub: 'Curatorial vetting, identity verification documents, and payout routing.' },
     stays: { title: 'Live Stays Catalog', sub: 'Active bookable residences published in the live guest collection.' },
     guests: { title: 'VIP Guest Waitlist', sub: 'Founding Circle passholders with priority destination interests.' },
-    hostWaitlist: { title: 'Host Partner Waitlist (partners.)', sub: 'Founding property custodians registered from partners.luxealiving.co.ke.' }
+    hostWaitlist: { title: 'Host Partner Waitlist (partners.)', sub: 'Founding property custodians registered from partners.luxealiving.co.ke.' },
+    profiles: { title: 'User Profiles & Access Roles', sub: 'Registered Supabase Auth users (lux_profiles). Assign administrative privileges and change roles.' }
   };
 
   tabOverview?.addEventListener('click', () => switchTab('overview'));
@@ -991,6 +1147,7 @@ export function initAdminDashboard() {
   tabStays?.addEventListener('click', () => switchTab('stays'));
   tabGuests?.addEventListener('click', () => switchTab('guests'));
   tabHostWaitlist?.addEventListener('click', () => switchTab('hostWaitlist'));
+  tabProfiles?.addEventListener('click', () => switchTab('profiles'));
 
   // Quick Jump cards from Overview
   document.getElementById('jumpToHostsCard')?.addEventListener('click', () => switchTab('hosts'));
@@ -1011,6 +1168,14 @@ export function initAdminDashboard() {
     renderHostWaitlistTable(e.target.value.toLowerCase().trim());
   });
 
+  profilesSearchInput?.addEventListener('input', (e) => {
+    renderProfilesTable(e.target.value.toLowerCase().trim());
+  });
+
+  profilesRoleFilter?.addEventListener('change', (e) => {
+    renderProfilesTable(profilesSearchInput ? profilesSearchInput.value.toLowerCase().trim() : '', e.target.value);
+  });
+
   // Inline Export Triggers
   document.getElementById('exportGuestsCsvBtnInline')?.addEventListener('click', () => {
     exportGuestsBtn?.click();
@@ -1026,12 +1191,14 @@ export function initAdminDashboard() {
     tabStays?.classList.toggle('active', tab === 'stays');
     tabGuests?.classList.toggle('active', tab === 'guests');
     tabHostWaitlist?.classList.toggle('active', tab === 'hostWaitlist');
+    tabProfiles?.classList.toggle('active', tab === 'profiles');
 
     viewOverview?.classList.toggle('hidden', tab !== 'overview');
     viewHosts?.classList.toggle('hidden', tab !== 'hosts');
     viewStays?.classList.toggle('hidden', tab !== 'stays');
     viewGuests?.classList.toggle('hidden', tab !== 'guests');
     viewHostWaitlist?.classList.toggle('hidden', tab !== 'hostWaitlist');
+    viewProfiles?.classList.toggle('hidden', tab !== 'profiles');
 
     if (adminViewTitle && tabTitles[tab]) {
       adminViewTitle.textContent = tabTitles[tab].title;

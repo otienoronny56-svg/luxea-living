@@ -659,20 +659,68 @@
       }));
 
       return { success: true, refId, newStatus };
+    },
+
+    // =========================================================================
+    // 7. USER PROFILES & ROLE REGISTRY ("lux_profiles")
+    // =========================================================================
+    fetchProfiles: async function () {
+      const client = this.getClient();
+      if (client) {
+        try {
+          const { data, error } = await client
+            .from('lux_profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!error && data) return data;
+          if (error) console.warn('Supabase fetchProfiles error:', error.message);
+        } catch (e) {
+          console.warn('Supabase fetchProfiles exception:', e);
+        }
+      }
+      return [];
+    },
+
+    updateProfileRole: async function (userId, newRole) {
+      const client = this.getClient();
+      if (!client) return { success: false, error: 'Database client not initialized' };
+
+      try {
+        const { data, error } = await client
+          .from('lux_profiles')
+          .update({ role: newRole, updated_at: new Date().toISOString() })
+          .eq('id', userId)
+          .select();
+
+        if (error) {
+          console.error('Supabase updateProfileRole error:', error.message);
+          return { success: false, error: error.message };
+        }
+        console.log(`✅ Role updated for ${userId} -> ${newRole}:`, data);
+        return { success: true, data };
+      } catch (err) {
+        console.error('Supabase updateProfileRole exception:', err);
+        return { success: false, error: err.message };
+      }
     }
   };
 
   // =========================================================================
   // SUPER ADMIN AUTHENTICATION GATEWAY
-  // Credentials: otienoronny56@gmail.com / Luxeaadmin
+  // Credentials: otienoronny56@gmail.com / dennbarasa@gmail.com
   // =========================================================================
   window.LuxeaAuth = {
-    SUPER_ADMIN_EMAIL: 'otienoronny56@gmail.com',
+    SUPER_ADMIN_EMAILS: ['otienoronny56@gmail.com', 'dennbarasa@gmail.com'],
+
+    isSuperAdminEmail: function (email) {
+      if (!email) return false;
+      return this.SUPER_ADMIN_EMAILS.includes(email.trim().toLowerCase());
+    },
 
     isAdminLoggedIn: function () {
       try {
         const sess = JSON.parse(localStorage.getItem('luxea_admin_session') || '{}');
-        return !!(sess && sess.email && sess.email.toLowerCase() === this.SUPER_ADMIN_EMAIL.toLowerCase() && sess.isSuperAdmin);
+        return !!(sess && sess.email && (this.isSuperAdminEmail(sess.email) || sess.role === 'super_admin' || sess.role === 'admin' || sess.role === 'Super Administrator') && sess.isSuperAdmin);
       } catch (e) {
         return false;
       }
@@ -683,6 +731,8 @@
       const cleanPass = (password || '').trim();
 
       const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
+      const isSuper = this.isSuperAdminEmail(cleanEmail);
+      const defaultName = cleanEmail === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno';
 
       // 1. Try Supabase Auth first
       if (client && client.auth) {
@@ -692,16 +742,18 @@
             password: cleanPass
           });
           if (!error && data && data.user) {
+            const userName = data.user.user_metadata?.full_name || data.user.user_metadata?.name || defaultName;
             const sessionData = {
               email: data.user.email,
               id: data.user.id,
-              isSuperAdmin: cleanEmail === this.SUPER_ADMIN_EMAIL.toLowerCase(),
-              name: 'Ronald Otieno (Super Admin)',
-              role: 'Super Administrator',
+              isSuperAdmin: isSuper,
+              name: `${userName} (Super Admin)`,
+              role: 'super_admin',
               token: data.session?.access_token,
               loggedInAt: new Date().toISOString()
             };
             localStorage.setItem('luxea_admin_session', JSON.stringify(sessionData));
+            localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
             return { success: true, user: sessionData };
           }
         } catch (e) {
@@ -710,21 +762,23 @@
       }
 
       // 2. Direct Super Admin Credential Check
-      if (cleanEmail === this.SUPER_ADMIN_EMAIL.toLowerCase() && cleanPass === 'Luxeaadmin') {
+      if (isSuper && cleanPass === 'Luxeaadmin') {
         const sessionData = {
-          email: this.SUPER_ADMIN_EMAIL,
+          email: cleanEmail,
           isSuperAdmin: true,
-          name: 'Ronald Otieno',
-          role: 'Super Administrator',
+          name: defaultName,
+          role: 'super_admin',
           loggedInAt: new Date().toISOString()
         };
         localStorage.setItem('luxea_admin_session', JSON.stringify(sessionData));
+        localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
 
         // Background registration attempt on Supabase Auth
         if (client && client.auth) {
           client.auth.signUp({
-            email: this.SUPER_ADMIN_EMAIL,
-            password: 'Luxeaadmin'
+            email: cleanEmail,
+            password: 'Luxeaadmin',
+            options: { data: { full_name: defaultName, role: 'super_admin' } }
           }).catch(() => {});
         }
 
