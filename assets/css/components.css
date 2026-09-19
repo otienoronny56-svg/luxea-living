@@ -716,3 +716,133 @@
 .auth-link-gold:hover {
   text-decoration: underline;
 }
+
+/* Auth Mode Toggle (Sign In vs Create Account) */
+.auth-mode-switch {
+  display: flex;
+  background: var(--color-linen-light);
+  border: 1px solid var(--color-khaki-light);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+  margin-bottom: 16px;
+}
+
+.auth-mode-btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: var(--color-cocoa);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.auth-mode-btn.active {
+  background: #FFFFFF;
+  color: var(--color-espresso);
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Google OAuth Button */
+.btn-google-auth-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  background: #FFFFFF;
+  border: 1px solid rgba(74, 52, 42, 0.18);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.btn-google-auth-modal:hover {
+  background: var(--color-linen-light);
+  border-color: var(--color-camel);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.btn-google-auth-modal:active {
+  transform: translateY(0);
+}
+
+/* Divider with text */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 14px 0;
+  color: var(--color-khaki-dark);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-khaki-light);
+}
+
+.auth-divider span {
+  padding: 0 12px;
+}
+
+/* Success Banner */
+.auth-success-banner {
+  padding: 10px 14px;
+  background: #ECFDF5;
+  color: #065F46;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid #10B981;
+  line-height: 1.4;
+}
+
+/* Host Setup Callout */
+.host-setup-callout {
+  background: var(--color-linen);
+  border: 1px dashed var(--color-camel);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  color: var(--color-espresso);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.host-setup-callout strong {
+  color: var(--color-espresso);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.host-setup-callout a {
+  color: var(--color-camel-dark);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
