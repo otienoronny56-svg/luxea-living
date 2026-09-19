@@ -242,7 +242,7 @@ Deno.serve(async (req) => {
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
                 <tr>
                   <td align="center">
-                    <a href="https://wa.me/254722345891?text=${encodeURIComponent('Hello Luxea Concierge, checking verification status for application ' + refId)}" style="display: inline-block; background: #B28756; color: #0B0806; font-weight: 700; font-size: 13px; text-decoration: none; padding: 14px 28px; border-radius: 8px; letter-spacing: 0.5px;">
+                    <a href="https://wa.me/254757912429?text=${encodeURIComponent('Hello Luxea Concierge, checking verification status for application ' + refId)}" style="display: inline-block; background: #B28756; color: #0B0806; font-weight: 700; font-size: 13px; text-decoration: none; padding: 14px 28px; border-radius: 8px; letter-spacing: 0.5px;">
                       Direct WhatsApp with Host Concierge ↗
                     </a>
                   </td>
