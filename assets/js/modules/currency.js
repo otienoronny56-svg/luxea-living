@@ -40,3 +40,30 @@ export function initCurrency() {
   applyCurrency(currentCurrency);
   return { getCurrent: () => currentCurrency, applyCurrency };
 }
+
+export function refreshPrices() {
+  const rate = (window.LUXEA_CONFIG && window.LUXEA_CONFIG.currency && window.LUXEA_CONFIG.currency.exchangeRateUsdToKes) || 130;
+  const curr = localStorage.getItem('luxea_currency') || 'USD';
+
+  const toggleBtn = document.getElementById('currencyToggle');
+  if (toggleBtn) {
+    const label = toggleBtn.querySelector('.currency-label');
+    if (label) label.textContent = curr === 'USD' ? 'USD ($)' : 'KES (KSh)';
+  }
+
+  document.querySelectorAll('[data-usd]').forEach(el => {
+    const usd = parseFloat(el.getAttribute('data-usd'));
+    const kes = parseFloat(el.getAttribute('data-kes')) || Math.round(usd * rate);
+
+    if (curr === 'USD') {
+      el.textContent = `$${usd.toLocaleString()}`;
+    } else {
+      el.textContent = `KSh ${kes.toLocaleString()}`;
+    }
+  });
+}
+
+export function initCurrencyToggle() {
+  return initCurrency();
+}
+
