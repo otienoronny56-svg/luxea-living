@@ -47,6 +47,9 @@ export function initAdminDashboard() {
   const profilesPane = document.getElementById('viewProfiles');
   const profilesSearchInput = document.getElementById('profilesSearchInput');
   const profilesRoleFilter = document.getElementById('profilesRoleFilter');
+  const profilesSortFilter = document.getElementById('profilesSortFilter');
+  const profilesStatusFilter = document.getElementById('profilesStatusFilter');
+
 
   // CSV Export Buttons
   const exportHostsBtn = document.getElementById('exportHostsCsvBtn');
@@ -291,6 +294,19 @@ export function initAdminDashboard() {
       cachedHostWaitlist = JSON.parse(localStorage.getItem('luxea_host_waitlist') || '[]');
       cachedProfiles = [];
     }
+
+    // Arrange all lists from NEWEST to OLDEST by default
+    const sortNewestFirst = (arr) => {
+      if (!Array.isArray(arr)) return [];
+      return arr.sort((a, b) => new Date(b.created_at || b.signature_date || 0) - new Date(a.created_at || a.signature_date || 0));
+    };
+
+    cachedHosts = sortNewestFirst(cachedHosts);
+    cachedGuests = sortNewestFirst(cachedGuests);
+    cachedHostWaitlist = sortNewestFirst(cachedHostWaitlist);
+    cachedProfiles = sortNewestFirst(cachedProfiles);
+    cachedStays = sortNewestFirst(cachedStays);
+
 
 
     // Fallback stays catalog
@@ -1124,18 +1140,37 @@ export function initAdminDashboard() {
     if (!profilesTableBody) return;
     profilesTableBody.innerHTML = '';
 
-    const selectedFilter = roleFilter !== 'all' ? roleFilter : (profilesRoleFilter ? profilesRoleFilter.value : 'all');
+    const selectedRole = roleFilter !== 'all' ? roleFilter : (profilesRoleFilter ? profilesRoleFilter.value : 'all');
+    const selectedStatus = profilesStatusFilter ? profilesStatusFilter.value : 'all';
+    const selectedSort = profilesSortFilter ? profilesSortFilter.value : 'newest';
 
-    const filtered = cachedProfiles.filter(p => {
+    let filtered = cachedProfiles.filter(p => {
       const name = (p.full_name || '').toLowerCase();
       const email = (p.email || '').toLowerCase();
       const role = (p.role || 'member').toLowerCase();
       const id = (p.id || '').toLowerCase();
 
       const matchQuery = !query || name.includes(query) || email.includes(query) || role.includes(query) || id.includes(query);
-      const matchRole = selectedFilter === 'all' || role === selectedFilter;
+      const matchRole = selectedRole === 'all' || role === selectedRole;
 
-      return matchQuery && matchRole;
+      const isSuspended = p.is_suspended === true;
+      let matchStatus = true;
+      if (selectedStatus === 'active') matchStatus = !isSuspended;
+      else if (selectedStatus === 'suspended') matchStatus = isSuspended;
+
+      return matchQuery && matchRole && matchStatus;
+    });
+
+    // Arrange list: Default Newest to Oldest!
+    filtered.sort((a, b) => {
+      if (selectedSort === 'oldest') {
+        return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+      } else if (selectedSort === 'name_asc') {
+        return (a.full_name || a.email || '').localeCompare(b.full_name || b.email || '');
+      } else {
+        // Default: Newest first
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+      }
     });
 
     if (filtered.length === 0) {
@@ -1150,6 +1185,12 @@ export function initAdminDashboard() {
       const currentRole = p.role || 'member';
       const date = p.created_at ? new Date(p.created_at).toLocaleDateString('en-GB') : 'Recent';
       const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
+      const isSuspended = p.is_suspended === true;
+
+      // Status chip: Active vs Inactive / Suspended
+      const statusChip = isSuspended
+        ? `<span class="status-chip chip-red" style="padding: 2px 8px; font-size: 0.7rem; font-weight: 700;">🔴 Suspended</span>`
+        : `<span class="status-chip chip-green" style="padding: 2px 8px; font-size: 0.7rem; font-weight: 700;">🟢 Active</span>`;
 
       // Cross check linked registries
       let linkedBadge = '<span class="status-chip chip-neutral" style="padding: 1px 6px; font-size: 0.65rem;">Auth Account</span>';
@@ -1180,7 +1221,7 @@ export function initAdminDashboard() {
                 ${isSuperAdminEmail ? '<span title="Super Admin" style="font-size: 11px;">👑</span>' : ''}
               </div>
               <div class="host-cell-sub" style="font-family: monospace; font-size: 0.72rem; color: #8F847C;" title="Supabase Auth UUID">
-                ${p.id.substring(0, 13)}...
+                ${p.id ? p.id.substring(0, 13) + '...' : 'Auth UUID'}
               </div>
             </div>
           </div>
@@ -1198,6 +1239,9 @@ export function initAdminDashboard() {
               <option value="member" ${currentRole === 'member' || !currentRole ? 'selected' : ''}>✨ VIP Member</option>
             </select>
           </div>
+        </td>
+        <td>
+          ${statusChip}
         </td>
         <td>
           ${linkedBadge}
@@ -1339,6 +1383,15 @@ export function initAdminDashboard() {
   profilesRoleFilter?.addEventListener('change', (e) => {
     renderProfilesTable(profilesSearchInput ? profilesSearchInput.value.toLowerCase().trim() : '', e.target.value);
   });
+
+  profilesSortFilter?.addEventListener('change', () => {
+    renderProfilesTable(profilesSearchInput ? profilesSearchInput.value.toLowerCase().trim() : '');
+  });
+
+  profilesStatusFilter?.addEventListener('change', () => {
+    renderProfilesTable(profilesSearchInput ? profilesSearchInput.value.toLowerCase().trim() : '');
+  });
+
 
   // Inline Export Triggers
   document.getElementById('exportGuestsCsvBtnInline')?.addEventListener('click', () => {

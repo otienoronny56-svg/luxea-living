@@ -345,28 +345,47 @@ export function initHostManager(containerId = 'hostManagerContainer') {
       const priceKes = parseFloat(container.querySelector('#newStayPriceKes').value) || 12000;
       const priceUsd = parseFloat(container.querySelector('#newStayPriceUsd').value) || 95;
       const photoFiles = container.querySelector('#newStayPhotosInput').files;
+      const saveBtn = container.querySelector('#saveNewListingBtn');
 
       if (!title) return;
 
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span>Uploading Photos &amp; Publishing...</span>';
+      }
+
       if (window.showToast) window.showToast('Publishing stay and uploading photos to Supabase...');
 
-      if (window.LuxeaDB) {
-        const newListing = await window.LuxeaDB.addPropertyListing({
-          name: title,
-          propertyType: type,
-          city: city,
-          locationGroup: city.toLowerCase(),
-          priceKes: priceKes,
-          priceUsd: priceUsd
-        }, photoFiles);
+      try {
+        if (window.LuxeaDB) {
+          const newListing = await window.LuxeaDB.addPropertyListing({
+            name: title,
+            propertyType: type,
+            city: city,
+            locationGroup: city.toLowerCase(),
+            priceKes: priceKes,
+            priceUsd: priceUsd
+          }, photoFiles);
 
+          modalBackdrop?.classList.remove('open');
+          newForm.reset();
+          if (window.showToast) window.showToast('✅ Stay published to Supabase! Now live across platform.');
+          await loadHostListings();
+        }
+      } catch (err) {
+        console.error('Publish stay error:', err);
+        if (window.showToast) window.showToast('Notice: Stay saved locally. Check Supabase connection.');
         modalBackdrop?.classList.remove('open');
-        newForm.reset();
-        if (window.showToast) window.showToast('✅ Stay published to Supabase! Now live across platform.');
-        loadHostListings();
+        await loadHostListings();
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = 'Publish Stay to Supabase';
+        }
       }
     });
   }
+
 
   // Listen for Realtime property updates dispatched by Supabase client
   window.addEventListener('luxea:property_updated', (e) => {

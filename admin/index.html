@@ -18,7 +18,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/assets/js/config.js"></script>
-  <script src="/assets/js/supabase.js?v=2.2.1"></script>
+  <script src="/assets/js/supabase.js?v=2.2.2"></script>
 </head>
 <body>
 
@@ -874,15 +874,30 @@
               <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               <input type="text" id="profilesSearchInput" class="form-control" placeholder="Search profiles by name, email, or role...">
             </div>
-            <div style="display: flex; gap: 8px; align-items: center;">
-              <select id="profilesRoleFilter" class="form-control" style="max-width: 180px; padding: 6px 12px; font-size: 0.85rem; height: 38px;">
-                <option value="all">All Roles</option>
-                <option value="super_admin">Super Admins</option>
-                <option value="admin">System Admins</option>
-                <option value="host">Host Partners</option>
-                <option value="member">Guests / Members</option>
-                <option value="suspended">Suspended Accounts</option>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <!-- Sort Filter: Newest to Oldest -->
+              <select id="profilesSortFilter" class="form-control" style="max-width: 155px; padding: 6px 10px; font-size: 0.82rem; height: 38px;" title="Sort profiles order">
+                <option value="newest" selected>⬇️ Newest First</option>
+                <option value="oldest">⬆️ Oldest First</option>
+                <option value="name_asc">🔤 Name (A - Z)</option>
               </select>
+
+              <!-- Status Filter: Active vs Non-Active / Suspended -->
+              <select id="profilesStatusFilter" class="form-control" style="max-width: 145px; padding: 6px 10px; font-size: 0.82rem; height: 38px;" title="Filter by account status">
+                <option value="all" selected>All Members</option>
+                <option value="active">🟢 Active Only</option>
+                <option value="suspended">🔴 Suspended / Inactive</option>
+              </select>
+
+              <!-- Role Filter -->
+              <select id="profilesRoleFilter" class="form-control" style="max-width: 145px; padding: 6px 10px; font-size: 0.82rem; height: 38px;" title="Filter by system access role">
+                <option value="all">All Roles</option>
+                <option value="super_admin">👑 Super Admins</option>
+                <option value="admin">🛡️ System Admins</option>
+                <option value="host">🏡 Host Partners</option>
+                <option value="member">💎 VIP Members</option>
+              </select>
+
               <button type="button" class="btn btn-primary btn-sm" id="openCreateUserModalBtn" style="height: 38px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
                 <span>+ Create Account / Host</span>
               </button>
@@ -894,12 +909,13 @@
             <table class="admin-data-table">
               <thead>
                 <tr>
-                  <th style="width: 26%;">User Identity &amp; Auth ID</th>
-                  <th style="width: 22%;">Email Address</th>
-                  <th style="width: 20%;">System Role &amp; Permission</th>
-                  <th style="width: 14%;">Connected Registry</th>
+                  <th style="width: 24%;">User Identity &amp; Auth ID</th>
+                  <th style="width: 19%;">Email Address</th>
+                  <th style="width: 17%;">System Role</th>
+                  <th style="width: 12%;">Status</th>
+                  <th style="width: 12%;">Registry</th>
                   <th style="width: 10%;">Joined</th>
-                  <th style="width: 8%; text-align: right;">Action</th>
+                  <th style="width: 6%; text-align: right;">Action</th>
                 </tr>
               </thead>
               <tbody id="profilesTableBody">
@@ -1204,7 +1220,7 @@
 
   <script src="/assets/js/main.js"></script>
   <script type="module">
-    import { initAdminDashboard } from '/assets/js/modules/admin.js?v=2.2.1';
+    import { initAdminDashboard } from '/assets/js/modules/admin.js?v=2.2.2';
 
     document.addEventListener('DOMContentLoaded', () => {
       initAdminDashboard();

@@ -104,33 +104,41 @@
     /**
      * Upload property photos directly to the "lux_listings" public bucket
      */
+    /**
+     * Upload property photos directly to the "lux_listings" public bucket with timeout
+     */
     uploadListingPhoto: async function (file, folder = 'properties') {
       const client = this.getClient();
       if (!client || !file) return null;
 
       try {
-        const ext = file.name.split('.').pop();
-        const safeName = file.name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
-        const path = `${folder}/${Date.now()}_${safeName}.${ext}`;
+        const ext = (file.name || 'photo.jpg').split('.').pop();
+        const safeName = (file.name || 'photo').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 20);
+        const path = `${folder}/${Date.now()}_${Math.random().toString(36).substring(2, 6)}_${safeName}.${ext}`;
 
-        // Attempt upload to 'lux_listings' first, fallback to 'lux_documents'
         let bucket = 'lux_listings';
-        let { data, error } = await client.storage
+        
+        // Timeout guard: 12 seconds per upload to prevent hanging
+        const uploadPromise = client.storage
           .from(bucket)
           .upload(path, file, { cacheControl: '3600', upsert: true });
+        
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), 12000));
 
-        if (error) {
-          console.warn(`Upload to ${bucket} failed, trying fallback:`, error.message);
+        let res;
+        try {
+          res = await Promise.race([uploadPromise, timeoutPromise]);
+        } catch (e) {
+          console.warn('Storage upload timeout or error, trying fallback bucket...', e.message);
           bucket = 'lux_documents';
-          const retry = await client.storage
+          res = await client.storage
             .from(bucket)
-            .upload(path, file, { cacheControl: '3600', upsert: true });
-          error = retry.error;
-          data = retry.data;
+            .upload(path, file, { cacheControl: '3600', upsert: true })
+            .catch(() => ({ error: { message: 'Fallback failed' } }));
         }
 
-        if (error) {
-          console.error('Supabase storage upload error:', error);
+        if (res && res.error) {
+          console.warn('Storage upload notice:', res.error.message);
           return null;
         }
 
@@ -138,24 +146,29 @@
           .from(bucket)
           .getPublicUrl(path);
 
-        return publicUrlData.publicUrl;
+        return publicUrlData ? publicUrlData.publicUrl : null;
       } catch (err) {
-        console.error('Photo upload exception:', err);
+        console.warn('Photo upload exception (non-fatal):', err);
         return null;
       }
     },
 
     /**
-     * Upload multiple property photos to "lux_listings"
+     * Upload multiple property photos concurrently with Promise.all
      */
     uploadListingPhotos: async function (files, folder = 'properties') {
-      const urls = [];
-      for (const file of Array.from(files)) {
-        const url = await this.uploadListingPhoto(file, folder);
-        if (url) urls.push(url);
+      if (!files || files.length === 0) return [];
+      const fileList = Array.from(files).slice(0, 6);
+      try {
+        const uploadPromises = fileList.map(f => this.uploadListingPhoto(f, folder));
+        const results = await Promise.all(uploadPromises);
+        return results.filter(Boolean);
+      } catch (err) {
+        console.warn('Batch upload exception:', err);
+        return [];
       }
-      return urls;
     },
+
 
     /**
      * Upload verification documents (ID, business certificates) to "lux_documents"
