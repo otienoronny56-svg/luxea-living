@@ -396,18 +396,10 @@ function selectAuthRole(role) {
   const roleHint = document.getElementById('authRoleHint');
 
   if (role === 'admin') {
-    if (currentAuthMode === 'signin') {
-      if (emailInput) emailInput.value = 'otienoronny56@gmail.com';
-      if (passInput) passInput.value = 'Luxeaadmin';
-    }
-    if (roleHint) roleHint.innerHTML = '👑 <strong>Super Admin Mode:</strong> Pre-filled credentials for authorized admin console access.';
+    if (roleHint) roleHint.innerHTML = '👑 <strong>Super Admin Mode:</strong> Enter your executive credentials or use Google below.';
   } else if (role === 'host') {
-    if (emailInput && emailInput.value === 'otienoronny56@gmail.com') emailInput.value = '';
-    if (passInput && passInput.value === 'Luxeaadmin') passInput.value = '';
     if (roleHint) roleHint.innerHTML = '🏡 <strong>Host Partner:</strong> Enter your property registration email to manage your listings or set your password.';
   } else {
-    if (emailInput && emailInput.value === 'otienoronny56@gmail.com') emailInput.value = '';
-    if (passInput && passInput.value === 'Luxeaadmin') passInput.value = '';
     if (roleHint) roleHint.innerHTML = '💎 <strong>VIP Member:</strong> Sign in or register to unlock private reservations & curated stays.';
   }
 }

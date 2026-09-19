@@ -72,8 +72,23 @@ export function initAdminDashboard() {
     const publicHeader = document.getElementById('adminPublicHeader');
     const mobileBottomNav = document.querySelector('.mobile-bottom-nav');
 
+    // Verify if Super Admin is logged in (via session or Supabase Google auth)
+    let isSuperAdmin = false;
+    let admin = null;
+
     if (window.LuxeaAuth && window.LuxeaAuth.isAdminLoggedIn()) {
-      const admin = window.LuxeaAuth.getCurrentAdmin();
+      isSuperAdmin = true;
+      admin = window.LuxeaAuth.getCurrentAdmin();
+    } else {
+      const userSession = JSON.parse(localStorage.getItem('luxea_user_session') || '{}');
+      if (userSession && userSession.email && userSession.email.toLowerCase() === 'otienoronny56@gmail.com') {
+        isSuperAdmin = true;
+        admin = userSession;
+        localStorage.setItem('luxea_admin_session', JSON.stringify(userSession));
+      }
+    }
+
+    if (isSuperAdmin && admin) {
       loginGateway?.classList.add('hidden');
       dashboardView?.classList.remove('hidden');
       if (publicHeader) publicHeader.classList.add('hidden');
@@ -81,12 +96,10 @@ export function initAdminDashboard() {
       adminBadge?.classList.remove('hidden');
       logoutBtn?.classList.remove('hidden');
 
-      if (admin && admin.name) {
-        const firstName = admin.name.split(' ')[0];
-        const sidebarName = document.getElementById('sidebarAdminName');
-        if (sidebarName) sidebarName.textContent = firstName;
-        if (adminBadge) adminBadge.textContent = `Super Admin`;
-      }
+      const firstName = (admin.name || 'Ronald').split(' ')[0];
+      const sidebarName = document.getElementById('sidebarAdminName');
+      if (sidebarName) sidebarName.textContent = firstName;
+      if (adminBadge) adminBadge.textContent = `Super Admin`;
       loadDashboardData();
     } else {
       loginGateway?.classList.remove('hidden');
@@ -97,6 +110,30 @@ export function initAdminDashboard() {
       logoutBtn?.classList.add('hidden');
     }
   }
+
+  // Google OAuth for Super Admin
+  const adminGoogleBtn = document.getElementById('adminGoogleBtn');
+  adminGoogleBtn?.addEventListener('click', async () => {
+    const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
+    if (client && client.auth) {
+      const btnText = document.getElementById('adminGoogleBtnText');
+      if (btnText) btnText.textContent = 'Verifying with Google...';
+      try {
+        await client.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + '/admin/'
+          }
+        });
+      } catch (err) {
+        console.error('Admin Google sign in error:', err);
+        if (loginErrorMsg) {
+          loginErrorMsg.textContent = 'Could not start Google Sign-In. Use credentials below.';
+          loginErrorMsg.classList.remove('hidden');
+        }
+      }
+    }
+  });
 
   loginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
