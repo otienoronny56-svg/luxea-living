@@ -586,6 +586,18 @@
       }
     },
 
+    /**
+     * Guarantee any user (guest, host, waitlist, or admin) is provisioned in the
+     * Supabase Authentication tab (auth.users) with email_confirm: true, and in lux_profiles.
+     */
+    syncAuthUser: async function (userData) {
+      if (!userData || !userData.email) return null;
+      console.log(`🔐 Syncing user to Supabase Authentication tab (auth.users): ${userData.email}`);
+      return await this.sendAutomatedEmail('sync_auth_user', userData);
+    },
+
+
+
     // =========================================================================
     // 5. FETCH DATA FOR ADMIN & DASHBOARDS
     // =========================================================================

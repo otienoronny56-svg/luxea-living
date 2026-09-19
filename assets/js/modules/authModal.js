@@ -668,17 +668,42 @@ function injectAuthModalHtml() {
           return;
         }
 
+        // 1. Ensure user is provisioned in Supabase Authentication tab (auth.users) with email_confirm: true
+        if (window.LuxeaDB && typeof window.LuxeaDB.syncAuthUser === 'function') {
+          try {
+            await window.LuxeaDB.syncAuthUser({
+              email: email,
+              name: name,
+              role: currentAuthRole,
+              password: pass,
+              source: 'signup_modal'
+            });
+          } catch (e) {
+            console.warn('Sync auth user notice:', e);
+          }
+        }
+
         if (client && client.auth) {
-          const { data, error } = await client.auth.signUp({
+          // Attempt sign in directly since user is confirmed via admin API, or fallback to signUp
+          let { data, error } = await client.auth.signInWithPassword({
             email: email,
-            password: pass,
-            options: {
-              data: {
-                full_name: name,
-                role: currentAuthRole
-              }
-            }
+            password: pass
           });
+
+          if (error) {
+            const signupRes = await client.auth.signUp({
+              email: email,
+              password: pass,
+              options: {
+                data: {
+                  full_name: name,
+                  role: currentAuthRole
+                }
+              }
+            });
+            data = signupRes.data;
+            error = signupRes.error;
+          }
 
           if (error) {
             if (error.message && error.message.includes('already registered')) {
@@ -771,31 +796,38 @@ function injectAuthModalHtml() {
           } catch (e) {}
         }
 
-        if (client && client.auth) {
-          // Try to sign up host in Supabase Auth with this password
-          const { data, error } = await client.auth.signUp({
-            email: email,
-            password: pass,
-            options: {
-              data: {
-                full_name: hostMatch ? hostMatch.full_name : email.split('@')[0],
-                role: 'host',
-                ref_id: hostMatch ? hostMatch.ref_id : hostRef
-              }
-            }
-          });
+        // Guarantee host is provisioned in Supabase Authentication tab (auth.users)
+        if (window.LuxeaDB && typeof window.LuxeaDB.syncAuthUser === 'function') {
+          try {
+            await window.LuxeaDB.syncAuthUser({
+              email: email,
+              name: hostMatch ? hostMatch.full_name : email.split('@')[0],
+              role: 'host',
+              password: pass,
+              phone: hostMatch ? hostMatch.phone : '',
+              source: 'host_set_password'
+            });
+          } catch (e) {
+            console.warn('Host auth sync notice:', e);
+          }
+        }
 
-          if (error && error.message && error.message.includes('already registered')) {
-            // Already registered: try updating user password or signing in
-            const { error: signInErr } = await client.auth.signInWithPassword({ email, password: pass });
-            if (signInErr) {
-              // Send password reset email
-              await client.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + '/host/activate/'
-              });
-              showSuccess(`A password reset link has been dispatched to <strong>${email}</strong>. Open your email to finish setting your password.`);
-              return;
-            }
+        if (client && client.auth) {
+          // Attempt direct sign in with new password
+          const { error: signInErr } = await client.auth.signInWithPassword({ email, password: pass });
+          if (signInErr) {
+            // Fallback to signUp or password reset if needed
+            await client.auth.signUp({
+              email: email,
+              password: pass,
+              options: {
+                data: {
+                  full_name: hostMatch ? hostMatch.full_name : email.split('@')[0],
+                  role: 'host',
+                  ref_id: hostMatch ? hostMatch.ref_id : hostRef
+                }
+              }
+            });
           }
         }
 
@@ -851,14 +883,54 @@ function injectAuthModalHtml() {
 
       // 2. Supabase Auth SignIn with Password
       if (client && client.auth) {
-        const { data, error } = await client.auth.signInWithPassword({
+        let { data, error } = await client.auth.signInWithPassword({
           email: email,
           password: pass
         });
 
+        // If credentials failed or user was not yet in auth.users, attempt sync via Edge Function & retry
+        if (error) {
+          if (window.LuxeaDB && typeof window.LuxeaDB.syncAuthUser === 'function') {
+            try {
+              // Look up if user has a name in lux_hosts or lux_waitlist
+              let existingName = email.split('@')[0];
+              let userRole = currentAuthRole;
+              const { data: hRows } = await client.from('lux_hosts').select('full_name').ilike('email', email).limit(1);
+              if (hRows && hRows.length > 0) {
+                existingName = hRows[0].full_name;
+                userRole = 'host';
+              } else {
+                const { data: wRows } = await client.from('lux_waitlist').select('full_name').ilike('email', email).limit(1);
+                if (wRows && wRows.length > 0) existingName = wRows[0].full_name;
+              }
+
+              await window.LuxeaDB.syncAuthUser({
+                email: email,
+                name: existingName,
+                role: userRole,
+                password: pass,
+                source: 'login_sync'
+              });
+
+              // Retry sign in with newly set password
+              const retry = await client.auth.signInWithPassword({
+                email: email,
+                password: pass
+              });
+              if (!retry.error && retry.data) {
+                data = retry.data;
+                error = null;
+              }
+            } catch (syncErr) {
+              console.warn('Auth sync on login notice:', syncErr);
+            }
+          }
+        }
+
         if (!error && data && data.user) {
           let role = data.user.user_metadata?.role || currentAuthRole;
           let hostInfo = null;
+
 
           // Check role from lux_profiles
           try {

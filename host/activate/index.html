@@ -427,38 +427,43 @@
 
         try {
           const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
-          let authSuccess = false;
+          // 1. Guarantee host is provisioned in Supabase Authentication tab (auth.users)
+          if (window.LuxeaDB && typeof window.LuxeaDB.syncAuthUser === 'function') {
+            try {
+              await window.LuxeaDB.syncAuthUser({
+                email: hostEmail,
+                name: dispName.textContent,
+                role: 'host',
+                password: newPass,
+                source: 'host_activation'
+              });
+            } catch (e) {
+              console.warn('Host activation sync notice:', e);
+            }
+          }
 
           if (client && client.auth) {
-            // Attempt to sign up or update user in Supabase Auth
-            const { data, error } = await client.auth.signUp({
+            // Attempt to sign in or update password in Supabase Auth
+            const { error: signInErr } = await client.auth.signInWithPassword({
               email: hostEmail,
-              password: newPass,
-              options: {
-                data: {
-                  full_name: dispName.textContent,
-                  ref_id: refId,
-                  role: 'host'
-                }
-              }
+              password: newPass
             });
 
-            if (!error) {
+            if (!signInErr) {
               authSuccess = true;
-            } else if (error.message && error.message.includes('already registered')) {
-              // If already registered, attempt signIn then updateUser
-              const { error: signInErr } = await client.auth.signInWithPassword({
-                email: hostEmail,
-                password: newPass
-              });
-              if (!signInErr) authSuccess = true;
-              else {
-                // Password changed or already set
-                authSuccess = true;
-              }
             } else {
-              console.warn('Supabase auth notice:', error);
-              authSuccess = true; // Fallback gracefully
+              const { data, error } = await client.auth.signUp({
+                email: hostEmail,
+                password: newPass,
+                options: {
+                  data: {
+                    full_name: dispName.textContent,
+                    ref_id: refId,
+                    role: 'host'
+                  }
+                }
+              });
+              authSuccess = !error;
             }
           } else {
             authSuccess = true;

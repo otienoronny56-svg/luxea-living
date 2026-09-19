@@ -57,6 +57,98 @@ function isDuplicate(type: string, email: string): boolean {
   return false;
 }
 
+/**
+ * Ensures any visitor/host/guest is registered in auth.users (Supabase Authentication tab)
+ * with email_confirm: true, which automatically triggers lux_profiles sync.
+ */
+async function ensureAuthUser(
+  email: string,
+  fullName: string,
+  role: string = 'member',
+  phone: string = '',
+  source: string = 'auto_sync',
+  customPassword?: string
+): Promise<string | null> {
+  if (!email) return null;
+  const cleanEmail = email.toLowerCase().trim();
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://abzcabiqdkmfaijnqbkf.supabase.co';
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  if (!serviceRoleKey) {
+    console.warn('Cannot sync auth.user: missing SUPABASE_SERVICE_ROLE_KEY');
+    return null;
+  }
+
+  try {
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+
+    // 1. Check if user already exists in auth.users
+    const { data: listData } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    const existing = listData?.users?.find((u: any) => u.email?.toLowerCase() === cleanEmail);
+
+    if (existing) {
+      console.log(`✓ User ${cleanEmail} already present in auth.users (ID: ${existing.id})`);
+      const updateData: Record<string, any> = {
+        user_metadata: {
+          full_name: fullName || existing.user_metadata?.full_name,
+          role: role || existing.user_metadata?.role || 'member',
+          phone: phone || existing.user_metadata?.phone,
+          source: source
+        }
+      };
+      if (customPassword) updateData.password = customPassword;
+      await supabaseAdmin.auth.admin.updateUserById(existing.id, updateData);
+
+      await supabaseAdmin.from('lux_profiles').upsert({
+        id: existing.id,
+        email: cleanEmail,
+        full_name: fullName || existing.user_metadata?.full_name,
+        role: role || existing.user_metadata?.role || 'member',
+        phone: phone || existing.user_metadata?.phone,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+
+      return existing.id;
+    }
+
+    // 2. Create in auth.users with email_confirm: true so user is immediately visible in Supabase Auth tab
+    const autoPassword = customPassword || `LX-${Math.random().toString(36).substring(2, 7).toUpperCase()}!${Math.floor(1000 + Math.random() * 9000)}`;
+    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email: cleanEmail,
+      password: autoPassword,
+      email_confirm: true,
+      user_metadata: {
+        full_name: fullName,
+        role: role,
+        phone: phone,
+        source: source,
+        initial_password: autoPassword
+      }
+    });
+
+    if (createError) {
+      console.warn(`createUser in auth.users notice for ${cleanEmail}:`, createError.message);
+      return null;
+    }
+
+    if (newUser?.user) {
+      console.log(`✅ User ${cleanEmail} successfully registered in Supabase auth.users (ID: ${newUser.user.id})`);
+      await supabaseAdmin.from('lux_profiles').upsert({
+        id: newUser.user.id,
+        email: cleanEmail,
+        full_name: fullName,
+        role: role,
+        phone: phone,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+      return newUser.user.id;
+    }
+  } catch (err) {
+    console.warn('ensureAuthUser exception:', err);
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -114,6 +206,9 @@ Deno.serve(async (req) => {
       const payoutMethod = record.payout_method || (record.payoutDetails && record.payoutDetails.method) || 'Registered Account';
 
       if (hostEmail) {
+        // Automatically ensure host is listed in auth.users (Supabase Authentication tab)
+        await ensureAuthUser(hostEmail, hostName, 'host', record.phone || '', 'host_application');
+
         if (isDuplicate('host_waiting_verification', hostEmail)) {
           console.log(`⏳ Debounced duplicate host_waiting_verification send for ${hostEmail}`);
           results.push({ recipient: hostEmail, type: 'host_waiting_verification', status: 'debounced_duplicate' });
@@ -392,6 +487,9 @@ Deno.serve(async (req) => {
       const activationUrl = `${APP_BASE_URL}/host/activate/?ref=${refId}&email=${encodeURIComponent(hostEmail)}`;
 
       if (hostEmail) {
+        // Automatically ensure host is listed in auth.users (Supabase Authentication tab)
+        await ensureAuthUser(hostEmail, hostName, 'host', record.phone || '', 'host_approved');
+
         if (isDuplicate('host_approved', hostEmail)) {
           console.log(`⏳ Debounced duplicate host_approved send for ${hostEmail}`);
           results.push({ recipient: hostEmail, type: 'host_approved', status: 'debounced_duplicate' });
@@ -542,6 +640,9 @@ Deno.serve(async (req) => {
       const destinations = record.preferred_destinations || 'Nairobi & Coast Curated Stays';
 
       if (guestEmail) {
+        // Automatically ensure guest is listed in auth.users (Supabase Authentication tab)
+        await ensureAuthUser(guestEmail, guestName, 'member', record.phone || '', 'guest_waitlist');
+
         if (isDuplicate('guest_welcome', guestEmail)) {
           console.log(`⏳ Debounced duplicate guest_welcome send for ${guestEmail}`);
           results.push({ recipient: guestEmail, type: 'guest_welcome', status: 'debounced_duplicate' });
@@ -755,6 +856,9 @@ Deno.serve(async (req) => {
       const notes = record.notes || '';
 
       if (hostEmail) {
+        // Automatically ensure founding host is listed in auth.users (Supabase Authentication tab)
+        await ensureAuthUser(hostEmail, hostName, 'host', record.phone || '', 'host_waitlist');
+
         if (isDuplicate('host_waitlist_welcome', hostEmail)) {
           console.log(`⏳ Debounced duplicate host_waitlist_welcome for ${hostEmail}`);
           results.push({ recipient: hostEmail, type: 'host_waitlist_welcome', status: 'debounced_duplicate' });
@@ -958,6 +1062,31 @@ Deno.serve(async (req) => {
       } catch (adminErr) {
         console.warn('Admin host waitlist alert error:', adminErr);
       }
+    }
+
+    // =========================================================================
+    // 4B. REALTIME AUTH USER REGISTRATION / SYNCHRONIZATION (Supabase Auth Tab)
+    // =========================================================================
+    if (emailType === 'sync_auth_user' || emailType === 'ensure_auth_user') {
+      const targetEmail = (record.email || '').toLowerCase().trim();
+      const targetName = record.name || record.full_name || (targetEmail ? targetEmail.split('@')[0] : 'User');
+      const targetRole = record.role || 'member';
+      const targetPhone = record.phone || '';
+      const targetPassword = record.password || undefined;
+      const targetSource = record.source || 'auth_modal';
+
+      console.log(`Syncing user ${targetEmail} (${targetRole}) to auth.users...`);
+      const authId = await ensureAuthUser(targetEmail, targetName, targetRole, targetPhone, targetSource, targetPassword);
+
+      return new Response(JSON.stringify({
+        success: true,
+        userId: authId,
+        email: targetEmail,
+        message: 'Account synchronized in Supabase Authentication and Profiles'
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
     }
 
     // =========================================================================
