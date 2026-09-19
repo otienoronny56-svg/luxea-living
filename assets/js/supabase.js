@@ -10,16 +10,26 @@
   let supabase = null;
   let realtimeChannel = null;
 
+  const ACTIVE_ANON_KEY = "sb_publishable_WWUoQIj6P8LL3WCXrwMbAw_x_rtBQZn";
+
   function getCredentials() {
     try {
       const stored = JSON.parse(localStorage.getItem('luxea_supabase_credentials') || '{}');
+      if (stored && stored.anonKey && (stored.anonKey.startsWith('eyJ') || stored.anonKey.includes('NalTP'))) {
+        stored.anonKey = ACTIVE_ANON_KEY;
+        stored.url = "https://abzcabiqdkmfaijnqbkf.supabase.co";
+        localStorage.setItem('luxea_supabase_credentials', JSON.stringify(stored));
+      }
       if (stored.url && stored.anonKey) return stored;
     } catch (e) {}
 
     if (window.LUXEA_CONFIG && window.LUXEA_CONFIG.supabase) {
       return window.LUXEA_CONFIG.supabase;
     }
-    return null;
+    return {
+      url: "https://abzcabiqdkmfaijnqbkf.supabase.co",
+      anonKey: ACTIVE_ANON_KEY
+    };
   }
 
   function init() {
@@ -54,6 +64,7 @@
           (payload) => {
             console.log('⚡ Supabase Realtime [lux_properties]:', payload);
             window.dispatchEvent(new CustomEvent('luxea:property_updated', { detail: payload }));
+            window.dispatchEvent(new CustomEvent('luxea:data_updated', { detail: { table: 'lux_properties', payload } }));
           }
         )
         .on(
@@ -62,6 +73,34 @@
           (payload) => {
             console.log('⚡ Supabase Realtime [lux_hosts]:', payload);
             window.dispatchEvent(new CustomEvent('luxea:host_updated', { detail: payload }));
+            window.dispatchEvent(new CustomEvent('luxea:data_updated', { detail: { table: 'lux_hosts', payload } }));
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'lux_profiles' },
+          (payload) => {
+            console.log('⚡ Supabase Realtime [lux_profiles]:', payload);
+            window.dispatchEvent(new CustomEvent('luxea:profile_updated', { detail: payload }));
+            window.dispatchEvent(new CustomEvent('luxea:data_updated', { detail: { table: 'lux_profiles', payload } }));
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'lux_host_waitlist' },
+          (payload) => {
+            console.log('⚡ Supabase Realtime [lux_host_waitlist]:', payload);
+            window.dispatchEvent(new CustomEvent('luxea:host_waitlist_updated', { detail: payload }));
+            window.dispatchEvent(new CustomEvent('luxea:data_updated', { detail: { table: 'lux_host_waitlist', payload } }));
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'lux_waitlist' },
+          (payload) => {
+            console.log('⚡ Supabase Realtime [lux_waitlist]:', payload);
+            window.dispatchEvent(new CustomEvent('luxea:waitlist_updated', { detail: payload }));
+            window.dispatchEvent(new CustomEvent('luxea:data_updated', { detail: { table: 'lux_waitlist', payload } }));
           }
         )
         .subscribe((status) => {
@@ -572,30 +611,20 @@
      */
     sendAutomatedEmail: async function (type, record) {
       if (!record || !record.email) return null;
-      console.log(`📨 Triggering automated ${type} email for: ${record.email}`);
+      console.log(`📨 Triggering automated ${type} for: ${record.email}`);
 
-      const client = this.getClient();
       try {
-        if (client && client.functions) {
-          const { data, error } = await client.functions.invoke('luxea-mailer', {
-            body: { type, record }
-          });
-          if (error) console.warn('Supabase functions.invoke mailer notice:', error);
-          else console.log('✅ Automated email dispatched via Edge Function:', data);
-          return data;
-        } else {
-          const res = await fetch('https://abzcabiqdkmfaijnqbkf.supabase.co/functions/v1/luxea-mailer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type, record })
-          });
-          const data = await res.json();
-          console.log('✅ Automated email dispatched via Edge API:', data);
-          return data;
-        }
+        const res = await fetch('https://abzcabiqdkmfaijnqbkf.supabase.co/functions/v1/luxea-mailer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type, record })
+        });
+        const data = await res.json();
+        console.log(`✅ [luxea-mailer] ${type} response:`, data);
+        return data;
       } catch (err) {
-        console.warn('Mailer dispatch exception (non-blocking):', err);
-        return null;
+        console.warn('Mailer dispatch exception:', err);
+        return { success: false, error: err.message };
       }
     },
 

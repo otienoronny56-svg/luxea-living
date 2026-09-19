@@ -58,6 +58,47 @@ function isDuplicate(type: string, email: string): boolean {
 }
 
 /**
+ * Native Supabase Auth & REST helper functions (Zero external modules, zero dependency failures)
+ */
+async function authAdminRequest(endpoint: string, method: string = 'GET', body?: any) {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://abzcabiqdkmfaijnqbkf.supabase.co';
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  const res = await fetch(`${supabaseUrl}/auth/v1/admin/${endpoint}`, {
+    method,
+    headers: {
+      'apikey': serviceRoleKey,
+      'Authorization': `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function restUpsert(table: string, data: any, onConflict?: string) {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://abzcabiqdkmfaijnqbkf.supabase.co';
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+  const url = onConflict
+    ? `${supabaseUrl}/rest/v1/${table}?on_conflict=${encodeURIComponent(onConflict)}`
+    : `${supabaseUrl}/rest/v1/${table}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'apikey': serviceRoleKey,
+      'Authorization': `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates'
+    },
+    body: JSON.stringify(data)
+  });
+  return res.ok;
+}
+
+/**
  * Ensures any visitor/host/guest is registered in auth.users (Supabase Authentication tab)
  * with email_confirm: true, which automatically triggers lux_profiles sync.
  */
@@ -71,19 +112,10 @@ async function ensureAuthUser(
 ): Promise<string | null> {
   if (!email) return null;
   const cleanEmail = email.toLowerCase().trim();
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://abzcabiqdkmfaijnqbkf.supabase.co';
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-  if (!serviceRoleKey) {
-    console.warn('Cannot sync auth.user: missing SUPABASE_SERVICE_ROLE_KEY');
-    return null;
-  }
 
   try {
-    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
-
     // 1. Check if user already exists in auth.users
-    const { data: listData } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+    const listData = await authAdminRequest('users?per_page=1000');
     const existing = listData?.users?.find((u: any) => u.email?.toLowerCase() === cleanEmail);
 
     if (existing) {
@@ -97,23 +129,23 @@ async function ensureAuthUser(
         }
       };
       if (customPassword) updateData.password = customPassword;
-      await supabaseAdmin.auth.admin.updateUserById(existing.id, updateData);
+      await authAdminRequest(`users/${existing.id}`, 'PUT', updateData);
 
-      await supabaseAdmin.from('lux_profiles').upsert({
+      await restUpsert('lux_profiles', {
         id: existing.id,
         email: cleanEmail,
         full_name: fullName || existing.user_metadata?.full_name,
         role: role || existing.user_metadata?.role || 'member',
         phone: phone || existing.user_metadata?.phone,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'id' });
+      });
 
       return existing.id;
     }
 
     // 2. Create in auth.users with email_confirm: true so user is immediately visible in Supabase Auth tab
     const autoPassword = customPassword || `LX-${Math.random().toString(36).substring(2, 7).toUpperCase()}!${Math.floor(1000 + Math.random() * 9000)}`;
-    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    const newUser = await authAdminRequest('users', 'POST', {
       email: cleanEmail,
       password: autoPassword,
       email_confirm: true,
@@ -126,28 +158,26 @@ async function ensureAuthUser(
       }
     });
 
-    if (createError) {
-      console.warn(`createUser in auth.users notice for ${cleanEmail}:`, createError.message);
-      return null;
-    }
-
-    if (newUser?.user) {
-      console.log(`✅ User ${cleanEmail} successfully registered in Supabase auth.users (ID: ${newUser.user.id})`);
-      await supabaseAdmin.from('lux_profiles').upsert({
-        id: newUser.user.id,
+    if (newUser && newUser.id) {
+      console.log(`✅ User ${cleanEmail} successfully registered in Supabase auth.users (ID: ${newUser.id})`);
+      await restUpsert('lux_profiles', {
+        id: newUser.id,
         email: cleanEmail,
         full_name: fullName,
         role: role,
         phone: phone,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'id' });
-      return newUser.user.id;
+      });
+      return newUser.id;
+    } else {
+      console.warn(`createUser in auth.users notice for ${cleanEmail}:`, newUser);
     }
   } catch (err) {
     console.warn('ensureAuthUser exception:', err);
   }
   return null;
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -1114,16 +1144,12 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Initialize Supabase Admin Client
-      const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://abzcabiqdkmfaijnqbkf.supabase.co';
-      const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-      const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+      console.log(`[Admin Provision] Starting native provisioning for ${email} (${role})...`);
 
-      let authUserId = null;
+      let authUserId: string | null = null;
 
-      // 1. Try to create user in auth.users
-      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      // 1. Try to create user in auth.users via native Supabase Auth Admin REST API
+      const newUser = await authAdminRequest('users', 'POST', {
         email,
         password,
         email_confirm: true,
@@ -1135,31 +1161,38 @@ Deno.serve(async (req) => {
         }
       });
 
-      if (createError) {
-        console.warn('createUser notice:', createError.message);
-        if (createError.message && createError.message.includes('already registered')) {
-          const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
-          const existingUser = listData?.users?.find((u: any) => u.email?.toLowerCase() === email);
-          if (existingUser) {
-            authUserId = existingUser.id;
-            await supabaseAdmin.auth.admin.updateUserById(authUserId, {
-              password: password,
-              user_metadata: { full_name: fullName, role: role, avatar_url: avatarUrl, phone: phone }
-            });
-          }
+      if (newUser && newUser.id) {
+        authUserId = newUser.id;
+        console.log(`[Admin Provision] Created new user in auth.users: ${authUserId}`);
+      } else {
+        console.warn('[Admin Provision] createUser response (checking if user exists):', newUser);
+        // Find existing user if already registered
+        const listData = await authAdminRequest('users?per_page=1000');
+        const existingUser = listData?.users?.find((u: any) => u.email?.toLowerCase() === email);
+        if (existingUser) {
+          authUserId = existingUser.id;
+          console.log(`[Admin Provision] User already exists (ID: ${authUserId}). Updating credentials & metadata...`);
+          await authAdminRequest(`users/${authUserId}`, 'PUT', {
+            password: password,
+            user_metadata: {
+              ...(existingUser.user_metadata || {}),
+              full_name: fullName,
+              role: role,
+              avatar_url: avatarUrl || existingUser.user_metadata?.avatar_url,
+              phone: phone || existingUser.user_metadata?.phone,
+            }
+          });
         } else {
-          return new Response(JSON.stringify({ error: createError.message }), {
+          return new Response(JSON.stringify({ error: newUser?.message || newUser?.msg || 'Failed to create user in auth' }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
-      } else if (newUser?.user) {
-        authUserId = newUser.user.id;
       }
 
-      // 2. Upsert into lux_profiles
+      // 2. Upsert into lux_profiles via native PostgREST
       if (authUserId) {
-        await supabaseAdmin.from('lux_profiles').upsert({
+        await restUpsert('lux_profiles', {
           id: authUserId,
           email,
           full_name: fullName,
@@ -1168,14 +1201,15 @@ Deno.serve(async (req) => {
           phone: phone || null,
           bio: bio || null,
           updated_at: new Date().toISOString()
-        });
+        }, 'id');
+        console.log(`[Admin Provision] lux_profiles record synced for ${email}`);
       }
 
       // 3. If role is 'host', create / upsert in lux_hosts
       let hostRefId = record.ref_id;
       if (role === 'host') {
         hostRefId = hostRefId || `LXH-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-        await supabaseAdmin.from('lux_hosts').upsert({
+        await restUpsert('lux_hosts', {
           ref_id: hostRefId,
           full_name: fullName,
           email: email,
@@ -1190,7 +1224,8 @@ Deno.serve(async (req) => {
           property_photos_urls: propertyPhoto ? [propertyPhoto] : [],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        }, { onConflict: 'email' });
+        }, 'email');
+        console.log(`[Admin Provision] lux_hosts record synced for ${email}`);
       }
 
       // 4. Send Credentials Email if enabled

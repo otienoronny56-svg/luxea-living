@@ -1554,13 +1554,22 @@ export function initAdminDashboard() {
   // =========================================================================
   // 9. LIVE MULTI-TAB & REALTIME LISTENERS
   // =========================================================================
-  window.addEventListener('luxea:host_updated', () => {
-    loadDashboardData();
-  });
+  let reloadTimer = null;
+  const triggerLiveReload = () => {
+    if (reloadTimer) clearTimeout(reloadTimer);
+    reloadTimer = setTimeout(async () => {
+      console.log('⚡ [Admin Realtime] Live change detected -> refreshing admin views');
+      await loadDashboardData();
+    }, 300);
+  };
 
-  window.addEventListener('luxea:property_updated', () => {
-    loadDashboardData();
-  });
+  window.addEventListener('luxea:host_updated', triggerLiveReload);
+  window.addEventListener('luxea:property_updated', triggerLiveReload);
+  window.addEventListener('luxea:profile_updated', triggerLiveReload);
+  window.addEventListener('luxea:waitlist_updated', triggerLiveReload);
+  window.addEventListener('luxea:host_waitlist_updated', triggerLiveReload);
+  window.addEventListener('luxea:data_updated', triggerLiveReload);
+  window.addEventListener('luxea:dataUpdated', triggerLiveReload);
 
   // =========================================================================
   // 10. EXECUTIVE PROVISIONING & HOST EDIT / SECURITY CONTROL MODALS
@@ -1889,9 +1898,15 @@ export function initAdminDashboard() {
         }
         closeCreateAccountModal();
         await loadDashboardData();
+        // Immediately jump to the right tab so the admin sees the new entry
+        if (accountData.role === 'host') {
+          switchTab('hosts');
+        } else {
+          switchTab('profiles');
+        }
       } else {
         if (window.showToast) {
-          window.showToast(`Notice: ${res?.error || 'Account provisioned or existing profile synchronized.'}`);
+          window.showToast(`❌ Provisioning notice: ${res?.error || 'Account could not be created.'}`);
         }
         closeCreateAccountModal();
         await loadDashboardData();
