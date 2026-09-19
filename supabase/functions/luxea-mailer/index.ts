@@ -960,6 +960,193 @@ Deno.serve(async (req) => {
       }
     }
 
+    // =========================================================================
+    // 5. EXECUTIVE ADMIN ACTION: PROVISION / CREATE NEW USER OR HOST ACCOUNT
+    // =========================================================================
+    if (emailType === 'admin_provision_user') {
+      const email = (record.email || '').toLowerCase().trim();
+      const password = record.password || `Luxea${Math.floor(1000 + Math.random() * 9000)}!`;
+      const fullName = record.full_name || record.fullName || 'User';
+      const role = record.role || 'member';
+      const phone = record.phone || '';
+      const avatarUrl = record.avatar_url || '';
+      const bio = record.bio || '';
+      const propertyName = record.property_name || '';
+      const propertyType = record.property_type || 'Apartment';
+      const county = record.county || 'Nairobi';
+      const area = record.area || 'Westlands';
+      const propertyPhoto = record.property_photo_url || '';
+      const sendEmail = record.send_credentials_email !== false;
+
+      if (!email) {
+        return new Response(JSON.stringify({ error: 'Email is required' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Initialize Supabase Admin Client
+      const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://abzcabiqdkmfaijnqbkf.supabase.co';
+      const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+      const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+
+      let authUserId = null;
+
+      // 1. Try to create user in auth.users
+      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          full_name: fullName,
+          role: role,
+          avatar_url: avatarUrl,
+          phone: phone,
+        }
+      });
+
+      if (createError) {
+        console.warn('createUser notice:', createError.message);
+        if (createError.message && createError.message.includes('already registered')) {
+          const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
+          const existingUser = listData?.users?.find((u: any) => u.email?.toLowerCase() === email);
+          if (existingUser) {
+            authUserId = existingUser.id;
+            await supabaseAdmin.auth.admin.updateUserById(authUserId, {
+              password: password,
+              user_metadata: { full_name: fullName, role: role, avatar_url: avatarUrl, phone: phone }
+            });
+          }
+        } else {
+          return new Response(JSON.stringify({ error: createError.message }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      } else if (newUser?.user) {
+        authUserId = newUser.user.id;
+      }
+
+      // 2. Upsert into lux_profiles
+      if (authUserId) {
+        await supabaseAdmin.from('lux_profiles').upsert({
+          id: authUserId,
+          email,
+          full_name: fullName,
+          role: role,
+          avatar_url: avatarUrl || null,
+          phone: phone || null,
+          bio: bio || null,
+          updated_at: new Date().toISOString()
+        });
+      }
+
+      // 3. If role is 'host', create / upsert in lux_hosts
+      let hostRefId = record.ref_id;
+      if (role === 'host') {
+        hostRefId = hostRefId || `LXH-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+        await supabaseAdmin.from('lux_hosts').upsert({
+          ref_id: hostRefId,
+          full_name: fullName,
+          email: email,
+          phone: phone,
+          property_name: propertyName || `${fullName}'s Residence`,
+          property_type: propertyType,
+          county: county,
+          area_suburb: area,
+          review_status: 'approved',
+          host_bio: bio,
+          avatar_url: avatarUrl || null,
+          property_photos_urls: propertyPhoto ? [propertyPhoto] : [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'email' });
+      }
+
+      // 4. Send Credentials Email if enabled
+      if (sendEmail && RESEND_API_KEY) {
+        try {
+          const roleLabel = role === 'super_admin' ? 'Super Administrator' : role === 'admin' ? 'System Administrator' : role === 'host' ? 'Verified Host Partner' : 'VIP Circle Member';
+          const portalUrl = role === 'super_admin' || role === 'admin' ? `${APP_BASE_URL}/admin/` : role === 'host' ? `${APP_BASE_URL}/host/?mode=manage` : `${APP_BASE_URL}/stays/`;
+
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${RESEND_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              from: getSenderEmail('Luxea Living Executive Office'),
+              to: [email],
+              subject: `Your Luxea Living Account Has Been Provisioned [${roleLabel}]`,
+              html: `
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #0B0806; color: #EDE8E3; padding: 36px 16px;">
+                  <div style="max-width: 560px; margin: 0 auto; background: #130E0A; border: 1px solid #D4AF37; border-radius: 12px; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                      <div style="font-size: 22px; letter-spacing: 5px; font-weight: 700; color: #D4AF37;">LUXEA LIVING</div>
+                      <div style="font-size: 11px; letter-spacing: 2px; color: #A0958C; text-transform: uppercase; margin-top: 4px;">Executive Onboarding Dispatch</div>
+                    </div>
+
+                    <div style="background: rgba(212, 175, 55, 0.12); border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 20px; padding: 4px 14px; font-size: 11px; color: #D4AF37; font-weight: 700; display: inline-block; margin-bottom: 16px;">
+                      ✓ ACCOUNT OFFICIALLY PROVISIONED
+                    </div>
+
+                    <h2 style="color: #FFFFFF; font-size: 20px; margin: 0 0 12px;">Welcome, ${fullName}</h2>
+                    <p style="color: #C5BCB3; font-size: 13px; line-height: 1.6; margin: 0 0 20px;">
+                      Your Luxea Living account has been created and verified by executive administration with the role of <strong>${roleLabel}</strong>.
+                    </p>
+
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background: #0E0A07; border: 1px solid rgba(178, 135, 86, 0.25); border-radius: 8px; margin-bottom: 24px; font-size: 13px;">
+                      <tr>
+                        <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #8F847C;">Login Email</td>
+                        <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #EDE8E3; font-weight: 600; text-align: right;">${email}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #8F847C;">Secure Password</td>
+                        <td style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #D4AF37; font-family: monospace; font-weight: bold; text-align: right;">${password}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 10px 14px; color: #8F847C;">Access Role</td>
+                        <td style="padding: 10px 14px; color: #4ADE80; font-weight: 600; text-align: right;">${roleLabel}</td>
+                      </tr>
+                    </table>
+
+                    <div style="text-align: center; margin: 24px 0;">
+                      <a href="${portalUrl}" style="background: linear-gradient(135deg, #D4AF37 0%, #B28756 100%); color: #0B0806; font-weight: 700; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-size: 13px; display: inline-block;">
+                        Access Your Portal ↗
+                      </a>
+                    </div>
+
+                    <p style="font-size: 12px; color: #8F847C; line-height: 1.5; margin: 0;">
+                      You may change your password anytime in your settings or continue with Google Sign-In using this email address.
+                    </p>
+                  </div>
+                </div>
+              `
+            })
+          });
+        } catch (mailErr) {
+          console.warn('Credentials dispatch notice:', mailErr);
+        }
+      }
+
+      return new Response(JSON.stringify({
+        success: true,
+        user: {
+          id: authUserId,
+          email,
+          full_name: fullName,
+          role,
+          refId: hostRefId,
+          password
+        }
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
     return new Response(JSON.stringify({ success: true, dispatched: results.length, results }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,

@@ -835,6 +835,37 @@
         <div id="hostManagerContainer"></div>
       </div>
 
+      <!-- VIEW 5: HOST ACCOUNT SUSPENDED (Block/Suspend access button) -->
+      <div id="hostSuspendedView" class="hidden">
+        <div class="gated-card" style="border-color: rgba(220, 38, 38, 0.3); background: rgba(254, 242, 242, 0.95); max-width: 580px; margin: 40px auto; text-align: center; padding: 48px 32px; border-radius: 16px;">
+          <div class="gated-lock-icon" style="width: 64px; height: 64px; border-radius: 50%; background: rgba(220, 38, 38, 0.1); color: #DC2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+          </div>
+          <span class="badge-tag" style="background: rgba(220, 38, 38, 0.15); color: #DC2626; border: 1px solid rgba(220, 38, 38, 0.3); font-size: 0.72rem; letter-spacing: 1px;">PORTAL ACCESS RESTRICTED</span>
+          <h2 class="gated-title" style="color: #991B1B; font-family: var(--font-serif); font-size: 1.8rem; margin: 12px 0;">Host Account Access Suspended</h2>
+          <p class="gated-desc" style="color: #7F1D1D; font-size: 0.92rem; line-height: 1.6; margin-bottom: 24px;">
+            Access to this host management suite, financial earnings reports, and property administration has been restricted by platform administration.
+          </p>
+          <div class="pending-info-box" style="border: 1px solid rgba(220, 38, 38, 0.2); background: #FFF; border-radius: 8px; padding: 16px; margin-bottom: 24px; text-align: left;">
+            <div class="pending-row" style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 8px;">
+              <span style="color: #6B7280;">Account Status:</span>
+              <strong style="color: #DC2626;">Suspended (Earnings &amp; Controls Locked)</strong>
+            </div>
+            <div class="pending-row" style="display: flex; justify-content: space-between; font-size: 0.82rem;">
+              <span style="color: #6B7280;">Resolution:</span>
+              <span>Contact Platform Concierge</span>
+            </div>
+          </div>
+          <div class="gated-actions" style="display: flex; gap: 12px; justify-content: center;">
+            <a href="mailto:concierge@luxealiving.co.ke" class="btn btn-secondary btn-sm" style="text-decoration: none;">Contact Super Admin</a>
+            <a href="/" class="btn btn-primary btn-sm" style="text-decoration: none;">Return to Homepage</a>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
@@ -905,6 +936,7 @@
       const gatedView = document.getElementById('hostGatedView');
       const pendingView = document.getElementById('hostPendingView');
       const managerView = document.getElementById('hostManagerView');
+      const suspendedView = document.getElementById('hostSuspendedView');
       const verifiedBar = document.getElementById('hostVerifiedSessionBar');
       const sessionHostName = document.getElementById('sessionHostName');
       const sessionPropName = document.getElementById('sessionPropName');
@@ -912,7 +944,7 @@
       const toggleHostModeLabel = document.getElementById('toggleHostModeLabel');
       const hostLogoutBtn = document.getElementById('hostLogoutBtn');
 
-      let currentView = 'register'; // 'register', 'manage', 'gated', 'pending'
+      let currentView = 'register'; // 'register', 'manage', 'gated', 'pending', 'suspended'
 
       // Check current host authentication and verification status
       async function checkHostAccess() {
@@ -946,6 +978,10 @@
                 .eq('id', user.id)
                 .maybeSingle();
 
+              if (prof && (prof.is_suspended || prof.role === 'suspended')) {
+                return { allowed: false, suspended: true, user: { email, name: prof.full_name, role: 'suspended' } };
+              }
+
               if (prof && (prof.role === 'super_admin' || prof.role === 'admin')) {
                 const adminUser = {
                   email: prof.email || email,
@@ -968,6 +1004,10 @@
 
               if (hostRows && hostRows.length > 0) {
                 const hostRec = hostRows[0];
+                if (hostRec.is_suspended || hostRec.review_status === 'suspended') {
+                  return { allowed: false, suspended: true, user: { email: hostRec.email, name: hostRec.full_name, refId: hostRec.ref_id } };
+                }
+
                 const isApproved = hostRec.review_status === 'approved';
                 const hSession = {
                   email: hostRec.email,
@@ -1011,17 +1051,24 @@
 
         // 2. Check if logged in as Host Partner
         if (userSession && (userSession.role === 'host' || userSession.refId)) {
+          if (userSession.is_suspended || userSession.role === 'suspended' || userSession.status === 'suspended') {
+            return { allowed: false, suspended: true, user: userSession };
+          }
+
           let isApproved = userSession.status === 'approved' || userSession.reviewStatus === 'approved';
 
           // Query Supabase for real-time status if available
           if (client && (userSession.refId || userSession.email)) {
             try {
-              let query = client.from('lux_hosts').select('review_status, full_name, property_name');
+              let query = client.from('lux_hosts').select('review_status, full_name, property_name, is_suspended');
               if (userSession.refId) query = query.eq('ref_id', userSession.refId);
               else query = query.ilike('email', userSession.email);
               const { data } = await query.limit(1);
 
               if (data && data.length > 0) {
+                if (data[0].is_suspended || data[0].review_status === 'suspended') {
+                  return { allowed: false, suspended: true, user: userSession };
+                }
                 if (data[0].review_status === 'approved') {
                   isApproved = true;
                   userSession.status = 'approved';
@@ -1052,6 +1099,7 @@
         gatedView.classList.add('hidden');
         pendingView.classList.add('hidden');
         managerView.classList.add('hidden');
+        if (suspendedView) suspendedView.classList.add('hidden');
 
         const access = await checkHostAccess();
 
@@ -1068,6 +1116,9 @@
           if (access.allowed) {
             managerView.classList.remove('hidden');
             if (toggleHostModeLabel) toggleHostModeLabel.textContent = 'Register Another Property';
+          } else if (access.suspended) {
+            if (suspendedView) suspendedView.classList.remove('hidden');
+            if (toggleHostModeLabel) toggleHostModeLabel.textContent = 'Host Access Suspended';
           } else if (access.pending) {
             pendingView.classList.remove('hidden');
             const pTitle = document.getElementById('pendingHostTitle');

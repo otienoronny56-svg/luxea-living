@@ -64,6 +64,53 @@ export function initAdminDashboard() {
   const inspectRejectBtn = document.getElementById('inspectRejectBtn');
   let currentInspectedRef = null;
 
+  // Account Provisioning Modal Elements
+  const createUserModal = document.getElementById('createUserModal');
+  const openCreateHostModalBtn = document.getElementById('openCreateHostModalBtn');
+  const openCreateUserModalBtn = document.getElementById('openCreateUserModalBtn');
+  const closeCreateUserModalBtn = document.getElementById('closeCreateUserModalBtn');
+  const cancelCreateUserBtn = document.getElementById('cancelCreateUserBtn');
+  const createUserForm = document.getElementById('createUserForm');
+  const btnGenPass = document.getElementById('btnGenPass');
+  const newAccRole = document.getElementById('newAccRole');
+  const newAccHostSection = document.getElementById('newAccHostSection');
+  const newAccPropPhotoWrap = document.getElementById('newAccPropPhotoWrap');
+  const newAccAvatarFile = document.getElementById('newAccAvatarFile');
+  const newAccAvatarPreview = document.getElementById('newAccAvatarPreview');
+  const newAccAvatarImg = document.getElementById('newAccAvatarImg');
+  const newAccPropPhotoFile = document.getElementById('newAccPropPhotoFile');
+  const newAccPropPhotoPreview = document.getElementById('newAccPropPhotoPreview');
+  const newAccPropPhotoImg = document.getElementById('newAccPropPhotoImg');
+
+  // Edit Profile & Security Controls Modal Elements
+  const editProfileModal = document.getElementById('editProfileModal');
+  const closeEditProfileModalBtn = document.getElementById('closeEditProfileModalBtn');
+  const cancelEditProfileBtn = document.getElementById('cancelEditProfileBtn');
+  const editProfileForm = document.getElementById('editProfileForm');
+  const editProfileRef = document.getElementById('editProfileRef');
+  const editProfileTitle = document.getElementById('editProfileTitle');
+  const editProfileUserId = document.getElementById('editProfileUserId');
+  const editProfileRefId = document.getElementById('editProfileRefId');
+  const editProfileFullName = document.getElementById('editProfileFullName');
+  const editProfileEmail = document.getElementById('editProfileEmail');
+  const editProfileRole = document.getElementById('editProfileRole');
+  const editProfilePhone = document.getElementById('editProfilePhone');
+  const editProfileHostSection = document.getElementById('editProfileHostSection');
+  const editProfilePropName = document.getElementById('editProfilePropName');
+  const editProfileBio = document.getElementById('editProfileBio');
+  const editProfileAvatarFile = document.getElementById('editProfileAvatarFile');
+  const editProfileAvatarImg = document.getElementById('editProfileAvatarImg');
+  const editProfileAvatarStatus = document.getElementById('editProfileAvatarStatus');
+  const editProfilePropPhotoWrap = document.getElementById('editProfilePropPhotoWrap');
+  const editProfilePropPhotoFile = document.getElementById('editProfilePropPhotoFile');
+  const editProfilePropImg = document.getElementById('editProfilePropImg');
+  const editProfilePropStatus = document.getElementById('editProfilePropStatus');
+  const editProfileHostControls = document.getElementById('editProfileHostControls');
+  const btnToggleSuspendHost = document.getElementById('btnToggleSuspendHost');
+  const labelToggleSuspend = document.getElementById('labelToggleSuspend');
+  const btnToggleDelistHost = document.getElementById('btnToggleDelistHost');
+  const labelToggleDelist = document.getElementById('labelToggleDelist');
+
   // Active Data State
   let cachedHosts = [];
   let cachedStays = [];
@@ -520,18 +567,25 @@ export function initAdminDashboard() {
       const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
       const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${name}, this is Ronald from Luxea Living regarding your host application (${ref}).`)}`;
 
+      const isSuspended = h.is_suspended === true || status === 'suspended';
+      const isDelisted = h.is_delisted === true;
+
       const tr = document.createElement('tr');
       tr.className = 'host-table-row';
       tr.setAttribute('data-ref', ref);
+      tr.setAttribute('data-email', email);
       tr.title = 'Click row to inspect full dossier';
       tr.innerHTML = `
         <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <span class="host-cell-name" style="font-size: 0.94rem; font-weight: 700; color: #241812;">${name}</span>
             <button type="button" class="btn-copy-micro copy-ref-btn" data-ref="${ref}" title="Click to copy Ref ID: ${ref}">
               <span>${ref}</span>
             </button>
+            ${isSuspended ? '<span class="status-chip chip-red" style="font-size:0.65rem; padding: 1px 6px;">🚫 Suspended</span>' : ''}
+            ${isDelisted ? '<span class="status-chip chip-neutral" style="font-size:0.65rem; padding: 1px 6px; background:#FEF3C7; color:#B45309;">🙈 Delisted</span>' : ''}
           </div>
+          <div style="font-size: 0.74rem; color: #8F847C; margin-top: 3px;">${email}</div>
         </td>
 
         <td>
@@ -540,17 +594,29 @@ export function initAdminDashboard() {
         </td>
 
         <td>
-          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="padding: 6px 12px; font-size: 0.78rem; font-weight: 700; width: 100%; min-width: 140px;">
+          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="padding: 6px 12px; font-size: 0.78rem; font-weight: 700; width: 100%; min-width: 130px;">
             <option value="pending_review" ${status === 'pending_review' ? 'selected' : ''}>⏳ Pending Review</option>
             <option value="approved" ${status === 'approved' ? 'selected' : ''}>✅ Approved</option>
             <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
+            <option value="suspended" ${status === 'suspended' || isSuspended ? 'selected' : ''}>🚫 Suspended</option>
           </select>
         </td>
 
-        <td style="text-align: right;">
-          <button type="button" class="btn-table-action btn-inspect trigger-inspect-btn" data-ref="${ref}" title="Inspect full application dossier (photos, payout, KYC)" style="padding: 6px 14px; font-size: 0.76rem; font-weight: 700;">
-            <span>Inspect ↗</span>
-          </button>
+        <td style="text-align: right; white-space: nowrap;">
+          <div style="display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end;">
+            <button type="button" class="btn-table-action btn-edit-host" data-ref="${ref}" data-email="${email}" title="Edit host bio, photo, property details & security controls" style="padding: 6px 10px; font-size: 0.76rem; font-weight: 600; background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
+              <span>✏️ Edit</span>
+            </button>
+            <button type="button" class="btn-table-action btn-toggle-suspend-quick" data-email="${email}" data-suspended="${isSuspended ? 'true' : 'false'}" title="${isSuspended ? 'Unsuspend portal access' : 'Block / Suspend access to earnings & portal'}" style="padding: 6px 8px; font-size: 0.74rem; font-weight: 600; ${isSuspended ? 'background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC;' : 'background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;'}">
+              <span>${isSuspended ? '🔓 Unblock' : '🔒 Block'}</span>
+            </button>
+            <button type="button" class="btn-table-action btn-toggle-delist-quick" data-email="${email}" data-delisted="${isDelisted ? 'true' : 'false'}" title="${isDelisted ? 'Relist property on platform catalog' : 'Delist / Hide residence from stays catalog'}" style="padding: 6px 8px; font-size: 0.74rem; font-weight: 600; ${isDelisted ? 'background: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD;' : 'background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D;'}">
+              <span>${isDelisted ? '🌐 Relist' : '🚫 Delist'}</span>
+            </button>
+            <button type="button" class="btn-table-action btn-inspect trigger-inspect-btn" data-ref="${ref}" title="Inspect full application dossier (photos, payout, KYC)" style="padding: 6px 10px; font-size: 0.76rem; font-weight: 700;">
+              <span>Inspect ↗</span>
+            </button>
+          </div>
         </td>
       `;
 
@@ -571,7 +637,46 @@ export function initAdminDashboard() {
       });
     });
 
-    // 2. Inline Status Switcher Dropdown
+    // 2. Edit Host Profile button
+    hostsTableBody.querySelectorAll('.btn-edit-host').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ref = btn.getAttribute('data-ref');
+        const email = btn.getAttribute('data-email');
+        openEditProfileModal(ref || email, 'host');
+      });
+    });
+
+    // 3. Quick Suspend toggle
+    hostsTableBody.querySelectorAll('.btn-toggle-suspend-quick').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const email = btn.getAttribute('data-email');
+        const isSuspended = btn.getAttribute('data-suspended') === 'true';
+        await handleToggleSuspend(email, isSuspended);
+      });
+    });
+
+    // 4. Quick Delist toggle
+    hostsTableBody.querySelectorAll('.btn-toggle-delist-quick').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const email = btn.getAttribute('data-email');
+        const isDelisted = btn.getAttribute('data-delisted') === 'true';
+        await handleToggleDelist(email, isDelisted);
+      });
+    });
+
+    // 5. Trigger Inspect Modal from button
+    hostsTableBody.querySelectorAll('.trigger-inspect-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ref = btn.getAttribute('data-ref');
+        openInspectModal(ref);
+      });
+    });
+
+    // 6. Inline Status Switcher Dropdown
     hostsTableBody.querySelectorAll('.host-status-select').forEach(sel => {
       sel.addEventListener('click', (e) => e.stopPropagation());
       sel.addEventListener('change', async (e) => {
@@ -592,10 +697,10 @@ export function initAdminDashboard() {
       });
     });
 
-    // 3. Row click & Inspect Modal trigger
+    // 7. Row click & Inspect Modal trigger
     hostsTableBody.querySelectorAll('.host-table-row').forEach(row => {
       row.addEventListener('click', (e) => {
-        if (e.target.closest('.host-status-select') || e.target.closest('.copy-ref-btn')) return;
+        if (e.target.closest('.host-status-select') || e.target.closest('.copy-ref-btn') || e.target.closest('.btn-table-action')) return;
         const ref = row.getAttribute('data-ref');
         openInspectModal(ref);
       });
@@ -1055,9 +1160,23 @@ export function initAdminDashboard() {
         <td style="text-align: right;">
           <small style="color: var(--color-cocoa); font-weight: 600;">${date}</small>
         </td>
+        <td style="text-align: right; white-space: nowrap;">
+          <button type="button" class="btn-table-action btn-edit-profile-row" data-email="${email}" data-user-id="${p.id}" title="Edit profile bio, avatar, role & permissions" style="padding: 4px 10px; font-size: 0.75rem; font-weight: 600; background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
+            <span>✏️ Edit</span>
+          </button>
+        </td>
       `;
 
       profilesTableBody.appendChild(tr);
+    });
+
+    // Wire up Edit button clicks on profile rows
+    profilesTableBody.querySelectorAll('.btn-edit-profile-row').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const email = btn.getAttribute('data-email');
+        openEditProfileModal(email, 'profile');
+      });
     });
 
     // Wire up change listeners on the role dropdowns
@@ -1345,8 +1464,414 @@ export function initAdminDashboard() {
     loadDashboardData();
   });
 
-  window.addEventListener('luxea:dataUpdated', () => {
-    loadDashboardData();
+  // =========================================================================
+  // 10. EXECUTIVE PROVISIONING & HOST EDIT / SECURITY CONTROL MODALS
+  // =========================================================================
+  let activeEditingEmail = null;
+  let activeEditingUserId = null;
+  let activeEditingRef = null;
+  let activeEditingIsSuspended = false;
+  let activeEditingIsDelisted = false;
+
+  async function handleToggleSuspend(email, isCurrentlySuspended) {
+    if (!email) {
+      if (window.showToast) window.showToast('No email associated with this host partner.');
+      return;
+    }
+    const nextState = !isCurrentlySuspended;
+    const actionDesc = nextState ? 'BLOCK / SUSPEND portal access (hide earnings & payout dashboard)' : 'RESTORE portal access';
+    if (!confirm(`Are you sure you want to ${actionDesc} for ${email}?`)) return;
+
+    if (window.showToast) window.showToast('Updating host portal access...');
+    if (window.LuxeaDB && typeof window.LuxeaDB.toggleHostSuspension === 'function') {
+      const res = await window.LuxeaDB.toggleHostSuspension(email, nextState);
+      if (res && res.success) {
+        if (window.showToast) {
+          window.showToast(nextState
+            ? '🔒 Host portal access suspended. Earnings, payouts & personal details are now hidden.'
+            : '🔓 Host portal access successfully restored.');
+        }
+        await loadDashboardData();
+      } else {
+        if (window.showToast) window.showToast(`Error: ${res?.error || 'Database operation failed'}`);
+      }
+    }
+  }
+
+  async function handleToggleDelist(email, isCurrentlyDelisted) {
+    if (!email) {
+      if (window.showToast) window.showToast('No email associated with this host partner.');
+      return;
+    }
+    const nextState = !isCurrentlyDelisted;
+    const actionDesc = nextState ? 'DELIST & HIDE residences from live Stays catalog' : 'RELIST & PUBLISH residences on live platform';
+    if (!confirm(`Are you sure you want to ${actionDesc} for ${email}?`)) return;
+
+    if (window.showToast) window.showToast('Updating platform listing status...');
+    if (window.LuxeaDB && typeof window.LuxeaDB.toggleHostDelist === 'function') {
+      const res = await window.LuxeaDB.toggleHostDelist(email, nextState);
+      if (res && res.success) {
+        if (window.showToast) {
+          window.showToast(nextState
+            ? '🚫 Host properties delisted and unpublished from the live platform.'
+            : '🌐 Host properties relisted and published live on the platform catalog.');
+        }
+        await loadDashboardData();
+      } else {
+        if (window.showToast) window.showToast(`Error: ${res?.error || 'Database operation failed'}`);
+      }
+    }
+  }
+
+  function openCreateAccountModal() {
+    if (createUserModal) createUserModal.classList.add('open');
+  }
+
+  function closeCreateAccountModal() {
+    if (createUserModal) createUserModal.classList.remove('open');
+    if (createUserForm) createUserForm.reset();
+    if (newAccAvatarPreview) newAccAvatarPreview.classList.add('hidden');
+    if (newAccPropPhotoPreview) newAccPropPhotoPreview.classList.add('hidden');
+  }
+
+  function openEditProfileModal(identifier, type = 'host') {
+    if (!editProfileModal) return;
+
+    const host = cachedHosts.find(h =>
+      (h.refId || h.ref_id) === identifier ||
+      (h.email || '').toLowerCase() === (identifier || '').toLowerCase()
+    );
+
+    const profile = cachedProfiles.find(p =>
+      (p.email || '').toLowerCase() === (identifier || '').toLowerCase() ||
+      p.id === identifier
+    );
+
+    const email = host?.email || profile?.email || identifier || '';
+    const name = host?.fullName || host?.full_name || profile?.full_name || (email ? email.split('@')[0] : 'User');
+    const phone = host?.phone || profile?.phone || '';
+    const ref = host?.refId || host?.ref_id || 'LUX-USER';
+    const propName = host?.propertyName || host?.property_name || '';
+    const bio = host?.host_bio || profile?.bio || '';
+    const role = profile?.role || (host ? 'host' : 'member');
+    const avatarUrl = profile?.avatar_url || host?.avatar_url || '';
+    const photoUrls = host?.property_photos_urls || [];
+    const isSuspended = host?.is_suspended === true || profile?.is_suspended === true || (role === 'suspended') || (host?.review_status === 'suspended');
+    const isDelisted = host?.is_delisted === true;
+
+    activeEditingEmail = email;
+    activeEditingUserId = profile?.id || null;
+    activeEditingRef = ref;
+    activeEditingIsSuspended = isSuspended;
+    activeEditingIsDelisted = isDelisted;
+
+    if (editProfileRef) editProfileRef.textContent = ref;
+    if (editProfileTitle) editProfileTitle.textContent = `Edit Profile: ${name}`;
+    if (editProfileUserId) editProfileUserId.value = activeEditingUserId || '';
+    if (editProfileRefId) editProfileRefId.value = activeEditingRef || '';
+    if (editProfileFullName) editProfileFullName.value = name;
+    if (editProfileEmail) editProfileEmail.value = email;
+    if (editProfileRole) editProfileRole.value = isSuspended ? 'suspended' : role;
+    if (editProfilePhone) editProfilePhone.value = phone;
+    if (editProfilePropName) editProfilePropName.value = propName;
+    if (editProfileBio) editProfileBio.value = bio;
+
+    // Avatar preview
+    if (editProfileAvatarImg && editProfileAvatarStatus) {
+      if (avatarUrl) {
+        editProfileAvatarImg.src = avatarUrl;
+        editProfileAvatarImg.style.display = 'block';
+        editProfileAvatarStatus.textContent = 'Current custom avatar';
+        editProfileAvatarStatus.style.color = '#15803D';
+      } else {
+        editProfileAvatarImg.style.display = 'none';
+        editProfileAvatarStatus.textContent = 'No custom avatar';
+        editProfileAvatarStatus.style.color = '#8F847C';
+      }
+    }
+
+    // Property photo preview
+    if (editProfilePropImg && editProfilePropStatus) {
+      if (photoUrls && photoUrls.length > 0) {
+        editProfilePropImg.src = photoUrls[0];
+        editProfilePropImg.style.display = 'block';
+        editProfilePropStatus.textContent = `${photoUrls.length} photo(s) on file`;
+        editProfilePropStatus.style.color = '#15803D';
+      } else {
+        editProfilePropImg.style.display = 'none';
+        editProfilePropStatus.textContent = 'No property photo';
+        editProfilePropStatus.style.color = '#8F847C';
+      }
+    }
+
+    // Host controls visibility & labels
+    const isHostAccount = host || role === 'host';
+    if (editProfileHostSection) editProfileHostSection.style.display = isHostAccount ? 'block' : 'none';
+    if (editProfilePropPhotoWrap) editProfilePropPhotoWrap.style.display = isHostAccount ? 'block' : 'none';
+    if (editProfileHostControls) editProfileHostControls.style.display = isHostAccount ? 'flex' : 'none';
+
+    updateSecurityButtonsUI();
+    editProfileModal.classList.add('open');
+  }
+
+  function closeEditProfileModal() {
+    if (editProfileModal) editProfileModal.classList.remove('open');
+    if (editProfileAvatarFile) editProfileAvatarFile.value = '';
+    if (editProfilePropPhotoFile) editProfilePropPhotoFile.value = '';
+  }
+
+  function updateSecurityButtonsUI() {
+    if (labelToggleSuspend && btnToggleSuspendHost) {
+      if (activeEditingIsSuspended) {
+        labelToggleSuspend.textContent = '🔓 Unblock / Restore Access';
+        btnToggleSuspendHost.style.color = '#15803D';
+        btnToggleSuspendHost.style.borderColor = '#86EFAC';
+        btnToggleSuspendHost.style.background = '#DCFCE7';
+      } else {
+        labelToggleSuspend.textContent = '🔒 Block / Suspend Access';
+        btnToggleSuspendHost.style.color = '#DC2626';
+        btnToggleSuspendHost.style.borderColor = '#FCA5A5';
+        btnToggleSuspendHost.style.background = 'transparent';
+      }
+    }
+
+    if (labelToggleDelist && btnToggleDelistHost) {
+      if (activeEditingIsDelisted) {
+        labelToggleDelist.textContent = '🌐 Relist on Platform';
+        btnToggleDelistHost.style.color = '#1D4ED8';
+        btnToggleDelistHost.style.borderColor = '#93C5FD';
+        btnToggleDelistHost.style.background = '#DBEAFE';
+      } else {
+        labelToggleDelist.textContent = '🚫 Delist from Platform';
+        btnToggleDelistHost.style.color = '#D97706';
+        btnToggleDelistHost.style.borderColor = '#FCD34D';
+        btnToggleDelistHost.style.background = 'transparent';
+      }
+    }
+  }
+
+  // Hook Security Control Buttons inside Edit Profile Modal
+  btnToggleSuspendHost?.addEventListener('click', async () => {
+    if (!activeEditingEmail) return;
+    const nextState = !activeEditingIsSuspended;
+    await handleToggleSuspend(activeEditingEmail, activeEditingIsSuspended);
+    activeEditingIsSuspended = nextState;
+    updateSecurityButtonsUI();
+  });
+
+  btnToggleDelistHost?.addEventListener('click', async () => {
+    if (!activeEditingEmail) return;
+    const nextState = !activeEditingIsDelisted;
+    await handleToggleDelist(activeEditingEmail, activeEditingIsDelisted);
+    activeEditingIsDelisted = nextState;
+    updateSecurityButtonsUI();
+  });
+
+  // Edit Profile Form Submission
+  editProfileForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const saveBtn = document.getElementById('saveEditProfileBtn');
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span>Saving...</span>';
+    }
+
+    try {
+      let newAvatarUrl = null;
+      let newPropUrl = null;
+
+      if (editProfileAvatarFile && editProfileAvatarFile.files[0]) {
+        if (window.showToast) window.showToast('Uploading custom avatar...');
+        newAvatarUrl = await window.LuxeaDB.uploadListingPhoto(editProfileAvatarFile.files[0], 'hosts');
+      }
+
+      if (editProfilePropPhotoFile && editProfilePropPhotoFile.files[0]) {
+        if (window.showToast) window.showToast('Uploading property photo...');
+        newPropUrl = await window.LuxeaDB.uploadListingPhoto(editProfilePropPhotoFile.files[0], 'properties');
+      }
+
+      const updates = {
+        email: activeEditingEmail,
+        ref_id: activeEditingRef,
+        full_name: editProfileFullName ? editProfileFullName.value.trim() : '',
+        phone: editProfilePhone ? editProfilePhone.value.trim() : '',
+        role: editProfileRole ? editProfileRole.value : 'member',
+        property_name: editProfilePropName ? editProfilePropName.value.trim() : '',
+        bio: editProfileBio ? editProfileBio.value.trim() : '',
+        avatar_url: newAvatarUrl || undefined
+      };
+
+      if (newPropUrl) {
+        const existing = cachedHosts.find(h => (h.email || '').toLowerCase() === (activeEditingEmail || '').toLowerCase());
+        const photos = existing?.property_photos_urls || [];
+        updates.property_photos_urls = [newPropUrl, ...photos];
+      }
+
+      if (window.LuxeaDB && typeof window.LuxeaDB.updateHostProfile === 'function') {
+        const res = await window.LuxeaDB.updateHostProfile(activeEditingEmail, updates);
+        if (res && res.success) {
+          if (activeEditingUserId && updates.role && typeof window.LuxeaDB.updateProfileRole === 'function') {
+            await window.LuxeaDB.updateProfileRole(activeEditingUserId, updates.role);
+          }
+          if (window.showToast) window.showToast('✅ Profile updated successfully!');
+          closeEditProfileModal();
+          await loadDashboardData();
+        } else {
+          if (window.showToast) window.showToast(`Error: ${res?.error || 'Update failed'}`);
+        }
+      }
+    } catch (err) {
+      console.error('Save profile exception:', err);
+      if (window.showToast) window.showToast('Failed to save profile changes');
+    } finally {
+      if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<span>Save Changes ↗</span>';
+      }
+    }
+  });
+
+  // Account Provisioning Form Submission
+  createUserForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById('submitCreateUserBtn');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Provisioning Account...</span>';
+    }
+
+    try {
+      let avatarUrl = '';
+      let propPhotoUrl = '';
+
+      if (newAccAvatarFile && newAccAvatarFile.files[0]) {
+        if (window.showToast) window.showToast('Uploading profile avatar...');
+        avatarUrl = await window.LuxeaDB.uploadListingPhoto(newAccAvatarFile.files[0], 'hosts') || '';
+      }
+
+      if (newAccPropPhotoFile && newAccPropPhotoFile.files[0]) {
+        if (window.showToast) window.showToast('Uploading property photo...');
+        propPhotoUrl = await window.LuxeaDB.uploadListingPhoto(newAccPropPhotoFile.files[0], 'properties') || '';
+      }
+
+      const accountData = {
+        full_name: document.getElementById('newAccFullName').value.trim(),
+        email: document.getElementById('newAccEmail').value.trim(),
+        role: newAccRole ? newAccRole.value : 'host',
+        phone: document.getElementById('newAccPhone')?.value?.trim() || '',
+        password: document.getElementById('newAccPassword').value,
+        property_name: document.getElementById('newAccPropName')?.value?.trim() || 'Luxury Residence',
+        property_type: document.getElementById('newAccPropType')?.value || 'Apartment',
+        county: document.getElementById('newAccCounty')?.value?.trim() || 'Nairobi',
+        area: document.getElementById('newAccArea')?.value?.trim() || 'Kenya',
+        bio: document.getElementById('newAccBio')?.value?.trim() || '',
+        avatar_url: avatarUrl,
+        property_photos_urls: propPhotoUrl ? [propPhotoUrl] : [],
+        send_credentials: document.getElementById('newAccSendEmail')?.checked ?? true
+      };
+
+      if (window.showToast) window.showToast(`Provisioning account for ${accountData.email}...`);
+
+      const res = await window.LuxeaDB.provisionUser(accountData);
+      if (res && res.success) {
+        if (window.showToast) {
+          window.showToast(`✅ Account successfully created for ${accountData.email}! ${accountData.send_credentials ? 'Credentials dispatched via email.' : ''}`);
+        }
+        closeCreateAccountModal();
+        await loadDashboardData();
+      } else {
+        if (window.showToast) {
+          window.showToast(`Notice: ${res?.error || 'Account provisioned or existing profile synchronized.'}`);
+        }
+        closeCreateAccountModal();
+        await loadDashboardData();
+      }
+    } catch (err) {
+      console.error('Provisioning exception:', err);
+      if (window.showToast) window.showToast('Provisioning failed. Check network or permissions.');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Provision &amp; Verify Account ↗</span>';
+      }
+    }
+  });
+
+  // Modal Triggers & File Previews
+  openCreateHostModalBtn?.addEventListener('click', () => {
+    if (newAccRole) newAccRole.value = 'host';
+    if (newAccHostSection) newAccHostSection.style.display = 'block';
+    if (newAccPropPhotoWrap) newAccPropPhotoWrap.style.display = 'block';
+    openCreateAccountModal();
+  });
+
+  openCreateUserModalBtn?.addEventListener('click', () => {
+    openCreateAccountModal();
+  });
+
+  closeCreateUserModalBtn?.addEventListener('click', closeCreateAccountModal);
+  cancelCreateUserBtn?.addEventListener('click', closeCreateAccountModal);
+  createUserModal?.addEventListener('click', (e) => {
+    if (e.target === createUserModal) closeCreateAccountModal();
+  });
+
+  closeEditProfileModalBtn?.addEventListener('click', closeEditProfileModal);
+  cancelEditProfileBtn?.addEventListener('click', closeEditProfileModal);
+  editProfileModal?.addEventListener('click', (e) => {
+    if (e.target === editProfileModal) closeEditProfileModal();
+  });
+
+  newAccRole?.addEventListener('change', () => {
+    const isHost = newAccRole.value === 'host';
+    if (newAccHostSection) newAccHostSection.style.display = isHost ? 'block' : 'none';
+    if (newAccPropPhotoWrap) newAccPropPhotoWrap.style.display = isHost ? 'block' : 'none';
+  });
+
+  btnGenPass?.addEventListener('click', () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+    const pass = `LX-${code}!${Math.floor(1000 + Math.random() * 9000)}`;
+    const passInput = document.getElementById('newAccPassword');
+    if (passInput) passInput.value = pass;
+    if (navigator.clipboard) navigator.clipboard.writeText(pass);
+    if (window.showToast) window.showToast(`📋 Secure password generated & copied: ${pass}`);
+  });
+
+  newAccAvatarFile?.addEventListener('change', () => {
+    const file = newAccAvatarFile.files[0];
+    if (file && newAccAvatarImg && newAccAvatarPreview) {
+      newAccAvatarImg.src = URL.createObjectURL(file);
+      newAccAvatarPreview.classList.remove('hidden');
+    }
+  });
+
+  newAccPropPhotoFile?.addEventListener('change', () => {
+    const file = newAccPropPhotoFile.files[0];
+    if (file && newAccPropPhotoImg && newAccPropPhotoPreview) {
+      newAccPropPhotoImg.src = URL.createObjectURL(file);
+      newAccPropPhotoPreview.classList.remove('hidden');
+    }
+  });
+
+  editProfileAvatarFile?.addEventListener('change', () => {
+    const file = editProfileAvatarFile.files[0];
+    if (file && editProfileAvatarImg && editProfileAvatarStatus) {
+      editProfileAvatarImg.src = URL.createObjectURL(file);
+      editProfileAvatarImg.style.display = 'block';
+      editProfileAvatarStatus.textContent = '✓ New photo selected';
+      editProfileAvatarStatus.style.color = '#15803D';
+    }
+  });
+
+  editProfilePropPhotoFile?.addEventListener('change', () => {
+    const file = editProfilePropPhotoFile.files[0];
+    if (file && editProfilePropImg && editProfilePropStatus) {
+      editProfilePropImg.src = URL.createObjectURL(file);
+      editProfilePropImg.style.display = 'block';
+      editProfilePropStatus.textContent = '✓ New property photo selected';
+      editProfilePropStatus.style.color = '#15803D';
+    }
   });
 
   // Initial check

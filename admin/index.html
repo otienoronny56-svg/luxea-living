@@ -564,6 +564,10 @@
                 <span class="pill-count" id="pillCountRejected">0</span>
               </button>
             </div>
+
+            <button type="button" class="btn btn-primary btn-sm" id="openCreateHostModalBtn" style="white-space: nowrap; height: 38px; display: inline-flex; align-items: center; gap: 6px;">
+              <span>+ Provision Host Partner</span>
+            </button>
           </div>
 
           <!-- VIEW 1: HOSTS APPLICATIONS TABLE -->
@@ -571,10 +575,10 @@
             <table class="lux-data-table">
               <thead>
                 <tr>
-                  <th style="width: 35%;">Host Partner</th>
-                  <th style="width: 40%;">Property &amp; Location</th>
-                  <th style="width: 170px;">Review Status</th>
-                  <th style="width: 110px; text-align: right;">Action</th>
+                  <th style="width: 28%;">Host Partner</th>
+                  <th style="width: 26%;">Property &amp; Location</th>
+                  <th style="width: 140px;">Review Status</th>
+                  <th style="width: 250px; text-align: right;">Platform Actions</th>
                 </tr>
               </thead>
               <tbody id="hostsTableBody">
@@ -877,7 +881,11 @@
                 <option value="admin">System Admins</option>
                 <option value="host">Host Partners</option>
                 <option value="member">Guests / Members</option>
+                <option value="suspended">Suspended Accounts</option>
               </select>
+              <button type="button" class="btn btn-primary btn-sm" id="openCreateUserModalBtn" style="height: 38px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
+                <span>+ Create Account / Host</span>
+              </button>
             </div>
           </div>
 
@@ -886,11 +894,12 @@
             <table class="admin-data-table">
               <thead>
                 <tr>
-                  <th style="width: 28%;">User Identity &amp; Auth ID</th>
-                  <th style="width: 24%;">Email Address</th>
-                  <th style="width: 22%;">System Role &amp; Permission</th>
+                  <th style="width: 26%;">User Identity &amp; Auth ID</th>
+                  <th style="width: 22%;">Email Address</th>
+                  <th style="width: 20%;">System Role &amp; Permission</th>
                   <th style="width: 14%;">Connected Registry</th>
-                  <th style="width: 12%; text-align: right;">Joined</th>
+                  <th style="width: 10%;">Joined</th>
+                  <th style="width: 8%; text-align: right;">Action</th>
                 </tr>
               </thead>
               <tbody id="profilesTableBody">
@@ -912,6 +921,237 @@
 
   </div>
   <!-- End admin-page-container -->
+
+  <!-- ======================================================================
+       EXECUTIVE USER & HOST PROVISIONING MODAL
+       ====================================================================== -->
+  <div class="inspect-modal-backdrop" id="createUserModal">
+    <div class="inspect-modal-card" style="max-width: 640px;">
+      <div class="modal-head" style="padding: 20px 24px; border-bottom: 1px solid var(--color-khaki-light); display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span class="badge-tag badge-gold">EXECUTIVE PROVISIONING</span>
+          <h2 style="font-family: var(--font-serif); font-size: 1.4rem; font-weight: 700; color: var(--color-espresso); margin-top: 4px;">
+            Create User or Host Account
+          </h2>
+        </div>
+        <button class="modal-close-btn" id="closeCreateUserModalBtn" style="background:none; border:none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="createUserForm" style="padding: 24px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Full Name *</label>
+            <input type="text" id="newAccFullName" class="form-control" placeholder="e.g. Dennis Barasa" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Email Address *</label>
+            <input type="email" id="newAccEmail" class="form-control" placeholder="user@example.com" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Account Role *</label>
+            <select id="newAccRole" class="form-control" required style="font-weight: 600;">
+              <option value="host">🏡 Host Partner (Verified)</option>
+              <option value="admin">🛡️ System Administrator</option>
+              <option value="super_admin">👑 Super Administrator</option>
+              <option value="member">✨ VIP Member / Guest</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Phone Number</label>
+            <input type="text" id="newAccPhone" class="form-control" placeholder="e.g. 0757912429">
+          </div>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem;">Password *</label>
+            <button type="button" id="btnGenPass" class="btn-text-link" style="font-size: 0.75rem; color: var(--color-camel-dark); cursor: pointer; background:none; border:none;">⚡ Generate Secure Password</button>
+          </div>
+          <input type="text" id="newAccPassword" class="form-control" placeholder="Set password (min 8 chars)" required minlength="8">
+        </div>
+
+        <!-- Host Specific Fields (Revealed when role is host) -->
+        <div id="newAccHostSection" style="margin-top: 16px; padding: 14px; background: rgba(212, 175, 55, 0.06); border: 1px solid rgba(212, 175, 55, 0.25); border-radius: 8px;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: #9A7B0C; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">
+            🏡 Host Partner &amp; Residence Configuration
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" style="font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; display: block;">Property Title / Name</label>
+              <input type="text" id="newAccPropName" class="form-control" placeholder="e.g. Glasshouse at Karen Ridge">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; display: block;">Property Type</label>
+              <select id="newAccPropType" class="form-control">
+                <option value="Apartment">Apartment</option>
+                <option value="Penthouse">Penthouse</option>
+                <option value="Villa">Villa</option>
+                <option value="Townhouse">Townhouse</option>
+                <option value="Studio">Studio</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+            <div class="form-group">
+              <label class="form-label" style="font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; display: block;">County</label>
+              <input type="text" id="newAccCounty" class="form-control" placeholder="e.g. Nairobi">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; display: block;">Area / Suburb</label>
+              <input type="text" id="newAccArea" class="form-control" placeholder="e.g. Westlands / Karen">
+            </div>
+          </div>
+        </div>
+
+        <!-- Description & Bio -->
+        <div style="margin-top: 14px;">
+          <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Brief Description / Host Biography</label>
+          <textarea id="newAccBio" class="form-control" rows="3" placeholder="Brief background, host partner notes, or curatorial accreditation..."></textarea>
+        </div>
+
+        <!-- Image Upload Section -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+          <div>
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Avatar / Profile Photo</label>
+            <input type="file" id="newAccAvatarFile" accept="image/*" class="form-control" style="font-size: 0.8rem;">
+            <div id="newAccAvatarPreview" class="hidden" style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+              <img id="newAccAvatarImg" src="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #D4AF37;">
+              <span style="font-size: 0.75rem; color: #16A34A;">✓ Photo ready</span>
+            </div>
+          </div>
+          <div id="newAccPropPhotoWrap">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Property Cover Image</label>
+            <input type="file" id="newAccPropPhotoFile" accept="image/*" class="form-control" style="font-size: 0.8rem;">
+            <div id="newAccPropPhotoPreview" class="hidden" style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+              <img id="newAccPropPhotoImg" src="" style="width: 50px; height: 35px; border-radius: 4px; object-fit: cover; border: 1px solid #D4AF37;">
+              <span style="font-size: 0.75rem; color: #16A34A;">✓ Image ready</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="newAccSendEmail" checked style="width: 16px; height: 16px;">
+          <label for="newAccSendEmail" style="font-size: 0.85rem; color: var(--color-espresso); cursor: pointer;">
+            Automatically email temporary login credentials &amp; access link to user
+          </label>
+        </div>
+
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--color-khaki-light); display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-outline btn-sm" id="cancelCreateUserBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="submitCreateUserBtn">
+            <span>Provision &amp; Verify Account ↗</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       EDIT CUSTODIAN PROFILE & DESCRIPTION MODAL
+       ====================================================================== -->
+  <div class="inspect-modal-backdrop" id="editProfileModal">
+    <div class="inspect-modal-card" style="max-width: 620px;">
+      <div class="modal-head" style="padding: 20px 24px; border-bottom: 1px solid var(--color-khaki-light); display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span class="badge-tag badge-gold" id="editProfileRef">LXH-PARTNER</span>
+          <h2 style="font-family: var(--font-serif); font-size: 1.4rem; font-weight: 700; color: var(--color-espresso); margin-top: 4px;" id="editProfileTitle">
+            Edit Custodian Profile &amp; Description
+          </h2>
+        </div>
+        <button class="modal-close-btn" id="closeEditProfileModalBtn" style="background:none; border:none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="editProfileForm" style="padding: 24px;">
+        <input type="hidden" id="editProfileUserId">
+        <input type="hidden" id="editProfileRefId">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Full Name</label>
+            <input type="text" id="editProfileFullName" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Email Address (Read-only)</label>
+            <input type="email" id="editProfileEmail" class="form-control" readonly style="background: rgba(0,0,0,0.04);">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">System Access Role</label>
+            <select id="editProfileRole" class="form-control" style="font-weight: 600;">
+              <option value="super_admin">👑 Super Administrator</option>
+              <option value="admin">🛡️ System Administrator</option>
+              <option value="host">🏡 Host Partner (Verified)</option>
+              <option value="member">✨ VIP Member / Guest</option>
+              <option value="suspended">🚫 Suspended Account</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Phone Number</label>
+            <input type="text" id="editProfilePhone" class="form-control">
+          </div>
+        </div>
+
+        <div id="editProfileHostSection" style="margin-top: 14px;">
+          <div class="form-group">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Property Name</label>
+            <input type="text" id="editProfilePropName" class="form-control">
+          </div>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Brief Description / Host Biography</label>
+          <textarea id="editProfileBio" class="form-control" rows="4" placeholder="Enter brief profile description, host notes, or curatorial accreditation..."></textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px;">
+          <div>
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Avatar / Profile Image</label>
+            <input type="file" id="editProfileAvatarFile" accept="image/*" class="form-control" style="font-size: 0.8rem;">
+            <div id="editProfileAvatarPreview" style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+              <img id="editProfileAvatarImg" src="" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid #D4AF37; display: none;">
+              <span id="editProfileAvatarStatus" style="font-size: 0.75rem; color: #8F847C;">No custom avatar</span>
+            </div>
+          </div>
+          <div id="editProfilePropPhotoWrap">
+            <label class="form-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Property Photo</label>
+            <input type="file" id="editProfilePropPhotoFile" accept="image/*" class="form-control" style="font-size: 0.8rem;">
+            <div id="editProfilePropPreview" style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+              <img id="editProfilePropImg" src="" style="width: 54px; height: 36px; border-radius: 4px; object-fit: cover; border: 1px solid #D4AF37; display: none;">
+              <span id="editProfilePropStatus" style="font-size: 0.75rem; color: #8F847C;">No property photo</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security & Platform Controls (Block Access & Delist) -->
+        <div id="editProfileHostControls" style="margin-top: 20px; padding: 14px; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-espresso);">Host Platform Security Controls</div>
+            <div style="font-size: 0.75rem; color: #8F847C;">Manage portal dashboard access and live collection visibility.</div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn btn-outline btn-sm" id="btnToggleSuspendHost" style="color: #DC2626; border-color: #FCA5A5;">
+              <span id="labelToggleSuspend">🔒 Block / Suspend Access</span>
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnToggleDelistHost" style="color: #D97706; border-color: #FCD34D;">
+              <span id="labelToggleDelist">🚫 Delist from Platform</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--color-khaki-light); display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-outline btn-sm" id="cancelEditProfileBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="saveEditProfileBtn">
+            <span>Save Changes ↗</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- ======================================================================
        HOST APPLICATION INSPECTION MODAL (Super Admin Detail View)

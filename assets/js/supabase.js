@@ -702,6 +702,134 @@
         console.error('Supabase updateProfileRole exception:', err);
         return { success: false, error: err.message };
       }
+    },
+
+    // =========================================================================
+    // 8. EXECUTIVE ACCOUNT PROVISIONING & HOST PROFILE MANAGEMENT
+    // =========================================================================
+    provisionUser: async function (accountData) {
+      console.log(`🚀 Executive provisioning requested for: ${accountData.email}`);
+      const res = await this.sendAutomatedEmail('admin_provision_user', accountData);
+      if (res && res.success) {
+        // Also refresh cached profiles if possible
+        window.dispatchEvent(new CustomEvent('luxea:dataUpdated'));
+      }
+      return res;
+    },
+
+    updateHostProfile: async function (emailOrRef, updates) {
+      const client = this.getClient();
+      if (!client) return { success: false, error: 'Supabase client unavailable' };
+
+      try {
+        const email = updates.email;
+        const now = new Date().toISOString();
+
+        // 1. Update lux_hosts
+        let hostQuery = client.from('lux_hosts').update({
+          full_name: updates.full_name,
+          phone: updates.phone,
+          property_name: updates.property_name,
+          property_type: updates.property_type,
+          county: updates.county,
+          area_suburb: updates.area,
+          host_bio: updates.bio,
+          avatar_url: updates.avatar_url,
+          property_photos_urls: updates.property_photos_urls,
+          updated_at: now
+        });
+
+        if (updates.ref_id) hostQuery = hostQuery.eq('ref_id', updates.ref_id);
+        else if (email) hostQuery = hostQuery.ilike('email', email);
+
+        const { data: hostData, error: hostErr } = await hostQuery.select();
+        if (hostErr) console.warn('Update lux_hosts error:', hostErr.message);
+
+        // 2. Update lux_profiles
+        if (email) {
+          await client.from('lux_profiles').update({
+            full_name: updates.full_name,
+            phone: updates.phone,
+            avatar_url: updates.avatar_url,
+            bio: updates.bio,
+            role: updates.role || undefined,
+            updated_at: now
+          }).ilike('email', email);
+        }
+
+        window.dispatchEvent(new CustomEvent('luxea:host_updated', { detail: { email, updates } }));
+        return { success: true, hostData };
+      } catch (err) {
+        console.error('updateHostProfile exception:', err);
+        return { success: false, error: err.message };
+      }
+    },
+
+    toggleHostSuspension: async function (email, isSuspended) {
+      const client = this.getClient();
+      if (!client || !email) return { success: false };
+
+      try {
+        const cleanEmail = email.toLowerCase().trim();
+        const newStatus = isSuspended ? 'suspended' : 'approved';
+        const now = new Date().toISOString();
+
+        // Update lux_hosts
+        await client.from('lux_hosts').update({
+          is_suspended: isSuspended,
+          review_status: newStatus,
+          updated_at: now
+        }).ilike('email', cleanEmail);
+
+        // Update lux_profiles
+        await client.from('lux_profiles').update({
+          is_suspended: isSuspended,
+          role: isSuspended ? 'suspended' : 'host',
+          updated_at: now
+        }).ilike('email', cleanEmail);
+
+        window.dispatchEvent(new CustomEvent('luxea:host_updated', { detail: { email: cleanEmail, isSuspended } }));
+        return { success: true, isSuspended };
+      } catch (err) {
+        console.error('toggleHostSuspension error:', err);
+        return { success: false, error: err.message };
+      }
+    },
+
+    toggleHostDelist: async function (email, isDelisted) {
+      const client = this.getClient();
+      if (!client || !email) return { success: false };
+
+      try {
+        const cleanEmail = email.toLowerCase().trim();
+        const now = new Date().toISOString();
+
+        // Update lux_hosts
+        await client.from('lux_hosts').update({
+          is_delisted: isDelisted,
+          updated_at: now
+        }).ilike('email', cleanEmail);
+
+        // Update lux_properties for this host (hide or show on platform)
+        // Match properties by owner name or slug
+        const { data: hostRows } = await client.from('lux_hosts').select('property_name').ilike('email', cleanEmail);
+        if (hostRows && hostRows.length > 0) {
+          const propName = hostRows[0].property_name;
+          if (propName) {
+            await client.from('lux_properties').update({
+              is_active: !isDelisted,
+              is_available: !isDelisted,
+              updated_at: now
+            }).ilike('name', `%${propName}%`);
+          }
+        }
+
+        window.dispatchEvent(new CustomEvent('luxea:property_updated', { detail: { email: cleanEmail, isDelisted } }));
+        return { success: true, isDelisted };
+      } catch (err) {
+        console.error('toggleHostDelist error:', err);
+        return { success: false, error: err.message };
+      }
     }
   };
 
