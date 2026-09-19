@@ -17,6 +17,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="/assets/js/config.js?v=2.3.1"></script>
   <script src="/assets/js/supabase.js?v=2.3.1"></script>
 </head>
@@ -132,7 +133,7 @@
         <nav class="admin-sidebar-nav">
           <div class="sidebar-section-title">Command Overview</div>
 
-          <button type="button" class="sidebar-nav-item" id="tabOverviewBtn">
+          <button type="button" class="sidebar-nav-item active" id="tabOverviewBtn">
             <span class="nav-item-left">
               <span class="nav-icon">📊</span>
               <span>Executive Overview</span>
@@ -142,7 +143,7 @@
 
           <div class="sidebar-section-title">Command Registries</div>
 
-          <button type="button" class="sidebar-nav-item active" id="tabHostsBtn">
+          <button type="button" class="sidebar-nav-item" id="tabHostsBtn">
             <span class="nav-item-left">
               <span class="nav-icon">📋</span>
               <span>Host Applications</span>
@@ -271,9 +272,9 @@
             </button>
             <div>
               <span class="badge-tag badge-gold" style="font-size: 0.68rem; padding: 2px 8px;">SUPER ADMIN COMMAND</span>
-              <h1 class="workspace-view-title" id="adminViewTitle">Host Applications</h1>
+              <h1 class="workspace-view-title" id="adminViewTitle">Executive Overview</h1>
               <p id="adminViewSub" style="color: var(--color-cocoa); font-size: 0.82rem; margin: 2px 0 0;">
-                Curatorial vetting, identity verification documents, and payout routing.
+                High-level command center, portfolio valuation, and visual analytics intelligence.
               </p>
             </div>
           </div>
@@ -293,7 +294,7 @@
         <!-- ==================================================================
              VIEW 0: EXECUTIVE OVERVIEW (HQ COMMAND DASHBOARD)
              ================================================================== -->
-        <div id="viewOverview" class="admin-view-page hidden">
+        <div id="viewOverview" class="admin-view-page">
           <!-- Top Executive Metrics Grid -->
           <div class="admin-metrics-grid">
             <div class="stat-metric-card">
@@ -342,108 +343,159 @@
             </div>
           </div>
 
-          <!-- Executive Analytics & Portfolio Breakdown Hub -->
-          <div class="admin-analytics-hub">
-            <!-- Widget 1: Revenue Economics & Portfolio Valuation -->
-            <div class="analytics-card">
-              <div class="analytics-card-header">
-                <div class="analytics-title-group">
-                  <span class="analytics-badge">PORTFOLIO ECONOMICS</span>
-                  <h3 class="analytics-title">Projected Nightly Valuation</h3>
-                </div>
-                <span class="analytics-chip-gold">Active Catalog</span>
+          <!-- Executive Valuation & Operational Performance Cluster -->
+          <div class="analytics-headline-banner">
+            <div class="headline-primary">
+              <div class="headline-badge">PORTFOLIO YIELD &amp; VALUATION</div>
+              <div class="headline-val-wrap">
+                <span class="currency-symbol">$</span>
+                <span class="headline-amount" id="analyticsTotalUsd">0</span>
+                <span class="headline-currency-tag">USD / Night</span>
+                <span class="headline-kes-tag">≈ KES <strong id="analyticsTotalKes">0</strong> / Night</span>
               </div>
+              <p class="headline-sub">
+                Combined bookable asset yield across verified penthouses, beachfront villas, and country sanctuaries.
+              </p>
+            </div>
 
-              <div class="portfolio-val-cluster">
-                <div class="val-primary">
-                  <span class="val-currency">$</span>
-                  <span class="val-number" id="analyticsTotalUsd">0</span>
-                  <span class="val-tag">USD / Night</span>
-                </div>
-                <div class="val-secondary">
-                  ≈ KES <strong id="analyticsTotalKes">0</strong> / Night
-                </div>
+            <div class="headline-kpi-stack">
+              <div class="kpi-mini-card">
+                <span class="kpi-mini-label">Average Daily Rate (ADR)</span>
+                <span class="kpi-mini-val" id="analyticsAdr">$0 / nt</span>
+                <small class="kpi-mini-sub" id="analyticsAdrSub">Median Rate</small>
               </div>
+              <div class="kpi-mini-card">
+                <span class="kpi-mini-label">Monthly Gross Potential</span>
+                <span class="kpi-mini-val" id="analyticsMonthlyGross">$0</span>
+                <small class="kpi-mini-sub">At 70% Occupancy Model</small>
+              </div>
+              <div class="kpi-mini-card">
+                <span class="kpi-mini-label">Vetting Approval Rate</span>
+                <span class="kpi-mini-val" id="analyticsApprovalRate">83.3%</span>
+                <small class="kpi-mini-sub" id="analyticsApprovalSub">1 Host In Audit</small>
+              </div>
+            </div>
+          </div>
 
-              <div class="economics-grid">
-                <div class="econ-item">
-                  <span class="econ-label">Average Daily Rate (ADR)</span>
-                  <span class="econ-val" id="analyticsAdr">$0 / night</span>
+          <!-- Section: Interactive Visual Analytics & Graphs -->
+          <div class="admin-section-header" style="margin-top: 28px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-family: var(--font-serif); font-size: 1.4rem; color: #241812; margin: 0;">Portfolio Visual Intelligence</h2>
+              <p style="font-size: 0.82rem; color: var(--color-cocoa); margin: 2px 0 0;">Real-time graphical analytics powered by live Supabase PostgreSQL data streams.</p>
+            </div>
+            <div class="chart-currency-toggle">
+              <span style="font-size: 0.76rem; font-weight: 700; color: #241812;">Currency:</span>
+              <button type="button" class="btn-toggle-curr active" id="btnToggleUsd">USD ($)</button>
+              <button type="button" class="btn-toggle-curr" id="btnToggleKes">KES (Ksh)</button>
+            </div>
+          </div>
+
+          <!-- 4 Luxury Graphs Grid -->
+          <div class="admin-charts-grid">
+            <!-- Chart 1: Regional Valuation & Yield -->
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <div>
+                  <span class="analytics-badge">GEOGRAPHIC ALLOCATION</span>
+                  <h3 class="analytics-title">Nightly Yield by Hub</h3>
                 </div>
-                <div class="econ-item">
-                  <span class="econ-label">Catalog Bookability</span>
-                  <span class="econ-val" id="analyticsOccupancy">100% Active</span>
-                </div>
+                <span class="analytics-chip-gold">Regional Yield</span>
+              </div>
+              <div class="chart-wrapper">
+                <canvas id="chartRegionalYield"></canvas>
               </div>
             </div>
 
-            <!-- Widget 2: Regional Inventory Distribution -->
-            <div class="analytics-card">
-              <div class="analytics-card-header">
-                <div class="analytics-title-group">
-                  <span class="analytics-badge">GEOGRAPHIC FOOTPRINT</span>
-                  <h3 class="analytics-title">Regional Distribution</h3>
+            <!-- Chart 2: Asset Allocation / Category Mix -->
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <div>
+                  <span class="analytics-badge">PORTFOLIO MIX</span>
+                  <h3 class="analytics-title">Property Class Allocation</h3>
                 </div>
-                <span class="analytics-chip-neutral" id="analyticsTotalRegions">4 Prime Hubs</span>
+                <span class="analytics-chip-neutral" id="assetMixTotalTag">5 Residences</span>
               </div>
-
-              <div class="regional-bars-wrap" id="analyticsRegionsList">
-                <!-- Injected dynamically by admin.js -->
+              <div class="chart-wrapper">
+                <canvas id="chartAssetMix"></canvas>
               </div>
             </div>
 
-            <!-- Widget 3: Category Mix & Host Vetting Pipeline -->
-            <div class="analytics-card">
-              <div class="analytics-card-header">
-                <div class="analytics-title-group">
-                  <span class="analytics-badge">INVENTORY &amp; PIPELINE</span>
-                  <h3 class="analytics-title">Category Mix &amp; Funnel</h3>
+            <!-- Chart 3: Platform Growth & Pipeline Trajectory -->
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <div>
+                  <span class="analytics-badge">PLATFORM EXPANSION</span>
+                  <h3 class="analytics-title">Growth &amp; Pipeline Velocity</h3>
                 </div>
-                <span class="analytics-chip-green">Realtime Vetting</span>
+                <span class="analytics-chip-green">Live Pipeline</span>
               </div>
+              <div class="chart-wrapper">
+                <canvas id="chartGrowthTrajectory"></canvas>
+              </div>
+            </div>
 
-              <div class="category-pills-cluster" id="analyticsCategoryPills">
-                <div class="cat-pill">
-                  <span class="cat-icon">🏙️</span>
-                  <span class="cat-label">Penthouses</span>
-                  <span class="cat-count" id="catCountPenthouse">2</span>
+            <!-- Chart 4: Nightly Rate Benchmarking vs Portfolio ADR -->
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <div>
+                  <span class="analytics-badge">PRICING TIERS</span>
+                  <h3 class="analytics-title">Residence ADR Benchmark</h3>
                 </div>
-                <div class="cat-pill">
-                  <span class="cat-icon">🌊</span>
-                  <span class="cat-label">Beach Villas</span>
-                  <span class="cat-count" id="catCountVilla">1</span>
-                </div>
-                <div class="cat-pill">
-                  <span class="cat-icon">🏡</span>
-                  <span class="cat-label">Townhomes</span>
-                  <span class="cat-count" id="catCountTownhouse">1</span>
-                </div>
-                <div class="cat-pill">
-                  <span class="cat-icon">✨</span>
-                  <span class="cat-label">Modern Suites</span>
-                  <span class="cat-count" id="catCountApartment">1</span>
-                </div>
+                <span class="analytics-chip-gold" id="chartAdrTag">ADR: $339</span>
               </div>
+              <div class="chart-wrapper">
+                <canvas id="chartPricingBenchmark"></canvas>
+              </div>
+            </div>
+          </div>
 
-              <div class="pipeline-progress-wrap">
-                <span class="pipeline-label">Host Partner Vetting Funnel</span>
-                <div class="funnel-steps">
-                  <div class="funnel-step">
-                    <span class="f-num" id="funnelTotal">0</span>
-                    <span class="f-label">Submitted</span>
-                  </div>
-                  <div class="funnel-arrow">→</div>
-                  <div class="funnel-step">
-                    <span class="f-num" id="funnelReview">0</span>
-                    <span class="f-label">In Review</span>
-                  </div>
-                  <div class="funnel-arrow">→</div>
-                  <div class="funnel-step f-approved">
-                    <span class="f-num" id="funnelApproved">0</span>
-                    <span class="f-label">Approved</span>
-                  </div>
-                </div>
+          <!-- Section: Executive Intelligence & Strategic Takeaways -->
+          <div class="admin-section-header" style="margin-top: 32px; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-family: var(--font-serif); font-size: 1.4rem; color: #241812; margin: 0;">Executive Strategic Briefing</h2>
+              <p style="font-size: 0.82rem; color: var(--color-cocoa); margin: 2px 0 0;">Visual data interpretations and high-level platform health indicators.</p>
+            </div>
+          </div>
+
+          <div class="chart-insights-cluster">
+            <div class="insight-card">
+              <div class="insight-header">
+                <span class="insight-icon">💼</span>
+                <span class="insight-title">Portfolio Earning Velocity</span>
               </div>
+              <p class="insight-body" id="insightYieldText">
+                The catalog commands <strong>$1,695 / KES 220,350</strong> in gross nightly potential. At a modeled 70% monthly occupancy, projected gross volume is <strong>$35,595 (KES 4.62M)</strong>, generating an estimated <strong>KES 694,000 in monthly platform commissions</strong>.
+              </p>
+            </div>
+
+            <div class="insight-card">
+              <div class="insight-header">
+                <span class="insight-icon">📍</span>
+                <span class="insight-title">Primary Value Centers</span>
+              </div>
+              <p class="insight-body" id="insightRegionalText">
+                <strong>Coastal Diani ($650/nt)</strong> and <strong>Westlands Skyline ($480/nt)</strong> contribute <strong>66.7% ($1,130/night)</strong> of gross portfolio valuation, demonstrating strong HNW demand for waterfront sanctuaries and panoramic high-rises.
+              </p>
+            </div>
+
+            <div class="insight-card">
+              <div class="insight-header">
+                <span class="insight-icon">🛡️</span>
+                <span class="insight-title">Curatorial Acceptance Standard</span>
+              </div>
+              <p class="insight-body" id="insightVettingText">
+                <strong>83.3%</strong> approval rate across evaluated host submissions (5 approved, 1 pending). <strong>Evans Kipchoge (Karen Sanctuary)</strong> is under active curatorial audit for fiber internet verification and staging prior to catalog launch.
+              </p>
+            </div>
+
+            <div class="insight-card">
+              <div class="insight-header">
+                <span class="insight-icon">🚀</span>
+                <span class="insight-title">Founding Host Expansion</span>
+              </div>
+              <p class="insight-body" id="insightPipelineText">
+                <strong>6 verified host partners</strong> are on the Founding Waitlist across Naivasha, Kilifi, Nanyuki, Watamu, and Kitisuru, representing an incoming pipeline of <strong>~KES 450,000/night</strong> in verified inventory.
+              </p>
             </div>
           </div>
 
@@ -490,7 +542,7 @@
         <!-- ==================================================================
              VIEW 1: HOST APPLICATIONS
              ================================================================== -->
-        <div id="viewHosts" class="admin-view-page">
+        <div id="viewHosts" class="admin-view-page hidden">
           <!-- Host Header Metrics -->
           <div class="admin-metrics-grid">
             <div class="stat-metric-card">
@@ -1220,7 +1272,7 @@
 
   <script src="/assets/js/main.js"></script>
   <script type="module">
-    import { initAdminDashboard } from '/assets/js/modules/admin.js?v=2.3.1';
+    import { initAdminDashboard } from '/assets/js/modules/admin.js?v=2.3.2';
 
     document.addEventListener('DOMContentLoaded', () => {
       initAdminDashboard();

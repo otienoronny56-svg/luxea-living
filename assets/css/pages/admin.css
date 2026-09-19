@@ -1501,3 +1501,232 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* ==========================================================================
+   EXECUTIVE ANALYTICS & VISUAL INTELLIGENCE SUITE
+   ========================================================================== */
+.analytics-headline-banner {
+  background: linear-gradient(135deg, #241812 0%, #150E0A 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 20px;
+  padding: 28px 32px;
+  color: #EDE8E3;
+  margin-bottom: 24px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.headline-primary {
+  flex: 1;
+  min-width: 280px;
+}
+
+.headline-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #D4AF37;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+
+.headline-val-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.headline-val-wrap .currency-symbol {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #D4AF37;
+}
+
+.headline-val-wrap .headline-amount {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+}
+
+.headline-val-wrap .headline-currency-tag {
+  font-size: 0.85rem;
+  color: #A0958C;
+  font-weight: 600;
+}
+
+.headline-val-wrap .headline-kes-tag {
+  font-size: 0.85rem;
+  color: #D4AF37;
+  margin-left: 8px;
+  padding: 3px 10px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  border-radius: 20px;
+}
+
+.headline-sub {
+  font-size: 0.82rem;
+  color: #A0958C;
+  margin: 8px 0 0 0;
+  max-width: 520px;
+  line-height: 1.5;
+}
+
+.headline-kpi-stack {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.kpi-mini-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 14px;
+  padding: 14px 18px;
+  min-width: 150px;
+}
+
+.kpi-mini-label {
+  font-size: 0.68rem;
+  color: #A0958C;
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.kpi-mini-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  display: block;
+}
+
+.kpi-mini-sub {
+  font-size: 0.7rem;
+  color: #D4AF37;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Charts Grid */
+.admin-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+  .admin-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(178, 150, 125, 0.22);
+  border-radius: 20px;
+  padding: 22px 24px;
+  box-shadow: 0 6px 20px rgba(36, 24, 18, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 260px;
+}
+
+.chart-currency-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFFFFF;
+  border: 1px solid rgba(178, 150, 125, 0.2);
+  border-radius: 10px;
+  padding: 4px 8px;
+}
+
+.btn-toggle-curr {
+  background: none;
+  border: none;
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--color-cocoa);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-toggle-curr.active {
+  background: #241812;
+  color: #D4AF37;
+}
+
+/* Strategic Takeaways */
+.chart-insights-cluster {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.insight-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(178, 150, 125, 0.2);
+  border-left: 4px solid #B28756;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 4px 14px rgba(36, 24, 18, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.insight-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(36, 24, 18, 0.06);
+}
+
+.insight-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.insight-icon {
+  font-size: 1.15rem;
+}
+
+.insight-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #241812;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.insight-body {
+  font-size: 0.82rem;
+  color: var(--color-cocoa);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.insight-body strong {
+  color: #241812;
+  font-weight: 700;
+}
