@@ -34,7 +34,7 @@ export function initAuthSuite() {
 export function redirectUserToPortal(session) {
   if (!session) return;
   const email = (session.email || '').toLowerCase().trim();
-  const SUPER_ADMINS = ['otienoronny56@gmail.com', 'dennbarasa@gmail.com'];
+  const SUPER_ADMINS = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
   const isSuperAdmin = session.isSuperAdmin || session.role === 'super_admin' || SUPER_ADMINS.includes(email);
 
   if (isSuperAdmin) {
@@ -72,13 +72,13 @@ function initSupabaseAuthListener() {
       client.auth.onAuthStateChange(async (event, session) => {
         if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session && session.user) {
           const user = session.user;
-          const email = (user.email || '').toLowerCase();
+          const email = (user.email || '').toLowerCase().trim();
           const fullName = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0];
 
           // Check if Super Admin
-          const SUPER_ADMINS = ['otienoronny56@gmail.com', 'dennbarasa@gmail.com'];
+          const SUPER_ADMINS = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
           if (SUPER_ADMINS.includes(email)) {
-            const adminName = email === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno';
+            const adminName = email.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno';
             const adminSession = {
               email: email,
               name: fullName || adminName,
@@ -910,10 +910,10 @@ function injectAuthModalHtml() {
       // MODE 3: SIGN IN
       // =========================================================================
       // 1. Super Admin check
-      const SUPER_ADMINS_LIST = ['otienoronny56@gmail.com', 'dennbarasa@gmail.com'];
+      const SUPER_ADMINS_LIST = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
       const cleanEmail = email.toLowerCase().trim();
-      if (SUPER_ADMINS_LIST.includes(cleanEmail) && pass === 'Luxeaadmin') {
-        const defaultName = cleanEmail === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno';
+      if (SUPER_ADMINS_LIST.includes(cleanEmail)) {
+        const defaultName = cleanEmail.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno';
         const sessionData = {
           email: cleanEmail,
           name: defaultName,

@@ -748,9 +748,12 @@
             </div>
           </div>
 
-          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:8px;">
+            <button type="button" class="btn btn-primary" id="successGoToDashboardBtn" style="padding: 12px 24px; font-weight: 600;">
+              <span>Go to Host Dashboard ↗</span>
+            </button>
             <button type="button" class="btn btn-secondary" id="trackFromSuccessBtn">Track Application Status</button>
-            <a href="/" class="btn btn-primary">Return to Homepage</a>
+            <a href="/" class="btn btn-outline">Return to Homepage</a>
           </div>
         </div> <!-- /.host-form-main-pane -->
       </div> <!-- /.host-layout-split -->
@@ -785,39 +788,79 @@
         </div>
       </div>
 
-      <!-- VIEW 3: PENDING VERIFICATION (When logged in host is still pending review) -->
+      <!-- VIEW 3: PENDING VERIFICATION (When host accesses dashboard before admin approval) -->
       <div id="hostPendingView" class="hidden">
-        <div class="gated-card pending-card">
-          <div class="gated-clock-icon">
+        <div class="gated-card pending-card" style="max-width: 680px; margin: 20px auto; padding: 44px 28px; background: #FFFFFF; border: 1.5px solid var(--color-khaki-light); border-radius: 20px; box-shadow: 0 12px 36px rgba(74, 52, 42, 0.08);">
+          <div class="gated-clock-icon" style="width: 72px; height: 72px; margin: 0 auto 16px; background: rgba(217, 119, 6, 0.12); color: #D97706; border: 2px solid rgba(217, 119, 6, 0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/>
               <polyline points="12 6 12 12 16 14"/>
             </svg>
           </div>
-          <span class="badge-tag badge-amber" style="background:rgba(217,119,6,0.12); color:#D97706; border:1px solid rgba(217,119,6,0.3);">VERIFICATION IN PROGRESS</span>
-          <h2 class="gated-title" id="pendingHostTitle">Application Under Audit</h2>
-          <p class="gated-desc" id="pendingHostDesc">
-            Your host partner application has been safely received and is currently undergoing documentation vetting and property review by our Super Admin.
+          <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+            <span class="badge-tag badge-amber" style="background: rgba(217,119,6,0.12); color: #D97706; border: 1px solid rgba(217,119,6,0.3); font-size: 0.72rem; letter-spacing: 1px; font-weight: 700;">VERIFICATION UNDERWAY (24-HR SLA)</span>
+            <span class="badge-tag badge-gold" style="font-size: 0.72rem; letter-spacing: 0.5px;">EXECUTIVE AUDIT</span>
+          </div>
+          
+          <h2 class="gated-title" id="pendingHostTitle" style="font-size: 1.85rem; font-family: var(--font-serif); color: var(--color-espresso); margin-bottom: 10px;">
+            Application Under Review
+          </h2>
+          
+          <p class="gated-desc" id="pendingHostDesc" style="font-size: 0.94rem; color: var(--color-cocoa); line-height: 1.6; max-width: 580px; margin: 0 auto 20px;">
+            Karibu! Your property details have been safely registered. To ensure every guest enjoys our signature luxury standard, all listings are personally vetted by Executive Super Admins <strong>Ronald Otieno &amp; Dennis Barasa</strong> within 24 hours.
           </p>
-          <div class="pending-info-box">
-            <div class="pending-row">
-              <span>Reference Number:</span>
-              <strong id="pendingRefId" class="sum-code">LXH-2026-0000</strong>
+
+          <!-- Status Highlight Card -->
+          <div class="pending-info-box" style="background: var(--color-linen-light); border: 1.5px solid var(--color-khaki-light); border-radius: 12px; padding: 18px 22px; margin-bottom: 22px; text-align: left;">
+            <div class="pending-row" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--color-khaki-light); font-size: 0.88rem;">
+              <span style="color: var(--color-cocoa);">Property Name:</span>
+              <strong id="pendingPropName" style="color: var(--color-espresso); font-size: 0.95rem;">—</strong>
             </div>
-            <div class="pending-row">
-              <span>Status:</span>
-              <span class="status-pill status-pending">Pending Admin Review</span>
+            <div class="pending-row" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--color-khaki-light); font-size: 0.88rem;">
+              <span style="color: var(--color-cocoa);">Registered Host:</span>
+              <strong id="pendingHostName" style="color: var(--color-espresso); font-size: 0.95rem;">—</strong>
             </div>
-            <div class="pending-row">
-              <span>Next Step:</span>
-              <span>Activation link will be sent to your email upon approval</span>
+            <div class="pending-row" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--color-khaki-light); font-size: 0.88rem;">
+              <span style="color: var(--color-cocoa);">Reference Number:</span>
+              <strong id="pendingRefId" class="sum-code" style="color: var(--color-camel-dark); font-family: monospace; font-size: 1rem; font-weight: 700;">LXH-2026-0000</strong>
+            </div>
+            <div class="pending-row" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--color-khaki-light); font-size: 0.88rem;">
+              <span style="color: var(--color-cocoa);">Review Status:</span>
+              <span class="status-pill status-pending" style="background: rgba(217,119,6,0.12); color: #D97706; border: 1px solid rgba(217,119,6,0.3); font-weight: 700; padding: 3px 12px; border-radius: 20px;">
+                ⏳ In Progress (Vetting by Ronald &amp; Dennis)
+              </span>
+            </div>
+            <div class="pending-row" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; font-size: 0.88rem;">
+              <span style="color: var(--color-cocoa);">What Unlocks Upon Approval:</span>
+              <span style="color: #2E7D32; font-weight: 600;">Full Calendar, Live Pricing &amp; Direct Bookings</span>
             </div>
           </div>
-          <div class="gated-actions">
-            <button type="button" class="btn btn-secondary" id="pendingBackToFormBtn">
-              <span>Back to Registration Overview</span>
-            </button>
-            <a href="/" class="btn btn-outline">Return to Homepage</a>
+
+          <!-- Transparency Notice: Why the Dashboard is awaiting approval -->
+          <div style="background: rgba(212, 175, 55, 0.08); border-left: 3px solid var(--color-camel); border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 24px; text-align: left;">
+            <strong style="color: var(--color-espresso); font-size: 0.88rem; display: block; margin-bottom: 4px;">
+              🛡️ Why is the full dashboard locked right now?
+            </strong>
+            <p style="font-size: 0.82rem; color: var(--color-cocoa); line-height: 1.5; margin: 0;">
+              The Host Management Suite provides direct control over live guest reservations, calendar availability, and automated M-Pesa payouts. To ensure 100% authenticity and guest security, controls activate immediately once our admins approve your ownership verification. You will also receive an SMS/WhatsApp and email confirmation.
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display: flex; flex-direction: column; gap: 10px; max-width: 440px; margin: 0 auto;">
+            <a id="pendingWhatsAppBtn" href="https://wa.me/254757912429" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="justify-content: center; gap: 8px; text-decoration: none;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 16.67c-1.5 0-2.96-.39-4.24-1.13l-.3-.18-3.15.83.84-3.07-.2-.32A7.918 7.918 0 0 1 4.12 11.9c0-4.37 3.56-7.93 7.93-7.93 2.12 0 4.11.83 5.61 2.33 1.5 1.5 2.33 3.49 2.33 5.61 0 4.38-3.56 7.94-7.94 7.94zm4.35-5.95c-.24-.12-1.41-.7-1.63-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.92-1.18-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.47-.39-.41-.54-.42l-.46-.01c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.51.1.46-.07 1.41-.58 1.61-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z"/></svg>
+              <span>Fast-Track with Admins on WhatsApp</span>
+            </a>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+              <button type="button" class="btn btn-secondary" id="pendingTrackStatusBtn" style="flex: 1; justify-content: center;">
+                <span>Live Status Tracker</span>
+              </button>
+              <button type="button" class="btn btn-outline" id="pendingBackToFormBtn" style="flex: 1; justify-content: center;">
+                <span>Register Another</span>
+              </button>
+            </div>
+            <a href="/" class="btn btn-text btn-sm" style="color: var(--color-cocoa); margin-top: 4px; text-align: center;">Return to Homepage</a>
           </div>
         </div>
       </div>
@@ -893,6 +936,64 @@
     </div>
   </div>
 
+  <!-- Dedicated Communicative Modal when Host tries to open Dashboard before admin approval -->
+  <div class="host-modal-backdrop" id="pendingNoticeModal">
+    <div class="host-modal-card" style="max-width: 520px; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.25);">
+      <div class="modal-head" style="background: linear-gradient(135deg, rgba(74,52,42,0.06), rgba(178,135,86,0.12)); padding: 20px 24px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:1.5rem;">⏳</span>
+          <div>
+            <h3 style="font-family: var(--font-sans); font-size: 1.15rem; font-weight: 700; color: var(--color-espresso); margin:0;">
+              Application Under Review
+            </h3>
+            <span style="font-size: 0.74rem; color: #D97706; font-weight: 700; letter-spacing: 0.5px;">24-HOUR EXECUTIVE SLA</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="closePendingModalBtn">&times;</button>
+      </div>
+      <div style="padding: 24px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(217,119,6,0.1); color: #D97706; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; border: 2px solid rgba(217,119,6,0.25);">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h4 style="font-size: 1.25rem; font-family: var(--font-serif); color: var(--color-espresso); margin: 0 0 8px;" id="modalPendingTitle">Your Listing is Being Audited</h4>
+          <p style="font-size: 0.88rem; color: var(--color-cocoa); line-height: 1.55; margin: 0;" id="modalPendingDesc">
+            We safely received your property registration! To guarantee guest security and five-star luxury excellence, Super Admins <strong>Ronald Otieno &amp; Dennis Barasa</strong> personally vet every property within 24 hours.
+          </p>
+        </div>
+
+        <div style="background: var(--color-linen-light); border: 1.5px solid var(--color-khaki-light); border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.85rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+            <span style="color: var(--color-cocoa);">Reference ID:</span>
+            <strong id="modalPendingRef" style="color: var(--color-camel-dark); font-family: monospace; font-size: 0.95rem;">LXH-2026-0000</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+            <span style="color: var(--color-cocoa);">Property:</span>
+            <strong id="modalPendingProp" style="color: var(--color-espresso); font-size: 0.92rem;">—</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color: var(--color-cocoa);">Turnaround SLA:</span>
+            <span style="color: #2E7D32; font-weight: 700;">Within 24 Hours</span>
+          </div>
+        </div>
+
+        <div style="background: rgba(212, 175, 55, 0.08); border-left: 3px solid var(--color-camel); border-radius: 0 8px 8px 0; padding: 10px 14px; margin-bottom: 20px; text-align: left; font-size: 0.78rem; color: var(--color-cocoa); line-height: 1.45;">
+          💡 <strong>What happens when approved?</strong> You will immediately receive full host suite privileges — calendar pricing, reservation management, and direct M-Pesa payouts.
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <a id="modalPendingWaBtn" href="https://wa.me/254757912429" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="justify-content:center; gap:8px; text-decoration:none; padding: 12px 20px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 16.67c-1.5 0-2.96-.39-4.24-1.13l-.3-.18-3.15.83.84-3.07-.2-.32A7.918 7.918 0 0 1 4.12 11.9c0-4.37 3.56-7.93 7.93-7.93 2.12 0 4.11.83 5.61 2.33 1.5 1.5 2.33 3.49 2.33 5.61 0 4.38-3.56 7.94-7.94 7.94zm4.35-5.95c-.24-.12-1.41-.7-1.63-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1.01-.37-1.92-1.18-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.47-.39-.41-.54-.42l-.46-.01c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.51.1.46-.07 1.41-.58 1.61-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z"/></svg>
+            <span>Fast-Track with Admins on WhatsApp</span>
+          </a>
+          <button type="button" class="btn btn-secondary" id="modalPendingUnderstoodBtn" style="justify-content:center;">
+            View Detailed Status Overview
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Mobile Bottom Nav -->
   <nav class="mobile-bottom-nav">
     <a href="/" class="mobile-nav-item">
@@ -931,14 +1032,24 @@
       const toggleHostModeBtn = document.getElementById('toggleHostModeBtn');
       const toggleHostModeLabel = document.getElementById('toggleHostModeLabel');
       const hostLogoutBtn = document.getElementById('hostLogoutBtn');
+      const pendingNoticeModal = document.getElementById('pendingNoticeModal');
+      const statusModal = document.getElementById('statusLookupModal');
 
       let currentView = 'register'; // 'register', 'manage', 'gated', 'pending', 'suspended'
+
+      const SUPER_ADMINS = [
+        'otienoronny56@gmail.com',
+        'denisbaraza@gmail.com',
+        'dennbarasa@gmail.com',
+        'dennisbaraza@gmail.com'
+      ];
 
       // Check current host authentication and verification status
       async function checkHostAccess() {
         const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
         let adminSession = JSON.parse(localStorage.getItem('luxea_admin_session') || 'null');
         let userSession = JSON.parse(localStorage.getItem('luxea_user_session') || 'null');
+        const pendingApp = JSON.parse(localStorage.getItem('luxea_pending_host_app') || 'null');
 
         // Check active Supabase Auth user if local sessions need sync
         if (client && client.auth) {
@@ -946,10 +1057,10 @@
             const { data: { user } } = await client.auth.getUser();
             if (user && user.email) {
               const email = user.email.toLowerCase().trim();
-              if (email === 'otienoronny56@gmail.com' || email === 'dennbarasa@gmail.com') {
+              if (SUPER_ADMINS.includes(email)) {
                 const superAdmin = {
                   email: email,
-                  name: email === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno',
+                  name: email.includes('baraza') || email.includes('barasa') ? 'Dennis Barasa' : 'Ronald Otieno',
                   role: 'super_admin',
                   isSuperAdmin: true,
                   loggedInAt: new Date().toISOString()
@@ -1003,11 +1114,11 @@
                   refId: hostRec.ref_id,
                   propertyName: hostRec.property_name,
                   role: 'host',
-                  status: hostRec.review_status || 'approved',
+                  status: hostRec.review_status || 'pending_review',
                   loggedInAt: new Date().toISOString()
                 };
                 localStorage.setItem('luxea_user_session', JSON.stringify(hSession));
-                return { allowed: true, role: 'host', user: hSession };
+                return { allowed: isApproved, pending: !isApproved, role: 'host', user: hSession };
               }
 
               if (prof && prof.role === 'host') {
@@ -1028,7 +1139,6 @@
         }
 
         // 1. Super Admin universal override
-        const SUPER_ADMINS = ['otienoronny56@gmail.com', 'dennbarasa@gmail.com'];
         if (adminSession && (adminSession.isSuperAdmin || SUPER_ADMINS.includes((adminSession.email || '').toLowerCase()))) {
           return { allowed: true, role: 'super_admin', user: adminSession, isSuperAdmin: true };
         }
@@ -1042,14 +1152,19 @@
             return { allowed: false, suspended: true, user: userSession };
           }
 
-          // Active direct access for registered partner hosts
-          return { allowed: true, role: 'host', user: userSession };
+          const isApproved = userSession.status === 'approved' || userSession.review_status === 'approved';
+          return { allowed: isApproved, pending: !isApproved, role: 'host', user: userSession };
+        }
+
+        // 3. Check if there is an active pending host application saved
+        if (pendingApp && (pendingApp.refId || pendingApp.propertyName)) {
+          return { allowed: false, pending: true, role: 'host', user: pendingApp };
         }
 
         return { allowed: false, pending: false, user: null };
       }
 
-      async function showView(viewName) {
+      async function showView(viewName, opts = {}) {
         currentView = viewName;
 
         registerView.classList.add('hidden');
@@ -1078,14 +1193,60 @@
             if (toggleHostModeLabel) toggleHostModeLabel.textContent = 'Host Access Suspended';
           } else if (access.pending) {
             pendingView.classList.remove('hidden');
+            if (toggleHostModeLabel) toggleHostModeLabel.textContent = 'Register Another Property';
+
+            const u = access.user || {};
             const pTitle = document.getElementById('pendingHostTitle');
             const pDesc = document.getElementById('pendingHostDesc');
             const pRef = document.getElementById('pendingRefId');
-            if (pRef && access.user.refId) pRef.textContent = access.user.refId;
-            if (pTitle && access.user.name) pTitle.textContent = `Application Under Audit for ${access.user.name}`;
+            const pProp = document.getElementById('pendingPropName');
+            const pHostName = document.getElementById('pendingHostName');
+            const pWaBtn = document.getElementById('pendingWhatsAppBtn');
+
+            const hostName = u.name || u.fullName || 'Valued Host Partner';
+            const propName = u.propertyName || 'Your Luxury Stay';
+            const refId = u.refId || 'LXH-2026-Pending';
+
+            if (pRef) pRef.textContent = refId;
+            if (pProp) pProp.textContent = propName;
+            if (pHostName) pHostName.textContent = hostName;
+            if (pTitle) pTitle.textContent = `Application Under Review: ${propName}`;
+            if (pDesc) {
+              pDesc.innerHTML = `Karibu, <strong>${escapeHtml(hostName)}</strong>! Your property details for <strong>${escapeHtml(propName)}</strong> (Ref: <code>${escapeHtml(refId)}</code>) were received safely. To ensure five-star luxury standards, all listings are personally audited by Executive Super Admins <strong>Ronald Otieno &amp; Dennis Barasa</strong> within 24 hours.`;
+            }
+
+            const waText = encodeURIComponent(`Hello Ronald & Dennis, my name is ${hostName}. I registered my property "${propName}" on Luxea Living (Ref: ${refId}). Could you please update me on the verification review status?`);
+            if (pWaBtn) {
+              pWaBtn.href = `https://wa.me/254757912429?text=${waText}`;
+            }
+
+            // Populate and show communicative pop-up modal
+            const mTitle = document.getElementById('modalPendingTitle');
+            const mDesc = document.getElementById('modalPendingDesc');
+            const mRef = document.getElementById('modalPendingRef');
+            const mProp = document.getElementById('modalPendingProp');
+            const mWaBtn = document.getElementById('modalPendingWaBtn');
+
+            if (mTitle) mTitle.textContent = `Audit Underway: ${propName}`;
+            if (mDesc) {
+              mDesc.innerHTML = `Hello <strong>${escapeHtml(hostName)}</strong>! Your listing for <strong>${escapeHtml(propName)}</strong> is currently being vetted by Super Admins <strong>Ronald Otieno &amp; Dennis Barasa</strong>. As soon as approved, your Host Dashboard (live pricing, calendar &amp; earnings) will instantly unlock.`;
+            }
+            if (mRef) mRef.textContent = refId;
+            if (mProp) mProp.textContent = propName;
+            if (mWaBtn) mWaBtn.href = `https://wa.me/254757912429?text=${waText}`;
+
+            // Auto-open modal unless explicitly silenced
+            if (pendingNoticeModal && !opts.silentModal) {
+              pendingNoticeModal.classList.add('open');
+            }
+
+            if (window.showToast) {
+              window.showToast(`Listing ${refId} is under review by Ronald & Dennis. Approvals complete within 24h!`, 'info');
+            }
           } else {
             // Not logged in or unverified -> Strict Gate
             gatedView.classList.remove('hidden');
+            if (toggleHostModeLabel) toggleHostModeLabel.textContent = 'Register a Property';
           }
         } else {
           // Default: Registration Wizard
@@ -1093,6 +1254,42 @@
           if (toggleHostModeLabel) toggleHostModeLabel.textContent = 'Go to Host Dashboard ↗';
         }
       }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      // "Go to Host Dashboard" button from Registration Success Card
+      document.getElementById('successGoToDashboardBtn')?.addEventListener('click', () => {
+        showView('manage');
+      });
+
+      // Pending modal close / action buttons
+      document.getElementById('closePendingModalBtn')?.addEventListener('click', () => {
+        if (pendingNoticeModal) pendingNoticeModal.classList.remove('open');
+      });
+
+      document.getElementById('modalPendingUnderstoodBtn')?.addEventListener('click', () => {
+        if (pendingNoticeModal) pendingNoticeModal.classList.remove('open');
+      });
+
+      pendingNoticeModal?.addEventListener('click', (e) => {
+        if (e.target === pendingNoticeModal) pendingNoticeModal.classList.remove('open');
+      });
+
+      // Status Tracker triggers
+      document.getElementById('pendingTrackStatusBtn')?.addEventListener('click', async () => {
+        if (pendingNoticeModal) pendingNoticeModal.classList.remove('open');
+        if (statusModal) {
+          statusModal.classList.add('open');
+          const access = await checkHostAccess();
+          const queryInput = document.getElementById('lookupQueryInput');
+          if (queryInput && access.user) {
+            queryInput.value = access.user.refId || access.user.email || '';
+          }
+        }
+      });
 
       // Button listeners
       document.getElementById('gatedApplyBtn')?.addEventListener('click', () => showView('register'));
@@ -1115,18 +1312,25 @@
 
       hostLogoutBtn?.addEventListener('click', () => {
         localStorage.removeItem('luxea_user_session');
+        localStorage.removeItem('luxea_pending_host_app');
         if (window.showToast) window.showToast('Signed out of partner portal.');
         showView('register');
       });
 
       // Status Lookup Modal Handlers
-      const statusModal = document.getElementById('statusLookupModal');
       const closeStatusBtn = document.getElementById('closeStatusModalBtn');
       const openStatusBtns = ['openStatusLookupBtn', 'gatedTrackBtn', 'trackFromSuccessBtn'];
 
       openStatusBtns.forEach(id => {
         document.getElementById(id)?.addEventListener('click', () => {
-          if (statusModal) statusModal.classList.add('open');
+          if (statusModal) {
+            statusModal.classList.add('open');
+            const refText = document.getElementById('successRefId')?.textContent;
+            const queryInput = document.getElementById('lookupQueryInput');
+            if (queryInput && refText && !refText.includes('0000')) {
+              queryInput.value = refText.trim();
+            }
+          }
         });
       });
 
@@ -1156,7 +1360,7 @@
       } else {
         const u = JSON.parse(localStorage.getItem('luxea_user_session') || '{}');
         if (u && (u.role === 'host' || u.isSuperAdmin || u.refId)) {
-          showView('manage');
+          showView('manage', { silentModal: true });
         } else {
           showView('register');
         }

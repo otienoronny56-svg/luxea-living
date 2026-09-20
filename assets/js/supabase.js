@@ -993,7 +993,7 @@
   // Credentials: otienoronny56@gmail.com / dennbarasa@gmail.com
   // =========================================================================
   window.LuxeaAuth = {
-    SUPER_ADMIN_EMAILS: ['otienoronny56@gmail.com', 'dennbarasa@gmail.com'],
+    SUPER_ADMIN_EMAILS: ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'],
 
     isSuperAdminEmail: function (email) {
       if (!email) return false;
@@ -1015,7 +1015,21 @@
 
       const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
       const isSuper = this.isSuperAdminEmail(cleanEmail);
-      const defaultName = cleanEmail === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno';
+      const defaultName = cleanEmail.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno';
+
+      // Instant authorization for designated Super Admins
+      if (isSuper) {
+        const sessionData = {
+          email: cleanEmail,
+          isSuperAdmin: true,
+          name: `${defaultName} (Super Admin)`,
+          role: 'super_admin',
+          loggedInAt: new Date().toISOString()
+        };
+        localStorage.setItem('luxea_admin_session', JSON.stringify(sessionData));
+        localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
+        return { success: true, user: sessionData };
+      }
 
       // 1. Try Supabase Auth first
       if (client && client.auth) {

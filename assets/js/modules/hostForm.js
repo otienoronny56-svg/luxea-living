@@ -437,17 +437,22 @@ export function initHostForm(formId = 'luxeaHostForm') {
       await window.LuxeaDB.submitHostApplication(hostData, filesToUpload);
     }
 
-    // Save active pending application locally so user can track immediately
+    // Save active pending application and user session locally so host is recognized immediately
     const userSession = {
       email: hostData.email,
       name: hostData.fullName,
       propertyName: hostData.propertyName,
+      propertyType: hostData.propertyType,
       refId: hostData.refId,
       role: 'host',
       status: 'pending_review',
-      submittedAt: hostData.submittedAt
+      isSuperAdmin: false,
+      submittedAt: hostData.submittedAt,
+      loggedInAt: new Date().toISOString()
     };
     localStorage.setItem('luxea_pending_host_app', JSON.stringify(userSession));
+    localStorage.setItem('luxea_user_session', JSON.stringify(userSession));
+    window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: userSession } }));
 
     // Show Success Card
     const refEl = document.getElementById('successRefId');

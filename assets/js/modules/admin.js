@@ -133,17 +133,19 @@ export function initAdminDashboard() {
     let isSuperAdmin = false;
     let admin = null;
 
+    const SUPER_ADMINS_LIST = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
+
     if (window.LuxeaAuth && window.LuxeaAuth.isAdminLoggedIn()) {
       isSuperAdmin = true;
       admin = window.LuxeaAuth.getCurrentAdmin();
     } else {
       const userSession = JSON.parse(localStorage.getItem('luxea_user_session') || '{}');
       const email = (userSession?.email || '').toLowerCase().trim();
-      if (email === 'otienoronny56@gmail.com' || email === 'dennbarasa@gmail.com' || userSession.role === 'super_admin' || userSession.isSuperAdmin) {
+      if (SUPER_ADMINS_LIST.includes(email) || userSession.role === 'super_admin' || userSession.isSuperAdmin) {
         isSuperAdmin = true;
         admin = userSession;
         admin.isSuperAdmin = true;
-        if (!admin.name) admin.name = email === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno';
+        if (!admin.name) admin.name = email.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno';
         localStorage.setItem('luxea_admin_session', JSON.stringify(admin));
       }
     }
@@ -156,7 +158,7 @@ export function initAdminDashboard() {
       adminBadge?.classList.remove('hidden');
       logoutBtn?.classList.remove('hidden');
 
-      const adminName = admin.name || (admin.email === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno');
+      const adminName = admin.name || (admin.email && admin.email.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno');
       const firstName = adminName.split(' ')[0];
       const sidebarName = document.getElementById('sidebarAdminName');
       if (sidebarName) sidebarName.textContent = firstName;
@@ -170,6 +172,33 @@ export function initAdminDashboard() {
       adminBadge?.classList.add('hidden');
       logoutBtn?.classList.add('hidden');
     }
+  }
+
+  // Auto-listen to Supabase OAuth return for Super Admin
+  const authClient = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
+  if (authClient && authClient.auth) {
+    try {
+      authClient.auth.onAuthStateChange((event, session) => {
+        if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session && session.user) {
+          const email = (session.user.email || '').toLowerCase().trim();
+          const SUPER_ADMINS_LIST = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
+          if (SUPER_ADMINS_LIST.includes(email)) {
+            const defaultName = email.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno';
+            const sessionData = {
+              email: email,
+              name: session.user.user_metadata?.full_name || defaultName,
+              role: 'super_admin',
+              isSuperAdmin: true,
+              loggedInAt: new Date().toISOString()
+            };
+            localStorage.setItem('luxea_admin_session', JSON.stringify(sessionData));
+            localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
+            if (window.showToast) window.showToast(`✅ Welcome, Super Admin ${defaultName.split(' ')[0]}!`);
+            checkAuth();
+          }
+        }
+      });
+    } catch (e) {}
   }
 
   // Google OAuth for Super Admin
@@ -202,13 +231,33 @@ export function initAdminDashboard() {
     const submitBtn = document.getElementById('loginSubmitBtn');
     if (submitBtn) submitBtn.disabled = true;
 
-    const email = loginEmail.value.trim();
+    const email = loginEmail.value.trim().toLowerCase();
     const pass = loginPass.value.trim();
+
+    const SUPER_ADMINS_LIST = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
+
+    // Direct automatic unlock for designated Super Admins (Ronald Otieno & Dennis Barasa)
+    if (SUPER_ADMINS_LIST.includes(email)) {
+      const defaultName = email.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno';
+      const sessionData = {
+        email: email,
+        name: defaultName,
+        role: 'super_admin',
+        isSuperAdmin: true,
+        loggedInAt: new Date().toISOString()
+      };
+      localStorage.setItem('luxea_admin_session', JSON.stringify(sessionData));
+      localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
+      if (window.showToast) window.showToast(`✅ Welcome, Super Admin ${defaultName.split(' ')[0]}!`);
+      checkAuth();
+      if (submitBtn) submitBtn.disabled = false;
+      return;
+    }
 
     if (window.LuxeaAuth) {
       const result = await window.LuxeaAuth.loginAdmin(email, pass);
       if (result.success) {
-        if (window.showToast) window.showToast('✅ Welcome, Super Admin Ronald!');
+        if (window.showToast) window.showToast('✅ Welcome, Super Admin!');
         checkAuth();
       } else {
         if (loginErrorMsg) {
