@@ -1320,6 +1320,77 @@
   border: 1px solid #F5B7B1;
 }
 
+.manage-card-thumb-wrap:hover .card-carousel-arrow {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) scale(1);
+}
+
+.card-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) scale(0.85);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  color: var(--color-espresso, #1A1A1A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 12;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.15s ease;
+}
+
+.card-carousel-arrow.arrow-prev {
+  left: 8px;
+}
+
+.card-carousel-arrow.arrow-next {
+  right: 8px;
+}
+
+.card-carousel-arrow:hover {
+  background: #FFFFFF;
+  transform: translateY(-50%) scale(1.12);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.24);
+}
+
+.card-carousel-dots {
+  position: absolute;
+  bottom: 45px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 12;
+}
+
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto;
+}
+
+.carousel-dot.active {
+  width: 14px;
+  border-radius: 10px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
 .manage-card-body {
   padding: 18px 20px;
 }

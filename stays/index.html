@@ -124,8 +124,14 @@
       </div>
 
       <!-- Hero Gallery (Phone 3) -->
-      <div class="detail-hero-media">
+      <div class="detail-hero-media" id="detailHeroMedia">
         <img id="detailHeroImg" src="/assets/images/villa.jpg" alt="Stay Preview">
+        <button class="card-carousel-arrow arrow-prev" id="detailHeroPrev" aria-label="Previous photo" title="Previous photo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button class="card-carousel-arrow arrow-next" id="detailHeroNext" aria-label="Next photo" title="Next photo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
         <div class="detail-gallery-dots">
           <span class="dot active"></span>
           <span class="dot"></span>
@@ -300,10 +306,10 @@
     </a>
   </nav>
 
-  <script src="/assets/js/main.js"></script>
+  <script src="/assets/js/main.js?v=2.4.0"></script>
   <script type="module">
-    import { LUXEA_STAYS } from '/assets/js/modules/staysData.js';
-    import { initCurrencyToggle, refreshPrices } from '/assets/js/modules/currency.js';
+    import { LUXEA_STAYS } from '/assets/js/modules/staysData.js?v=2.4.0';
+    import { initCurrencyToggle, refreshPrices } from '/assets/js/modules/currency.js?v=2.4.0';
 
     // Haversine distance calculator
     function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -509,11 +515,25 @@
 
         items.forEach(stay => {
           const isAvail = stay.is_available !== false;
+          const gallery = (stay.images && stay.images.length > 0) ? stay.images : [stay.image];
+          const hasMultiple = gallery.length > 1;
+
           const card = document.createElement('div');
           card.className = `browse-card ${isAvail ? '' : 'browse-card-blocked'}`;
           card.innerHTML = `
-            <div class="browse-card-media">
-              <img src="${stay.image}" alt="${stay.name}" loading="lazy">
+            <div class="browse-card-media" data-stay-id="${stay.id}">
+              <img src="${gallery[0]}" alt="${stay.name}" loading="lazy" class="browse-thumb-img">
+              ${hasMultiple ? `
+                <button class="card-carousel-arrow arrow-prev" aria-label="Previous photo" title="Previous photo">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <button class="card-carousel-arrow arrow-next" aria-label="Next photo" title="Next photo">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+                <div class="card-carousel-dots">
+                  ${gallery.map((_, i) => `<span class="carousel-dot ${i === 0 ? 'active' : ''}" data-idx="${i}"></span>`).join('')}
+                </div>
+              ` : ''}
               <div class="card-top-left">
                 <span class="tag-badge ${isAvail ? '' : 'badge-unavailable'}">
                   ${isAvail ? (stay.propertyTypeName || 'Verified Partner') : '🚫 Dates Blocked by Host'}
@@ -544,7 +564,54 @@
             </div>
           `;
 
-          // Tap to view Phone 3 detail view
+          if (hasMultiple) {
+            let activeIdx = 0;
+            const img = card.querySelector('.browse-thumb-img');
+            const prevBtn = card.querySelector('.arrow-prev');
+            const nextBtn = card.querySelector('.arrow-next');
+            const dots = card.querySelectorAll('.carousel-dot');
+
+            const updateImg = (newIdx) => {
+              activeIdx = (newIdx + gallery.length) % gallery.length;
+              img.src = gallery[activeIdx];
+              dots.forEach((dot, i) => dot.classList.toggle('active', i === activeIdx));
+            };
+
+            prevBtn?.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              updateImg(activeIdx - 1);
+            });
+
+            nextBtn?.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              updateImg(activeIdx + 1);
+            });
+
+            dots.forEach((dot, i) => {
+              dot.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                updateImg(i);
+              });
+            });
+
+            let startX = 0;
+            const media = card.querySelector('.browse-card-media');
+            media?.addEventListener('touchstart', (e) => {
+              startX = e.changedTouches[0].screenX;
+            }, { passive: true });
+            media?.addEventListener('touchend', (e) => {
+              const diff = e.changedTouches[0].screenX - startX;
+              if (Math.abs(diff) > 35) {
+                if (diff < 0) updateImg(activeIdx + 1);
+                else updateImg(activeIdx - 1);
+              }
+            }, { passive: true });
+          }
+
+          // Tap to view detail view
           card.addEventListener('click', () => {
             showDetailView(stay);
           });
@@ -556,7 +623,39 @@
       }
 
       function showDetailView(stay) {
-        document.getElementById('detailHeroImg').src = stay.image;
+        const detailGallery = (stay.images && stay.images.length > 0) ? stay.images : [stay.image];
+        let detailIdx = 0;
+        const heroImg = document.getElementById('detailHeroImg');
+        const heroPrev = document.getElementById('detailHeroPrev');
+        const heroNext = document.getElementById('detailHeroNext');
+        const dotsWrap = document.querySelector('.detail-gallery-dots');
+
+        const setHeroPhoto = (idx) => {
+          detailIdx = (idx + detailGallery.length) % detailGallery.length;
+          heroImg.src = detailGallery[detailIdx];
+          if (dotsWrap) {
+            dotsWrap.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === detailIdx));
+          }
+        };
+
+        setHeroPhoto(0);
+
+        if (dotsWrap) {
+          dotsWrap.innerHTML = detailGallery.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}" data-idx="${i}" style="cursor: pointer;"></span>`).join('');
+          dotsWrap.querySelectorAll('.dot').forEach((d, i) => {
+            d.onclick = () => setHeroPhoto(i);
+          });
+        }
+
+        if (heroPrev) {
+          heroPrev.style.display = detailGallery.length > 1 ? 'flex' : 'none';
+          heroPrev.onclick = () => setHeroPhoto(detailIdx - 1);
+        }
+        if (heroNext) {
+          heroNext.style.display = detailGallery.length > 1 ? 'flex' : 'none';
+          heroNext.onclick = () => setHeroPhoto(detailIdx + 1);
+        }
+
         const priceEl = document.getElementById('detailPriceNum');
         priceEl.setAttribute('data-usd', stay.usdPrice);
         priceEl.setAttribute('data-kes', stay.kesPrice);

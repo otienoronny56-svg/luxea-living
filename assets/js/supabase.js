@@ -367,6 +367,64 @@
     },
 
     /**
+     * Append multiple photos to a property's gallery_images and sync Supabase & local storage
+     */
+    appendPropertyPhotos: async function (propertyId, newPhotoUrls = []) {
+      if (!newPhotoUrls || newPhotoUrls.length === 0) return { success: false };
+
+      // 1. Update in local storage cache immediately
+      const cached = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+      const idx = cached.findIndex(p => p.id === propertyId || p.slug === propertyId);
+      let updatedGallery = [];
+      let updatedCover = '';
+
+      if (idx !== -1) {
+        const existing = cached[idx].gallery_images || [];
+        updatedGallery = [...new Set([...existing, ...newPhotoUrls])];
+        updatedCover = cached[idx].cover_image_url || updatedGallery[0];
+        cached[idx].gallery_images = updatedGallery;
+        cached[idx].cover_image_url = updatedCover;
+        cached[idx].updated_at = new Date().toISOString();
+        localStorage.setItem('luxea_cached_properties', JSON.stringify(cached));
+      }
+
+      // 2. Update Supabase
+      const client = this.getClient();
+      if (client) {
+        try {
+          if (updatedGallery.length === 0) {
+            const { data: prop } = await client.from('lux_properties').select('gallery_images, cover_image_url').eq('id', propertyId).single();
+            const existing = (prop && prop.gallery_images) || [];
+            updatedGallery = [...new Set([...existing, ...newPhotoUrls])];
+            updatedCover = (prop && prop.cover_image_url) || updatedGallery[0];
+          }
+
+          const { data, error } = await client
+            .from('lux_properties')
+            .update({
+              gallery_images: updatedGallery,
+              cover_image_url: updatedCover,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', propertyId)
+            .select();
+
+          if (error) console.warn('Supabase append photos error:', error.message);
+          else console.log('✅ Supabase gallery updated:', data);
+        } catch (err) {
+          console.error('Supabase append photos exception:', err);
+        }
+      }
+
+      // 3. Dispatch event
+      window.dispatchEvent(new CustomEvent('luxea:property_updated', {
+        detail: { eventType: 'UPDATE', new: { id: propertyId, gallery_images: updatedGallery, cover_image_url: updatedCover } }
+      }));
+
+      return { success: true, propertyId, gallery: updatedGallery };
+    },
+
+    /**
      * Host Add New Listing: Uploads photos to "lux_listings" and inserts into "lux_properties"
      */
     addPropertyListing: async function (listingData, photoFiles = []) {

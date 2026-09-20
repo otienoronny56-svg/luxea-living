@@ -6,7 +6,7 @@
  * 3. Geolocation: Live proximity detection & immediate banner dismissal
  */
 
-import { LUXEA_STAYS } from './staysData.js';
+import { LUXEA_STAYS } from './staysData.js?v=2.4.0';
 
 // Calculate Haversine distance in km
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -94,14 +94,17 @@ export function initNearbyStays(containerId = 'locationSectionsContainer') {
 
       const filteredNearby = filterStays(allWithDist);
       if (filteredNearby.length > 0) {
-        const nearestDist = filteredNearby[0].distanceKm;
+        const within15 = filteredNearby.filter(s => s.distanceKm <= 15);
+        const useRadius = within15.length >= 2;
+        const itemsToShow = useRadius ? within15.slice(0, 4) : filteredNearby.slice(0, 4);
+
         renderShelf(container, {
           title: userCoords 
-            ? (nearestDist < 15 ? 'Stays near you (Within 15 km)' : 'Stays closest to your location')
+            ? (useRadius ? 'Stays near you (Within 15 km)' : 'Stays closest to your location')
             : 'Stays near you',
           subtitle: userCoords ? 'Live GPS proximity calculation' : 'Top verified stays across Nairobi & beyond',
           link: '/stays/?near=true',
-          items: filteredNearby.slice(0, 4),
+          items: itemsToShow,
           isNearbyShelf: true
         });
       }
@@ -246,16 +249,30 @@ export function initNearbyStays(containerId = 'locationSectionsContainer') {
 
     config.items.forEach(item => {
       const isAvail = availMap[item.id] !== undefined ? availMap[item.id] : (item.is_available !== false);
+      const gallery = (item.images && item.images.length > 0) ? item.images : [item.image];
+      const hasMultiple = gallery.length > 1;
+
       const card = document.createElement('a');
       card.href = `/stays/?id=${item.id}`;
       card.className = `shelf-card ${isAvail ? '' : 'shelf-card-blocked'}`;
       card.innerHTML = `
-        <div class="shelf-card-thumb">
-          <img src="${item.image}" alt="${item.name}" loading="lazy">
+        <div class="shelf-card-thumb" data-stay-id="${item.id}">
+          <img src="${gallery[0]}" alt="${item.name}" loading="lazy" class="shelf-thumb-img">
+          ${hasMultiple ? `
+            <button class="card-carousel-arrow arrow-prev" aria-label="Previous photo" title="Previous photo">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button class="card-carousel-arrow arrow-next" aria-label="Next photo" title="Next photo">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <div class="card-carousel-dots">
+              ${gallery.map((_, i) => `<span class="carousel-dot ${i === 0 ? 'active' : ''}" data-idx="${i}"></span>`).join('')}
+            </div>
+          ` : ''}
           <span class="guest-favorite-badge ${isAvail ? '' : 'badge-unavailable'}">
             ${isAvail ? (item.propertyTypeName || 'Verified') : '🚫 Dates Blocked'}
           </span>
-          <button class="shelf-heart-btn" aria-label="Save to wishlist" onclick="event.preventDefault(); this.classList.toggle('active')">
+          <button class="shelf-heart-btn" aria-label="Save to wishlist" onclick="event.preventDefault(); event.stopPropagation(); this.classList.toggle('active')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
         </div>
@@ -269,6 +286,58 @@ export function initNearbyStays(containerId = 'locationSectionsContainer') {
           ${item.distanceKm !== undefined && userCoords ? `<div class="shelf-dist-pill">📍 ${item.distanceKm.toFixed(1)} km from you</div>` : ''}
         </div>
       `;
+
+      if (hasMultiple) {
+        let activeIdx = 0;
+        const img = card.querySelector('.shelf-thumb-img');
+        const prevBtn = card.querySelector('.arrow-prev');
+        const nextBtn = card.querySelector('.arrow-next');
+        const dots = card.querySelectorAll('.carousel-dot');
+
+        const updateImage = (newIdx) => {
+          activeIdx = (newIdx + gallery.length) % gallery.length;
+          img.src = gallery[activeIdx];
+          dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === activeIdx);
+          });
+        };
+
+        prevBtn?.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          updateImage(activeIdx - 1);
+        });
+
+        nextBtn?.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          updateImage(activeIdx + 1);
+        });
+
+        dots.forEach((dot, i) => {
+          dot.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            updateImage(i);
+          });
+        });
+
+        // Touch swipe support
+        let startX = 0;
+        const thumb = card.querySelector('.shelf-card-thumb');
+        thumb?.addEventListener('touchstart', (e) => {
+          startX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        thumb?.addEventListener('touchend', (e) => {
+          const endX = e.changedTouches[0].screenX;
+          const diff = endX - startX;
+          if (Math.abs(diff) > 35) {
+            if (diff < 0) updateImage(activeIdx + 1);
+            else updateImage(activeIdx - 1);
+          }
+        }, { passive: true });
+      }
+
       scrollWrap.appendChild(card);
     });
 

@@ -141,9 +141,13 @@ export function initHostManager(containerId = 'hostManagerContainer') {
             </div>
             
             <div class="form-group" style="margin-bottom: 18px;">
-              <label class="form-label">Photos (Uploaded directly to Supabase Storage Bucket)</label>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label class="form-label" style="margin: 0;">Property Photos (Upload Multiple Rooms) *</label>
+                <span id="newStayPhotosCountBadge" style="font-size: 0.75rem; color: var(--color-camel-dark); font-weight: 600;">0 selected</span>
+              </div>
               <input type="file" id="newStayPhotosInput" class="form-control" accept="image/*" multiple>
-              <small style="color: var(--color-cocoa); font-size: 0.78rem; display: block; margin-top: 4px;">Photos are saved into bucket <code>lux_listings</code></small>
+              <div id="newStayPhotosPreviewGrid" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;"></div>
+              <small style="color: var(--color-cocoa); font-size: 0.78rem; display: block; margin-top: 4px;">Upload multiple room photos (living room, bedroom, bathroom, etc.). First photo acts as primary cover. Photos are saved into Supabase bucket <code>lux_listings</code>.</small>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
@@ -159,18 +163,34 @@ export function initHostManager(containerId = 'hostManagerContainer') {
 
     listings.forEach(listing => {
       const isAvailable = listing.is_available !== false;
+      const hostGallery = (listing.gallery_images && listing.gallery_images.length > 0)
+        ? listing.gallery_images
+        : (listing.cover_image_url ? [listing.cover_image_url] : ['/assets/images/villa.jpg']);
+      const hasGalleryMultiple = hostGallery.length > 1;
+
       const card = document.createElement('div');
       card.className = `host-manage-card ${isAvailable ? 'card-available' : 'card-unavailable'}`;
       card.setAttribute('data-id', listing.id);
 
       card.innerHTML = `
-        <div class="manage-card-thumb-wrap">
-          <img src="${listing.cover_image_url || (listing.gallery_images && listing.gallery_images[0]) || '/assets/images/villa.jpg'}" alt="${listing.name}" class="manage-thumb-img" id="thumb-${listing.id}">
+        <div class="manage-card-thumb-wrap" data-listing-id="${listing.id}">
+          <img src="${hostGallery[0]}" alt="${listing.name}" class="manage-thumb-img" id="thumb-${listing.id}">
+          ${hasGalleryMultiple ? `
+            <button class="card-carousel-arrow arrow-prev" aria-label="Previous photo" style="z-index: 12; width: 28px; height: 28px;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button class="card-carousel-arrow arrow-next" aria-label="Next photo" style="z-index: 12; width: 28px; height: 28px;">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <div class="card-carousel-dots" style="z-index: 12;">
+              ${hostGallery.map((_, i) => `<span class="carousel-dot ${i === 0 ? 'active' : ''}" data-idx="${i}"></span>`).join('')}
+            </div>
+          ` : ''}
           <div class="manage-thumb-overlay">
-            <label class="bucket-upload-label" title="Upload new photo to Supabase Storage bucket">
+            <label class="bucket-upload-label" title="Upload more photos to Supabase Storage bucket">
               <input type="file" class="card-bucket-file-input" data-id="${listing.id}" accept="image/*" multiple style="display: none;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-              <span>Upload to Supabase Bucket</span>
+              <span>+ Add Photos (${hostGallery.length})</span>
             </label>
           </div>
           <span class="status-indicator-pill ${isAvailable ? 'pill-green' : 'pill-red'}" id="statusPill-${listing.id}">
@@ -281,9 +301,9 @@ export function initHostManager(containerId = 'hostManagerContainer') {
         if (window.LuxeaDB) {
           const uploadedUrls = await window.LuxeaDB.uploadListingPhotos(files, 'properties');
           if (uploadedUrls && uploadedUrls.length > 0) {
-            const thumbImg = container.querySelector(`#thumb-${id}`);
-            if (thumbImg) thumbImg.src = uploadedUrls[0];
-            if (window.showToast) window.showToast(`✅ Saved ${uploadedUrls.length} photo(s) to Supabase Storage!`);
+            await window.LuxeaDB.appendPropertyPhotos(id, uploadedUrls);
+            if (window.showToast) window.showToast(`✅ Saved ${uploadedUrls.length} photo(s) to Supabase gallery!`);
+            await loadHostListings();
           } else {
             // Local preview fallback
             const thumbImg = container.querySelector(`#thumb-${id}`);
@@ -291,6 +311,71 @@ export function initHostManager(containerId = 'hostManagerContainer') {
             if (window.showToast) window.showToast(`Photo updated locally.`);
           }
         }
+      });
+    });
+
+    // 2B. Host Card Photo Carousel Navigation
+    container.querySelectorAll('.host-manage-card').forEach(card => {
+      const id = card.getAttribute('data-id');
+      const listing = listings.find(l => l.id === id);
+      if (!listing) return;
+      const gallery = (listing.gallery_images && listing.gallery_images.length > 0)
+        ? listing.gallery_images
+        : (listing.cover_image_url ? [listing.cover_image_url] : ['/assets/images/villa.jpg']);
+      if (gallery.length <= 1) return;
+
+      let activeIdx = 0;
+      const img = card.querySelector(`#thumb-${id}`);
+      const prevBtn = card.querySelector('.arrow-prev');
+      const nextBtn = card.querySelector('.arrow-next');
+      const dots = card.querySelectorAll('.carousel-dot');
+
+      const setHostPhoto = (newIdx) => {
+        activeIdx = (newIdx + gallery.length) % gallery.length;
+        if (img) img.src = gallery[activeIdx];
+        dots.forEach((dot, i) => dot.classList.toggle('active', i === activeIdx));
+      };
+
+      prevBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setHostPhoto(activeIdx - 1);
+      });
+
+      nextBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setHostPhoto(activeIdx + 1);
+      });
+
+      dots.forEach((dot, i) => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setHostPhoto(i);
+        });
+      });
+    });
+
+    // 2C. Multi-photo selection preview in New Listing modal
+    const photosInput = container.querySelector('#newStayPhotosInput');
+    const previewGrid = container.querySelector('#newStayPhotosPreviewGrid');
+    const countBadge = container.querySelector('#newStayPhotosCountBadge');
+
+    photosInput?.addEventListener('change', () => {
+      if (!photosInput.files || !previewGrid) return;
+      previewGrid.innerHTML = '';
+      const count = photosInput.files.length;
+      if (countBadge) countBadge.textContent = count > 0 ? `${count} photo(s) selected` : '0 selected';
+
+      Array.from(photosInput.files).forEach((file, idx) => {
+        const thumbWrap = document.createElement('div');
+        thumbWrap.style.cssText = 'position: relative; width: 68px; height: 50px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 1px 4px rgba(0,0,0,0.06);';
+        thumbWrap.innerHTML = `
+          <img src="${URL.createObjectURL(file)}" style="width: 100%; height: 100%; object-fit: cover;">
+          ${idx === 0 ? '<span style="position: absolute; bottom: 2px; left: 2px; background: rgba(0,0,0,0.7); color: #fff; font-size: 0.55rem; padding: 1px 4px; border-radius: 4px; font-weight: 700;">COVER</span>' : ''}
+        `;
+        previewGrid.appendChild(thumbWrap);
       });
     });
 
