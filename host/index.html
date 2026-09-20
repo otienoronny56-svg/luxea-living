@@ -17,8 +17,8 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/assets/js/config.js?v=2.4.3"></script>
-  <script src="/assets/js/supabase.js?v=2.4.3"></script>
+  <script src="/assets/js/config.js?v=2.4.4"></script>
+  <script src="/assets/js/supabase.js?v=2.4.4"></script>
 </head>
 <body>
 
@@ -755,9 +755,10 @@
             <button type="button" class="btn btn-secondary" id="trackFromSuccessBtn">Track Application Status</button>
             <a href="/" class="btn btn-outline">Return to Homepage</a>
           </div>
-        </div> <!-- /.host-form-main-pane -->
-      </div> <!-- /.host-layout-split -->
-    </div> <!-- /#hostRegisterView -->
+        </div> <!-- /#hostSuccessPane -->
+      </div> <!-- /.host-form-main-pane -->
+    </div> <!-- /.host-layout-split -->
+  </div> <!-- /#hostRegisterView -->
 
       <!-- VIEW 2: ACCESS GATED (When unverified user tries to access host dashboard) -->
       <div id="hostGatedView" class="hidden">
@@ -1010,11 +1011,11 @@
     </a>
   </nav>
 
-  <script src="/assets/js/main.js?v=2.4.3"></script>
+  <script src="/assets/js/main.js?v=2.4.4"></script>
   <script type="module">
-    import { initCurrency } from '/assets/js/modules/currency.js?v=2.4.3';
-    import { initHostForm } from '/assets/js/modules/hostForm.js?v=2.4.3';
-    import { initHostManager } from '/assets/js/modules/hostManager.js?v=2.4.3';
+    import { initCurrency } from '/assets/js/modules/currency.js?v=2.4.4';
+    import { initHostForm } from '/assets/js/modules/hostForm.js?v=2.4.4';
+    import { initHostManager } from '/assets/js/modules/hostManager.js?v=2.4.4';
 
     document.addEventListener('DOMContentLoaded', async () => {
       initCurrency();

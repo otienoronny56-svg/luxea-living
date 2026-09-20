@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Automatically initialize global luxury Auth Suite & Header account controls
-  import('/assets/js/modules/authModal.js')
+  import('/assets/js/modules/authModal.js?v=2.4.4')
     .then(mod => {
       if (mod && mod.initAuthSuite) mod.initAuthSuite();
     })

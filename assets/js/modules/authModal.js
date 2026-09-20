@@ -271,17 +271,6 @@ export function updateHeaderAuthState() {
               <span>Sign Out</span>
             </button>
           </div>
-        </div>
-      `;
-
-            <div class="dropdown-divider"></div>
-
-            <button class="dropdown-link dropdown-logout" id="luxGlobalSignOutBtn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-              <span>Sign Out</span>
-            </button>
-          </div>
-        </div>
       `;
 
       const toggle = authContainer.querySelector('#luxUserDropdownToggle');
