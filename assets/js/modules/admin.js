@@ -1098,14 +1098,28 @@ export function initAdminDashboard() {
         const newStatus = sel.value;
 
         sel.className = `status-select-inline status-${newStatus} host-status-select`;
+        sel.disabled = true;
 
-        if (window.LuxeaDB) {
-          await window.LuxeaDB.updateHostStatus(ref, newStatus);
-          if (window.showToast) {
-            window.showToast(`Updated status for ${ref} → ${newStatus.toUpperCase()}`);
+        try {
+          if (window.LuxeaDB) {
+            await window.LuxeaDB.updateHostStatus(ref, newStatus);
+            // Immediately update in-memory cache
+            const hostObj = cachedHosts.find(h => (h.refId || h.ref_id) === ref);
+            if (hostObj) {
+              hostObj.review_status = newStatus;
+              hostObj.status = newStatus;
+            }
+            if (window.showToast) {
+              window.showToast(`Updated status for ${ref} → ${newStatus.toUpperCase()}`);
+            }
+            // Refresh analytics and counters
+            await loadDashboardData();
           }
-          // Refresh analytics and counters
-          loadDashboardData();
+        } catch (err) {
+          console.error('Failed to update host status:', err);
+          if (window.showToast) window.showToast('Error updating status: ' + (err.message || 'Failed'));
+        } finally {
+          sel.disabled = false;
         }
       });
     });
@@ -1221,21 +1235,55 @@ export function initAdminDashboard() {
 
   inspectApproveBtn?.addEventListener('click', async () => {
     if (!currentInspectedRef) return;
-    if (window.LuxeaDB) {
-      await window.LuxeaDB.updateHostStatus(currentInspectedRef, 'approved');
-      if (window.showToast) window.showToast(`✅ Host ${currentInspectedRef} officially APPROVED!`);
-      inspectModal?.classList.remove('open');
-      loadDashboardData();
+    inspectApproveBtn.disabled = true;
+    const origHtml = inspectApproveBtn.innerHTML;
+    inspectApproveBtn.innerHTML = 'Approving...';
+
+    try {
+      if (window.LuxeaDB) {
+        await window.LuxeaDB.updateHostStatus(currentInspectedRef, 'approved');
+        const hostObj = cachedHosts.find(h => (h.refId || h.ref_id) === currentInspectedRef);
+        if (hostObj) {
+          hostObj.review_status = 'approved';
+          hostObj.status = 'approved';
+        }
+        if (window.showToast) window.showToast(`✅ Host ${currentInspectedRef} officially APPROVED!`);
+        inspectModal?.classList.remove('open');
+        await loadDashboardData();
+      }
+    } catch (err) {
+      console.error('Approval error:', err);
+      if (window.showToast) window.showToast('Error approving host: ' + (err.message || 'Failed'));
+    } finally {
+      inspectApproveBtn.disabled = false;
+      inspectApproveBtn.innerHTML = origHtml;
     }
   });
 
   inspectRejectBtn?.addEventListener('click', async () => {
     if (!currentInspectedRef) return;
-    if (window.LuxeaDB) {
-      await window.LuxeaDB.updateHostStatus(currentInspectedRef, 'rejected');
-      if (window.showToast) window.showToast(`❌ Host ${currentInspectedRef} marked as Rejected.`);
-      inspectModal?.classList.remove('open');
-      loadDashboardData();
+    inspectRejectBtn.disabled = true;
+    const origHtml = inspectRejectBtn.innerHTML;
+    inspectRejectBtn.innerHTML = 'Rejecting...';
+
+    try {
+      if (window.LuxeaDB) {
+        await window.LuxeaDB.updateHostStatus(currentInspectedRef, 'rejected');
+        const hostObj = cachedHosts.find(h => (h.refId || h.ref_id) === currentInspectedRef);
+        if (hostObj) {
+          hostObj.review_status = 'rejected';
+          hostObj.status = 'rejected';
+        }
+        if (window.showToast) window.showToast(`❌ Host ${currentInspectedRef} marked as Rejected.`);
+        inspectModal?.classList.remove('open');
+        await loadDashboardData();
+      }
+    } catch (err) {
+      console.error('Rejection error:', err);
+      if (window.showToast) window.showToast('Error rejecting host: ' + (err.message || 'Failed'));
+    } finally {
+      inspectRejectBtn.disabled = false;
+      inspectRejectBtn.innerHTML = origHtml;
     }
   });
 

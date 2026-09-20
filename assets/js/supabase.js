@@ -709,7 +709,12 @@
             .from('lux_hosts')
             .select('*')
             .order('created_at', { ascending: false });
-          if (!error && data) return data;
+          if (!error && data) {
+            try {
+              localStorage.setItem('luxea_host_applications', JSON.stringify(data));
+            } catch (e) {}
+            return data;
+          }
         } catch (e) {}
       }
       return JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
@@ -723,50 +728,140 @@
             .from('lux_waitlist')
             .select('*')
             .order('created_at', { ascending: false });
-          if (!error && data) return data;
+          if (!error && data) {
+            try {
+              localStorage.setItem('luxea_waitlist_guests', JSON.stringify(data));
+            } catch (e) {}
+            return data;
+          }
         } catch (e) {}
       }
       return JSON.parse(localStorage.getItem('luxea_waitlist_guests') || '[]');
     },
 
-    // 6. UPDATE HOST APPLICATION REVIEW STATUS
-    updateHostStatus: async function (refId, newStatus) {
-      console.log(`Updating host application ${refId} -> ${newStatus}`);
-
-      // Update local cache
-      const cached = JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
-      const idx = cached.findIndex(h => (h.refId || h.ref_id) === refId);
-      if (idx !== -1) {
-        cached[idx].review_status = newStatus;
-        localStorage.setItem('luxea_host_applications', JSON.stringify(cached));
-      }
-
+    fetchHostWaitlist: async function () {
       const client = this.getClient();
       if (client) {
         try {
           const { data, error } = await client
+            .from('lux_host_waitlist')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (!error && data) {
+            try {
+              localStorage.setItem('luxea_host_waitlist', JSON.stringify(data));
+            } catch (e) {}
+            return data;
+          }
+        } catch (e) {}
+      }
+      return JSON.parse(localStorage.getItem('luxea_host_waitlist') || '[]');
+    },
+
+    // 6. UPDATE HOST APPLICATION REVIEW STATUS
+    updateHostStatus: async function (refId, newStatus) {
+      const cleanRef = String(refId || '').trim();
+      console.log(`Updating host application "${cleanRef}" -> ${newStatus}`);
+
+      // Update local application caches
+      const cached = JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
+      const idx = cached.findIndex(h => {
+        const hRef = String(h.refId || h.ref_id || '').trim().toLowerCase();
+        const hEmail = String(h.email || '').trim().toLowerCase();
+        const target = cleanRef.toLowerCase();
+        return hRef === target || hEmail === target;
+      });
+      if (idx !== -1) {
+        cached[idx].review_status = newStatus;
+        cached[idx].status = newStatus;
+        localStorage.setItem('luxea_host_applications', JSON.stringify(cached));
+      }
+
+      // Also check pending app and active user session in localStorage
+      try {
+        const pendingApp = JSON.parse(localStorage.getItem('luxea_pending_host_app') || 'null');
+        if (pendingApp && (String(pendingApp.refId || '').trim().toLowerCase() === cleanRef.toLowerCase() || String(pendingApp.email || '').trim().toLowerCase() === cleanRef.toLowerCase())) {
+          pendingApp.review_status = newStatus;
+          pendingApp.status = newStatus;
+          localStorage.setItem('luxea_pending_host_app', JSON.stringify(pendingApp));
+        }
+
+        const userSession = JSON.parse(localStorage.getItem('luxea_user_session') || 'null');
+        if (userSession && (String(userSession.refId || '').trim().toLowerCase() === cleanRef.toLowerCase() || String(userSession.email || '').trim().toLowerCase() === cleanRef.toLowerCase())) {
+          userSession.review_status = newStatus;
+          userSession.status = newStatus;
+          localStorage.setItem('luxea_user_session', JSON.stringify(userSession));
+        }
+      } catch (e) {}
+
+      let updatedRecord = null;
+      const client = this.getClient();
+      if (client) {
+        try {
+          // A. Try updating by ref_id (case-insensitive)
+          let res = await client
             .from('lux_hosts')
             .update({ review_status: newStatus, updated_at: new Date().toISOString() })
-            .eq('ref_id', refId)
+            .ilike('ref_id', cleanRef)
             .select();
 
-          if (error) {
-            console.warn('Supabase host review status update error:', error.message);
-          } else {
-            console.log('✅ Supabase host review status updated:', data);
-            if (newStatus === 'approved' && data && data.length > 0) {
-              const hostDoc = data[0];
+          // B. If no rows matched by ref_id, try updating by email
+          if (!res.data || res.data.length === 0) {
+            res = await client
+              .from('lux_hosts')
+              .update({ review_status: newStatus, updated_at: new Date().toISOString() })
+              .ilike('email', cleanRef)
+              .select();
+          }
+
+          if (res.error) {
+            console.warn('Supabase host review status update error:', res.error.message);
+          } else if (res.data && res.data.length > 0) {
+            updatedRecord = res.data[0];
+            console.log('✅ Supabase host review status updated:', updatedRecord);
+
+            // Sync with lux_profiles if profile exists
+            if (updatedRecord.email) {
+              try {
+                await client
+                  .from('lux_profiles')
+                  .update({
+                    role: newStatus === 'approved' ? 'host' : 'member',
+                    updated_at: new Date().toISOString()
+                  })
+                  .ilike('email', updatedRecord.email);
+              } catch (profErr) {
+                console.warn('Profile role sync notice:', profErr);
+              }
+            }
+
+            // Sync with lux_host_waitlist if waitlist record exists
+            try {
+              await client
+                .from('lux_host_waitlist')
+                .update({
+                  status: newStatus === 'approved' ? 'approved' : newStatus,
+                  updated_at: new Date().toISOString()
+                })
+                .or(`pass_number.ilike.${cleanRef},email.ilike.${updatedRecord.email || cleanRef}`);
+            } catch (waitErr) {
+              console.warn('Waitlist sync notice:', waitErr);
+            }
+
+            if (newStatus === 'approved') {
+              const hostDoc = updatedRecord;
               // Ensure stay is published in lux_properties
               try {
                 const { data: existingProp } = await client
                   .from('lux_properties')
                   .select('id')
-                  .eq('host_ref_id', refId);
+                  .eq('host_ref_id', hostDoc.ref_id);
 
                 if (!existingProp || existingProp.length === 0) {
                   const newProp = {
                     name: hostDoc.property_name || `${hostDoc.full_name}'s Residence`,
-                    slug: (hostDoc.property_name || `stay-${refId}`).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+                    slug: (hostDoc.property_name || `stay-${hostDoc.ref_id}`).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+                    category: (hostDoc.property_type || 'Apartment').toLowerCase(),
                     property_type: (hostDoc.property_type || 'Apartment').toLowerCase(),
                     tagline: `Curated luxury stay in ${hostDoc.area_suburb || hostDoc.county || 'Kenya'}`,
                     description: hostDoc.host_bio || 'Curated luxury residence verified by Luxea Living.',
@@ -787,11 +882,11 @@
                     is_featured: false,
                     is_active: true,
                     is_available: true,
-                    host_ref_id: refId,
+                    host_ref_id: hostDoc.ref_id,
                     created_at: new Date().toISOString()
                   };
                   await client.from('lux_properties').insert([newProp]);
-                  console.log('✅ Listing automatically published to lux_properties for approved host:', refId);
+                  console.log('✅ Listing automatically published to lux_properties for approved host:', hostDoc.ref_id);
                   window.dispatchEvent(new CustomEvent('luxea:property_updated', { detail: { eventType: 'INSERT', new: newProp } }));
                 }
               } catch (propErr) {
@@ -810,10 +905,11 @@
       }
 
       window.dispatchEvent(new CustomEvent('luxea:host_updated', {
-        detail: { eventType: 'UPDATE', refId, newStatus }
+        detail: { eventType: 'UPDATE', refId: cleanRef, newStatus }
       }));
+      window.dispatchEvent(new CustomEvent('luxea:dataUpdated'));
 
-      return { success: true, refId, newStatus };
+      return { success: true, newStatus, record: updatedRecord };
     },
 
     // =========================================================================
