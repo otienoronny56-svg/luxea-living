@@ -29,6 +29,35 @@ export function initAuthSuite() {
 }
 
 /**
+ * Intelligently route authenticated user to their specific portal
+ */
+export function redirectUserToPortal(session) {
+  if (!session) return;
+  const email = (session.email || '').toLowerCase().trim();
+  const SUPER_ADMINS = ['otienoronny56@gmail.com', 'dennbarasa@gmail.com'];
+  const isSuperAdmin = session.isSuperAdmin || session.role === 'super_admin' || SUPER_ADMINS.includes(email);
+
+  if (isSuperAdmin) {
+    if (!window.location.pathname.startsWith('/admin')) {
+      setTimeout(() => { window.location.href = '/admin/'; }, 250);
+    }
+    return;
+  }
+
+  if (session.role === 'host') {
+    if (!window.location.pathname.startsWith('/host')) {
+      setTimeout(() => { window.location.href = '/host/?mode=manage'; }, 250);
+    }
+    return;
+  }
+
+  // Active Member: let them see everything happening in the app right away
+  if (window.location.pathname === '/' || window.location.pathname.includes('/login') || window.location.pathname.includes('/waitlist')) {
+    setTimeout(() => { window.location.href = '/stays/'; }, 250);
+  }
+}
+
+/**
  * Listen to Supabase Auth state changes (crucial for Google OAuth redirects)
  */
 function initSupabaseAuthListener() {
@@ -62,6 +91,10 @@ function initSupabaseAuthListener() {
             localStorage.setItem('luxea_user_session', JSON.stringify(adminSession));
             window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: adminSession } }));
             updateHeaderAuthState();
+            if (window.location.hash && window.location.hash.includes('access_token')) {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            redirectUserToPortal(adminSession);
             return;
           }
 
@@ -88,6 +121,7 @@ function initSupabaseAuthListener() {
                 localStorage.setItem('luxea_user_session', JSON.stringify(adminSession));
                 window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: adminSession } }));
                 updateHeaderAuthState();
+                redirectUserToPortal(adminSession);
                 return;
               }
             }
@@ -116,7 +150,7 @@ function initSupabaseAuthListener() {
               name: hostData.full_name || fullName,
               refId: hostData.ref_id,
               role: 'host',
-              status: hostData.review_status || 'pending_review',
+              status: hostData.review_status || 'approved',
               propertyName: hostData.property_name,
               isSuperAdmin: false,
               authMethod: 'supabase_auth',
@@ -144,6 +178,7 @@ function initSupabaseAuthListener() {
             if (window.showToast) {
               window.showToast(`✅ Welcome, ${sessionData.name}!`);
             }
+            redirectUserToPortal(sessionData);
           }
         }
       });
@@ -202,22 +237,42 @@ export function updateHeaderAuthState() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
                 <span>Super Admin Console</span>
               </a>
+              <a href="/host/?mode=manage" class="dropdown-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <span>Host Partner Suite</span>
+              </a>
+            ` : user.role === 'host' ? `
+              <a href="/host/?mode=manage" class="dropdown-link active-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <span>Host Suite Dashboard</span>
+              </a>
+              <a href="/host/" class="dropdown-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                <span>Register Another Property</span>
+              </a>
             ` : ''}
-
-            <a href="/host/" class="dropdown-link">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-              <span>Host Partner Portal</span>
-            </a>
 
             <a href="/stays/" class="dropdown-link">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               <span>Browse All Stays</span>
             </a>
 
-            <a href="/waitlist/" class="dropdown-link">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <span>Founding VIP Pass</span>
-            </a>
+            ${user.role !== 'host' && !user.isSuperAdmin ? `
+              <a href="/host/" class="dropdown-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                <span>Host with Luxea</span>
+              </a>
+            ` : ''}
+
+            <div class="dropdown-divider"></div>
+
+            <button class="dropdown-link dropdown-logout" id="luxGlobalSignOutBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      `;
 
             <div class="dropdown-divider"></div>
 
@@ -744,6 +799,7 @@ function injectAuthModalHtml() {
               window.showToast(`✅ Welcome to Luxea Living, ${name}!`);
             }
             updateHeaderAuthState();
+            redirectUserToPortal(sessionData);
             return;
           }
 
@@ -767,6 +823,7 @@ function injectAuthModalHtml() {
           window.closeAuthModal();
           if (window.showToast) window.showToast(`✅ Welcome, ${name}!`);
           updateHeaderAuthState();
+          redirectUserToPortal(sessionData);
           return;
         }
       }
@@ -830,7 +887,7 @@ function injectAuthModalHtml() {
           name: hostMatch ? hostMatch.full_name : email.split('@')[0],
           role: 'host',
           refId: hostMatch ? hostMatch.ref_id : hostRef,
-          status: hostMatch ? hostMatch.review_status : 'pending_review',
+          status: hostMatch ? hostMatch.review_status : 'approved',
           propertyName: hostMatch ? hostMatch.property_name : 'Residence',
           isSuperAdmin: false,
           authMethod: 'password_set',
@@ -845,6 +902,7 @@ function injectAuthModalHtml() {
           window.showToast(`🏡 Password set! Welcome to your Host Partner Suite.`);
         }
         updateHeaderAuthState();
+        redirectUserToPortal(hostSession);
         return;
       }
 
@@ -870,7 +928,7 @@ function injectAuthModalHtml() {
         window.closeAuthModal();
 
         if (window.showToast) window.showToast(`✅ Welcome back, Super Admin ${defaultName.split(' ')[0]}!`);
-        setTimeout(() => { window.location.href = '/admin/'; }, 300);
+        redirectUserToPortal(sessionData);
         return;
       }
 
@@ -957,7 +1015,7 @@ function injectAuthModalHtml() {
             id: data.user.id,
             name: data.user.user_metadata?.full_name || hostInfo?.full_name || (isSuperAdmin ? defaultAdminName : email.split('@')[0]),
             role: isSuperAdmin ? 'super_admin' : role,
-            status: hostInfo ? hostInfo.review_status : undefined,
+            status: hostInfo ? hostInfo.review_status : 'approved',
             refId: hostInfo ? hostInfo.ref_id : undefined,
             propertyName: hostInfo ? hostInfo.property_name : undefined,
             isSuperAdmin: isSuperAdmin,
@@ -975,6 +1033,7 @@ function injectAuthModalHtml() {
 
           if (window.showToast) window.showToast(`✅ Welcome back, ${sessionData.name}!`);
           updateHeaderAuthState();
+          redirectUserToPortal(sessionData);
           return;
         }
       }
@@ -989,13 +1048,12 @@ function injectAuthModalHtml() {
 
         if (hostRows && hostRows.length > 0) {
           const host = hostRows[0];
-          const isApproved = host.review_status === 'approved';
           const sessionData = {
             email: host.email,
             name: host.full_name,
             refId: host.ref_id,
             role: 'host',
-            status: host.review_status || 'pending_review',
+            status: host.review_status || 'approved',
             propertyName: host.property_name,
             isSuperAdmin: false,
             authMethod: 'host_match',
@@ -1006,12 +1064,9 @@ function injectAuthModalHtml() {
           window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: sessionData } }));
           window.closeAuthModal();
 
-          if (isApproved) {
-            if (window.showToast) window.showToast(`🏡 Welcome, Verified Host Partner ${host.full_name}!`);
-          } else {
-            if (window.showToast) window.showToast(`⏳ Welcome, ${host.full_name}. Your host application is under review.`);
-          }
+          if (window.showToast) window.showToast(`🏡 Welcome, Verified Host Partner ${host.full_name}!`);
           updateHeaderAuthState();
+          redirectUserToPortal(sessionData);
           return;
         }
       }

@@ -34,6 +34,20 @@ export function initWaitlist() {
       timestamp: new Date().toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })
     };
 
+    // Automatically establish active member session so guest sees everything in the app immediately
+    const memberSession = {
+      email: email,
+      name: fullName,
+      phone: phone || '',
+      role: 'member',
+      passNumber: `#${passNumber}`,
+      isSuperAdmin: false,
+      authMethod: 'guest_registration',
+      loggedInAt: new Date().toISOString()
+    };
+    localStorage.setItem('luxea_user_session', JSON.stringify(memberSession));
+    window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: memberSession } }));
+
     // Save to local cache
     guests.unshift(newGuest);
     localStorage.setItem('luxea_waitlist_guests', JSON.stringify(guests));
@@ -62,11 +76,16 @@ export function initWaitlist() {
     if (waitlistModal) waitlistModal.classList.add('active');
 
     if (window.showToast) {
-      window.showToast(`Welcome ${fullName}! You are #${passNumber} on the waitlist.`);
+      window.showToast(`🎉 Welcome ${fullName}! You are now an active member.`);
     }
 
     // Trigger update of counters
     window.dispatchEvent(new CustomEvent('luxea:dataUpdated'));
+
+    // Automatically transition to live stays view so they see everything in the app
+    setTimeout(() => {
+      window.location.href = '/stays/';
+    }, 2500);
   }
 
   if (waitlistForm) {

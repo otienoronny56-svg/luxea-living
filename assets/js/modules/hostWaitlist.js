@@ -104,7 +104,25 @@ export function initHostWaitlist() {
           timestamp: new Date().toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })
         };
 
-        // Persist to Supabase and trigger automated email dispatches
+        // Establish active host partner session so user is immediately a recognized member/host
+        const hostSession = {
+          email: email,
+          name: fullName,
+          phone: phone,
+          role: 'host',
+          status: 'approved',
+          refId: passNumber,
+          propertyName: propertyName,
+          propertyType: propertyType,
+          region: region,
+          isSuperAdmin: false,
+          authMethod: 'partner_registration',
+          loggedInAt: new Date().toISOString()
+        };
+        localStorage.setItem('luxea_user_session', JSON.stringify(hostSession));
+        window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: hostSession } }));
+
+        // Persist to Supabase and trigger automated email & SMS dispatches
         if (window.LuxeaDB && typeof window.LuxeaDB.submitHostWaitlist === 'function') {
           await window.LuxeaDB.submitHostWaitlist(hostSubmission);
         } else {
@@ -127,8 +145,17 @@ export function initHostWaitlist() {
         if (passPropInfoEl) passPropInfoEl.textContent = `${propertyName} • ${propertyType} (${bedrooms} Beds)`;
         if (passRegionEl) passRegionEl.textContent = region;
         if (passEmailNoticeEl) {
-          passEmailNoticeEl.innerHTML = `Your priority briefing and verified pass have been dispatched to <strong>${email}</strong>.`;
+          passEmailNoticeEl.innerHTML = `Your priority onboarding briefing and verified pass have been dispatched to <strong>${email}</strong>.`;
         }
+
+        // Setup Direct Host Portal Destination URL
+        const isPartnerDomain = window.location.hostname === 'partners.luxealiving.co.ke' || window.location.hostname.startsWith('partners.');
+        const targetHostUrl = isPartnerDomain 
+          ? 'https://luxealiving.co.ke/host/?mode=manage' 
+          : '/host/?mode=manage';
+
+        const directBtn = document.getElementById('directHostSuiteBtn');
+        if (directBtn) directBtn.href = targetHostUrl;
 
         // Animate swap from form to VIP result card
         if (formContainer) {
@@ -144,10 +171,22 @@ export function initHostWaitlist() {
         }
 
         if (window.showToast) {
-          window.showToast(`Welcome ${fullName}! Your Founding Partner Pass ${passNumber} is locked.`);
+          window.showToast(`🎉 You are welcomed, ${fullName}! Taking you to your Host Suite.`);
         }
+
+        // Automatic countdown redirect to Host Suite
+        let countdown = 3;
+        const countdownEl = document.getElementById('redirectSeconds');
+        const timer = setInterval(() => {
+          countdown--;
+          if (countdownEl) countdownEl.textContent = countdown;
+          if (countdown <= 0) {
+            clearInterval(timer);
+            window.location.href = targetHostUrl;
+          }
+        }, 1000);
       } catch (err) {
-        console.error('Host waitlist registration error:', err);
+        console.error('Host registration error:', err);
         if (window.showToast) {
           window.showToast('Registration saved locally. Our team will verify your invitation shortly.');
         }
