@@ -75,6 +75,14 @@ export function initHostManager(containerId = 'hostManagerContainer') {
       ? 'Super Admin Control: Manage live availability, rates, and blackout calendar across all listings.' 
       : 'Manage live guest availability, blackout calendar dates, and photography for your residence.';
 
+    let displayListings = listings;
+    if (userSession && userSession.refId && !isSuperAdmin) {
+      const myProps = listings.filter(l => l.host_ref_id === userSession.refId);
+      if (myProps.length > 0) {
+        displayListings = myProps;
+      }
+    }
+
     container.innerHTML = `
       <div class="host-manager-header">
         <div>
@@ -161,11 +169,23 @@ export function initHostManager(containerId = 'hostManagerContainer') {
 
     const grid = container.querySelector('#hostListingsGrid');
 
-    listings.forEach(listing => {
+    displayListings.forEach(listing => {
       const isAvailable = listing.is_available !== false;
-      const hostGallery = (listing.gallery_images && listing.gallery_images.length > 0)
-        ? listing.gallery_images
-        : (listing.cover_image_url ? [listing.cover_image_url] : ['/assets/images/villa.jpg']);
+      let hostGallery = [];
+      if (Array.isArray(listing.gallery_images) && listing.gallery_images.length > 0) {
+        hostGallery = listing.gallery_images;
+      } else if (typeof listing.gallery_images === 'string' && listing.gallery_images.trim().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(listing.gallery_images);
+          if (Array.isArray(parsed) && parsed.length > 0) hostGallery = parsed;
+        } catch (e) {}
+      }
+      if (hostGallery.length === 0 && listing.cover_image_url) {
+        hostGallery = [listing.cover_image_url];
+      }
+      if (hostGallery.length === 0) {
+        hostGallery = ['/assets/images/villa.jpg'];
+      }
       const hasGalleryMultiple = hostGallery.length > 1;
 
       const card = document.createElement('div');
@@ -477,5 +497,6 @@ export function initHostManager(containerId = 'hostManagerContainer') {
     console.log('Host Manager received realtime update:', e.detail);
   });
 
+  window.refreshHostManager = loadHostListings;
   loadHostListings();
 }

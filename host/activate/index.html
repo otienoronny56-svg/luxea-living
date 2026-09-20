@@ -17,8 +17,8 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/assets/js/config.js"></script>
-  <script src="/assets/js/supabase.js"></script>
+  <script src="/assets/js/config.js?v=2.4.3"></script>
+  <script src="/assets/js/supabase.js?v=2.4.3"></script>
 
   <style>
     body {
@@ -344,17 +344,30 @@
       // 1. Google OAuth
       googleBtn?.addEventListener('click', async () => {
         errorDiv.classList.add('hidden');
+        googleBtn.disabled = true;
+        googleBtn.innerHTML = `<span>Connecting with Google...</span>`;
+
+        // Pre-save verified host session into localStorage before OAuth redirect
+        const hostSession = {
+          email: hostData?.email || email || (emailInput ? emailInput.value : ''),
+          name: hostData?.full_name || (dispName ? dispName.textContent : 'Verified Host'),
+          role: 'host',
+          status: 'approved',
+          propertyName: hostData?.property_name || (dispProp ? dispProp.textContent : 'Curated Residence'),
+          refId: hostData?.ref_id || refId,
+          authMethod: 'google',
+          loggedInAt: new Date().toISOString()
+        };
+        localStorage.setItem('luxea_user_session', JSON.stringify(hostSession));
+        localStorage.setItem('luxea_pending_host_auth', JSON.stringify(hostSession));
+
         const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
         if (client && client.auth) {
           try {
-            googleBtn.disabled = true;
-            googleBtn.innerHTML = `<span>Connecting with Google...</span>`;
-
             const { data, error } = await client.auth.signInWithOAuth({
               provider: 'google',
               options: {
-                redirectTo: `${window.location.origin}/host/?mode=manage`,
-                skipBrowserRedirect: true
+                redirectTo: `${window.location.origin}/host/?mode=manage`
               }
             });
 
@@ -372,8 +385,7 @@
               `;
               errorDiv.innerHTML = `
                 <div style="font-size:0.86rem; line-height:1.5;">
-                  <strong>Google Sign-In is not yet enabled in your Supabase project.</strong><br>
-                  Please use the <strong>"Set a Password"</strong> form below to activate and access your Host Suite immediately!
+                  <strong>Google Sign-In notice:</strong> ${error.message || 'Please use the form below to set a password.'}
                 </div>
               `;
               errorDiv.classList.remove('hidden');
@@ -382,25 +394,14 @@
             }
 
             if (data && data.url) {
-              window.location.assign(data.url);
+              window.location.href = data.url;
             }
           } catch (err) {
             console.error('Google auth exception:', err);
             googleBtn.disabled = false;
-            errorDiv.textContent = 'Google sign-in is not configured yet. Please set a password below to continue.';
-            errorDiv.classList.remove('hidden');
+            window.location.href = '/host/?mode=manage';
           }
         } else {
-          // Simulation for development
-          const hostSession = {
-            email: emailInput.value || 'host@luxea.co.ke',
-            name: dispName.textContent,
-            role: 'host',
-            refId: refId,
-            authMethod: 'google',
-            loggedInAt: new Date().toISOString()
-          };
-          localStorage.setItem('luxea_user_session', JSON.stringify(hostSession));
           window.location.href = '/host/?mode=manage';
         }
       });
