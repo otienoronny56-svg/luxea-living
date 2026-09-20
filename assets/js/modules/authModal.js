@@ -171,12 +171,7 @@ export function updateHeaderAuthState() {
     }
 
     if (user) {
-      const initials = (user.name || user.email || 'U')
-        .split(' ')
-        .map(n => n[0])
-        .join('')
-        .substring(0, 2)
-        .toUpperCase();
+      const firstInitial = (user.name ? user.name.trim()[0] : (user.email ? user.email[0] : 'R')).toUpperCase();
 
       const roleLabel = user.isSuperAdmin
         ? 'Super Admin'
@@ -188,11 +183,9 @@ export function updateHeaderAuthState() {
 
       authContainer.innerHTML = `
         <div class="lux-user-menu-wrap">
-          <button class="lux-user-pill-btn" id="luxUserDropdownToggle" aria-expanded="false" aria-label="Account menu">
-            <span class="user-avatar-initials">${user.isSuperAdmin ? '👑' : initials}</span>
-            <span class="user-name-short">${user.name ? user.name.split(' ')[0] : 'Account'}</span>
-            <span class="user-role-badge ${roleBadgeClass}">${roleLabel}</span>
-            <svg class="dropdown-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+          <button class="lux-user-avatar-btn" id="luxUserDropdownToggle" aria-expanded="false" aria-label="Account menu: ${user.name || 'User'}" title="${user.name || 'Account'} (${roleLabel})">
+            <span class="user-avatar-initial">${firstInitial}</span>
+            ${user.isSuperAdmin ? '<span class="avatar-crown-indicator" title="Super Admin">👑</span>' : ''}
           </button>
 
           <div class="lux-user-dropdown hidden" id="luxUserDropdownMenu">

@@ -426,6 +426,48 @@
   position: relative;
 }
 
+.lux-user-avatar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-espresso);
+  border: 2px solid var(--color-camel);
+  color: #FFFFFF;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(74, 52, 42, 0.15);
+  transition: all 0.2s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.lux-user-avatar-btn:hover {
+  transform: translateY(-1px) scale(1.05);
+  border-color: #FFFFFF;
+  background: var(--color-espresso-rich);
+  box-shadow: 0 4px 14px rgba(74, 52, 42, 0.24);
+}
+
+.user-avatar-initial {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.avatar-crown-indicator {
+  position: absolute;
+  top: -6px;
+  right: -5px;
+  font-size: 0.75rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
 .lux-user-pill-btn {
   display: inline-flex;
   align-items: center;
@@ -437,27 +479,6 @@
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
-}
-
-.lux-user-pill-btn:hover {
-  background: #FFFFFF;
-  border-color: var(--color-camel);
-  box-shadow: 0 4px 12px rgba(74, 52, 42, 0.12);
-  transform: translateY(-1px);
-}
-
-.user-avatar-initials {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--color-espresso);
-  color: var(--color-linen);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
 }
 
 .user-name-short {
