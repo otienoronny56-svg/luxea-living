@@ -38,10 +38,7 @@
       </nav>
 
       <div class="header-actions">
-        <button class="currency-toggle" id="currencyToggle" aria-label="Toggle currency">
-          <span class="currency-label">USD ($)</span>
-        </button>
-        <a href="/waitlist/" class="btn btn-primary btn-sm">Join Waitlist</a>
+        <a href="/host/" class="btn btn-outline btn-sm">Host a Home</a>
       </div>
     </div>
   </header>
@@ -105,110 +102,202 @@
     <!-- ==========================================================================
          VIEW 2: PROPERTY DETAIL (Phone 3 Reference UI)
          ========================================================================== -->
+    <!-- ==========================================================================
+         VIEW 2: PROPERTY DETAIL (Redesigned Zero Space Wastage Luxury UI)
+         ========================================================================== -->
     <div id="detailView" class="detail-view-pane hidden">
       
-      <!-- Top Action Bar (Phone 3) -->
+      <!-- Top Action Bar -->
       <div class="detail-nav-bar">
         <button class="detail-back-btn" id="backToBrowseBtn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
           <span>Back to Stays</span>
         </button>
         <div class="detail-actions">
-          <button class="icon-tool-btn" id="shareStayBtn" title="Share">
+          <button class="icon-tool-btn" id="shareStayBtn" title="Share Stay">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
           </button>
-          <button class="icon-tool-btn" id="saveStayBtn" title="Wishlist">
+          <button class="icon-tool-btn" id="saveStayBtn" title="Save to Wishlist">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           </button>
         </div>
       </div>
 
-      <!-- Hero Gallery (Phone 3) -->
+      <!-- Full-Width Hero Media Carousel -->
       <div class="detail-hero-media" id="detailHeroMedia">
-        <img id="detailHeroImg" src="/assets/images/villa.jpg" alt="Stay Preview">
+        <img id="detailHeroImg" src="/assets/images/villa_pool.jpg" alt="Stay Preview">
         <button class="card-carousel-arrow arrow-prev" id="detailHeroPrev" aria-label="Previous photo" title="Previous photo">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
         </button>
         <button class="card-carousel-arrow arrow-next" id="detailHeroNext" aria-label="Next photo" title="Next photo">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m9 18 6-6-6-6"/></svg>
         </button>
-        <div class="detail-gallery-dots">
-          <span class="dot active"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-          <span class="dot"></span>
-        </div>
+        <div class="detail-gallery-dots"></div>
       </div>
 
-      <!-- Price & Verified Row (Phone 3) -->
-      <div class="detail-price-box">
-        <div class="detail-price-text price-num" id="detailPriceNum" data-usd="650" data-kes="84500">$650<small style="font-size: 0.9rem; color: var(--color-cocoa); font-weight: normal;"> / night</small></div>
-        <span class="verified-pill-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          <span>Verified Luxury</span>
-        </span>
-      </div>
-
-      <!-- Title & Location (Phone 3) -->
-      <div>
-        <h2 class="detail-title-text" id="detailStayTitle">The Grand Oasis Infinity Villa</h2>
-        <p class="detail-loc-text" id="detailStayLoc">Galu Beach, Diani • Coast Region</p>
-      </div>
-
-      <!-- 4 Spec Boxes (Phone 3: Bedrooms / Bathrooms / Sqft / Year) -->
-      <div class="specs-icon-grid">
-        <div class="spec-box-item">
-          <div class="spec-box-icon">🛏️</div>
-          <div class="spec-box-val" id="specBedsVal">4</div>
-          <div class="spec-box-lbl">Bedrooms</div>
-        </div>
-        <div class="spec-box-item">
-          <div class="spec-box-icon">🛁</div>
-          <div class="spec-box-val" id="specBathsVal">4.5</div>
-          <div class="spec-box-lbl">Bathrooms</div>
-        </div>
-        <div class="spec-box-item">
-          <div class="spec-box-icon">📐</div>
-          <div class="spec-box-val" id="specSqftVal">5,400</div>
-          <div class="spec-box-lbl">Sq Ft</div>
-        </div>
-        <div class="spec-box-item">
-          <div class="spec-box-icon">⭐</div>
-          <div class="spec-box-val" id="specRatingVal">4.98</div>
-          <div class="spec-box-lbl">Rating</div>
-        </div>
-      </div>
-
-      <!-- Description Paragraph (Phone 3) -->
-      <p class="detail-desc-text" id="detailStayDesc">
-        An oceanfront sanctuary framed by swaying palms and azure waters. Features expansive living pavilions, travertine sun terraces, private ocean-view infinity pool, dedicated butler, and resident private chef preparing coastal Swahili-fusion gourmet dining.
-      </p>
-
-      <!-- Mini Map Card Preview (Phone 3) -->
-      <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" class="mini-map-card">
-        <div class="map-card-left">
-          <div class="map-pin-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <!-- 2-Column Responsive Body Layout -->
+      <div class="detail-body-layout">
+        
+        <!-- Left Main Column (Details, Specs, Description, Amenities, Map) -->
+        <div class="detail-main-col">
+          <div class="detail-header-block">
+            <div class="detail-meta-row">
+              <span class="verified-pill-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span>Verified Luxury</span>
+              </span>
+              <span class="detail-rating-pill" id="detailRatingBadge">⭐ 4.98</span>
+            </div>
+            <h1 class="detail-title-text" id="detailStayTitle">The Grand Oasis Infinity Villa</h1>
+            <p class="detail-loc-text" id="detailStayLoc">Galu Beach, Diani • Coast Region</p>
           </div>
-          <div>
-            <div class="map-pin-title" id="mapStayName">Galu Beach, Diani</div>
-            <div class="map-pin-sub">Coast Region, Kenya</div>
+
+          <!-- 4 Spec Boxes -->
+          <div class="specs-icon-grid">
+            <div class="spec-box-item">
+              <div class="spec-box-icon">🛏️</div>
+              <div class="spec-box-val" id="specBedsVal">4</div>
+              <div class="spec-box-lbl">Bedrooms</div>
+            </div>
+            <div class="spec-box-item">
+              <div class="spec-box-icon">🛁</div>
+              <div class="spec-box-val" id="specBathsVal">4.5</div>
+              <div class="spec-box-lbl">Bathrooms</div>
+            </div>
+            <div class="spec-box-item">
+              <div class="spec-box-icon">📐</div>
+              <div class="spec-box-val" id="specSqftVal">5,400</div>
+              <div class="spec-box-lbl">Sq Ft</div>
+            </div>
+            <div class="spec-box-item">
+              <div class="spec-box-icon">⭐</div>
+              <div class="spec-box-val" id="specRatingVal">4.98</div>
+              <div class="spec-box-lbl">Rating</div>
+            </div>
+          </div>
+
+          <div class="detail-divider"></div>
+
+          <!-- Description Section -->
+          <div class="detail-section">
+            <h3 class="detail-section-heading">About this Space</h3>
+            <p class="detail-desc-text" id="detailStayDesc">
+              An oceanfront sanctuary framed by swaying palms and azure waters. Features expansive living pavilions, travertine sun terraces, private ocean-view infinity pool, dedicated butler, and resident private chef preparing coastal Swahili-fusion gourmet dining.
+            </p>
+          </div>
+
+          <div class="detail-divider"></div>
+
+          <!-- Curated Inclusions (2-Column Grid) -->
+          <div class="detail-section">
+            <h3 class="detail-section-heading">Curated Inclusions</h3>
+            <div class="amenities-grid" id="detailAmenitiesList">
+              <!-- Injected dynamically via JS -->
+            </div>
+          </div>
+
+          <div class="detail-divider"></div>
+
+          <!-- Location & Neighborhood -->
+          <div class="detail-section">
+            <h3 class="detail-section-heading">Location &amp; Neighborhood</h3>
+            <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" class="mini-map-card" id="detailMapLink">
+              <div class="map-card-left">
+                <div class="map-pin-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div>
+                  <div class="map-pin-title" id="mapStayName">Galu Beach, Diani</div>
+                  <div class="map-pin-sub" id="mapStaySub">Coast Region, Kenya</div>
+                </div>
+              </div>
+              <span class="map-link-btn">View on Maps &rsaquo;</span>
+            </a>
           </div>
         </div>
-        <span style="font-size: 0.85rem; font-weight: 600; color: var(--color-camel-dark);">View on Map &rsaquo;</span>
-      </a>
 
-      <!-- Nearby Amenities List (Phone 3) -->
-      <h3 class="amenities-section-title">Curated Inclusions</h3>
-      <div class="amenities-list" id="detailAmenitiesList">
-        <!-- Injected dynamically -->
+        <!-- Right Column: Sticky Booking Reservation Card (Desktop) -->
+        <div class="detail-sidebar-col">
+          <div class="detail-booking-card" id="detailBookingCard">
+            <div class="booking-card-head">
+              <div class="booking-price-wrap">
+                <span class="booking-price-amount" id="detailPriceNum">KSh 84,500</span>
+                <span class="booking-price-unit">/ night</span>
+              </div>
+              <span class="booking-badge-verified">Verified Luxury</span>
+            </div>
+
+            <!-- Date & Guest Form -->
+            <div class="booking-form-box">
+              <div class="booking-dates-row">
+                <div class="booking-date-field">
+                  <label for="bookingCheckIn">CHECK-IN</label>
+                  <input type="date" id="bookingCheckIn" class="booking-date-input">
+                </div>
+                <div class="booking-date-field">
+                  <label for="bookingCheckOut">CHECKOUT</label>
+                  <input type="date" id="bookingCheckOut" class="booking-date-input">
+                </div>
+              </div>
+              <div class="booking-guests-field">
+                <label for="bookingGuests">GUESTS</label>
+                <select id="bookingGuests" class="booking-guests-select">
+                  <option value="1">1 Guest</option>
+                  <option value="2" selected>2 Guests</option>
+                  <option value="3">3 Guests</option>
+                  <option value="4">4 Guests</option>
+                  <option value="5+">5+ Guests</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Live Pricing Breakdown -->
+            <div class="booking-cost-breakdown">
+              <div class="cost-row">
+                <span id="costBreakdownNights">KSh 84,500 × 3 nights</span>
+                <span id="costBreakdownSubtotal">KSh 253,500</span>
+              </div>
+              <div class="cost-row">
+                <span>Luxea VIP Concierge</span>
+                <span class="cost-free">Included</span>
+              </div>
+              <div class="cost-row">
+                <span>Housekeeping &amp; Linen</span>
+                <span class="cost-free">Included</span>
+              </div>
+              <div class="cost-divider"></div>
+              <div class="cost-row total-row">
+                <span>Estimated Total</span>
+                <span class="cost-total-amount" id="costTotalAmount">KSh 253,500</span>
+              </div>
+            </div>
+
+            <!-- Direct Reserve Button -->
+            <button class="btn btn-primary btn-block booking-btn" id="directReserveBtn">
+              <span>Reserve This Stay</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+
+            <!-- Direct WhatsApp Concierge Button -->
+            <a id="whatsappConciergeBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp-concierge btn-block">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.196 8.196 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.76-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.12-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.12.17 1.78 2.71 4.3 3.8 2.53 1.09 2.53.73 2.99.69.45-.05 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.17-.48-.29z"/></svg>
+              <span>Inquire via WhatsApp</span>
+            </a>
+
+            <p class="booking-guarantee-note">✦ Best rate guaranteed • Instant concierge confirmation</p>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Fixed Sticky Bottom Bar (Phone 3) -->
-      <div class="detail-sticky-bar">
-        <a href="/waitlist/" class="book-now-btn">Reserve via VIP Waitlist</a>
-        <button class="chat-inquire-btn" title="Contact Concierge" onclick="window.location.href='mailto:concierge@luxealiving.com'">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <!-- Mobile Floating Booking Bar (Sticky on phones) -->
+      <div class="detail-mobile-booking-bar" id="detailMobileBookingBar">
+        <div class="mobile-booking-info">
+          <div class="mobile-booking-price" id="mobileDetailPrice">KSh 84,500</div>
+          <div class="mobile-booking-sub">per night • all included</div>
+        </div>
+        <button class="btn btn-primary mobile-booking-btn" id="mobileReserveBtn">
+          Reserve Stay
         </button>
       </div>
 
@@ -623,6 +712,11 @@
       }
 
       function showDetailView(stay) {
+        document.body.classList.add('detail-open');
+        try {
+          window.history.pushState(null, '', '/stays/?id=' + encodeURIComponent(stay.id));
+        } catch (e) {}
+
         const detailGallery = (stay.images && stay.images.length > 0) ? stay.images : [stay.image];
         let detailIdx = 0;
         const heroImg = document.getElementById('detailHeroImg');
@@ -641,63 +735,214 @@
         setHeroPhoto(0);
 
         if (dotsWrap) {
-          dotsWrap.innerHTML = detailGallery.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}" data-idx="${i}" style="cursor: pointer;"></span>`).join('');
+          dotsWrap.innerHTML = detailGallery.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}" data-idx="${i}"></span>`).join('');
           dotsWrap.querySelectorAll('.dot').forEach((d, i) => {
-            d.onclick = () => setHeroPhoto(i);
+            d.onclick = (e) => {
+              e.stopPropagation();
+              setHeroPhoto(i);
+            };
           });
         }
 
         if (heroPrev) {
           heroPrev.style.display = detailGallery.length > 1 ? 'flex' : 'none';
-          heroPrev.onclick = () => setHeroPhoto(detailIdx - 1);
+          heroPrev.onclick = (e) => {
+            e.stopPropagation();
+            setHeroPhoto(detailIdx - 1);
+          };
         }
         if (heroNext) {
           heroNext.style.display = detailGallery.length > 1 ? 'flex' : 'none';
-          heroNext.onclick = () => setHeroPhoto(detailIdx + 1);
+          heroNext.onclick = (e) => {
+            e.stopPropagation();
+            setHeroPhoto(detailIdx + 1);
+          };
         }
 
+        // Pricing (Exclusively KES)
+        const formattedKes = `KSh ${stay.kesPrice.toLocaleString()}`;
         const priceEl = document.getElementById('detailPriceNum');
-        priceEl.setAttribute('data-usd', stay.usdPrice);
-        priceEl.setAttribute('data-kes', stay.kesPrice);
-        priceEl.innerHTML = `KSh ${(stay.kesPrice).toLocaleString()}<small style="font-size: 0.9rem; color: var(--color-cocoa); font-weight: normal;"> / night</small>`;
+        if (priceEl) {
+          priceEl.setAttribute('data-kes', stay.kesPrice);
+          priceEl.setAttribute('data-usd', stay.usdPrice);
+          priceEl.textContent = formattedKes;
+        }
 
+        const mobilePriceEl = document.getElementById('mobileDetailPrice');
+        if (mobilePriceEl) {
+          mobilePriceEl.textContent = formattedKes;
+        }
+
+        // Details & Titles
         document.getElementById('detailStayTitle').textContent = stay.name;
         document.getElementById('detailStayLoc').textContent = stay.location;
-        document.getElementById('mapStayName').textContent = stay.location.split('•')[0];
+        document.getElementById('mapStayName').textContent = stay.location.split('•')[0].trim();
+        const mapSub = document.getElementById('mapStaySub');
+        if (mapSub) mapSub.textContent = stay.location.split('•')[1] ? stay.location.split('•')[1].trim() : 'Kenya';
         document.getElementById('detailStayDesc').textContent = stay.description;
 
-        // Parse specs
-        const parts = stay.specs.split('•');
-        document.getElementById('specBedsVal').textContent = parts[0] ? parts[0].trim().replace('Beds', '') : '3';
-        document.getElementById('specBathsVal').textContent = parts[1] ? parts[1].trim().replace('Baths', '') : '3';
-        document.getElementById('specSqftVal').textContent = parts[2] ? parts[2].trim().replace('sqft', '') : '3,200';
-        document.getElementById('specRatingVal').textContent = stay.rating.split(' ')[1] || '4.95';
+        const ratingVal = stay.rating.split(' ')[1] || '4.95';
+        const detailRatingBadge = document.getElementById('detailRatingBadge');
+        if (detailRatingBadge) detailRatingBadge.textContent = `⭐ ${ratingVal}`;
+        const bookingCardRating = document.getElementById('bookingCardRating');
+        if (bookingCardRating) bookingCardRating.textContent = `⭐ ${ratingVal}`;
 
-        // Curated inclusions
+        // Map Link
+        const mapLink = document.getElementById('detailMapLink');
+        if (mapLink) {
+          mapLink.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(stay.location + ' ' + stay.name);
+        }
+
+        // Parse Specs
+        const parts = stay.specs.split('•');
+        document.getElementById('specBedsVal').textContent = parts[0] ? parts[0].trim().replace('Beds', '').trim() : '3';
+        document.getElementById('specBathsVal').textContent = parts[1] ? parts[1].trim().replace('Baths', '').trim() : '3';
+        document.getElementById('specSqftVal').textContent = parts[2] ? parts[2].trim().replace('sqft', '').trim() : '3,200';
+        document.getElementById('specRatingVal').textContent = ratingVal;
+
+        // Curated Inclusions
         const amList = document.getElementById('detailAmenitiesList');
         amList.innerHTML = '';
         stay.amenities.forEach(am => {
-          const row = document.createElement('div');
-          row.className = 'amenity-row';
-          row.innerHTML = `
-            <div class="amenity-left">
-              <span>✨</span>
+          const item = document.createElement('div');
+          item.className = 'amenity-grid-item';
+          item.innerHTML = `
+            <div class="amenity-item-left">
+              <span class="amenity-sparkle">✦</span>
               <span>${am}</span>
             </div>
-            <span class="amenity-dist">Included</span>
+            <span class="amenity-badge">Included</span>
           `;
-          amList.appendChild(row);
+          amList.appendChild(item);
         });
 
-        refreshPrices();
+        // Booking Calculator & Interactive Date Inputs
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const checkOutDefault = new Date(tomorrow);
+        checkOutDefault.setDate(checkOutDefault.getDate() + 3);
+
+        const toIso = d => d.toISOString().split('T')[0];
+        const checkInInput = document.getElementById('bookingCheckIn');
+        const checkOutInput = document.getElementById('bookingCheckOut');
+        const guestsInput = document.getElementById('bookingGuests');
+
+        if (checkInInput) {
+          checkInInput.min = toIso(today);
+          checkInInput.value = toIso(tomorrow);
+        }
+        if (checkOutInput) {
+          checkOutInput.min = toIso(tomorrow);
+          checkOutInput.value = toIso(checkOutDefault);
+        }
+
+        function updateBookingCost() {
+          const cinVal = checkInInput ? checkInInput.value : '';
+          const coutVal = checkOutInput ? checkOutInput.value : '';
+          const cin = cinVal ? new Date(cinVal) : tomorrow;
+          const cout = coutVal ? new Date(coutVal) : checkOutDefault;
+          let nights = Math.round((cout - cin) / (1000 * 60 * 60 * 24));
+          if (isNaN(nights) || nights < 1) nights = 1;
+          const guests = guestsInput ? guestsInput.value : '2';
+
+          const subtotal = nights * stay.kesPrice;
+          const nightsLabel = document.getElementById('costBreakdownNights');
+          if (nightsLabel) nightsLabel.textContent = `KSh ${stay.kesPrice.toLocaleString()} × ${nights} night${nights > 1 ? 's' : ''}`;
+          const subtotalEl = document.getElementById('costBreakdownSubtotal');
+          if (subtotalEl) subtotalEl.textContent = `KSh ${subtotal.toLocaleString()}`;
+          const totalEl = document.getElementById('costTotalAmount');
+          if (totalEl) totalEl.textContent = `KSh ${subtotal.toLocaleString()}`;
+
+          // Live WhatsApp Concierge Link
+          const waBtn = document.getElementById('whatsappConciergeBtn');
+          if (waBtn) {
+            const msg = `Hello Luxea Concierge, I would like to reserve "${stay.name}" in ${stay.location.split('•')[0].trim()} for ${nights} night(s) (${cinVal} to ${coutVal}) for ${guests} guest(s). Estimated total: KSh ${subtotal.toLocaleString()}. Please confirm availability.`;
+            waBtn.href = `https://wa.me/254700000000?text=${encodeURIComponent(msg)}`;
+          }
+        }
+
+        if (checkInInput) {
+          checkInInput.onchange = () => {
+            if (checkOutInput) {
+              const d = new Date(checkInInput.value);
+              d.setDate(d.getDate() + 1);
+              checkOutInput.min = toIso(d);
+              if (new Date(checkOutInput.value) <= new Date(checkInInput.value)) {
+                checkOutInput.value = toIso(d);
+              }
+            }
+            updateBookingCost();
+          };
+        }
+        if (checkOutInput) checkOutInput.onchange = updateBookingCost;
+        if (guestsInput) guestsInput.onchange = updateBookingCost;
+        updateBookingCost();
+
+        // Direct Reserve Action Handlers
+        const handleReserve = () => {
+          const cinVal = checkInInput ? checkInInput.value : '';
+          const coutVal = checkOutInput ? checkOutInput.value : '';
+          const cin = cinVal ? new Date(cinVal) : tomorrow;
+          const cout = coutVal ? new Date(coutVal) : checkOutDefault;
+          let nights = Math.round((cout - cin) / (1000 * 60 * 60 * 24));
+          if (isNaN(nights) || nights < 1) nights = 1;
+          const guests = guestsInput ? guestsInput.value : '2';
+          const subtotal = nights * stay.kesPrice;
+
+          const msg = `Hello Luxea Concierge, I would like to reserve "${stay.name}" in ${stay.location.split('•')[0].trim()} for ${nights} night(s) from ${cinVal} to ${coutVal} for ${guests} guest(s). Total: KSh ${subtotal.toLocaleString()}.`;
+          window.open(`https://wa.me/254700000000?text=${encodeURIComponent(msg)}`, '_blank');
+          if (window.showToast) {
+            window.showToast(`Connecting with Luxea VIP Concierge for ${stay.name}...`);
+          }
+        };
+
+        const directBtn = document.getElementById('directReserveBtn');
+        if (directBtn) directBtn.onclick = handleReserve;
+
+        const mobileResBtn = document.getElementById('mobileReserveBtn');
+        if (mobileResBtn) mobileResBtn.onclick = handleReserve;
+
+        // Share & Save
+        const shareBtn = document.getElementById('shareStayBtn');
+        if (shareBtn) {
+          shareBtn.onclick = () => {
+            if (navigator.share) {
+              navigator.share({
+                title: stay.name + ' • Luxea Living',
+                text: `Experience ${stay.name} in ${stay.location} with Luxea Living`,
+                url: window.location.href
+              }).catch(() => {});
+            } else {
+              navigator.clipboard.writeText(window.location.href);
+              if (window.showToast) window.showToast('Listing link copied to clipboard!');
+            }
+          };
+        }
+
+        const saveBtn = document.getElementById('saveStayBtn');
+        if (saveBtn) {
+          saveBtn.onclick = (e) => {
+            e.currentTarget.classList.toggle('active');
+            const isActive = e.currentTarget.classList.contains('active');
+            if (window.showToast) {
+              window.showToast(isActive ? 'Saved to your Luxea Wishlist' : 'Removed from Wishlist');
+            }
+          };
+        }
+
         browseView.classList.add('hidden');
         detailView.classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
       backBtn.addEventListener('click', () => {
+        document.body.classList.remove('detail-open');
         detailView.classList.add('hidden');
         browseView.classList.remove('hidden');
+        try {
+          window.history.pushState(null, '', '/stays/');
+        } catch (e) {}
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
 

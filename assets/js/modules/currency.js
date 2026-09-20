@@ -1,64 +1,51 @@
 /**
  * LUXEA LIVING — CURRENCY MODULE (currency.js)
- * Toggles USD ($) and KES (KSh) prices with live conversion
+ * Standardized to Kenyan Shillings (KSh / KES) for luxury local and safari market.
  */
 
 export function initCurrency() {
-  const rate = (window.LUXEA_CONFIG && window.LUXEA_CONFIG.currency.exchangeRateUsdToKes) || 130;
-  let currentCurrency = localStorage.getItem('luxea_currency') || 'USD';
+  const rate = (window.LUXEA_CONFIG && window.LUXEA_CONFIG.currency && window.LUXEA_CONFIG.currency.exchangeRateUsdToKes) || 130;
+  // Always default strictly to KES as requested
+  const currentCurrency = 'KES';
+  localStorage.setItem('luxea_currency', 'KES');
+
+  const toggleBtn = document.getElementById('currencyToggle');
+  if (toggleBtn) {
+    // If the element still exists in DOM, display KES or hide
+    const label = toggleBtn.querySelector('.currency-label');
+    if (label) label.textContent = 'KES (KSh)';
+  }
 
   function applyCurrency(curr) {
-    currentCurrency = curr;
-    localStorage.setItem('luxea_currency', curr);
-
-    const toggleBtn = document.getElementById('currencyToggle');
-    if (toggleBtn) {
-      const label = toggleBtn.querySelector('.currency-label');
-      if (label) label.textContent = curr === 'USD' ? 'USD ($)' : 'KES (KSh)';
-    }
-
-    document.querySelectorAll('[data-usd]').forEach(el => {
-      const usd = parseFloat(el.getAttribute('data-usd'));
-      const kes = parseFloat(el.getAttribute('data-kes')) || Math.round(usd * rate);
-
-      if (curr === 'USD') {
-        el.textContent = `$${usd.toLocaleString()}`;
-      } else {
-        el.textContent = `KSh ${kes.toLocaleString()}`;
+    document.querySelectorAll('[data-kes], [data-usd]').forEach(el => {
+      const kes = parseFloat(el.getAttribute('data-kes')) || (parseFloat(el.getAttribute('data-usd')) * rate);
+      if (!isNaN(kes)) {
+        // If element contains a sub-unit like / night, preserve it
+        const hasNight = el.innerHTML.includes('/ night') || el.classList.contains('card-large-price') || el.id === 'detailPriceNum' || el.id === 'mobilePriceVal';
+        if (hasNight) {
+          el.innerHTML = `KSh ${Math.round(kes).toLocaleString()}<small style="font-size: 0.85em; font-weight: normal; color: inherit; opacity: 0.8;"> / night</small>`;
+        } else {
+          el.textContent = `KSh ${Math.round(kes).toLocaleString()}`;
+        }
       }
     });
   }
 
-  const toggleBtn = document.getElementById('currencyToggle');
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      applyCurrency(currentCurrency === 'USD' ? 'KES' : 'USD');
-      if (window.showToast) window.showToast(`Currency set to ${currentCurrency}`);
-    });
-  }
-
   applyCurrency(currentCurrency);
-  return { getCurrent: () => currentCurrency, applyCurrency };
+  return { getCurrent: () => 'KES', applyCurrency };
 }
 
 export function refreshPrices() {
   const rate = (window.LUXEA_CONFIG && window.LUXEA_CONFIG.currency && window.LUXEA_CONFIG.currency.exchangeRateUsdToKes) || 130;
-  const curr = localStorage.getItem('luxea_currency') || 'USD';
-
-  const toggleBtn = document.getElementById('currencyToggle');
-  if (toggleBtn) {
-    const label = toggleBtn.querySelector('.currency-label');
-    if (label) label.textContent = curr === 'USD' ? 'USD ($)' : 'KES (KSh)';
-  }
-
-  document.querySelectorAll('[data-usd]').forEach(el => {
-    const usd = parseFloat(el.getAttribute('data-usd'));
-    const kes = parseFloat(el.getAttribute('data-kes')) || Math.round(usd * rate);
-
-    if (curr === 'USD') {
-      el.textContent = `$${usd.toLocaleString()}`;
-    } else {
-      el.textContent = `KSh ${kes.toLocaleString()}`;
+  document.querySelectorAll('[data-kes], [data-usd]').forEach(el => {
+    const kes = parseFloat(el.getAttribute('data-kes')) || (parseFloat(el.getAttribute('data-usd')) * rate);
+    if (!isNaN(kes)) {
+      const hasNight = el.innerHTML.includes('/ night') || el.classList.contains('card-large-price') || el.id === 'detailPriceNum' || el.id === 'mobilePriceVal';
+      if (hasNight) {
+        el.innerHTML = `KSh ${Math.round(kes).toLocaleString()}<small style="font-size: 0.85em; font-weight: normal; color: inherit; opacity: 0.8;"> / night</small>`;
+      } else {
+        el.textContent = `KSh ${Math.round(kes).toLocaleString()}`;
+      }
     }
   });
 }

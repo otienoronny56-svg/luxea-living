@@ -302,13 +302,13 @@
 .browse-card-media {
   position: relative;
   width: 100%;
-  height: 240px;
+  height: 220px;
   overflow: hidden;
 }
 
 @media (min-width: 600px) {
   .browse-card-media {
-    height: 300px;
+    height: 240px;
   }
 }
 
@@ -408,19 +408,19 @@
 }
 
 /* ==========================================================================
-   5. DETAIL VIEW (Phone 3)
+   5. DETAIL VIEW (Redesigned Zero Space Wastage Luxury UI)
    ========================================================================== */
 .detail-view-pane {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  width: 100%;
 }
 
 .detail-nav-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .detail-back-btn {
@@ -435,6 +435,12 @@
   font-weight: 600;
   color: var(--color-espresso);
   cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.detail-back-btn:hover {
+  background: var(--color-linen);
+  border-color: var(--color-camel);
 }
 
 .detail-actions {
@@ -445,15 +451,17 @@
 .detail-hero-media {
   position: relative;
   width: 100%;
-  height: 320px;
-  border-radius: 24px;
+  height: 280px;
+  border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(74, 52, 42, 0.08);
+  background: var(--color-linen);
 }
 
 @media (min-width: 600px) {
   .detail-hero-media {
-    height: 400px;
+    height: 380px;
+    border-radius: 24px;
   }
 }
 
@@ -470,13 +478,16 @@
   transform: translateX(-50%);
   display: flex;
   gap: 6px;
+  z-index: 12;
 }
 
 .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .dot.active {
@@ -485,45 +496,60 @@
   background: #FFFFFF;
 }
 
-.detail-price-box {
+/* 2-Column Responsive Body Layout */
+.detail-body-layout {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 0;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 20px;
 }
 
-.detail-price-text {
-  font-size: 1.8rem;
+.detail-main-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.detail-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.detail-rating-pill {
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--color-espresso);
 }
 
 .detail-title-text {
   font-family: var(--font-serif);
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 600;
   color: var(--color-espresso);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  line-height: 1.25;
 }
 
 .detail-loc-text {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   color: var(--color-cocoa);
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
-/* 4 Spec Boxes (Phone 3) */
+/* 4 Spec Boxes */
 .specs-icon-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 8px;
 }
 
 .spec-box-item {
   background: #FFFFFF;
   border: 1px solid var(--color-khaki-light);
-  border-radius: 16px;
+  border-radius: 14px;
   padding: 12px 8px;
   text-align: center;
 }
@@ -534,7 +560,7 @@
 }
 
 .spec-box-val {
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--color-espresso);
   margin-bottom: 2px;
@@ -547,15 +573,82 @@
   letter-spacing: 0.04em;
 }
 
-/* Description */
-.detail-desc-text {
-  font-size: 0.92rem;
-  color: var(--color-espresso);
-  line-height: 1.65;
-  margin-bottom: 24px;
+.detail-divider {
+  height: 1px;
+  background: var(--color-khaki-light);
+  margin: 20px 0;
+  opacity: 0.7;
 }
 
-/* Mini Map Preview Box (Phone 3) */
+/* Detail Section */
+.detail-section-heading {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+  margin-bottom: 12px;
+}
+
+.detail-desc-text {
+  font-size: 0.95rem;
+  color: var(--color-espresso);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* Curated Inclusions Grid (2-Column Density) */
+.amenities-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+@media (min-width: 600px) {
+  .amenities-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+.amenity-grid-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 14px;
+  background: #FFFFFF;
+  border: 1px solid var(--color-khaki-light);
+  border-radius: 12px;
+  font-size: 0.88rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.amenity-grid-item:hover {
+  border-color: var(--color-camel);
+  box-shadow: 0 2px 8px rgba(74, 52, 42, 0.04);
+}
+
+.amenity-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: var(--color-espresso);
+}
+
+.amenity-sparkle {
+  color: var(--color-camel-dark);
+}
+
+.amenity-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-camel-dark);
+  background: rgba(184, 150, 107, 0.12);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+/* Mini Map Preview Box */
 .mini-map-card {
   display: flex;
   align-items: center;
@@ -564,8 +657,13 @@
   border: 1px solid var(--color-khaki-light);
   border-radius: 16px;
   padding: 16px 20px;
-  margin-bottom: 24px;
   text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mini-map-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(74, 52, 42, 0.08);
 }
 
 .map-card-left {
@@ -575,18 +673,19 @@
 }
 
 .map-pin-icon {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   background: var(--color-linen);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-espresso);
+  color: var(--color-camel-dark);
+  flex-shrink: 0;
 }
 
 .map-pin-title {
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-espresso);
   margin-bottom: 2px;
@@ -597,142 +696,293 @@
   color: var(--color-camel-dark);
 }
 
-/* Nearby Amenities List (Phone 3) */
-.amenities-section-title {
-  font-family: var(--font-serif);
-  font-size: 1.25rem;
+.map-link-btn {
+  font-size: 0.85rem;
   font-weight: 600;
-  color: var(--color-espresso);
-  margin-bottom: 12px;
-}
-
-.amenities-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 30px;
-}
-
-.amenity-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 14px;
-  background: #FFFFFF;
-  border: 1px solid var(--color-khaki-light);
-  border-radius: 12px;
-  font-size: 0.88rem;
-}
-
-.amenity-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--color-espresso);
-}
-
-.amenity-dist {
-  font-size: 0.78rem;
   color: var(--color-camel-dark);
 }
 
-/* Sticky Bottom Action Bar (Phone 3) */
-.detail-sticky-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid var(--color-khaki-light);
-  padding: 14px 20px;
-  z-index: 99;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  max-width: 600px;
-  left: 50%;
-  transform: translateX(-50%);
+/* Desktop Sidebar Column & Sticky Booking Card */
+.detail-sidebar-col {
+  display: none; /* Controlled on desktop via @media (min-width: 992px) */
 }
 
-.chat-inquire-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+.detail-booking-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-khaki-light);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 12px 36px rgba(40, 28, 22, 0.07);
+}
+
+.booking-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-khaki-light);
+}
+
+.booking-price-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.booking-price-amount {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+  letter-spacing: -0.02em;
+}
+
+.booking-price-unit {
+  font-size: 0.88rem;
+  color: var(--color-cocoa);
+  font-weight: 400;
+}
+
+.booking-badge-verified {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-camel-dark);
   background: var(--color-linen);
-  border: 1px solid var(--color-khaki);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-khaki-light);
+}
+
+.booking-form-box {
+  border: 1px solid var(--color-khaki-light);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.booking-dates-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--color-khaki-light);
+}
+
+.booking-date-field {
+  padding: 10px 12px;
+}
+
+.booking-date-field:first-child {
+  border-right: 1px solid var(--color-khaki-light);
+}
+
+.booking-date-field label,
+.booking-guests-field label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-camel-dark);
+  margin-bottom: 4px;
+}
+
+.booking-date-input,
+.booking-guests-select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+  outline: none;
+  cursor: pointer;
+}
+
+.booking-guests-field {
+  padding: 10px 12px;
+}
+
+.booking-cost-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+}
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--color-espresso);
+}
+
+.cost-free {
+  color: #2E7D32;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.cost-divider {
+  height: 1px;
+  background: var(--color-khaki-light);
+  margin: 4px 0;
+}
+
+.cost-row.total-row {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-espresso);
+  padding-top: 4px;
+}
+
+.cost-total-amount {
+  color: var(--color-camel-dark);
+  font-size: 1.15rem;
+}
+
+.booking-btn {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-espresso);
+  gap: 8px;
+  padding: 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
   cursor: pointer;
-  flex-shrink: 0;
 }
 
-.book-now-btn {
-  flex: 1;
-  background: var(--color-camel);
-  color: #FFFFFF;
+.btn-whatsapp-concierge {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  font-size: 0.88rem;
   font-weight: 600;
-  font-size: 1rem;
-  padding: 14px 24px;
   border-radius: var(--radius-pill);
-  text-align: center;
+  background: #128C7E;
+  color: #FFFFFF;
   text-decoration: none;
-  transition: var(--transition-fast);
+  margin-top: 10px;
+  transition: background 0.2s ease, transform 0.2s ease;
   border: none;
   cursor: pointer;
 }
 
-.book-now-btn:hover {
-  background: var(--color-camel-dark);
+.btn-whatsapp-concierge:hover {
+  background: #075E54;
+  transform: translateY(-1px);
+}
+
+.booking-guarantee-note {
+  font-size: 0.72rem;
+  color: var(--color-cocoa);
+  text-align: center;
+  margin-top: 12px;
+  margin-bottom: 0;
+  line-height: 1.4;
+}
+
+/* Mobile Floating Booking Bar (Sticky on small screens) */
+.detail-mobile-booking-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid var(--color-khaki-light);
+  padding: 12px 20px;
+  z-index: 999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.08);
+}
+
+.mobile-booking-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-booking-price {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+}
+
+.mobile-booking-sub {
+  font-size: 0.72rem;
+  color: var(--color-cocoa);
+}
+
+.mobile-booking-btn {
+  padding: 10px 22px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+}
+
+/* When detail view is open on mobile, hide the bottom navigation bar */
+body.detail-open .mobile-bottom-nav {
+  display: none !important;
+}
+
+body.detail-open .stays-page-wrap {
+  padding-bottom: 80px;
 }
 
 /* ==========================================================================
-   DESKTOP & LARGE SCREEN ENHANCEMENTS (min-width: 992px)
-   Eliminate wasted space, 2-column feed and desktop stay details layout
+   DESKTOP & LARGE SCREEN ENHANCEMENTS (min-width: 992px & 1400px)
+   3 to 4 listing cards per row, 2-column detail layout with sticky booking
    ========================================================================== */
 @media (min-width: 992px) {
   .stays-page-wrap {
-    max-width: 1220px;
+    max-width: 1440px;
     padding: 24px 32px 100px;
   }
 
-  /* 2-column feed filling the desktop screen */
+  /* 3-column feed filling the desktop screen */
   .browse-feed {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 28px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
   }
 
   .browse-card-media {
-    height: 280px;
-  }
-
-  /* Split Detail View for desktop */
-  .detail-view-pane {
-    display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: 36px;
-    align-items: start;
-  }
-
-  .detail-nav-bar {
-    grid-column: 1 / -1;
+    height: 240px;
   }
 
   .detail-hero-media {
     height: 480px;
+    border-radius: 28px;
   }
 
-  .detail-sticky-bar {
-    position: static;
-    transform: none;
-    max-width: 100%;
-    padding: 0;
-    margin-top: 20px;
-    background: transparent;
-    border: none;
+  .detail-title-text {
+    font-size: 2.2rem;
+  }
+
+  /* 2-Column Responsive Body Layout for Desktop */
+  .detail-body-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 48px;
+    align-items: start;
+    margin-top: 32px;
+  }
+
+  .detail-sidebar-col {
+    display: block;
+    position: sticky;
+    top: 96px;
+  }
+
+  .detail-mobile-booking-bar {
+    display: none !important;
   }
 
   .filter-bottom-sheet {
@@ -745,6 +995,23 @@
 
   .filter-modal-backdrop.open .filter-bottom-sheet {
     transform: translateY(0) scale(1);
+  }
+}
+
+@media (min-width: 1400px) {
+  .stays-page-wrap {
+    max-width: 1560px;
+  }
+
+  /* 4-column feed on wider desktop screens */
+  .browse-feed {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+
+  .browse-card-media {
+    height: 220px;
   }
 }
 

@@ -393,7 +393,7 @@ export function renderStaysGrid(containerId, category = 'all') {
       <div class="stay-info">
         <div class="stay-pricing-row">
           <div class="stay-price">
-            <span class="price-num" data-usd="${stay.usdPrice}" data-kes="${stay.kesPrice}">$${stay.usdPrice}</span>
+            <span class="price-num" data-usd="${stay.usdPrice}" data-kes="${stay.kesPrice}">KSh ${(stay.kesPrice).toLocaleString()}</span>
             <span class="price-period">/ night</span>
           </div>
           <span class="stay-rating">${stay.rating}</span>
@@ -402,8 +402,7 @@ export function renderStaysGrid(containerId, category = 'all') {
         <p class="stay-loc">${stay.location}</p>
         <div class="stay-features">${stay.specs}</div>
         <div class="stay-card-bottom">
-          <button class="btn btn-secondary btn-sm open-stay-detail-btn" data-stay-id="${stay.id}">View Details</button>
-          <a href="/waitlist/" class="btn btn-primary btn-sm">Waitlist Access</a>
+          <a href="/stays/?id=${stay.id}" class="btn btn-primary btn-sm">Reserve Stay</a>
         </div>
       </div>
     `;
