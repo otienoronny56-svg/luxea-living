@@ -77,7 +77,11 @@ export function initHostManager(containerId = 'hostManagerContainer') {
 
     let displayListings = listings;
     if (userSession && userSession.refId && !isSuperAdmin) {
-      const myProps = listings.filter(l => l.host_ref_id === userSession.refId);
+      const myProps = listings.filter(l => 
+        l.host_ref_id === userSession.refId || 
+        l.host_ref_id === 'LXH-HOST-DIRECT' ||
+        (userSession.email && l.host_email === userSession.email)
+      );
       if (myProps.length > 0) {
         displayListings = myProps;
       }
@@ -184,6 +188,60 @@ export function initHostManager(containerId = 'hostManagerContainer') {
           </form>
         </div>
       </div>
+
+      <!-- Edit Listing Modal -->
+      <div class="host-modal-backdrop" id="editListingModalBackdrop">
+        <div class="host-modal-card">
+          <div class="modal-head">
+            <h3 style="font-family: var(--font-sans); font-size: 1.25rem; font-weight: 700; color: var(--color-espresso);">Edit Stay Details</h3>
+            <button class="modal-close-btn" id="closeEditListingModal">&times;</button>
+          </div>
+          <form id="editListingForm" style="padding: 20px 24px;">
+            <input type="hidden" id="editStayId">
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label class="form-label">Stay / Property Title *</label>
+              <input type="text" id="editStayTitle" class="form-control" required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+              <div class="form-group">
+                <label class="form-label">Property Type</label>
+                <select id="editStayType" class="form-control">
+                  <option value="apartment">Apartment &amp; BnB</option>
+                  <option value="villa">Luxury Villa</option>
+                  <option value="hotel">Boutique Hotel Suite</option>
+                  <option value="penthouse">Sky Penthouse</option>
+                  <option value="townhouse">Townhome</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Location / City *</label>
+                <input 
+                  type="text" 
+                  id="editStayCity" 
+                  class="form-control" 
+                  list="suggestedCitiesList" 
+                  required
+                >
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+              <div class="form-group">
+                <label class="form-label">Price / Night (KES) *</label>
+                <input type="number" id="editStayPriceKes" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Price / Night (USD)</label>
+                <input type="number" id="editStayPriceUsd" class="form-control">
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+              <button type="button" class="btn btn-outline btn-sm" id="cancelEditListingBtn">Cancel</button>
+              <button type="submit" class="btn btn-primary btn-sm" id="saveEditListingBtn">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
     `;
 
     const grid = container.querySelector('#hostListingsGrid');
@@ -226,7 +284,7 @@ export function initHostManager(containerId = 'hostManagerContainer') {
             </div>
           ` : ''}
           <div class="manage-thumb-overlay">
-            <label class="bucket-upload-label" title="Upload more photos to Supabase Storage bucket">
+            <label class="bucket-upload-label" title="Upload more photos">
               <input type="file" class="card-bucket-file-input" data-id="${listing.id}" accept="image/*" multiple style="display: none;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
               <span>+ Add Photos (${hostGallery.length})</span>
@@ -238,12 +296,15 @@ export function initHostManager(containerId = 'hostManagerContainer') {
         </div>
 
         <div class="manage-card-body">
-          <div class="manage-title-row">
-            <div>
+          <div class="manage-title-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+            <div style="flex: 1;">
               <span class="manage-type-tag">${(listing.property_type || 'Apartment').toUpperCase()} • ${listing.city}</span>
               <h3 class="manage-prop-name">${listing.name}</h3>
-              <p class="manage-price-line">KSh ${(listing.price_per_night_kes || 12000).toLocaleString()}<small> / night</small></p>
+              <p class="manage-price-line">KSh ${(listing.price_per_night_kes || 12000).toLocaleString()}<small> / night</small> <span style="font-size: 0.78rem; color: var(--color-cocoa); font-weight: normal;">(≈ $${listing.price_per_night_usd || Math.round((listing.price_per_night_kes || 12000) / 130)})</span></p>
             </div>
+            <button class="btn btn-secondary btn-sm edit-stay-btn" data-id="${listing.id}" style="padding: 5px 12px; font-size: 0.76rem; border-radius: var(--radius-pill); white-space: nowrap;">
+              ✏️ Edit
+            </button>
           </div>
 
           <!-- AVAILABILITY TOGGLE ROW -->
@@ -493,6 +554,7 @@ export function initHostManager(containerId = 'hostManagerContainer') {
       const priceUsd = parseFloat(container.querySelector('#newStayPriceUsd').value) || 95;
       const photoFiles = container.querySelector('#newStayPhotosInput').files;
       const saveBtn = container.querySelector('#saveNewListingBtn');
+      const userSession = JSON.parse(localStorage.getItem('luxea_user_session') || 'null');
 
       if (!title) return;
 
@@ -511,7 +573,8 @@ export function initHostManager(containerId = 'hostManagerContainer') {
             city: city,
             locationGroup: city.toLowerCase(),
             priceKes: priceKes,
-            priceUsd: priceUsd
+            priceUsd: priceUsd,
+            hostRefId: (userSession && userSession.refId) ? userSession.refId : 'LXH-HOST-DIRECT'
           }, photoFiles);
 
           modalBackdrop?.classList.remove('open');
@@ -528,6 +591,99 @@ export function initHostManager(containerId = 'hostManagerContainer') {
         if (saveBtn) {
           saveBtn.disabled = false;
           saveBtn.innerHTML = 'Publish Stay to Luxea';
+        }
+      }
+    });
+
+    // 6. Edit Listing Modal Triggers & Logic
+    const editModalBackdrop = container.querySelector('#editListingModalBackdrop');
+    const closeEditModalBtn = container.querySelector('#closeEditListingModal');
+    const cancelEditModalBtn = container.querySelector('#cancelEditListingBtn');
+    const editForm = container.querySelector('#editListingForm');
+    const editPriceKesInput = container.querySelector('#editStayPriceKes');
+    const editPriceUsdInput = container.querySelector('#editStayPriceUsd');
+
+    closeEditModalBtn?.addEventListener('click', () => editModalBackdrop?.classList.remove('open'));
+    cancelEditModalBtn?.addEventListener('click', () => editModalBackdrop?.classList.remove('open'));
+
+    // Live conversion for Edit Modal
+    editPriceUsdInput?.addEventListener('input', () => {
+      const usdVal = parseFloat(editPriceUsdInput.value);
+      if (!isNaN(usdVal) && usdVal >= 0) {
+        editPriceKesInput.value = Math.round(usdVal * exchangeRate);
+      } else if (editPriceUsdInput.value === '') {
+        editPriceKesInput.value = '';
+      }
+    });
+
+    editPriceKesInput?.addEventListener('input', () => {
+      const kesVal = parseFloat(editPriceKesInput.value);
+      if (!isNaN(kesVal) && kesVal >= 0) {
+        editPriceUsdInput.value = Math.round(kesVal / exchangeRate);
+      } else if (editPriceKesInput.value === '') {
+        editPriceUsdInput.value = '';
+      }
+    });
+
+    // Populate and open edit modal on clicking Edit
+    container.querySelectorAll('.edit-stay-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const item = listings.find(l => l.id === id);
+        if (!item) return;
+
+        container.querySelector('#editStayId').value = item.id;
+        container.querySelector('#editStayTitle').value = item.name || '';
+        container.querySelector('#editStayType').value = (item.property_type || item.category || 'apartment').toLowerCase();
+        container.querySelector('#editStayCity').value = item.city || '';
+        const kes = item.price_per_night_kes || 12000;
+        const usd = item.price_per_night_usd || Math.round(kes / exchangeRate);
+        container.querySelector('#editStayPriceKes').value = kes;
+        container.querySelector('#editStayPriceUsd').value = usd;
+
+        editModalBackdrop?.classList.add('open');
+      });
+    });
+
+    // Submit edit form
+    editForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = container.querySelector('#editStayId').value;
+      const title = container.querySelector('#editStayTitle').value.trim();
+      const type = container.querySelector('#editStayType').value;
+      const city = container.querySelector('#editStayCity').value.trim();
+      const priceKes = parseFloat(container.querySelector('#editStayPriceKes').value) || 12000;
+      const priceUsd = parseFloat(container.querySelector('#editStayPriceUsd').value) || Math.round(priceKes / exchangeRate);
+      const saveBtn = container.querySelector('#saveEditListingBtn');
+
+      if (!title || !id) return;
+
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span>Saving Changes...</span>';
+      }
+
+      try {
+        if (window.LuxeaDB && typeof window.LuxeaDB.updatePropertyListing === 'function') {
+          await window.LuxeaDB.updatePropertyListing(id, {
+            name: title,
+            propertyType: type,
+            city: city,
+            priceKes: priceKes,
+            priceUsd: priceUsd
+          });
+        }
+
+        editModalBackdrop?.classList.remove('open');
+        if (window.showToast) window.showToast('✅ Stay details updated successfully!');
+        await loadHostListings();
+      } catch (err) {
+        console.error('Update stay error:', err);
+        if (window.showToast) window.showToast('Notice: Could not sync changes to Supabase.');
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = 'Save Changes';
         }
       }
     });

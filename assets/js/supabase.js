@@ -425,8 +425,68 @@
     },
 
     /**
-     * Host Add New Listing: Uploads photos to "lux_listings" and inserts into "lux_properties"
+     * Update existing property listing details (Title, Type, City, KES, USD)
      */
+    updatePropertyListing: async function (propertyId, updates = {}) {
+      const client = this.getClient();
+
+      // 1. Update cached local storage
+      const cached = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+      const idx = cached.findIndex(p => p.id === propertyId || p.slug === propertyId);
+      let updatedObj = null;
+
+      if (idx !== -1) {
+        if (updates.name) cached[idx].name = updates.name;
+        if (updates.propertyType) {
+          cached[idx].property_type = updates.propertyType;
+          cached[idx].category = updates.propertyType;
+        }
+        if (updates.city) {
+          cached[idx].city = updates.city;
+          cached[idx].location_group = updates.city.toLowerCase();
+        }
+        if (updates.priceKes !== undefined) cached[idx].price_per_night_kes = parseFloat(updates.priceKes);
+        if (updates.priceUsd !== undefined) cached[idx].price_per_night_usd = parseFloat(updates.priceUsd);
+        cached[idx].updated_at = new Date().toISOString();
+        updatedObj = cached[idx];
+        localStorage.setItem('luxea_cached_properties', JSON.stringify(cached));
+      }
+
+      // 2. Update Supabase
+      if (client) {
+        try {
+          const dbPayload = { updated_at: new Date().toISOString() };
+          if (updates.name) dbPayload.name = updates.name;
+          if (updates.propertyType) {
+            dbPayload.property_type = updates.propertyType;
+            dbPayload.category = updates.propertyType;
+          }
+          if (updates.city) {
+            dbPayload.city = updates.city;
+            dbPayload.location_group = updates.city.toLowerCase();
+          }
+          if (updates.priceKes !== undefined) dbPayload.price_per_night_kes = parseFloat(updates.priceKes);
+          if (updates.priceUsd !== undefined) dbPayload.price_per_night_usd = parseFloat(updates.priceUsd);
+
+          const { data, error } = await client
+            .from('lux_properties')
+            .update(dbPayload)
+            .eq('id', propertyId)
+            .select();
+
+          if (error) console.warn('Supabase updatePropertyListing error:', error.message);
+          else if (data && data[0]) updatedObj = data[0];
+        } catch (err) {
+          console.error('Supabase updatePropertyListing exception:', err);
+        }
+      }
+
+      window.dispatchEvent(new CustomEvent('luxea:property_updated', {
+        detail: { eventType: 'UPDATE', new: updatedObj || { id: propertyId, ...updates } }
+      }));
+
+      return updatedObj || { id: propertyId, ...updates };
+    },
     addPropertyListing: async function (listingData, photoFiles = []) {
       const client = this.getClient();
 
