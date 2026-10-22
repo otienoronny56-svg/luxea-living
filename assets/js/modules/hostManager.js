@@ -106,7 +106,7 @@ export function initHostManager(containerId = 'hostManagerContainer') {
       <div class="host-modal-backdrop" id="newListingModalBackdrop">
         <div class="host-modal-card">
           <div class="modal-head">
-            <h3 style="font-family: var(--font-sans); font-size: 1.25rem; font-weight: 700; color: var(--color-espresso);">Add New Stay to Supabase</h3>
+            <h3 style="font-family: var(--font-sans); font-size: 1.25rem; font-weight: 700; color: var(--color-espresso);">Add New Stay to Luxea</h3>
             <button class="modal-close-btn" id="closeNewListingModal">&times;</button>
           </div>
           <form id="newListingForm" style="padding: 20px 24px;">
@@ -155,12 +155,12 @@ export function initHostManager(containerId = 'hostManagerContainer') {
               </div>
               <input type="file" id="newStayPhotosInput" class="form-control" accept="image/*" multiple>
               <div id="newStayPhotosPreviewGrid" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;"></div>
-              <small style="color: var(--color-cocoa); font-size: 0.78rem; display: block; margin-top: 4px;">Upload multiple room photos (living room, bedroom, bathroom, etc.). First photo acts as primary cover. Photos are saved into Supabase bucket <code>lux_listings</code>.</small>
+              <small style="color: var(--color-cocoa); font-size: 0.78rem; display: block; margin-top: 4px;">Upload multiple room photos (living room, bedroom, bathroom, etc.). First photo acts as primary cover.</small>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
               <button type="button" class="btn btn-outline btn-sm" id="cancelNewListingBtn">Cancel</button>
-              <button type="submit" class="btn btn-primary btn-sm" id="saveNewListingBtn">Publish Stay to Supabase</button>
+              <button type="submit" class="btn btn-primary btn-sm" id="saveNewListingBtn">Publish Stay to Luxea</button>
             </div>
           </form>
         </div>
@@ -442,6 +442,29 @@ export function initHostManager(containerId = 'hostManagerContainer') {
     closeModalBtn?.addEventListener('click', () => modalBackdrop?.classList.remove('open'));
     cancelModalBtn?.addEventListener('click', () => modalBackdrop?.classList.remove('open'));
 
+    // Live bi-directional currency conversion (USD <-> KES)
+    const priceKesInput = container.querySelector('#newStayPriceKes');
+    const priceUsdInput = container.querySelector('#newStayPriceUsd');
+    const exchangeRate = (window.LUXEA_CONFIG && window.LUXEA_CONFIG.currency && window.LUXEA_CONFIG.currency.exchangeRateUsdToKes) || 130;
+
+    priceUsdInput?.addEventListener('input', () => {
+      const usdVal = parseFloat(priceUsdInput.value);
+      if (!isNaN(usdVal) && usdVal >= 0) {
+        priceKesInput.value = Math.round(usdVal * exchangeRate);
+      } else if (priceUsdInput.value === '') {
+        priceKesInput.value = '';
+      }
+    });
+
+    priceKesInput?.addEventListener('input', () => {
+      const kesVal = parseFloat(priceKesInput.value);
+      if (!isNaN(kesVal) && kesVal >= 0) {
+        priceUsdInput.value = Math.round(kesVal / exchangeRate);
+      } else if (priceKesInput.value === '') {
+        priceUsdInput.value = '';
+      }
+    });
+
     newForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const title = container.querySelector('#newStayTitle').value.trim();
@@ -459,7 +482,7 @@ export function initHostManager(containerId = 'hostManagerContainer') {
         saveBtn.innerHTML = '<span>Uploading Photos &amp; Publishing...</span>';
       }
 
-      if (window.showToast) window.showToast('Publishing stay and uploading photos to Supabase...');
+      if (window.showToast) window.showToast('Publishing stay and uploading photos to Luxea...');
 
       try {
         if (window.LuxeaDB) {
@@ -474,18 +497,18 @@ export function initHostManager(containerId = 'hostManagerContainer') {
 
           modalBackdrop?.classList.remove('open');
           newForm.reset();
-          if (window.showToast) window.showToast('✅ Stay published to Supabase! Now live across platform.');
+          if (window.showToast) window.showToast('✅ Stay published to Luxea! Now live across platform.');
           await loadHostListings();
         }
       } catch (err) {
         console.error('Publish stay error:', err);
-        if (window.showToast) window.showToast('Notice: Stay saved locally. Check Supabase connection.');
+        if (window.showToast) window.showToast('Notice: Stay saved locally. Check connection.');
         modalBackdrop?.classList.remove('open');
         await loadHostListings();
       } finally {
         if (saveBtn) {
           saveBtn.disabled = false;
-          saveBtn.innerHTML = 'Publish Stay to Supabase';
+          saveBtn.innerHTML = 'Publish Stay to Luxea';
         }
       }
     });

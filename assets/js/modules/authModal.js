@@ -457,18 +457,6 @@ function selectAuthRole(role) {
   document.querySelectorAll('.auth-role-tab').forEach(t => {
     t.classList.toggle('active', t.getAttribute('data-role') === role);
   });
-
-  const emailInput = document.getElementById('authModalEmail');
-  const passInput = document.getElementById('authModalPassword');
-  const roleHint = document.getElementById('authRoleHint');
-
-  if (role === 'admin') {
-    if (roleHint) roleHint.innerHTML = '👑 <strong>Super Admin Mode:</strong> Enter your executive credentials or use Google below.';
-  } else if (role === 'host') {
-    if (roleHint) roleHint.innerHTML = '🏡 <strong>Host Partner:</strong> Enter your property registration email to manage your listings or set your password.';
-  } else {
-    if (roleHint) roleHint.innerHTML = '💎 <strong>VIP Member:</strong> Sign in or register to unlock private reservations & curated stays.';
-  }
 }
 
 /**
@@ -502,21 +490,14 @@ function injectAuthModalHtml() {
         </button>
       </div>
 
-      <!-- Role Selector Tabs -->
+      <!-- Role Selector Tabs: Guest vs Host Partner -->
       <div class="auth-role-tabs" id="authRoleTabsWrap">
         <button type="button" class="auth-role-tab active" data-role="member">
-          <span>💎 VIP Member</span>
+          <span>Guest / Member</span>
         </button>
         <button type="button" class="auth-role-tab" data-role="host">
-          <span>🏡 Host Partner</span>
+          <span>Host Partner</span>
         </button>
-        <button type="button" class="auth-role-tab" data-role="admin">
-          <span>👑 Admin</span>
-        </button>
-      </div>
-
-      <div id="authRoleHint" class="auth-role-hint">
-        💎 <strong>VIP Member:</strong> Sign in or register to unlock private reservations & curated stays.
       </div>
 
       <!-- Google OAuth Button -->
