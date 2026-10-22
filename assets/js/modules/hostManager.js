@@ -51,17 +51,20 @@ export function initHostManager(containerId = 'hostManagerContainer') {
     const availMap = JSON.parse(localStorage.getItem('luxea_host_avail_map') || '{}');
     const datesMap = JSON.parse(localStorage.getItem('luxea_host_dates_map') || '{}');
 
-    listings = supabaseProps.map(p => {
-      const isAvail = availMap[p.id] !== undefined ? availMap[p.id] : (p.is_available !== false);
-      const dates = datesMap[p.id] || {};
-      return {
-        ...p,
-        is_available: isAvail,
-        available_from: dates.availableFrom || p.available_from || new Date().toISOString().split('T')[0],
-        available_to: dates.availableTo || p.available_to || new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0],
-        blocked_dates: dates.blockedDates || p.blocked_dates || []
-      };
-    });
+    const deletedIds = JSON.parse(localStorage.getItem('luxea_deleted_properties') || '[]');
+    listings = supabaseProps
+      .filter(p => !deletedIds.includes(p.id) && !deletedIds.includes(p.slug))
+      .map(p => {
+        const isAvail = availMap[p.id] !== undefined ? availMap[p.id] : (p.is_available !== false);
+        const dates = datesMap[p.id] || {};
+        return {
+          ...p,
+          is_available: isAvail,
+          available_from: dates.availableFrom || p.available_from || new Date().toISOString().split('T')[0],
+          available_to: dates.availableTo || p.available_to || new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0],
+          blocked_dates: dates.blockedDates || p.blocked_dates || []
+        };
+      });
 
     renderListings();
   }

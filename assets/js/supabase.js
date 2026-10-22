@@ -256,9 +256,11 @@
             .select('*')
             .order('created_at', { ascending: false });
 
-          if (!error && data && data.length > 0) {
-            localStorage.setItem('luxea_cached_properties', JSON.stringify(data));
-            return data;
+          if (!error && Array.isArray(data)) {
+            const deletedIds = JSON.parse(localStorage.getItem('luxea_deleted_properties') || '[]');
+            const activeListings = data.filter(p => !deletedIds.includes(p.id) && !deletedIds.includes(p.slug));
+            localStorage.setItem('luxea_cached_properties', JSON.stringify(activeListings));
+            return activeListings;
           }
         } catch (e) {
           console.warn('Fetch properties error:', e);
@@ -266,7 +268,9 @@
       }
 
       // Fallback to locally saved properties
-      return JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+      const deletedIds = JSON.parse(localStorage.getItem('luxea_deleted_properties') || '[]');
+      const cached = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+      return cached.filter(p => !deletedIds.includes(p.id) && !deletedIds.includes(p.slug));
     },
 
     /**
@@ -494,21 +498,36 @@
     deletePropertyListing: async function (propertyId) {
       const client = this.getClient();
 
-      // 1. Remove from local cache
+      // 1. Record in persistent deleted list to ensure it never resurfaces
+      const deletedIds = JSON.parse(localStorage.getItem('luxea_deleted_properties') || '[]');
+      if (!deletedIds.includes(propertyId)) {
+        deletedIds.push(propertyId);
+        localStorage.setItem('luxea_deleted_properties', JSON.stringify(deletedIds));
+      }
+
+      // 2. Remove from local cache
       const cached = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
       const filtered = cached.filter(p => p.id !== propertyId && p.slug !== propertyId);
       localStorage.setItem('luxea_cached_properties', JSON.stringify(filtered));
 
-      // 2. Delete from Supabase
+      // 3. Delete from Supabase (or set is_active = false if hard delete is blocked by RLS)
       if (client) {
         try {
           const { error } = await client
             .from('lux_properties')
             .delete()
-            .eq('id', propertyId);
+            .or(`id.eq.${propertyId},slug.eq.${propertyId}`);
 
-          if (error) console.warn('Supabase delete listing error:', error.message);
-          else console.log('✅ Supabase property deleted:', propertyId);
+          if (error) {
+            console.warn('Supabase delete error, attempting soft-delete:', error.message);
+            // Soft delete fallback: mark inactive so it disappears everywhere
+            await client
+              .from('lux_properties')
+              .update({ is_active: false, is_available: false, updated_at: new Date().toISOString() })
+              .or(`id.eq.${propertyId},slug.eq.${propertyId}`);
+          } else {
+            console.log('✅ Supabase property deleted:', propertyId);
+          }
         } catch (err) {
           console.error('Supabase delete listing exception:', err);
         }
