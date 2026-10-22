@@ -126,15 +126,34 @@ export function initHostManager(containerId = 'hostManagerContainer') {
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">Location / City</label>
-                <select id="newStayCity" class="form-control">
-                  <option value="Ruaka">Ruaka</option>
-                  <option value="Westlands">Westlands</option>
-                  <option value="Roysambu">Roysambu</option>
-                  <option value="Mombasa">Mombasa &amp; Diani</option>
-                  <option value="Karen">Karen &amp; Kitisuru</option>
-                  <option value="Naivasha">Naivasha</option>
-                </select>
+                <label class="form-label">Location / City *</label>
+                <input 
+                  type="text" 
+                  id="newStayCity" 
+                  class="form-control" 
+                  list="suggestedCitiesList" 
+                  placeholder="e.g. Roysambu, Kilifi, Nakuru..." 
+                  required
+                >
+                <datalist id="suggestedCitiesList">
+                  <option value="Ruaka">
+                  <option value="Westlands">
+                  <option value="Roysambu">
+                  <option value="Kilimani">
+                  <option value="Lavington">
+                  <option value="Karen">
+                  <option value="Kitisuru">
+                  <option value="Mombasa">
+                  <option value="Diani">
+                  <option value="Malindi">
+                  <option value="Watamu">
+                  <option value="Kilifi">
+                  <option value="Naivasha">
+                  <option value="Nanyuki">
+                  <option value="Nakuru">
+                  <option value="Kisumu">
+                  <option value="Eldoret">
+                </datalist>
               </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
