@@ -487,6 +487,39 @@
 
       return updatedObj || { id: propertyId, ...updates };
     },
+
+    /**
+     * Delete a property listing completely from local cache and Supabase
+     */
+    deletePropertyListing: async function (propertyId) {
+      const client = this.getClient();
+
+      // 1. Remove from local cache
+      const cached = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+      const filtered = cached.filter(p => p.id !== propertyId && p.slug !== propertyId);
+      localStorage.setItem('luxea_cached_properties', JSON.stringify(filtered));
+
+      // 2. Delete from Supabase
+      if (client) {
+        try {
+          const { error } = await client
+            .from('lux_properties')
+            .delete()
+            .eq('id', propertyId);
+
+          if (error) console.warn('Supabase delete listing error:', error.message);
+          else console.log('✅ Supabase property deleted:', propertyId);
+        } catch (err) {
+          console.error('Supabase delete listing exception:', err);
+        }
+      }
+
+      window.dispatchEvent(new CustomEvent('luxea:property_updated', {
+        detail: { eventType: 'DELETE', old: { id: propertyId } }
+      }));
+
+      return { success: true, id: propertyId };
+    },
     addPropertyListing: async function (listingData, photoFiles = []) {
       const client = this.getClient();
 

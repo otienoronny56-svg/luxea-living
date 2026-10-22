@@ -302,9 +302,14 @@ export function initHostManager(containerId = 'hostManagerContainer') {
               <h3 class="manage-prop-name">${listing.name}</h3>
               <p class="manage-price-line">KSh ${(listing.price_per_night_kes || 12000).toLocaleString()}<small> / night</small> <span style="font-size: 0.78rem; color: var(--color-cocoa); font-weight: normal;">(≈ $${listing.price_per_night_usd || Math.round((listing.price_per_night_kes || 12000) / 130)})</span></p>
             </div>
-            <button class="btn btn-secondary btn-sm edit-stay-btn" data-id="${listing.id}" style="padding: 5px 12px; font-size: 0.76rem; border-radius: var(--radius-pill); white-space: nowrap;">
-              ✏️ Edit
-            </button>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-secondary btn-sm edit-stay-btn" data-id="${listing.id}" style="padding: 5px 11px; font-size: 0.75rem; border-radius: var(--radius-pill); white-space: nowrap;">
+                ✏️ Edit
+              </button>
+              <button class="btn btn-outline btn-sm delete-stay-btn" data-id="${listing.id}" data-name="${listing.name}" style="padding: 5px 10px; font-size: 0.75rem; border-radius: var(--radius-pill); color: #C0392B; border-color: rgba(192, 57, 43, 0.35); white-space: nowrap;" title="Delete Stay">
+                🗑️ Delete
+              </button>
+            </div>
           </div>
 
           <!-- AVAILABILITY TOGGLE ROW -->
@@ -686,6 +691,38 @@ export function initHostManager(containerId = 'hostManagerContainer') {
           saveBtn.innerHTML = 'Save Changes';
         }
       }
+    });
+
+    // 7. Delete Stay Handlers
+    container.querySelectorAll('.delete-stay-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.getAttribute('data-id');
+        const name = btn.getAttribute('data-name') || 'this stay';
+
+        const confirmed = window.confirm(`Are you sure you want to delete "${name}"? This will permanently remove the stay from your portfolio and Luxea browse feeds.`);
+        if (!confirmed) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span>Deleting...</span>';
+
+        try {
+          if (window.LuxeaDB && typeof window.LuxeaDB.deletePropertyListing === 'function') {
+            await window.LuxeaDB.deletePropertyListing(id);
+          } else {
+            const cached = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
+            const filtered = cached.filter(p => p.id !== id && p.slug !== id);
+            localStorage.setItem('luxea_cached_properties', JSON.stringify(filtered));
+          }
+
+          if (window.showToast) window.showToast(`🗑️ "${name}" was deleted successfully.`);
+          await loadHostListings();
+        } catch (err) {
+          console.error('Delete stay error:', err);
+          if (window.showToast) window.showToast('Could not delete stay. Please try again.');
+          btn.disabled = false;
+          btn.innerHTML = '🗑️ Delete';
+        }
+      });
     });
   }
 
