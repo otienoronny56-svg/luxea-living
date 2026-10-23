@@ -10,6 +10,7 @@
  */
 
 import { LUXEA_STAYS } from './staysData.js';
+import { DEFAULT_LAUNDRY_PROVIDERS } from './laundryManager.js';
 
 export function initAdminDashboard() {
   const loginGateway = document.getElementById('adminLoginGateway');
@@ -40,6 +41,15 @@ export function initAdminDashboard() {
   const tabGuests = document.getElementById('tabGuestsBtn');
   const tabHostWaitlist = document.getElementById('tabHostWaitlistBtn');
   const tabProfiles = document.getElementById('tabProfilesBtn');
+  const tabLaundry = document.getElementById('tabLaundryBtn');
+  const viewLaundry = document.getElementById('viewLaundry');
+  const laundryPartnersTableBody = document.getElementById('laundryPartnersTableBody');
+  const laundryOrdersTableBody = document.getElementById('laundryOrdersTableBody');
+  const laundryPartnersEmpty = document.getElementById('laundryPartnersEmptyState');
+  const laundryOrdersEmpty = document.getElementById('laundryOrdersEmptyState');
+  const laundrySearchInput = document.getElementById('laundrySearchInput');
+  const laundryAreaFilter = document.getElementById('laundryAreaFilter');
+  const copyLaundryInviteLinkBtn = document.getElementById('copyLaundryInviteLinkBtn');
   const hostsPane = document.getElementById('hostsViewPane');
   const staysPane = document.getElementById('staysViewPane');
   const guestsPane = document.getElementById('guestsViewPane');
@@ -120,6 +130,8 @@ export function initAdminDashboard() {
   let cachedGuests = [];
   let cachedHostWaitlist = [];
   let cachedProfiles = [];
+  let cachedLaundryPartners = [];
+  let cachedLaundryOrders = [];
   let currentStatusFilter = 'all';
 
   // =========================================================================
@@ -336,12 +348,27 @@ export function initAdminDashboard() {
           }
         } catch (e) {}
       }
+
+      // Laundry Partners & Orders
+      const dbLaundry = typeof window.LuxeaDB.fetchLaundryPartners === 'function'
+        ? await window.LuxeaDB.fetchLaundryPartners()
+        : JSON.parse(localStorage.getItem('luxea_laundry_partners') || '[]');
+      cachedLaundryPartners = (dbLaundry && dbLaundry.length > 0) ? dbLaundry : [...DEFAULT_LAUNDRY_PROVIDERS];
+
+      cachedLaundryOrders = typeof window.LuxeaDB.fetchLaundryOrders === 'function'
+        ? await window.LuxeaDB.fetchLaundryOrders()
+        : JSON.parse(localStorage.getItem('luxea_laundry_orders') || '[]');
     } else {
       cachedHosts = JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
       cachedGuests = JSON.parse(localStorage.getItem('luxea_waitlist_guests') || '[]');
       cachedStays = JSON.parse(localStorage.getItem('luxea_cached_properties') || '[]');
       cachedHostWaitlist = JSON.parse(localStorage.getItem('luxea_host_waitlist') || '[]');
       cachedProfiles = [];
+      cachedLaundryPartners = JSON.parse(localStorage.getItem('luxea_laundry_partners') || '[]');
+      if (!cachedLaundryPartners || cachedLaundryPartners.length === 0) {
+        cachedLaundryPartners = [...DEFAULT_LAUNDRY_PROVIDERS];
+      }
+      cachedLaundryOrders = JSON.parse(localStorage.getItem('luxea_laundry_orders') || '[]');
     }
 
     // Arrange all lists from NEWEST to OLDEST by default
@@ -355,6 +382,8 @@ export function initAdminDashboard() {
     cachedHostWaitlist = sortNewestFirst(cachedHostWaitlist);
     cachedProfiles = sortNewestFirst(cachedProfiles);
     cachedStays = sortNewestFirst(cachedStays);
+    cachedLaundryPartners = sortNewestFirst(cachedLaundryPartners);
+    cachedLaundryOrders = sortNewestFirst(cachedLaundryOrders);
 
 
 
@@ -446,17 +475,49 @@ export function initAdminDashboard() {
     if (cProfilesHosts) cProfilesHosts.textContent = hostProfiles;
     if (cProfilesMembers) cProfilesMembers.textContent = memberProfiles;
 
+    // Dedicated Laundry Cards & Metrics
+    const totalLaundryPartners = cachedLaundryPartners.length;
+    const activeLaundryOrders = cachedLaundryOrders.filter(o => {
+      const s = (o.status || '').toLowerCase();
+      return s === 'requested' || s === 'accepted' || s === 'picked_up' || s === 'in_process';
+    }).length;
+    const completedLaundryOrders = cachedLaundryOrders.filter(o => {
+      const s = (o.status || '').toLowerCase();
+      return s === 'delivered' || s === 'completed';
+    }).length;
+    const laundryGmv = cachedLaundryOrders.reduce((sum, o) => {
+      const val = parseFloat(o.total_amount_kes || o.amount_kes || o.amount || 0);
+      return sum + (isNaN(val) ? 0 : val);
+    }, 0);
+
+    const elTotalLaundry = document.getElementById('metricTotalLaundryPartners');
+    const elActiveLaundry = document.getElementById('metricActiveLaundryOrders');
+    const elCompletedLaundry = document.getElementById('metricCompletedLaundryOrders');
+    const elLaundryGmv = document.getElementById('metricLaundryGmv');
+    if (elTotalLaundry) elTotalLaundry.textContent = totalLaundryPartners;
+    if (elActiveLaundry) elActiveLaundry.textContent = activeLaundryOrders;
+    if (elCompletedLaundry) elCompletedLaundry.textContent = completedLaundryOrders;
+    if (elLaundryGmv) elLaundryGmv.textContent = `KES ${laundryGmv.toLocaleString()}`;
+
+    const countTagPartners = document.getElementById('laundryPartnersCountTag');
+    if (countTagPartners) countTagPartners.textContent = `${totalLaundryPartners} Partner${totalLaundryPartners === 1 ? '' : 's'}`;
+
+    const countTagOrders = document.getElementById('laundryOrdersCountTag');
+    if (countTagOrders) countTagOrders.textContent = `${cachedLaundryOrders.length} Order${cachedLaundryOrders.length === 1 ? '' : 's'}`;
+
     // Tab counters
     const tHost = document.getElementById('hostTabCounter');
     const tStays = document.getElementById('staysTabCounter');
     const tGuest = document.getElementById('guestTabCounter');
     const tHostWaitlist = document.getElementById('hostWaitlistTabCounter');
     const tProfiles = document.getElementById('profilesTabCounter');
+    const tLaundry = document.getElementById('laundryTabCounter');
     if (tHost) tHost.textContent = totalHosts;
     if (tStays) tStays.textContent = totalStays;
     if (tGuest) tGuest.textContent = totalGuests;
     if (tHostWaitlist) tHostWaitlist.textContent = totalHostWaitlist;
     if (tProfiles) tProfiles.textContent = totalProfiles;
+    if (tLaundry) tLaundry.textContent = totalLaundryPartners;
 
     // Filter pill count badges
     const pAll = document.getElementById('pillCountAll');
@@ -930,6 +991,7 @@ export function initAdminDashboard() {
     renderGuestsTable(filterQuery);
     renderHostWaitlistTable(filterQuery);
     renderProfilesTable(filterQuery);
+    renderLaundryTable(filterQuery);
   }
 
   // =========================================================================
@@ -1701,6 +1763,191 @@ export function initAdminDashboard() {
   }
 
   // =========================================================================
+  // 6D. LAUNDRY & VALET SERVICE PARTNERS & ORDERS REGISTRY
+  // =========================================================================
+  function renderLaundryTable(query = '', areaFilter = 'all') {
+    const selectedArea = areaFilter !== 'all' ? areaFilter : (laundryAreaFilter ? laundryAreaFilter.value : 'all');
+    const q = query.toLowerCase().trim();
+
+    // 1. RENDER PARTNERS TABLE
+    if (laundryPartnersTableBody) {
+      laundryPartnersTableBody.innerHTML = '';
+
+      const filteredPartners = cachedLaundryPartners.filter(p => {
+        const name = (p.business_name || p.businessName || '').toLowerCase();
+        const contact = (p.contact_person || p.contactPerson || '').toLowerCase();
+        const phone = (p.phone || '').toLowerCase();
+        const refId = (p.ref_id || p.refId || '').toLowerCase();
+        const email = (p.email || '').toLowerCase();
+        const areas = Array.isArray(p.coverage_areas) ? p.coverage_areas : [];
+        const areasStr = areas.join(' ').toLowerCase();
+
+        const matchQuery = !q || name.includes(q) || contact.includes(q) || phone.includes(q) || refId.includes(q) || email.includes(q) || areasStr.includes(q);
+        const matchArea = selectedArea === 'all' || areasStr.includes(selectedArea.toLowerCase());
+
+        return matchQuery && matchArea;
+      });
+
+      if (filteredPartners.length === 0) {
+        if (laundryPartnersEmpty) laundryPartnersEmpty.classList.remove('hidden');
+      } else {
+        if (laundryPartnersEmpty) laundryPartnersEmpty.classList.add('hidden');
+
+        filteredPartners.forEach(p => {
+          const bizName = p.business_name || p.businessName || 'Valet Service Partner';
+          const refId = p.ref_id || p.refId || 'LXL-2026-PARTNER';
+          const contact = p.contact_person || p.contactPerson || 'Manager';
+          const phone = p.phone || '—';
+          const email = p.email || '';
+          const rating = p.rating || 5.0;
+          const completedJobs = p.completed_orders_count || 0;
+          const areas = Array.isArray(p.coverage_areas) ? p.coverage_areas : ['Westlands', 'Kilimani'];
+          const washRate = p.price_wash_fold_per_kg || 250;
+          const linenRate = p.price_linen_turnover_set || 1500;
+          const suitRate = p.price_dry_clean_suit || 900;
+          const isExpress = p.express_available !== false;
+
+          const digitsOnly = phone.replace(/[^0-9]/g, '');
+          const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
+          const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${contact}, this is Ronald from Luxea Living Admin regarding your valet partnership (${refId}).`)}` : '';
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>
+              <div style="font-weight: 700; color: #241812; font-size: 0.88rem;">${bizName}</div>
+              <div style="display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap;">
+                <code style="font-family: monospace; font-size: 0.72rem; color: #8C6D58; background: #F6F3EE; padding: 1px 6px; border-radius: 4px; border: 1px solid #E5DFD7;">${refId}</code>
+                ${isExpress ? '<span class="status-chip chip-gold" style="font-size: 0.65rem; padding: 1px 5px;">⚡ Express</span>' : ''}
+              </div>
+            </td>
+            <td>
+              <div class="host-cell-name">${contact}</div>
+              <div class="host-cell-sub" style="margin-top: 2px;">
+                <span>${phone}</span>
+                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Partner" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
+                ${email ? `<span>•</span><span title="${email}" style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>` : ''}
+              </div>
+            </td>
+            <td>
+              <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                ${areas.map(a => `<span style="display: inline-block; background: #F6F3EE; color: #604D42; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; border: 1px solid #E5DFD7;">${a}</span>`).join('')}
+              </div>
+            </td>
+            <td>
+              <div style="font-size: 0.78rem; color: #241812; line-height: 1.35;">
+                <div><span style="color: #8C6D58;">Wash & Fold:</span> <strong>KES ${washRate}</strong>/kg</div>
+                <div><span style="color: #8C6D58;">Linen Set:</span> <strong>KES ${linenRate}</strong></div>
+                <div><span style="color: #8C6D58;">Dry Clean:</span> <strong>KES ${suitRate}</strong></div>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight: 700; color: #D4AF37; font-size: 0.85rem;">⭐ ${rating}</div>
+              <small style="color: #8C6D58; font-size: 0.72rem;">${completedJobs} jobs done</small>
+            </td>
+            <td style="text-align: right;">
+              <a href="/laundry/?partner_ref=${encodeURIComponent(refId)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 4px 8px; text-decoration: none; white-space: nowrap;" title="Test Partner Dashboard">
+                <span>Direct Hub ↗</span>
+              </a>
+            </td>
+          `;
+          laundryPartnersTableBody.appendChild(tr);
+        });
+      }
+    }
+
+    // 2. RENDER ORDERS AUDIT LOG
+    if (laundryOrdersTableBody) {
+      laundryOrdersTableBody.innerHTML = '';
+
+      const filteredOrders = cachedLaundryOrders.filter(o => {
+        const orderNum = (o.order_number || o.id || '').toLowerCase();
+        const custName = (o.customer_name || '').toLowerCase();
+        const custPhone = (o.customer_phone || '').toLowerCase();
+        const propName = (o.property_name || '').toLowerCase();
+        const area = (o.location_area || '').toLowerCase();
+        const service = (o.service_type || '').toLowerCase();
+
+        const matchQuery = !q || orderNum.includes(q) || custName.includes(q) || custPhone.includes(q) || propName.includes(q) || area.includes(q) || service.includes(q);
+        const matchArea = selectedArea === 'all' || area.includes(selectedArea.toLowerCase());
+
+        return matchQuery && matchArea;
+      });
+
+      if (filteredOrders.length === 0) {
+        if (laundryOrdersEmpty) laundryOrdersEmpty.classList.remove('hidden');
+      } else {
+        if (laundryOrdersEmpty) laundryOrdersEmpty.classList.add('hidden');
+
+        filteredOrders.forEach(o => {
+          const orderNum = o.order_number || o.id || 'ORD-LX';
+          const isTurnover = o.order_type === 'host_turnover';
+          const custName = o.customer_name || 'Client';
+          const custPhone = o.customer_phone || '—';
+          const propName = o.property_name || 'Luxea Stay';
+          const unit = o.unit_number ? `(${o.unit_number})` : '';
+          const area = o.location_area || 'Nairobi';
+          const service = o.service_type || 'Wash & Fold';
+          const weight = o.estimated_weight_or_items || 'Standard Bag';
+          const pickupDate = o.pickup_date || 'Today';
+          const timeSlot = o.pickup_time_slot || '';
+          const amount = parseFloat(o.total_amount_kes || o.amount_kes || 0);
+          const status = o.status || 'requested';
+
+          let statusBadgeClass = 'chip-amber';
+          let statusText = 'New Request';
+          if (status === 'accepted') { statusBadgeClass = 'chip-neutral'; statusText = 'Accepted'; }
+          else if (status === 'picked_up') { statusBadgeClass = 'chip-neutral'; statusText = 'Picked Up'; }
+          else if (status === 'in_process') { statusBadgeClass = 'chip-amber'; statusText = 'In Wash'; }
+          else if (status === 'out_for_delivery') { statusBadgeClass = 'chip-gold'; statusText = 'Out For Delivery'; }
+          else if (status === 'delivered') { statusBadgeClass = 'chip-green'; statusText = 'Delivered'; }
+
+          const digitsOnly = custPhone.replace(/[^0-9]/g, '');
+          const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
+          const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${custName}, this is Luxea Living Concierge regarding your laundry valet pickup (${orderNum}).`)}` : '';
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>
+              <code style="font-family: monospace; font-size: 0.8rem; font-weight: 700; color: #241812;">${orderNum}</code>
+              <div style="margin-top: 3px;">
+                <span class="status-chip ${isTurnover ? 'chip-gold' : 'chip-neutral'}" style="font-size: 0.65rem; padding: 1px 6px;">
+                  ${isTurnover ? '🏡 Host Turnover' : '✨ Guest Valet'}
+                </span>
+              </div>
+            </td>
+            <td>
+              <div class="host-cell-name">${custName}</div>
+              <div class="host-cell-sub" style="margin-top: 2px;">
+                <span>${custPhone}</span>
+                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Customer" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
+              </div>
+            </td>
+            <td>
+              <div style="font-weight: 600; color: #241812; font-size: 0.82rem;">${propName} ${unit}</div>
+              <small style="color: #8C6D58; font-size: 0.74rem;">📍 ${area}</small>
+            </td>
+            <td>
+              <div style="font-size: 0.82rem; font-weight: 600; color: #241812;">${service}</div>
+              <small style="color: #8C6D58; font-size: 0.72rem; display: block;">📅 ${pickupDate} ${timeSlot ? `• ${timeSlot}` : ''}</small>
+              <small style="color: #A38068; font-size: 0.7rem;">⚖️ ${weight}</small>
+            </td>
+            <td>
+              <div style="font-weight: 700; color: #B28756; font-size: 0.9rem;">KES ${amount.toLocaleString()}</div>
+              <span class="status-chip chip-green" style="font-size: 0.65rem; padding: 1px 5px;">M-Pesa / Valet</span>
+            </td>
+            <td style="text-align: right;">
+              <span class="status-chip ${statusBadgeClass}" style="font-size: 0.72rem; padding: 2px 8px;">
+                ${statusText}
+              </span>
+            </td>
+          `;
+          laundryOrdersTableBody.appendChild(tr);
+        });
+      }
+    }
+  }
+
+  // =========================================================================
   // 7. TOOLBAR, SEARCH & FILTER EVENTS
   // =========================================================================
   searchInput?.addEventListener('input', () => {
@@ -1747,7 +1994,8 @@ export function initAdminDashboard() {
     stays: { title: 'Live Stays Catalog', sub: 'Active bookable residences published in the live guest collection.' },
     guests: { title: 'VIP Guest Waitlist', sub: 'Founding Circle passholders with priority destination interests.' },
     hostWaitlist: { title: 'Host Partner Waitlist (partners.)', sub: 'Founding property custodians registered from partners.luxealiving.co.ke.' },
-    profiles: { title: 'User Profiles & Access Roles', sub: 'Registered Supabase Auth users (lux_profiles). Assign administrative privileges and change roles.' }
+    profiles: { title: 'User Profiles & Access Roles', sub: 'Registered Supabase Auth users (lux_profiles). Assign administrative privileges and change roles.' },
+    laundry: { title: 'Laundry & Valet Service Partners', sub: 'Verified dry cleaners, laundromats, and host turnover linen partners.' }
   };
 
   tabOverview?.addEventListener('click', () => switchTab('overview'));
@@ -1756,12 +2004,14 @@ export function initAdminDashboard() {
   tabGuests?.addEventListener('click', () => switchTab('guests'));
   tabHostWaitlist?.addEventListener('click', () => switchTab('hostWaitlist'));
   tabProfiles?.addEventListener('click', () => switchTab('profiles'));
+  tabLaundry?.addEventListener('click', () => switchTab('laundry'));
 
   // Quick Jump cards from Overview
   document.getElementById('jumpToHostsCard')?.addEventListener('click', () => switchTab('hosts'));
   document.getElementById('jumpToStaysCard')?.addEventListener('click', () => switchTab('stays'));
   document.getElementById('jumpToGuestsCard')?.addEventListener('click', () => switchTab('guests'));
   document.getElementById('jumpToWaitlistCard')?.addEventListener('click', () => switchTab('hostWaitlist'));
+  document.getElementById('jumpToLaundryCard')?.addEventListener('click', () => switchTab('laundry'));
 
   // Per-view Search Listeners
   staysSearchInput?.addEventListener('input', (e) => {
@@ -1792,6 +2042,32 @@ export function initAdminDashboard() {
     renderProfilesTable(profilesSearchInput ? profilesSearchInput.value.toLowerCase().trim() : '');
   });
 
+  // Laundry Search & Filters
+  laundrySearchInput?.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    const area = laundryAreaFilter ? laundryAreaFilter.value : 'all';
+    renderLaundryTable(q, area);
+  });
+
+  laundryAreaFilter?.addEventListener('change', (e) => {
+    const q = laundrySearchInput ? laundrySearchInput.value.toLowerCase().trim() : '';
+    renderLaundryTable(q, e.target.value);
+  });
+
+  copyLaundryInviteLinkBtn?.addEventListener('click', () => {
+    const inviteUrl = `${window.location.origin}/laundry/?partner=register`;
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+      if (window.showToast) window.showToast('📋 Partner registration invite link copied to clipboard!');
+      const span = copyLaundryInviteLinkBtn.querySelector('span');
+      if (span) {
+        const orig = span.textContent;
+        span.textContent = '✓ Link Copied!';
+        setTimeout(() => { span.textContent = orig; }, 2500);
+      }
+    }).catch(() => {
+      prompt('Copy partner invite link:', inviteUrl);
+    });
+  });
 
   // Inline Export Triggers
   document.getElementById('exportGuestsCsvBtnInline')?.addEventListener('click', () => {
@@ -1809,6 +2085,7 @@ export function initAdminDashboard() {
     tabGuests?.classList.toggle('active', tab === 'guests');
     tabHostWaitlist?.classList.toggle('active', tab === 'hostWaitlist');
     tabProfiles?.classList.toggle('active', tab === 'profiles');
+    tabLaundry?.classList.toggle('active', tab === 'laundry');
 
     viewOverview?.classList.toggle('hidden', tab !== 'overview');
     viewHosts?.classList.toggle('hidden', tab !== 'hosts');
@@ -1816,6 +2093,7 @@ export function initAdminDashboard() {
     viewGuests?.classList.toggle('hidden', tab !== 'guests');
     viewHostWaitlist?.classList.toggle('hidden', tab !== 'hostWaitlist');
     viewProfiles?.classList.toggle('hidden', tab !== 'profiles');
+    viewLaundry?.classList.toggle('hidden', tab !== 'laundry');
 
     if (adminViewTitle && tabTitles[tab]) {
       adminViewTitle.textContent = tabTitles[tab].title;

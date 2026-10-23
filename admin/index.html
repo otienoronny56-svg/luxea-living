@@ -183,6 +183,14 @@
             <span class="tab-badge" id="profilesTabCounter" style="background: rgba(46, 204, 113, 0.2); color: #27AE60;">0</span>
           </button>
 
+          <button type="button" class="sidebar-nav-item" id="tabLaundryBtn">
+            <span class="nav-item-left">
+              <span class="nav-icon">🧺</span>
+              <span>Laundry Service Partners</span>
+            </span>
+            <span class="tab-badge" id="laundryTabCounter" style="background: rgba(14, 165, 233, 0.2); color: #0284C7;">0</span>
+          </button>
+
           <div class="sidebar-section-title">Data Operations</div>
 
           <button type="button" class="sidebar-nav-action" id="refreshAdminDataBtn" title="Sync live Supabase updates">
@@ -239,6 +247,14 @@
             <span class="nav-item-left">
               <span class="nav-icon">💎</span>
               <span>Founding Waitlist</span>
+            </span>
+            <span class="domain-tag">↗</span>
+          </a>
+
+          <a href="/laundry/" class="sidebar-nav-action" target="_blank" rel="noopener">
+            <span class="nav-item-left">
+              <span class="nav-icon">🧺</span>
+              <span>Valet Laundry Hub</span>
             </span>
             <span class="domain-tag">↗</span>
           </a>
@@ -535,6 +551,15 @@
                 <p>Manage founding property owners registered on partners.luxealiving.co.ke with 0% launch perks.</p>
               </div>
               <span class="jump-arrow">Open Host Waitlist →</span>
+            </div>
+
+            <div class="quick-jump-card" id="jumpToLaundryCard" style="cursor: pointer;">
+              <div class="jump-icon">🧺</div>
+              <div class="jump-meta">
+                <h4>Laundry Service Partners</h4>
+                <p>Manage verified valet laundromats, dry cleaners, host turnover rates, and live orders.</p>
+              </div>
+              <span class="jump-arrow">Open Laundry Registry →</span>
             </div>
           </div>
         </div>
@@ -980,6 +1005,137 @@
           </div>
         </div>
       <!-- End profilesViewPane -->
+
+        <!-- ==================================================================
+             VIEW 6: LAUNDRY & VALET PARTNERS REGISTRY (luxealiving.co.ke/laundry)
+             ================================================================== -->
+        <div id="viewLaundry" class="admin-view-page hidden">
+          <!-- Laundry Metrics Grid -->
+          <div class="admin-metrics-grid">
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Laundry Service Partners</span>
+                <span class="metric-trend-chip chip-neutral" id="trendLaundryTotal">Verified</span>
+              </div>
+              <div class="metric-val" id="metricTotalLaundryPartners">0</div>
+              <div class="metric-sub">Across Westlands, Kilimani, Ruaka, Roysambu</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label" style="color: #9A7B0C;">Active In Progress</span>
+                <span class="metric-trend-chip chip-amber">In Wash</span>
+              </div>
+              <div class="metric-val" style="color: #9A7B0C;" id="metricActiveLaundryOrders">0</div>
+              <div class="metric-sub">Picked up or out for delivery</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label" style="color: #1E8449;">Completed Orders</span>
+                <span class="metric-trend-chip chip-green">Fulfilled</span>
+              </div>
+              <div class="metric-val" style="color: #1E8449;" id="metricCompletedLaundryOrders">0</div>
+              <div class="metric-sub">Valet orders marked delivered</div>
+            </div>
+
+            <div class="stat-metric-card">
+              <div class="metric-card-top">
+                <span class="metric-label">Valet Order Volume (GMV)</span>
+                <span class="metric-trend-chip chip-gold">KES Payouts</span>
+              </div>
+              <div class="metric-val" style="font-size: 1.45rem; color: #B28756;" id="metricLaundryGmv">KES 0</div>
+              <div class="metric-sub">Total revenue routed to partners</div>
+            </div>
+          </div>
+
+          <!-- Laundry Partners Toolbar -->
+          <div class="admin-toolbar-card">
+            <div class="admin-search-box">
+              <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="laundrySearchInput" class="form-control" placeholder="Search laundry partners by business name, contact, phone, area, or ref ID...">
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <select id="laundryAreaFilter" class="form-control" style="max-width: 150px; padding: 6px 10px; font-size: 0.82rem; height: 38px;">
+                <option value="all">All Locations</option>
+                <option value="westlands">Westlands</option>
+                <option value="kilimani">Kilimani</option>
+                <option value="ruaka">Ruaka</option>
+                <option value="roysambu">Roysambu</option>
+                <option value="karen">Karen</option>
+              </select>
+
+              <button type="button" class="btn btn-secondary btn-sm" id="copyLaundryInviteLinkBtn" style="height: 38px; white-space: nowrap;">
+                <span>🔗 Copy Partner Invite Link</span>
+              </button>
+              <a href="/laundry/" target="_blank" class="btn btn-primary btn-sm" style="height: 38px; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                <span>Live Laundry Hub ↗</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Section 1: Laundry Partners Roster Table -->
+          <div class="admin-table-card" style="margin-bottom: 24px;">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-linen); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--color-espresso); margin: 0 0 2px;">Registered Laundry Service Providers</h3>
+                <p style="font-size: 0.8rem; color: var(--color-cocoa); margin: 0;">Verified partner businesses, rates, and service coverage zones.</p>
+              </div>
+              <span class="badge-tag chip-neutral" id="laundryPartnersCountTag">0 Partners</span>
+            </div>
+
+            <table class="admin-data-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">Business &amp; Reference ID</th>
+                  <th style="width: 20%;">Manager &amp; Contact</th>
+                  <th style="width: 20%;">Coverage Neighborhoods</th>
+                  <th style="width: 15%;">Standard Rates</th>
+                  <th style="width: 10%;">Rating / Jobs</th>
+                  <th style="width: 10%; text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="laundryPartnersTableBody">
+                <!-- Injected dynamically by admin.js -->
+              </tbody>
+            </table>
+            <div id="laundryPartnersEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
+              No laundry service partners found matching your search.
+            </div>
+          </div>
+
+          <!-- Section 2: Recent Laundry Orders Audit Log -->
+          <div class="admin-table-card">
+            <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-linen); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--color-espresso); margin: 0 0 2px;">Recent Laundry &amp; Valet Orders</h3>
+                <p style="font-size: 0.8rem; color: var(--color-cocoa); margin: 0;">Orders requested by guests and host properties across Nairobi.</p>
+              </div>
+              <span class="badge-tag chip-neutral" id="laundryOrdersCountTag">0 Orders</span>
+            </div>
+
+            <table class="admin-data-table">
+              <thead>
+                <tr>
+                  <th style="width: 16%;">Order Number</th>
+                  <th style="width: 20%;">Customer &amp; Phone</th>
+                  <th style="width: 22%;">Stay / Residence</th>
+                  <th style="width: 16%;">Service &amp; Pickup</th>
+                  <th style="width: 14%;">Amount (KES)</th>
+                  <th style="width: 12%; text-align: right;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="laundryOrdersTableBody">
+                <!-- Injected dynamically by admin.js -->
+              </tbody>
+            </table>
+            <div id="laundryOrdersEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
+              No laundry orders logged in the database yet.
+            </div>
+          </div>
+
+        </div> <!-- /#viewLaundry -->
 
       </main>
       <!-- End admin-workspace -->
