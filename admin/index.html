@@ -1053,11 +1053,11 @@
           <div class="admin-toolbar-card">
             <div class="admin-search-box">
               <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input type="text" id="laundrySearchInput" class="form-control" placeholder="Search laundry partners by business name, contact, phone, area, or ref ID...">
+              <input type="text" id="laundrySearchInput" class="form-control" placeholder="Search partners, phone, ref ID, or neighborhood...">
             </div>
 
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-              <select id="laundryAreaFilter" class="form-control" style="max-width: 150px; padding: 6px 10px; font-size: 0.82rem; height: 38px;">
+              <select id="laundryAreaFilter" class="form-control" style="width: 140px; padding: 6px 10px; font-size: 0.82rem; height: 38px;">
                 <option value="all">All Locations</option>
                 <option value="westlands">Westlands</option>
                 <option value="kilimani">Kilimani</option>
@@ -1067,33 +1067,33 @@
               </select>
 
               <button type="button" class="btn btn-secondary btn-sm" id="copyLaundryInviteLinkBtn" style="height: 38px; white-space: nowrap;">
-                <span>🔗 Copy Partner Invite Link</span>
+                <span>🔗 Copy Invite Link</span>
               </button>
               <a href="/laundry/" target="_blank" class="btn btn-primary btn-sm" style="height: 38px; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                <span>Live Laundry Hub ↗</span>
+                <span>Live Hub ↗</span>
               </a>
             </div>
           </div>
 
           <!-- Section 1: Laundry Partners Roster Table -->
-          <div class="admin-table-card" style="margin-bottom: 24px;">
-            <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-linen); display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--color-espresso); margin: 0 0 2px;">Registered Laundry Service Providers</h3>
-                <p style="font-size: 0.8rem; color: var(--color-cocoa); margin: 0;">Verified partner businesses, rates, and service coverage zones.</p>
-              </div>
-              <span class="badge-tag chip-neutral" id="laundryPartnersCountTag">0 Partners</span>
+          <div class="admin-section-header" style="margin: 24px 0 12px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+              <h2 style="font-family: var(--font-serif); font-size: 1.25rem; color: #241812; margin: 0;">Verified Laundry Partners</h2>
+              <p style="font-size: 0.8rem; color: var(--color-cocoa); margin: 2px 0 0;">Service providers, operational zones, and laundry price list.</p>
             </div>
+            <span class="badge-tag chip-neutral" id="laundryPartnersCountTag">0 Partners</span>
+          </div>
 
-            <table class="admin-data-table">
+          <div class="table-responsive-box" style="margin-bottom: 30px;">
+            <table class="lux-data-table">
               <thead>
                 <tr>
-                  <th style="width: 25%;">Business &amp; Reference ID</th>
-                  <th style="width: 20%;">Manager &amp; Contact</th>
-                  <th style="width: 20%;">Coverage Neighborhoods</th>
-                  <th style="width: 15%;">Standard Rates</th>
-                  <th style="width: 10%;">Rating / Jobs</th>
-                  <th style="width: 10%; text-align: right;">Action</th>
+                  <th style="width: 27%;">Partner &amp; Code</th>
+                  <th style="width: 20%;">Contact</th>
+                  <th style="width: 20%;">Coverage</th>
+                  <th style="width: 17%;">Rates (KES)</th>
+                  <th style="width: 8%;">Rating</th>
+                  <th style="width: 8%; text-align: right;">Portal</th>
                 </tr>
               </thead>
               <tbody id="laundryPartnersTableBody">
@@ -1106,24 +1106,24 @@
           </div>
 
           <!-- Section 2: Recent Laundry Orders Audit Log -->
-          <div class="admin-table-card">
-            <div style="padding: 16px 20px; border-bottom: 1px solid var(--color-linen); display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <h3 style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--color-espresso); margin: 0 0 2px;">Recent Laundry &amp; Valet Orders</h3>
-                <p style="font-size: 0.8rem; color: var(--color-cocoa); margin: 0;">Orders requested by guests and host properties across Nairobi.</p>
-              </div>
-              <span class="badge-tag chip-neutral" id="laundryOrdersCountTag">0 Orders</span>
+          <div class="admin-section-header" style="margin: 24px 0 12px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+              <h2 style="font-family: var(--font-serif); font-size: 1.25rem; color: #241812; margin: 0;">Valet &amp; Linen Orders Log</h2>
+              <p style="font-size: 0.8rem; color: var(--color-cocoa); margin: 2px 0 0;">Recent guest valet requests and host turnover pickups.</p>
             </div>
+            <span class="badge-tag chip-neutral" id="laundryOrdersCountTag">0 Orders</span>
+          </div>
 
-            <table class="admin-data-table">
+          <div class="table-responsive-box">
+            <table class="lux-data-table">
               <thead>
                 <tr>
-                  <th style="width: 16%;">Order Number</th>
-                  <th style="width: 20%;">Customer &amp; Phone</th>
-                  <th style="width: 22%;">Stay / Residence</th>
-                  <th style="width: 16%;">Service &amp; Pickup</th>
-                  <th style="width: 14%;">Amount (KES)</th>
-                  <th style="width: 12%; text-align: right;">Status</th>
+                  <th style="width: 15%;">Order #</th>
+                  <th style="width: 20%;">Customer</th>
+                  <th style="width: 23%;">Stay &amp; Area</th>
+                  <th style="width: 20%;">Service &amp; Slot</th>
+                  <th style="width: 12%;">Amount</th>
+                  <th style="width: 10%; text-align: right;">Status</th>
                 </tr>
               </thead>
               <tbody id="laundryOrdersTableBody">
@@ -1131,7 +1131,9 @@
               </tbody>
             </table>
             <div id="laundryOrdersEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
-              No laundry orders logged in the database yet.
+              <div style="font-size: 1.8rem; margin-bottom: 6px;">🧺</div>
+              <p style="font-weight: 600; color: var(--color-espresso); margin-bottom: 4px; font-size: 0.95rem;">No valet orders in queue</p>
+              <p style="font-size: 0.8rem; margin: 0;">Guest valet requests and host turnover orders will show here in real-time.</p>
             </div>
           </div>
 

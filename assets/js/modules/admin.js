@@ -1811,42 +1811,41 @@ export function initAdminDashboard() {
           const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
           const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${contact}, this is Ronald from Luxea Living Admin regarding your valet partnership (${refId}).`)}` : '';
 
+          const areasText = areas.join(', ');
+
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>
-              <div style="font-weight: 700; color: #241812; font-size: 0.88rem;">${bizName}</div>
-              <div style="display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap;">
-                <code style="font-family: monospace; font-size: 0.72rem; color: #8C6D58; background: #F6F3EE; padding: 1px 6px; border-radius: 4px; border: 1px solid #E5DFD7;">${refId}</code>
-                ${isExpress ? '<span class="status-chip chip-gold" style="font-size: 0.65rem; padding: 1px 5px;">⚡ Express</span>' : ''}
+              <div style="font-weight: 700; color: #241812; font-size: 0.88rem; line-height: 1.25;">${bizName}</div>
+              <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap;">
+                <code style="font-family: monospace; font-size: 0.72rem; color: #8C6D58; background: #F6F3EE; padding: 1px 5px; border-radius: 4px; border: 1px solid #E5DFD7;">${refId}</code>
+                ${isExpress ? '<span class="status-chip chip-gold" style="font-size: 0.62rem; padding: 1px 5px;">⚡ Express</span>' : ''}
               </div>
             </td>
             <td>
-              <div class="host-cell-name">${contact}</div>
-              <div class="host-cell-sub" style="margin-top: 2px;">
+              <div class="host-cell-name" style="font-size: 0.85rem;">${contact}</div>
+              <div class="host-cell-sub" style="margin-top: 2px; font-size: 0.78rem;">
                 <span>${phone}</span>
-                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Partner" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
-                ${email ? `<span>•</span><span title="${email}" style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>` : ''}
+                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Partner" style="color: #22C55E; font-size: 13px; text-decoration: none; margin-left: 3px;">💬</a>` : ''}
               </div>
             </td>
             <td>
-              <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                ${areas.map(a => `<span style="display: inline-block; background: #F6F3EE; color: #604D42; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; border: 1px solid #E5DFD7;">${a}</span>`).join('')}
+              <div style="font-size: 0.8rem; color: #4A3B32; line-height: 1.35;">${areasText}</div>
+            </td>
+            <td>
+              <div style="font-size: 0.76rem; color: #241812; line-height: 1.35;">
+                <div><span style="color: #8C6D58;">Wash:</span> <strong>${washRate}</strong>/kg</div>
+                <div><span style="color: #8C6D58;">Linen:</span> <strong>${linenRate}</strong>/set</div>
+                <div><span style="color: #8C6D58;">Suit:</span> <strong>${suitRate}</strong></div>
               </div>
             </td>
             <td>
-              <div style="font-size: 0.78rem; color: #241812; line-height: 1.35;">
-                <div><span style="color: #8C6D58;">Wash & Fold:</span> <strong>KES ${washRate}</strong>/kg</div>
-                <div><span style="color: #8C6D58;">Linen Set:</span> <strong>KES ${linenRate}</strong></div>
-                <div><span style="color: #8C6D58;">Dry Clean:</span> <strong>KES ${suitRate}</strong></div>
-              </div>
-            </td>
-            <td>
-              <div style="font-weight: 700; color: #D4AF37; font-size: 0.85rem;">⭐ ${rating}</div>
-              <small style="color: #8C6D58; font-size: 0.72rem;">${completedJobs} jobs done</small>
+              <div style="font-weight: 700; color: #B28756; font-size: 0.84rem;">⭐ ${rating}</div>
+              <small style="color: #8C6D58; font-size: 0.7rem;">${completedJobs} jobs</small>
             </td>
             <td style="text-align: right;">
               <a href="/laundry/?partner_ref=${encodeURIComponent(refId)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 4px 8px; text-decoration: none; white-space: nowrap;" title="Test Partner Dashboard">
-                <span>Direct Hub ↗</span>
+                <span>Hub ↗</span>
               </a>
             </td>
           `;
@@ -1908,18 +1907,18 @@ export function initAdminDashboard() {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>
-              <code style="font-family: monospace; font-size: 0.8rem; font-weight: 700; color: #241812;">${orderNum}</code>
+              <code style="font-family: monospace; font-size: 0.78rem; font-weight: 700; color: #241812;">${orderNum}</code>
               <div style="margin-top: 3px;">
-                <span class="status-chip ${isTurnover ? 'chip-gold' : 'chip-neutral'}" style="font-size: 0.65rem; padding: 1px 6px;">
-                  ${isTurnover ? '🏡 Host Turnover' : '✨ Guest Valet'}
+                <span class="status-chip ${isTurnover ? 'chip-gold' : 'chip-neutral'}" style="font-size: 0.62rem; padding: 1px 5px;">
+                  ${isTurnover ? '🏡 Linen' : '✨ Valet'}
                 </span>
               </div>
             </td>
             <td>
-              <div class="host-cell-name">${custName}</div>
-              <div class="host-cell-sub" style="margin-top: 2px;">
+              <div class="host-cell-name" style="font-size: 0.84rem;">${custName}</div>
+              <div class="host-cell-sub" style="margin-top: 2px; font-size: 0.76rem;">
                 <span>${custPhone}</span>
-                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Customer" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
+                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Customer" style="color: #22C55E; font-size: 12px; text-decoration: none; margin-left: 2px;">💬</a>` : ''}
               </div>
             </td>
             <td>
@@ -1927,16 +1926,15 @@ export function initAdminDashboard() {
               <small style="color: #8C6D58; font-size: 0.74rem;">📍 ${area}</small>
             </td>
             <td>
-              <div style="font-size: 0.82rem; font-weight: 600; color: #241812;">${service}</div>
+              <div style="font-size: 0.8rem; font-weight: 600; color: #241812;">${service}</div>
               <small style="color: #8C6D58; font-size: 0.72rem; display: block;">📅 ${pickupDate} ${timeSlot ? `• ${timeSlot}` : ''}</small>
-              <small style="color: #A38068; font-size: 0.7rem;">⚖️ ${weight}</small>
             </td>
             <td>
-              <div style="font-weight: 700; color: #B28756; font-size: 0.9rem;">KES ${amount.toLocaleString()}</div>
-              <span class="status-chip chip-green" style="font-size: 0.65rem; padding: 1px 5px;">M-Pesa / Valet</span>
+              <div style="font-weight: 700; color: #B28756; font-size: 0.85rem;">KES ${amount.toLocaleString()}</div>
+              <small style="color: #1E8449; font-size: 0.68rem; font-weight: 600;">M-Pesa</small>
             </td>
             <td style="text-align: right;">
-              <span class="status-chip ${statusBadgeClass}" style="font-size: 0.72rem; padding: 2px 8px;">
+              <span class="status-chip ${statusBadgeClass}" style="font-size: 0.7rem; padding: 2px 7px;">
                 ${statusText}
               </span>
             </td>

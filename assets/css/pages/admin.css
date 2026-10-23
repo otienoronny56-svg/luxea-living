@@ -960,7 +960,7 @@
   background: #FFFFFF;
   border: 1px solid rgba(178, 150, 125, 0.22);
   border-radius: 20px;
-  overflow-x: hidden;
+  overflow-x: auto;
   box-shadow: 0 6px 24px rgba(36, 24, 18, 0.04);
   width: 100%;
   max-width: 100%;
@@ -968,6 +968,7 @@
 
 .lux-data-table {
   width: 100%;
+  min-width: 760px;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
