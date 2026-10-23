@@ -100,9 +100,14 @@ export function initHostManager(containerId = 'hostManagerContainer') {
           <h2 class="manager-title">${hostTitle}</h2>
           <p class="manager-sub">${hostSub}</p>
         </div>
-        <button class="btn btn-primary btn-sm" id="openNewListingBtn">
-          <span>+ Add New Listing</span>
-        </button>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <a href="/laundry/" class="btn btn-outline btn-sm" title="Book or manage turnover linen and laundry service">
+            <span>🧺 Linen &amp; Laundry Valet ↗</span>
+          </a>
+          <button class="btn btn-primary btn-sm" id="openNewListingBtn">
+            <span>+ Add New Listing</span>
+          </button>
+        </div>
       </div>
 
       <div class="host-listings-grid" id="hostListingsGrid">

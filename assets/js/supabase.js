@@ -1308,6 +1308,216 @@
       } catch (e) {
         return null;
       }
+    },
+
+    // =========================================================================
+    // 5. LAUNDRY & VALET SERVICE PARTNERS & ORDERS
+    // =========================================================================
+
+    /**
+     * Register a new Laundry Service Provider
+     */
+    registerLaundryPartner: async function (partnerData) {
+      const client = this.getClient();
+      const refId = `LXL-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      const newPartner = {
+        id: crypto.randomUUID ? crypto.randomUUID() : `laundry-${Date.now()}`,
+        ref_id: refId,
+        business_name: partnerData.businessName,
+        contact_person: partnerData.contactPerson,
+        phone: partnerData.phone,
+        email: partnerData.email || `${refId.toLowerCase()}@laundry.luxealiving.co.ke`,
+        mpesa_number: partnerData.mpesaNumber || partnerData.phone,
+        coverage_areas: partnerData.coverageAreas || ['Westlands', 'Kilimani', 'Ruaka'],
+        price_wash_fold_per_kg: parseFloat(partnerData.priceWashFold) || 250,
+        price_linen_turnover_set: parseFloat(partnerData.priceLinenTurnover) || 1500,
+        price_dry_clean_suit: parseFloat(partnerData.priceDryClean) || 900,
+        express_available: partnerData.expressAvailable !== false,
+        status: 'approved',
+        rating: 5.0,
+        completed_orders_count: 0,
+        created_at: new Date().toISOString()
+      };
+
+      // 1. Cache locally
+      const cached = JSON.parse(localStorage.getItem('luxea_laundry_partners') || '[]');
+      cached.unshift(newPartner);
+      localStorage.setItem('luxea_laundry_partners', JSON.stringify(cached));
+
+      // Save active session for the laundry partner
+      localStorage.setItem('luxea_laundry_session', JSON.stringify(newPartner));
+
+      // 2. Insert into Supabase if connected
+      if (client) {
+        try {
+          const { data, error } = await client.from('lux_laundry_partners').insert([newPartner]).select();
+          if (error) console.warn('Supabase laundry partner insert note:', error.message);
+          else if (data && data[0]) return data[0];
+        } catch (err) {
+          console.warn('Supabase laundry partner insert exception:', err);
+        }
+      }
+
+      return newPartner;
+    },
+
+    /**
+     * Fetch laundry service providers
+     */
+    fetchLaundryPartners: async function () {
+      const client = this.getClient();
+      if (client) {
+        try {
+          const { data, error } = await client
+            .from('lux_laundry_partners')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (!error && Array.isArray(data) && data.length > 0) {
+            localStorage.setItem('luxea_laundry_partners', JSON.stringify(data));
+            return data;
+          }
+        } catch (e) {
+          console.warn('Fetch laundry partners error:', e);
+        }
+      }
+      return JSON.parse(localStorage.getItem('luxea_laundry_partners') || '[]');
+    },
+
+    /**
+     * Create a new Laundry Service Order (from Guest or Host)
+     */
+    createLaundryOrder: async function (orderData) {
+      const client = this.getClient();
+      const orderNum = `ORD-LX-${Math.floor(100000 + Math.random() * 900000)}`;
+
+      const newOrder = {
+        id: crypto.randomUUID ? crypto.randomUUID() : `ord-${Date.now()}`,
+        order_number: orderNum,
+        customer_name: orderData.customerName,
+        customer_phone: orderData.customerPhone,
+        customer_email: orderData.customerEmail || '',
+        order_type: orderData.orderType || 'guest_valet', // 'guest_valet' or 'host_turnover'
+        property_name: orderData.propertyName || 'Luxea Residence',
+        unit_number: orderData.unitNumber || '',
+        location_area: orderData.locationArea || 'Westlands',
+        pickup_date: orderData.pickupDate || new Date().toISOString().split('T')[0],
+        pickup_time_slot: orderData.pickupTimeSlot || '10:00 AM - 12:00 PM',
+        service_type: orderData.serviceType || 'Wash & Fold',
+        estimated_weight_or_items: orderData.estimatedWeightOrItems || '1 Bag (~5kg)',
+        special_instructions: orderData.specialInstructions || '',
+        total_amount_kes: parseFloat(orderData.totalAmountKes) || 1250,
+        payment_status: orderData.paymentStatus || 'pending',
+        status: 'requested',
+        assigned_partner_id: orderData.assignedPartnerId || null,
+        created_at: new Date().toISOString()
+      };
+
+      // Cache locally
+      const cached = JSON.parse(localStorage.getItem('luxea_laundry_orders') || '[]');
+      cached.unshift(newOrder);
+      localStorage.setItem('luxea_laundry_orders', JSON.stringify(cached));
+
+      // Insert into Supabase
+      if (client) {
+        try {
+          const { data, error } = await client.from('lux_laundry_orders').insert([newOrder]).select();
+          if (error) console.warn('Supabase laundry order insert note:', error.message);
+          else if (data && data[0]) return data[0];
+        } catch (err) {
+          console.warn('Supabase laundry order insert exception:', err);
+        }
+      }
+
+      window.dispatchEvent(new CustomEvent('luxea:laundry_order_created', { detail: newOrder }));
+      return newOrder;
+    },
+
+    /**
+     * Fetch laundry orders (optionally filtered by partner or area)
+     */
+    fetchLaundryOrders: async function (partnerId = null) {
+      const client = this.getClient();
+      if (client) {
+        try {
+          let query = client.from('lux_laundry_orders').select('*').order('created_at', { ascending: false });
+          if (partnerId) {
+            query = query.or(`assigned_partner_id.eq.${partnerId},assigned_partner_id.is.null`);
+          }
+          const { data, error } = await query;
+          if (!error && Array.isArray(data)) {
+            localStorage.setItem('luxea_laundry_orders', JSON.stringify(data));
+            return data;
+          }
+        } catch (e) {
+          console.warn('Fetch laundry orders error:', e);
+        }
+      }
+
+      const localOrders = JSON.parse(localStorage.getItem('luxea_laundry_orders') || '[]');
+      if (partnerId) {
+        return localOrders.filter(o => !o.assigned_partner_id || o.assigned_partner_id === partnerId);
+      }
+      return localOrders;
+    },
+
+    /**
+     * Update laundry order status (requested -> accepted -> picked_up -> in_process -> out_for_delivery -> delivered)
+     */
+    updateLaundryOrderStatus: async function (orderId, newStatus, partnerId = null) {
+      const client = this.getClient();
+
+      // Update local storage
+      const cached = JSON.parse(localStorage.getItem('luxea_laundry_orders') || '[]');
+      const idx = cached.findIndex(o => o.id === orderId || o.order_number === orderId);
+      let updatedOrder = null;
+
+      if (idx !== -1) {
+        cached[idx].status = newStatus;
+        if (partnerId) cached[idx].assigned_partner_id = partnerId;
+        cached[idx].updated_at = new Date().toISOString();
+        updatedOrder = cached[idx];
+        localStorage.setItem('luxea_laundry_orders', JSON.stringify(cached));
+      }
+
+      // Update Supabase
+      if (client) {
+        try {
+          const updatePayload = {
+            status: newStatus,
+            updated_at: new Date().toISOString()
+          };
+          if (partnerId) updatePayload.assigned_partner_id = partnerId;
+
+          const { data, error } = await client
+            .from('lux_laundry_orders')
+            .update(updatePayload)
+            .or(`id.eq.${orderId},order_number.eq.${orderId}`)
+            .select();
+
+          if (error) console.warn('Supabase update order status note:', error.message);
+          else if (data && data[0]) updatedOrder = data[0];
+        } catch (err) {
+          console.warn('Supabase update order status exception:', err);
+        }
+      }
+
+      window.dispatchEvent(new CustomEvent('luxea:laundry_order_updated', { detail: updatedOrder || { id: orderId, status: newStatus } }));
+      return updatedOrder || { id: orderId, status: newStatus };
+    },
+
+    getCurrentLaundryPartner: function () {
+      try {
+        return JSON.parse(localStorage.getItem('luxea_laundry_session') || 'null');
+      } catch (e) {
+        return null;
+      }
+    },
+
+    logoutLaundryPartner: function () {
+      localStorage.removeItem('luxea_laundry_session');
+      return { success: true };
     }
   };
 

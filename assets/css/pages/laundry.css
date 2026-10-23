@@ -1,0 +1,252 @@
+/* ==========================================================================
+   LUXEA LIVING — LAUNDRY PARTNER PORTAL & DASHBOARD (laundry.css)
+   ========================================================================== */
+
+.laundry-page-container {
+  max-width: 960px;
+  margin: 32px auto 80px;
+  padding: 0 16px;
+}
+
+.laundry-hero-banner {
+  background: linear-gradient(135deg, var(--color-espresso), var(--color-cocoa-deep));
+  color: var(--color-linen-light);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  margin-bottom: 24px;
+  box-shadow: 0 12px 36px rgba(74, 52, 42, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.laundry-hero-info h1 {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.laundry-hero-info p {
+  font-size: 0.9rem;
+  color: var(--color-khaki-light);
+  max-width: 520px;
+}
+
+/* Mode Switcher Pills */
+.laundry-mode-nav {
+  display: flex;
+  background: var(--color-linen);
+  border: 1px solid var(--color-khaki);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  margin-bottom: 24px;
+  max-width: 440px;
+}
+
+.laundry-mode-tab {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--color-cocoa);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.laundry-mode-tab.active {
+  background: #FFFFFF;
+  color: var(--color-espresso);
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(74, 52, 42, 0.08);
+}
+
+/* Card Box */
+.laundry-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-khaki-light);
+  box-shadow: var(--shadow-sm);
+  padding: 28px 24px;
+  margin-bottom: 24px;
+}
+
+.laundry-card h2 {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+  margin-bottom: 6px;
+}
+
+.laundry-card p.card-sub {
+  font-size: 0.85rem;
+  color: var(--color-cocoa);
+  margin-bottom: 20px;
+}
+
+/* Metric stats grid */
+.laundry-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.laundry-stat-box {
+  background: var(--color-linen-light);
+  border: 1px solid var(--color-khaki-light);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: left;
+}
+
+.laundry-stat-num {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-espresso);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.laundry-stat-label {
+  font-size: 0.75rem;
+  color: var(--color-cocoa);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Orders List */
+.laundry-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.laundry-order-card {
+  border: 1px solid var(--color-khaki-light);
+  border-radius: var(--radius-md);
+  background: #FFFFFF;
+  padding: 18px 20px;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.laundry-order-card:hover {
+  border-color: var(--color-camel);
+  box-shadow: 0 4px 14px rgba(74, 52, 42, 0.08);
+}
+
+.order-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-linen);
+}
+
+.order-id-badge {
+  font-family: monospace;
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: var(--color-camel-dark);
+}
+
+.order-status-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-requested { background: #FEF3C7; color: #92400E; }
+.status-accepted { background: #E0E7FF; color: #3730A3; }
+.status-picked_up { background: #E0F2FE; color: #075985; }
+.status-in_process { background: #FCE7F3; color: #9D174D; }
+.status-out_for_delivery { background: #FFEDD5; color: #9A3412; }
+.status-delivered { background: #DCFCE7; color: #166534; }
+
+.order-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  font-size: 0.84rem;
+  color: var(--color-espresso);
+}
+
+.order-detail-item strong {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--color-cocoa);
+  margin-bottom: 2px;
+}
+
+.order-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-linen);
+}
+
+.order-price-val {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-espresso);
+}
+
+/* Checkbox Grid for Coverage */
+.coverage-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.coverage-chip-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  background: var(--color-linen-light);
+  border: 1px solid var(--color-khaki-light);
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.coverage-chip-label:hover {
+  background: #FFFFFF;
+  border-color: var(--color-camel);
+}
+
+@media (max-width: 600px) {
+  .laundry-hero-banner {
+    padding: 24px 20px;
+  }
+  .laundry-hero-info h1 {
+    font-size: 1.6rem;
+  }
+  .laundry-card {
+    padding: 20px 16px;
+  }
+}
