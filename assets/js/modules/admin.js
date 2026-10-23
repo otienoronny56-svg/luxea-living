@@ -1839,14 +1839,9 @@ export function initAdminDashboard() {
                 <div><span style="color: #8C6D58;">Suit:</span> <strong>${suitRate}</strong></div>
               </div>
             </td>
-            <td>
+            <td style="text-align: right;">
               <div style="font-weight: 700; color: #B28756; font-size: 0.76rem;">⭐ ${rating}</div>
               <small style="color: #8C6D58; font-size: 0.64rem;">${completedJobs} jobs</small>
-            </td>
-            <td style="text-align: right;">
-              <a href="/laundry/?partner_ref=${encodeURIComponent(refId)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="font-size: 0.68rem; padding: 3px 6px; text-decoration: none; white-space: nowrap;" title="Test Partner Dashboard">
-                <span>Hub ↗</span>
-              </a>
             </td>
           `;
           laundryPartnersTableBody.appendChild(tr);
