@@ -1,35 +1,150 @@
 /**
- * LUXEA LIVING — LAUNDRY PARTNER PORTAL & DASHBOARD (laundryManager.js)
- * Clean, mobile-first management for Laundry Service Providers in Kenya.
+ * LUXEA LIVING — LAUNDRY & VALET PORTAL (laundryManager.js)
+ * 1. Default for Guests/Hosts: Marketplace of local verified laundry & dry clean providers with clear pricing.
+ * 2. Order Tracking: Guests can track their pickup orders live.
+ * 3. Gated / Invite-Only: Service providers only see dashboard/registration via invite link or partner login.
  */
 
+export const DEFAULT_LAUNDRY_PROVIDERS = [
+  {
+    id: 'prov-spotless',
+    ref_id: 'LXL-2026-WEST',
+    business_name: 'Spotless Valet & Dry Cleaners',
+    contact_person: 'Mary Wanjiku',
+    phone: '0712 345 678',
+    rating: 4.9,
+    completed_orders_count: 68,
+    coverage_areas: ['Westlands', 'Parklands', 'Riverside'],
+    price_wash_fold_per_kg: 250,
+    price_linen_turnover_set: 1500,
+    price_dry_clean_suit: 900,
+    express_available: true,
+    turnaround: 'Same-day 4-6 hrs',
+    tagline: 'Premium garment care, steam pressing & executive suit dry cleaning with doorstep collection.'
+  },
+  {
+    id: 'prov-linencraft',
+    ref_id: 'LXL-2026-KILI',
+    business_name: 'LinenCraft Host Turnover Specialists',
+    contact_person: 'Kevin Otieno',
+    phone: '0722 890 123',
+    rating: 5.0,
+    completed_orders_count: 94,
+    coverage_areas: ['Kilimani', 'Kileleshwa', 'Lavington'],
+    price_wash_fold_per_kg: 220,
+    price_linen_turnover_set: 1400,
+    price_dry_clean_suit: 850,
+    express_available: true,
+    turnaround: 'Rapid turnover for Airbnb hosts',
+    tagline: 'Specialized bed sheets, duvet & bath towel laundering with hotel-grade crisp folding.'
+  },
+  {
+    id: 'prov-freshbreeze',
+    ref_id: 'LXL-2026-RUAK',
+    business_name: 'FreshBreeze Eco-Laundry Hub',
+    contact_person: 'Grace Muthoni',
+    phone: '0733 456 789',
+    rating: 4.8,
+    completed_orders_count: 51,
+    coverage_areas: ['Ruaka', 'Two Rivers', 'Rosslyn'],
+    price_wash_fold_per_kg: 200,
+    price_linen_turnover_set: 1300,
+    price_dry_clean_suit: 800,
+    express_available: true,
+    turnaround: 'Next-day or 6-hr express',
+    tagline: 'Eco-friendly hypoallergenic detergents, gentle cycle care, ideal for long stay guests.'
+  },
+  {
+    id: 'prov-safari',
+    ref_id: 'LXL-2026-ROYS',
+    business_name: 'Safari Sparkle Express Laundromat',
+    contact_person: 'Samuel Kiprop',
+    phone: '0701 234 567',
+    rating: 4.9,
+    completed_orders_count: 43,
+    coverage_areas: ['Roysambu', 'Garden Estate', 'Thika Road'],
+    price_wash_fold_per_kg: 220,
+    price_linen_turnover_set: 1400,
+    price_dry_clean_suit: 850,
+    express_available: true,
+    turnaround: 'Fast doorstep bike courier pickup',
+    tagline: 'Prompt doorstep collection & delivery with live SMS updates and express turnaround.'
+  },
+  {
+    id: 'prov-karen-prestige',
+    ref_id: 'LXL-2026-KAREN',
+    business_name: 'Prestige Fabric & Villa Valet',
+    contact_person: 'Brenda Cherono',
+    phone: '0720 998 877',
+    rating: 5.0,
+    completed_orders_count: 36,
+    coverage_areas: ['Karen', 'Langata', 'Hardy'],
+    price_wash_fold_per_kg: 280,
+    price_linen_turnover_set: 1600,
+    price_dry_clean_suit: 950,
+    express_available: true,
+    turnaround: 'Same-day concierge pickup',
+    tagline: 'Luxury villa & holiday home valet laundry. White-glove handling of fine linens & delicate fabrics.'
+  }
+];
+
 export function initLaundryManager() {
-  const regForm = document.getElementById('laundryRegisterForm');
+  // Views
+  const browseView = document.getElementById('laundryBrowseView');
+  const myOrdersView = document.getElementById('laundryMyOrdersView');
   const dashboardView = document.getElementById('laundryDashboardView');
   const registerView = document.getElementById('laundryRegisterView');
+  
+  // Navigation elements
   const navTabs = document.querySelectorAll('.laundry-mode-tab');
+  const partnerTabBtn = document.getElementById('partnerPortalTabBtn');
+  const providersContainer = document.getElementById('laundryProvidersGrid');
+  const locFilterChips = document.querySelectorAll('.loc-filter-chip');
+  const providerSearchInput = document.getElementById('providerSearchInput');
+  
+  // Orders & Modal elements
   const ordersContainer = document.getElementById('laundryOrdersContainer');
+  const myOrdersContainer = document.getElementById('myOrdersContainer');
+  const myOrdersBadge = document.getElementById('myOrdersCountBadge');
   const orderModal = document.getElementById('laundryOrderModal');
   const orderForm = document.getElementById('createLaundryOrderForm');
   const openOrderBtn = document.getElementById('openCreateOrderBtn');
   const closeOrderBtn = document.getElementById('closeOrderModalBtn');
   const cancelOrderBtn = document.getElementById('cancelOrderModalBtn');
+  const regForm = document.getElementById('laundryRegisterForm');
 
-  // Check if laundry partner session exists
+  // State
+  let activeLocFilter = 'All';
+  let activeSearchTerm = '';
+  let selectedProviderForOrder = null;
   let partnerSession = window.LuxeaDB ? window.LuxeaDB.getCurrentLaundryPartner() : null;
 
-  // Initial seed orders if none exist
+  // Initialize sample orders if empty
   seedInitialOrdersIfEmpty();
 
-  // Mode switching
+  // 1. View Switching Logic
   function switchView(mode) {
-    navTabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-mode') === mode));
-    if (mode === 'dashboard') {
-      registerView?.classList.add('hidden');
+    // Hide all views first
+    browseView?.classList.add('hidden');
+    myOrdersView?.classList.add('hidden');
+    dashboardView?.classList.add('hidden');
+    registerView?.classList.add('hidden');
+
+    // Update active state on nav tabs
+    navTabs.forEach(tab => {
+      tab.classList.toggle('active', tab.getAttribute('data-mode') === mode);
+    });
+
+    if (mode === 'browse') {
+      browseView?.classList.remove('hidden');
+      renderProvidersList();
+    } else if (mode === 'my_orders') {
+      myOrdersView?.classList.remove('hidden');
+      renderGuestOrders();
+    } else if (mode === 'dashboard') {
       dashboardView?.classList.remove('hidden');
-      renderDashboard();
-    } else {
-      dashboardView?.classList.add('hidden');
+      renderPartnerDashboard();
+    } else if (mode === 'register') {
       registerView?.classList.remove('hidden');
     }
   }
@@ -40,54 +155,364 @@ export function initLaundryManager() {
     });
   });
 
-  // 1. Partner Registration Form Submit
-  regForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = regForm.querySelector('button[type="submit"]');
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = '<span>Registering Partner...</span>';
+  // Switch to customer view button from partner dashboard
+  document.getElementById('backToMarketplaceBtn')?.addEventListener('click', () => {
+    switchView('browse');
+  });
+
+  // 2. Fetch and Combine Providers (Default + Supabase)
+  async function getAllProviders() {
+    let dbPartners = [];
+    if (window.LuxeaDB && typeof window.LuxeaDB.fetchLaundryPartners === 'function') {
+      dbPartners = await window.LuxeaDB.fetchLaundryPartners();
+    } else {
+      dbPartners = JSON.parse(localStorage.getItem('luxea_laundry_partners') || '[]');
     }
 
-    const coverageCheckboxes = regForm.querySelectorAll('input[name="coverage"]:checked');
-    const coverage = Array.from(coverageCheckboxes).map(c => c.value);
+    // Merge default providers and custom registered partners
+    const combined = [...DEFAULT_LAUNDRY_PROVIDERS];
+    dbPartners.forEach(p => {
+      if (!combined.some(c => c.ref_id === p.ref_id || c.id === p.id)) {
+        combined.unshift({
+          id: p.id,
+          ref_id: p.ref_id || 'LXL-PARTNER',
+          business_name: p.business_name || p.businessName,
+          contact_person: p.contact_person || p.contactPerson || 'Manager',
+          phone: p.phone,
+          rating: p.rating || 5.0,
+          completed_orders_count: p.completed_orders_count || 1,
+          coverage_areas: Array.isArray(p.coverage_areas) ? p.coverage_areas : ['Westlands', 'Kilimani'],
+          price_wash_fold_per_kg: parseFloat(p.price_wash_fold_per_kg) || 250,
+          price_linen_turnover_set: parseFloat(p.price_linen_turnover_set) || 1500,
+          price_dry_clean_suit: parseFloat(p.price_dry_clean_suit) || 900,
+          express_available: p.express_available !== false,
+          turnaround: p.express_available ? 'Express same-day available' : 'Next day pickup',
+          tagline: 'Verified Luxea Living service provider.'
+        });
+      }
+    });
 
-    const partnerData = {
-      businessName: regForm.querySelector('#bizName').value.trim(),
-      contactPerson: regForm.querySelector('#contactPerson').value.trim(),
-      phone: regForm.querySelector('#bizPhone').value.trim(),
-      email: regForm.querySelector('#bizEmail').value.trim(),
-      mpesaNumber: regForm.querySelector('#mpesaNumber').value.trim() || regForm.querySelector('#bizPhone').value.trim(),
-      coverageAreas: coverage.length > 0 ? coverage : ['Westlands', 'Kilimani'],
-      priceWashFold: parseFloat(regForm.querySelector('#priceWashFold').value) || 250,
-      priceLinenTurnover: parseFloat(regForm.querySelector('#priceLinenTurnover').value) || 1500,
-      priceDryClean: parseFloat(regForm.querySelector('#priceDryClean').value) || 900,
-      expressAvailable: regForm.querySelector('#expressAvailable').checked
+    return combined;
+  }
+
+  // 3. Render Providers List for Customers
+  async function renderProvidersList() {
+    if (!providersContainer) return;
+    const providers = await getAllProviders();
+
+    // Filter by location & search
+    const filtered = providers.filter(p => {
+      const matchesLoc = activeLocFilter === 'All' || 
+        (p.coverage_areas && p.coverage_areas.some(area => area.toLowerCase().includes(activeLocFilter.toLowerCase())));
+      
+      const matchesSearch = !activeSearchTerm || 
+        p.business_name.toLowerCase().includes(activeSearchTerm.toLowerCase()) ||
+        (p.coverage_areas && p.coverage_areas.some(a => a.toLowerCase().includes(activeSearchTerm.toLowerCase())));
+
+      return matchesLoc && matchesSearch;
+    });
+
+    if (filtered.length === 0) {
+      providersContainer.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: #FFF; border-radius: var(--radius-lg); border: 1px solid var(--color-khaki-light);">
+          <div style="font-size: 2.2rem; margin-bottom: 8px;">🧺</div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.3rem; color: var(--color-espresso); margin-bottom: 6px;">No laundry providers found for "${activeLocFilter}"</h3>
+          <p style="font-size: 0.85rem; color: var(--color-cocoa); max-width: 440px; margin: 0 auto 16px;">
+            We are actively expanding verified partners into this zone. You can request a central valet pickup and our concierge will assign the closest dispatch.
+          </p>
+          <button type="button" class="btn btn-primary btn-sm" id="emptyCentralOrderBtn">
+            <span>Request Central Pickup Instead</span>
+          </button>
+        </div>
+      `;
+      providersContainer.querySelector('#emptyCentralOrderBtn')?.addEventListener('click', () => {
+        openOrderModalWithProvider(null);
+      });
+      return;
+    }
+
+    providersContainer.innerHTML = filtered.map(provider => {
+      const areasHtml = (provider.coverage_areas || []).map(a => `<span class="provider-area-tag">${a}</span>`).join('');
+
+      return `
+        <div class="provider-card" data-provider-id="${provider.id}">
+          <div>
+            <div class="provider-header">
+              <div>
+                <span style="font-size: 0.68rem; font-weight: 700; color: var(--color-camel-dark); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">
+                  ✦ VERIFIED LUXEA PARTNER
+                </span>
+                <h3 class="provider-title">${provider.business_name}</h3>
+              </div>
+              <div class="provider-rating-pill">
+                <span>★ ${provider.rating || '5.0'}</span>
+                <small style="opacity: 0.8;">(${provider.completed_orders_count || 12})</small>
+              </div>
+            </div>
+
+            <div class="provider-areas-tags">
+              ${areasHtml}
+            </div>
+
+            <p class="provider-bio">${provider.tagline || 'Specialized in fast, spotless fabric care with convenient doorstep delivery.'}</p>
+
+            <div class="provider-pricing-box">
+              <div class="pricing-row">
+                <span>🧺 Wash &amp; Fold</span>
+                <strong>KES ${provider.price_wash_fold_per_kg} / kg</strong>
+              </div>
+              <div class="pricing-row">
+                <span>👔 Dry Clean Suit</span>
+                <strong>KES ${provider.price_dry_clean_suit}</strong>
+              </div>
+              <div class="pricing-row">
+                <span>🏡 Host Linen Set</span>
+                <strong>KES ${provider.price_linen_turnover_set}</strong>
+              </div>
+              ${provider.express_available ? `
+                <div style="font-size: 0.74rem; color: #166534; font-weight: 600; margin-top: 6px; display: flex; align-items: center; gap: 4px;">
+                  ⚡ ${provider.turnaround || 'Same-day express turnaround'}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+
+          <div class="provider-footer">
+            <button type="button" class="btn btn-primary btn-sm book-this-provider-btn" data-provider-id="${provider.id}" style="padding: 10px 14px;">
+              <span>Book Pickup →</span>
+            </button>
+            <a href="tel:${provider.phone}" class="btn btn-outline btn-sm" style="padding: 10px 14px;" title="Call provider directly">
+              <span>📞 Call</span>
+            </a>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Attach click events on "Book Pickup" buttons
+    providersContainer.querySelectorAll('.book-this-provider-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const provId = btn.getAttribute('data-provider-id');
+        const selected = providers.find(p => p.id === provId);
+        openOrderModalWithProvider(selected);
+      });
+    });
+  }
+
+  // Location filter clicks
+  locFilterChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      locFilterChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeLocFilter = chip.getAttribute('data-loc');
+      renderProvidersList();
+    });
+  });
+
+  // Search input filter
+  providerSearchInput?.addEventListener('input', (e) => {
+    activeSearchTerm = e.target.value.trim();
+    renderProvidersList();
+  });
+
+  // 4. Render Guest Orders (Track My Orders)
+  function renderGuestOrders() {
+    if (!myOrdersContainer) return;
+    const allOrders = JSON.parse(localStorage.getItem('luxea_laundry_orders') || '[]');
+
+    if (myOrdersBadge) {
+      myOrdersBadge.textContent = allOrders.length;
+      myOrdersBadge.style.display = allOrders.length > 0 ? 'inline-block' : 'none';
+    }
+
+    if (allOrders.length === 0) {
+      myOrdersContainer.innerHTML = `
+        <div style="text-align: center; padding: 48px 20px; color: var(--color-cocoa); background: #FFF; border-radius: var(--radius-lg); border: 1px solid var(--color-khaki-light);">
+          <div style="font-size: 2.2rem; margin-bottom: 8px;">📦</div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.3rem; color: var(--color-espresso); margin-bottom: 4px;">No active orders yet</h3>
+          <p style="font-size: 0.85rem; margin-bottom: 16px;">Pick a laundry partner from the marketplace and request a doorstep pickup.</p>
+          <button class="btn btn-primary btn-sm" id="emptyBookNowBtn">Browse Providers &amp; Book</button>
+        </div>
+      `;
+      myOrdersContainer.querySelector('#emptyBookNowBtn')?.addEventListener('click', () => {
+        switchView('browse');
+      });
+      return;
+    }
+
+    myOrdersContainer.innerHTML = allOrders.map(order => {
+      const statusLabel = getStatusLabel(order.status);
+      const stepIndex = getStepIndex(order.status);
+
+      return `
+        <div class="laundry-order-card" style="margin-bottom: 16px;">
+          <div class="order-top-row">
+            <div>
+              <span class="order-id-badge">${order.order_number || 'ORD-LX-XXXX'}</span>
+              <span style="font-size: 0.78rem; color: var(--color-cocoa); margin-left: 8px;">
+                • ${order.order_type === 'host_turnover' ? '🏡 Host Linen Turnover' : '✨ Guest Valet'}
+              </span>
+            </div>
+            <span class="order-status-pill status-${order.status || 'requested'}">${statusLabel}</span>
+          </div>
+
+          <!-- Stepper Visualization for Guests -->
+          <div class="order-tracking-steps">
+            <div class="track-step-item ${stepIndex >= 1 ? (stepIndex > 1 ? 'done' : 'active') : ''}">
+              <div class="track-step-circle">${stepIndex > 1 ? '✓' : '1'}</div>
+              <span class="track-step-label">Placed</span>
+            </div>
+            <div class="track-step-item ${stepIndex >= 2 ? (stepIndex > 2 ? 'done' : 'active') : ''}">
+              <div class="track-step-circle">${stepIndex > 2 ? '✓' : '2'}</div>
+              <span class="track-step-label">Accepted</span>
+            </div>
+            <div class="track-step-item ${stepIndex >= 3 ? (stepIndex > 3 ? 'done' : 'active') : ''}">
+              <div class="track-step-circle">${stepIndex > 3 ? '✓' : '3'}</div>
+              <span class="track-step-label">Picked Up</span>
+            </div>
+            <div class="track-step-item ${stepIndex >= 4 ? (stepIndex > 4 ? 'done' : 'active') : ''}">
+              <div class="track-step-circle">${stepIndex > 4 ? '✓' : '4'}</div>
+              <span class="track-step-label">Washing</span>
+            </div>
+            <div class="track-step-item ${stepIndex >= 5 ? (stepIndex > 5 ? 'done' : 'active') : ''}">
+              <div class="track-step-circle">${stepIndex > 5 ? '✓' : '5'}</div>
+              <span class="track-step-label">Out for Delivery</span>
+            </div>
+            <div class="track-step-item ${stepIndex >= 6 ? 'done' : ''}">
+              <div class="track-step-circle">${stepIndex >= 6 ? '✓' : '6'}</div>
+              <span class="track-step-label">Delivered</span>
+            </div>
+          </div>
+
+          <div class="order-details-grid" style="margin-top: 14px;">
+            <div class="order-detail-item">
+              <strong>Stay / Residence</strong>
+              <span>${order.property_name || 'Curated Villa'} ${order.unit_number ? `(${order.unit_number})` : ''}</span>
+              <small style="color: var(--color-cocoa); display: block;">${order.location_area || 'Nairobi'}</small>
+            </div>
+            <div class="order-detail-item">
+              <strong>Pickup Scheduled</strong>
+              <span>📅 ${order.pickup_date || 'Today'}</span>
+              <small style="color: var(--color-cocoa); display: block;">⏰ ${order.pickup_time_slot || '10:00 AM - 12:00 PM'}</small>
+            </div>
+            <div class="order-detail-item">
+              <strong>Service &amp; Items</strong>
+              <span>${order.service_type || 'Wash & Fold'}</span>
+              <small style="color: var(--color-cocoa); display: block;">${order.estimated_weight_or_items || '1 Bag'}</small>
+            </div>
+            <div class="order-detail-item">
+              <strong>Estimated Total</strong>
+              <span style="font-weight: 700; color: var(--color-espresso);">KES ${(parseFloat(order.total_amount_kes) || 1200).toLocaleString()}</span>
+              <small style="color: #166534; font-weight: 600; display: block;">M-Pesa on Delivery</small>
+            </div>
+          </div>
+
+          ${order.special_instructions ? `
+            <div style="background: var(--color-linen-light); padding: 8px 12px; border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--color-espresso); margin-top: 10px;">
+              💬 <em>"${order.special_instructions}"</em>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function getStepIndex(status) {
+    switch (status) {
+      case 'requested': return 1;
+      case 'accepted': return 2;
+      case 'picked_up': return 3;
+      case 'in_process': return 4;
+      case 'out_for_delivery': return 5;
+      case 'delivered': return 6;
+      default: return 1;
+    }
+  }
+
+  // 5. Open Order Modal with Provider pre-filled
+  function openOrderModalWithProvider(provider = null) {
+    selectedProviderForOrder = provider;
+    const assignedNote = document.getElementById('modalAssignedProviderNote');
+    const assignedName = document.getElementById('modalAssignedProviderName');
+    const amountInput = document.getElementById('ordAmount');
+
+    if (provider) {
+      if (assignedNote) assignedNote.classList.remove('hidden');
+      if (assignedName) assignedName.textContent = provider.business_name;
+      if (amountInput) amountInput.value = provider.price_wash_fold_per_kg * 4; // default ~4kg
+    } else {
+      if (assignedNote) assignedNote.classList.add('hidden');
+      if (amountInput) amountInput.value = 1250;
+    }
+
+    orderModal?.classList.add('active');
+  }
+
+  function closeOrderModal() {
+    orderModal?.classList.remove('active');
+  }
+
+  openOrderBtn?.addEventListener('click', () => openOrderModalWithProvider(null));
+  closeOrderBtn?.addEventListener('click', closeOrderModal);
+  cancelOrderBtn?.addEventListener('click', closeOrderModal);
+
+  // Submit Order Form
+  orderForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = orderForm.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Submitting Order...</span>';
+    }
+
+    const orderData = {
+      customerName: orderForm.querySelector('#ordCustomerName').value.trim(),
+      customerPhone: orderForm.querySelector('#ordCustomerPhone').value.trim(),
+      orderType: orderForm.querySelector('#ordType').value,
+      propertyName: orderForm.querySelector('#ordProperty').value.trim(),
+      unitNumber: orderForm.querySelector('#ordUnit').value.trim(),
+      locationArea: orderForm.querySelector('#ordArea').value,
+      pickupDate: orderForm.querySelector('#ordDate').value || new Date().toISOString().split('T')[0],
+      pickupTimeSlot: orderForm.querySelector('#ordTime').value,
+      serviceType: orderForm.querySelector('#ordService').value,
+      estimatedWeightOrItems: orderForm.querySelector('#ordItems').value.trim() || '1 Bag',
+      totalAmountKes: parseFloat(orderForm.querySelector('#ordAmount').value) || 1250,
+      specialInstructions: orderForm.querySelector('#ordNotes').value.trim(),
+      assignedPartnerId: selectedProviderForOrder ? selectedProviderForOrder.id : null
     };
 
     try {
-      if (window.LuxeaDB && typeof window.LuxeaDB.registerLaundryPartner === 'function') {
-        partnerSession = await window.LuxeaDB.registerLaundryPartner(partnerData);
+      if (window.LuxeaDB && typeof window.LuxeaDB.createLaundryOrder === 'function') {
+        await window.LuxeaDB.createLaundryOrder(orderData);
       } else {
-        partnerSession = partnerData;
-        localStorage.setItem('luxea_laundry_session', JSON.stringify(partnerData));
+        const cached = JSON.parse(localStorage.getItem('luxea_laundry_orders') || '[]');
+        cached.unshift({
+          id: `ord-${Date.now()}`,
+          order_number: `ORD-LX-${Math.floor(100000 + Math.random() * 900000)}`,
+          ...orderData,
+          status: 'requested'
+        });
+        localStorage.setItem('luxea_laundry_orders', JSON.stringify(cached));
       }
 
-      if (window.showToast) window.showToast(`✅ Welcome, ${partnerData.businessName}! Partner Dashboard is live.`);
-      switchView('dashboard');
+      if (window.showToast) {
+        window.showToast(`✅ Pickup requested! Assigned to ${selectedProviderForOrder ? selectedProviderForOrder.business_name : 'Valet Concierge'}.`);
+      }
+      closeOrderModal();
+      orderForm.reset();
+      switchView('my_orders');
     } catch (err) {
-      console.error('Laundry partner registration error:', err);
-      if (window.showToast) window.showToast('Registration failed. Please check inputs.');
+      console.error('Order creation error:', err);
     } finally {
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = '<span>Complete Registration &amp; Open Dashboard →</span>';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span>Request Pickup →</span>';
       }
     }
   });
 
-  // 2. Render Partner Dashboard
-  async function renderDashboard() {
+  // 6. Partner Operations Dashboard (Internal Workspace)
+  async function renderPartnerDashboard() {
     partnerSession = window.LuxeaDB ? window.LuxeaDB.getCurrentLaundryPartner() : null;
 
     const partnerNameEl = document.getElementById('partnerDisplayName');
@@ -104,11 +529,10 @@ export function initLaundryManager() {
       if (partnerPhoneEl) partnerPhoneEl.textContent = 'M-Pesa Payout Ready';
     }
 
-    loadOrders();
+    loadPartnerOrders();
   }
 
-  // Load and display orders
-  async function loadOrders() {
+  async function loadPartnerOrders() {
     let orders = [];
     if (window.LuxeaDB && typeof window.LuxeaDB.fetchLaundryOrders === 'function') {
       orders = await window.LuxeaDB.fetchLaundryOrders();
@@ -116,7 +540,6 @@ export function initLaundryManager() {
       orders = JSON.parse(localStorage.getItem('luxea_laundry_orders') || '[]');
     }
 
-    // Update summary metrics
     const pendingOrders = orders.filter(o => o.status === 'requested' || o.status === 'accepted');
     const activeOrders = orders.filter(o => o.status === 'picked_up' || o.status === 'in_process' || o.status === 'out_for_delivery');
     const completedOrders = orders.filter(o => o.status === 'delivered');
@@ -132,21 +555,16 @@ export function initLaundryManager() {
     if (elStatActive) elStatActive.textContent = activeOrders.length;
     if (elStatEarnings) elStatEarnings.textContent = `KES ${totalEarnings.toLocaleString()}`;
 
-    // Render list
     if (!ordersContainer) return;
 
     if (orders.length === 0) {
       ordersContainer.innerHTML = `
         <div style="text-align: center; padding: 40px 20px; color: var(--color-cocoa); background: var(--color-linen-light); border-radius: var(--radius-md);">
           <div style="font-size: 2rem; margin-bottom: 8px;">🧺</div>
-          <p style="font-weight: 600; color: var(--color-espresso); margin-bottom: 4px;">No laundry orders yet</p>
-          <p style="font-size: 0.82rem; margin-bottom: 16px;">New orders placed by guests or hosts in your coverage areas will appear here.</p>
-          <button class="btn btn-outline btn-sm" id="emptySeedOrderBtn">Create Sample Test Order</button>
+          <p style="font-weight: 600; color: var(--color-espresso); margin-bottom: 4px;">No client orders currently in queue</p>
+          <p style="font-size: 0.82rem; margin-bottom: 16px;">Orders placed by guests or hosts in your coverage areas will appear here.</p>
         </div>
       `;
-      ordersContainer.querySelector('#emptySeedOrderBtn')?.addEventListener('click', () => {
-        openOrderModal();
-      });
       return;
     }
 
@@ -167,7 +585,7 @@ export function initLaundryManager() {
           <div class="order-details-grid">
             <div class="order-detail-item">
               <strong>Stay / Residence</strong>
-              <span>${order.property_name || 'Curated Villa'} ${order.unit_number ? `(Unit ${order.unit_number})` : ''}</span>
+              <span>${order.property_name || 'Curated Villa'} ${order.unit_number ? `(${order.unit_number})` : ''}</span>
               <small style="color: var(--color-cocoa); display: block;">${order.location_area || 'Nairobi'}</small>
             </div>
             <div class="order-detail-item">
@@ -215,7 +633,7 @@ export function initLaundryManager() {
       `;
     }).join('');
 
-    // Bind action buttons
+    // Attach status update clicks
     ordersContainer.querySelectorAll('.update-status-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const orderId = btn.getAttribute('data-order-id');
@@ -234,8 +652,8 @@ export function initLaundryManager() {
           }
         }
 
-        if (window.showToast) window.showToast(`Status updated to: ${getStatusLabel(nextStatus)}`);
-        loadOrders();
+        if (window.showToast) window.showToast(`Order status updated to: ${getStatusLabel(nextStatus)}`);
+        loadPartnerOrders();
       });
     });
   }
@@ -263,66 +681,64 @@ export function initLaundryManager() {
     }
   }
 
-  // 3. New Order Placement (Guest/Host simulation modal)
-  function openOrderModal() {
-    orderModal?.classList.add('active');
-  }
-
-  function closeOrderModal() {
-    orderModal?.classList.remove('active');
-  }
-
-  openOrderBtn?.addEventListener('click', openOrderModal);
-  closeOrderBtn?.addEventListener('click', closeOrderModal);
-  cancelOrderBtn?.addEventListener('click', closeOrderModal);
-
-  orderForm?.addEventListener('submit', async (e) => {
+  // 7. Partner Registration Form Submit (Invite Link)
+  regForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const submitBtn = orderForm.querySelector('button[type="submit"]');
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Submitting Order...</span>';
+    const btn = regForm.querySelector('button[type="submit"]');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>Registering Partner...</span>';
     }
 
-    const orderData = {
-      customerName: orderForm.querySelector('#ordCustomerName').value.trim(),
-      customerPhone: orderForm.querySelector('#ordCustomerPhone').value.trim(),
-      orderType: orderForm.querySelector('#ordType').value,
-      propertyName: orderForm.querySelector('#ordProperty').value.trim(),
-      unitNumber: orderForm.querySelector('#ordUnit').value.trim(),
-      locationArea: orderForm.querySelector('#ordArea').value,
-      pickupDate: orderForm.querySelector('#ordDate').value || new Date().toISOString().split('T')[0],
-      pickupTimeSlot: orderForm.querySelector('#ordTime').value,
-      serviceType: orderForm.querySelector('#ordService').value,
-      estimatedWeightOrItems: orderForm.querySelector('#ordItems').value.trim() || '1 Bag',
-      totalAmountKes: parseFloat(orderForm.querySelector('#ordAmount').value) || 1250,
-      specialInstructions: orderForm.querySelector('#ordNotes').value.trim()
+    const coverageCheckboxes = regForm.querySelectorAll('input[name="coverage"]:checked');
+    const coverage = Array.from(coverageCheckboxes).map(c => c.value);
+
+    const partnerData = {
+      businessName: regForm.querySelector('#bizName').value.trim(),
+      contactPerson: regForm.querySelector('#contactPerson').value.trim(),
+      phone: regForm.querySelector('#bizPhone').value.trim(),
+      email: regForm.querySelector('#bizEmail').value.trim(),
+      mpesaNumber: regForm.querySelector('#mpesaNumber').value.trim() || regForm.querySelector('#bizPhone').value.trim(),
+      coverageAreas: coverage.length > 0 ? coverage : ['Westlands', 'Kilimani'],
+      priceWashFold: parseFloat(regForm.querySelector('#priceWashFold').value) || 250,
+      priceLinenTurnover: parseFloat(regForm.querySelector('#priceLinenTurnover').value) || 1500,
+      priceDryClean: parseFloat(regForm.querySelector('#priceDryClean').value) || 900,
+      expressAvailable: regForm.querySelector('#expressAvailable').checked
     };
 
     try {
-      if (window.LuxeaDB && typeof window.LuxeaDB.createLaundryOrder === 'function') {
-        await window.LuxeaDB.createLaundryOrder(orderData);
+      if (window.LuxeaDB && typeof window.LuxeaDB.registerLaundryPartner === 'function') {
+        partnerSession = await window.LuxeaDB.registerLaundryPartner(partnerData);
       } else {
-        const cached = JSON.parse(localStorage.getItem('luxea_laundry_orders') || '[]');
-        cached.unshift({ id: `ord-${Date.now()}`, order_number: `ORD-LX-${Math.floor(100000 + Math.random() * 900000)}`, ...orderData, status: 'requested' });
-        localStorage.setItem('luxea_laundry_orders', JSON.stringify(cached));
+        partnerSession = { id: `laundry-${Date.now()}`, ref_id: `LXL-2026-${Math.floor(1000 + Math.random() * 9000)}`, ...partnerData };
+        localStorage.setItem('luxea_laundry_session', JSON.stringify(partnerSession));
       }
 
-      if (window.showToast) window.showToast('✅ Laundry order submitted! Alert sent to local partner.');
-      closeOrderModal();
-      orderForm.reset();
-      loadOrders();
+      if (window.showToast) window.showToast(`✅ Welcome, ${partnerData.businessName}! Partner Dashboard is live.`);
+      if (partnerTabBtn) partnerTabBtn.style.display = 'block';
+      switchView('dashboard');
     } catch (err) {
-      console.error('Order creation error:', err);
+      console.error('Laundry partner registration error:', err);
+      if (window.showToast) window.showToast('Registration failed. Please check inputs.');
     } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Request Pickup →</span>';
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Complete Registration &amp; Open Dashboard →</span>';
       }
     }
   });
 
-  // Seed sample orders if none exist
+  // Logout partner
+  document.getElementById('logoutLaundryBtn')?.addEventListener('click', () => {
+    if (window.LuxeaDB) window.LuxeaDB.logoutLaundryPartner();
+    else localStorage.removeItem('luxea_laundry_session');
+    partnerSession = null;
+    if (partnerTabBtn) partnerTabBtn.style.display = 'none';
+    if (window.showToast) window.showToast('Signed out of Laundry Partner Dashboard.');
+    switchView('browse');
+  });
+
+  // Seed sample initial orders
   function seedInitialOrdersIfEmpty() {
     const existing = JSON.parse(localStorage.getItem('luxea_laundry_orders') || '[]');
     if (existing.length === 0) {
@@ -342,50 +758,33 @@ export function initLaundryManager() {
           estimated_weight_or_items: '2 Bags (~8kg)',
           special_instructions: 'Please separate dark cottons. Ring doorbell upon arrival.',
           total_amount_kes: 2000,
-          status: 'requested',
+          status: 'in_process',
           created_at: new Date().toISOString()
-        },
-        {
-          id: 'ord-sample-2',
-          order_number: 'ORD-LX-592014',
-          customer_name: 'Gabriel Kamau (Host)',
-          customer_phone: '0722 889 900',
-          order_type: 'host_turnover',
-          property_name: 'Ruby Apartments',
-          unit_number: 'Apt 302',
-          location_area: 'Roysambu',
-          pickup_date: new Date().toISOString().split('T')[0],
-          pickup_time_slot: '10:00 AM - 12:00 PM',
-          service_type: 'Host Linen Turnover Set',
-          estimated_weight_or_items: '3 Bed Sets + 6 Bath Towels',
-          special_instructions: 'Urgent turnaround before 3:00 PM check-in.',
-          total_amount_kes: 3500,
-          status: 'picked_up',
-          created_at: new Date(Date.now() - 3600000).toISOString()
         }
       ];
       localStorage.setItem('luxea_laundry_orders', JSON.stringify(samples));
     }
   }
 
-  // Logout partner button
-  document.getElementById('logoutLaundryBtn')?.addEventListener('click', () => {
-    if (window.LuxeaDB) window.LuxeaDB.logoutLaundryPartner();
-    else localStorage.removeItem('luxea_laundry_session');
-    if (window.showToast) window.showToast('Signed out of Laundry Dashboard.');
-    switchView('register');
-  });
+  // 8. ROUTING & ACCESS CONTROL:
+  // GUESTS/CUSTOMERS ALWAYS DEFAULT TO 'browse' (Marketplace)!
+  // Partner Registration or Dashboard ONLY shown if explicitly invited via URL or logged in as partner!
+  const urlParams = new URLSearchParams(window.location.search);
+  const partnerParam = urlParams.get('partner') || urlParams.get('mode');
 
-  // Default view: if partner is already logged in, show dashboard; else show dashboard with sample data or registration
-  if (partnerSession) {
+  if (partnerParam === 'register' || urlParams.get('invite') === 'true') {
+    // Authorized Invite Link for service providers
+    switchView('register');
+  } else if (partnerParam === 'dashboard' || partnerParam === 'portal' || partnerParam === 'login') {
+    // Partner requested their dashboard
+    if (partnerTabBtn) partnerTabBtn.style.display = 'block';
     switchView('dashboard');
   } else {
-    // Check URL parameters (e.g. ?view=register or ?view=dashboard)
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('tab') === 'register') {
-      switchView('register');
-    } else {
-      switchView('dashboard');
+    // Normal Guests, Hosts, & Public Visitors:
+    // ALWAYS show the Customer Marketplace first!
+    if (partnerSession && partnerTabBtn) {
+      partnerTabBtn.style.display = 'block';
     }
+    switchView('browse');
   }
 }

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Laundry & Linen Valet Portal | Luxea Living</title>
-  <meta name="description" content="Dedicated laundry and valet linen portal for partners, guests, and hosts across Nairobi and Kenya. Quick M-Pesa payouts and automated order workflow.">
+  <title>Valet Laundry & Linen Care | Luxea Living</title>
+  <meta name="description" content="Doorstep laundry pickup, dry cleaning & host linen turnover across Nairobi. Select a verified local partner, view transparent pricing, and enjoy fresh clothes.">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,32 +46,97 @@
 
   <main class="laundry-page-container">
     
-    <!-- Hero Banner -->
+    <!-- Hero Banner (Customer Focused) -->
     <div class="laundry-hero-banner">
       <div class="laundry-hero-info">
         <span style="display: inline-block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-camel-light); font-weight: 700; margin-bottom: 6px;">
-          ✦ LUXEA VALET &amp; SERVICE PARTNERS
+          ✦ LUXEA CONCIERGE VALET SERVICES
         </span>
-        <h1>Laundry &amp; Linen Turnover Hub</h1>
+        <h1>Valet Laundry &amp; Linen Care</h1>
         <p>
-          Dedicated workspace for dry cleaners, laundromats, and linen turnover specialists. Accept jobs from luxury apartments and villas with direct M-Pesa payouts.
+          Doorstep wash, steam pressing, and host turnover linen services across Nairobi. Browse verified local partners below, compare transparent rates, and enjoy fresh laundry.
         </p>
       </div>
       <div>
         <button type="button" class="btn btn-primary" onclick="document.getElementById('openCreateOrderBtn')?.click()">
-          <span>+ Place Laundry Order</span>
+          <span>+ Request Pickup</span>
         </button>
       </div>
     </div>
 
-    <!-- Mode Switcher Tabs -->
+    <!-- Mode Switcher Tabs (For Customers & Guests) -->
     <div class="laundry-mode-nav">
-      <button type="button" class="laundry-mode-tab active" data-mode="dashboard">Partner Dashboard</button>
-      <button type="button" class="laundry-mode-tab" data-mode="register">Register as Partner</button>
+      <button type="button" class="laundry-mode-tab active" data-mode="browse">🧺 Browse Providers</button>
+      <button type="button" class="laundry-mode-tab" data-mode="my_orders">
+        📦 Track My Orders <span id="myOrdersCountBadge" class="filter-badge-count" style="display: none; margin-left: 4px;">0</span>
+      </button>
+      <button type="button" class="laundry-mode-tab" id="partnerPortalTabBtn" data-mode="dashboard" style="display: none;">
+        💼 Partner Workspace
+      </button>
     </div>
 
-    <!-- VIEW 1: PARTNER DASHBOARD -->
-    <div id="laundryDashboardView">
+    <!-- =========================================================================
+         VIEW 1: CUSTOMER BROWSE PROVIDERS & PRICING (Default for Guests)
+         ========================================================================= -->
+    <div id="laundryBrowseView">
+      
+      <!-- Filter Bar: Search + Neighborhood Chips -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;">
+          <input 
+            type="text" 
+            id="providerSearchInput" 
+            class="form-control" 
+            placeholder="🔍 Search providers by name or neighborhood (e.g. Westlands, Kilimani, Ruaka)..."
+            style="flex: 1; min-width: 260px;"
+          >
+        </div>
+
+        <!-- Neighborhood Chips -->
+        <div class="laundry-loc-filter-bar">
+          <button type="button" class="loc-filter-chip active" data-loc="All">All Nairobi</button>
+          <button type="button" class="loc-filter-chip" data-loc="Westlands">Westlands</button>
+          <button type="button" class="loc-filter-chip" data-loc="Kilimani">Kilimani</button>
+          <button type="button" class="loc-filter-chip" data-loc="Ruaka">Ruaka</button>
+          <button type="button" class="loc-filter-chip" data-loc="Roysambu">Roysambu</button>
+          <button type="button" class="loc-filter-chip" data-loc="Kileleshwa">Kileleshwa</button>
+          <button type="button" class="loc-filter-chip" data-loc="Lavington">Lavington</button>
+          <button type="button" class="loc-filter-chip" data-loc="Karen">Karen</button>
+        </div>
+      </div>
+
+      <!-- Providers Grid Container (Injected by laundryManager.js) -->
+      <div id="laundryProvidersGrid" class="laundry-providers-grid">
+        <!-- Rendered Provider Cards -->
+      </div>
+
+    </div>
+
+    <!-- =========================================================================
+         VIEW 2: GUEST ORDER TRACKING (Track My Orders)
+         ========================================================================= -->
+    <div id="laundryMyOrdersView" class="hidden">
+      <div class="laundry-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h2>My Laundry Orders</h2>
+            <p class="card-sub" style="margin-bottom: 0;">Live tracking and pickup status for your apartments and stays.</p>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('openCreateOrderBtn')?.click()">
+            <span>+ Request New Pickup</span>
+          </button>
+        </div>
+
+        <div id="myOrdersContainer">
+          <!-- Rendered Guest Orders -->
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         VIEW 3: PARTNER OPERATIONS DASHBOARD (Internal Workspace for Providers)
+         ========================================================================= -->
+    <div id="laundryDashboardView" class="hidden">
       
       <!-- Partner Profile Strip -->
       <div class="laundry-card" style="padding: 18px 24px; margin-bottom: 16px;">
@@ -88,8 +153,11 @@
               <small id="partnerDisplayPhone" style="color: var(--color-cocoa);">0700 000 000</small>
             </div>
           </div>
-          <div style="display: flex; gap: 8px;">
-            <button type="button" class="btn btn-outline btn-sm" id="logoutLaundryBtn">Sign Out</button>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button type="button" class="btn btn-outline btn-sm" id="backToMarketplaceBtn">
+              <span>← Customer View</span>
+            </button>
+            <button type="button" class="btn btn-text btn-sm" id="logoutLaundryBtn" style="color: #DC2626;">Sign Out</button>
           </div>
         </div>
       </div>
@@ -110,16 +178,13 @@
         </div>
       </div>
 
-      <!-- Active Orders Feed Card -->
+      <!-- Active Client Orders Feed Card -->
       <div class="laundry-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
           <div>
-            <h2>Current Laundry Orders</h2>
-            <p class="card-sub" style="margin-bottom: 0;">Incoming guest valet and host turnover pickups in your designated coverage zones.</p>
+            <h2>Incoming Client Orders</h2>
+            <p class="card-sub" style="margin-bottom: 0;">Jobs received from guests and hosts in your designated coverage zones.</p>
           </div>
-          <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('openCreateOrderBtn')?.click()">
-            <span>+ Test New Order</span>
-          </button>
         </div>
 
         <div id="laundryOrdersContainer" class="laundry-orders-list">
@@ -129,12 +194,17 @@
 
     </div>
 
-    <!-- VIEW 2: PARTNER REGISTRATION FORM -->
+    <!-- =========================================================================
+         VIEW 4: PARTNER REGISTRATION FORM (Gated / Invite Link Only)
+         ========================================================================= -->
     <div id="laundryRegisterView" class="hidden">
       <div class="laundry-card">
-        <h2>Join Luxea Living as a Laundry Service Partner</h2>
+        <div style="display: inline-block; font-size: 0.72rem; font-weight: 700; color: var(--color-camel-dark); background: var(--color-linen); padding: 3px 8px; border-radius: 4px; margin-bottom: 8px;">
+          ✦ PARTNER ONBOARDING (INVITATION ACCESS)
+        </div>
+        <h2>Register as a Laundry Service Provider</h2>
         <p class="card-sub">
-          Receive regular laundry and linen wash orders from verified stays, Airbnbs, and luxury villas in your neighborhood.
+          Set up your provider listing, service rates, and coverage neighborhoods on Luxea Living. Receive regular orders from verified apartments, villas, and Airbnb hosts.
         </p>
 
         <form id="laundryRegisterForm" style="display: flex; flex-direction: column; gap: 20px;">
@@ -142,7 +212,7 @@
           <!-- Business Information -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
             <div class="form-group">
-              <label class="form-label" for="bizName">Business / Laundry Name *</label>
+              <label class="form-label" for="bizName">Business / Laundromat Name *</label>
               <input type="text" id="bizName" class="form-control" placeholder="e.g. Spotless Express Laundromat" required>
             </div>
             <div class="form-group">
@@ -225,7 +295,7 @@
 
           <div>
             <button type="submit" class="btn btn-primary btn-large" style="width: 100%; justify-content: center;">
-              <span>Complete Registration &amp; Open Dashboard →</span>
+              <span>Complete Registration &amp; Open Partner Dashboard →</span>
             </button>
           </div>
 
@@ -242,19 +312,26 @@
       <div class="modal-header">
         <div>
           <h3 style="font-family: var(--font-serif); font-size: 1.4rem; color: var(--color-espresso); margin: 0 0 4px;">Request Laundry &amp; Linen Pickup</h3>
-          <p style="font-size: 0.82rem; color: var(--color-cocoa); margin: 0;">Fast collection from your apartment or villa in Nairobi.</p>
+          <p style="font-size: 0.82rem; color: var(--color-cocoa); margin: 0;">Doorstep collection from your apartment or villa.</p>
         </div>
         <button type="button" class="btn-text" id="closeOrderModalBtn" style="font-size: 1.5rem; line-height: 1; padding: 4px 8px; border: none; background: transparent; cursor: pointer;">&times;</button>
       </div>
 
       <form id="createLaundryOrderForm" style="padding: 24px;">
+        
+        <!-- Pre-selected provider banner (if clicked 'Book with this partner') -->
+        <div id="modalAssignedProviderNote" class="hidden" style="background: var(--color-linen-light); padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.85rem; color: var(--color-espresso); border: 1px solid var(--color-khaki-light); display: flex; align-items: center; gap: 8px;">
+          <span>🧺 Selected Provider:</span>
+          <strong id="modalAssignedProviderName" style="color: var(--color-camel-dark);">Spotless Valet</strong>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
           <div class="form-group">
             <label class="form-label" for="ordCustomerName">Your Name *</label>
             <input type="text" id="ordCustomerName" class="form-control" placeholder="e.g. David Mwangi" required>
           </div>
           <div class="form-group">
-            <label class="form-label" for="ordCustomerPhone">Phone Number *</label>
+            <label class="form-label" for="ordCustomerPhone">Phone Number (M-Pesa) *</label>
             <input type="tel" id="ordCustomerPhone" class="form-control" placeholder="0712 345 678" required>
           </div>
         </div>
@@ -348,15 +425,22 @@
     </div>
   </div>
 
+  <!-- Footer with Discreet Partner Access Links -->
   <footer class="footer-modern" style="margin-top: 60px; padding: 32px 16px; border-top: 1px solid var(--color-linen); text-align: center; color: var(--color-cocoa); font-size: 0.82rem;">
-    <p>© 2026 Luxea Living Kenya. All rights reserved. • <a href="/stays/" style="color: var(--color-espresso); text-decoration: underline;">Stays</a> • <a href="/host/" style="color: var(--color-espresso); text-decoration: underline;">Hosts</a> • <a href="/laundry/" style="color: var(--color-espresso); text-decoration: underline;">Laundry Partners</a></p>
+    <p style="margin-bottom: 8px;">
+      © 2026 Luxea Living Kenya. All rights reserved. • <a href="/stays/" style="color: var(--color-espresso); text-decoration: underline;">Stays</a> • <a href="/host/" style="color: var(--color-espresso); text-decoration: underline;">Hosts</a> • <a href="/laundry/" style="color: var(--color-espresso); text-decoration: underline;">Laundry Valet</a>
+    </p>
+    <p style="font-size: 0.75rem; color: #9CA3AF;">
+      Are you a verified laundry service provider? 
+      <a href="/laundry/?partner=dashboard" style="color: var(--color-espresso); text-decoration: underline; margin-left: 4px;">Partner Sign In ↗</a> • 
+      <a href="/laundry/?partner=register" style="color: var(--color-espresso); text-decoration: underline; margin-left: 4px;">Invite Registration ↗</a>
+    </p>
   </footer>
 
   <!-- Scripts -->
   <script type="module">
     import { initLaundryManager } from '/assets/js/modules/laundryManager.js';
     document.addEventListener('DOMContentLoaded', () => {
-      // Set default date to today
       const dateInput = document.getElementById('ordDate');
       if (dateInput) {
         dateInput.value = new Date().toISOString().split('T')[0];
