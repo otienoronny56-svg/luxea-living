@@ -1515,6 +1515,46 @@
       }
     },
 
+    loginLaundryPartner: async function (query) {
+      const client = this.getClient();
+      const cleanQ = (query || '').trim().toLowerCase();
+      if (!cleanQ) return null;
+
+      // 1. Check Supabase table
+      if (client) {
+        try {
+          const { data, error } = await client
+            .from('lux_laundry_partners')
+            .select('*')
+            .or(`ref_id.ilike.%${cleanQ}%,phone.ilike.%${cleanQ}%,email.ilike.%${cleanQ}%,business_name.ilike.%${cleanQ}%`)
+            .limit(1);
+
+          if (!error && Array.isArray(data) && data.length > 0) {
+            localStorage.setItem('luxea_laundry_session', JSON.stringify(data[0]));
+            return data[0];
+          }
+        } catch (e) {
+          console.warn('Supabase partner login query note:', e);
+        }
+      }
+
+      // 2. Check local partners
+      const localPartners = JSON.parse(localStorage.getItem('luxea_laundry_partners') || '[]');
+      const match = localPartners.find(p => 
+        (p.ref_id && p.ref_id.toLowerCase().includes(cleanQ)) ||
+        (p.phone && p.phone.toLowerCase().includes(cleanQ)) ||
+        (p.email && p.email.toLowerCase().includes(cleanQ)) ||
+        (p.business_name && p.business_name.toLowerCase().includes(cleanQ))
+      );
+
+      if (match) {
+        localStorage.setItem('luxea_laundry_session', JSON.stringify(match));
+        return match;
+      }
+
+      return null;
+    },
+
     logoutLaundryPartner: function () {
       localStorage.removeItem('luxea_laundry_session');
       return { success: true };

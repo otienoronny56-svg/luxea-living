@@ -425,6 +425,47 @@
     </div>
   </div>
 
+  <!-- Modal: Partner Sign In -->
+  <div class="lux-modal-overlay" id="partnerLoginModal">
+    <div class="lux-modal-container" style="max-width: 460px;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-family: var(--font-serif); font-size: 1.4rem; color: var(--color-espresso); margin: 0 0 4px;">Service Provider Sign In</h3>
+          <p style="font-size: 0.82rem; color: var(--color-cocoa); margin: 0;">Access your Partner Operations Dashboard</p>
+        </div>
+        <button type="button" class="btn-text" id="closePartnerLoginModalBtn" style="font-size: 1.5rem; line-height: 1; padding: 4px 8px; border: none; background: transparent; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="partnerLoginForm" style="padding: 24px;">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" for="partnerLoginInput">Partner Reference ID or Phone Number *</label>
+          <input 
+            type="text" 
+            id="partnerLoginInput" 
+            class="form-control" 
+            placeholder="e.g. LXL-2026-WEST or 0712345678" 
+            required
+          >
+        </div>
+
+        <div style="background: var(--color-linen-light); padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 20px; border: 1px solid var(--color-khaki-light); font-size: 0.82rem; color: var(--color-espresso);">
+          <div style="font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+            <span>Verified Launch Partner:</span>
+            <button type="button" id="useDemoCredsBtn" class="btn-text-link" style="font-size: 0.75rem; text-decoration: underline; color: var(--color-camel-dark); font-weight: 700;">Fill Demo Login</button>
+          </div>
+          <span style="color: var(--color-cocoa);">Reference ID: <strong style="font-family: monospace; color: var(--color-espresso);">LXL-2026-WEST</strong> (Spotless Valet Westlands)</span>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-outline" id="cancelPartnerLoginBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="partnerLoginSubmitBtn">
+            <span>Sign In to Dashboard →</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Footer with Discreet Partner Access Links -->
   <footer class="footer-modern" style="margin-top: 60px; padding: 32px 16px; border-top: 1px solid var(--color-linen); text-align: center; color: var(--color-cocoa); font-size: 0.82rem;">
     <p style="margin-bottom: 8px;">
@@ -432,7 +473,7 @@
     </p>
     <p style="font-size: 0.75rem; color: #9CA3AF;">
       Are you a verified laundry service provider? 
-      <a href="/laundry/?partner=dashboard" style="color: var(--color-espresso); text-decoration: underline; margin-left: 4px;">Partner Sign In ↗</a> • 
+      <a href="#login" class="open-partner-login-btn" style="color: var(--color-espresso); text-decoration: underline; margin-left: 4px; font-weight: 600;">Partner Sign In ↗</a> • 
       <a href="/laundry/?partner=register" style="color: var(--color-espresso); text-decoration: underline; margin-left: 4px;">Invite Registration ↗</a>
     </p>
   </footer>
