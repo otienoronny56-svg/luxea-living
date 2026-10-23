@@ -1003,6 +1003,18 @@
   overflow: hidden;
 }
 
+/* Executive High-Density Compact Mode */
+.lux-data-table.table-compact thead th {
+  padding: 10px 14px;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+}
+
+.lux-data-table.table-compact tbody td {
+  padding: 10px 14px;
+  font-size: 0.74rem;
+}
+
 .lux-data-table tbody tr {
   cursor: pointer;
   transition: background 0.15s ease;

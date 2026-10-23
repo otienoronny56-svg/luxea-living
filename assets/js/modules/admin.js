@@ -1816,35 +1816,35 @@ export function initAdminDashboard() {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>
-              <div style="font-weight: 700; color: #241812; font-size: 0.88rem; line-height: 1.25;">${bizName}</div>
-              <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px; flex-wrap: wrap;">
-                <code style="font-family: monospace; font-size: 0.72rem; color: #8C6D58; background: #F6F3EE; padding: 1px 5px; border-radius: 4px; border: 1px solid #E5DFD7;">${refId}</code>
-                ${isExpress ? '<span class="status-chip chip-gold" style="font-size: 0.62rem; padding: 1px 5px;">⚡ Express</span>' : ''}
+              <div style="font-weight: 700; color: #241812; font-size: 0.78rem; line-height: 1.2;">${bizName}</div>
+              <div style="display: flex; align-items: center; gap: 4px; margin-top: 3px; flex-wrap: wrap;">
+                <code style="font-family: monospace; font-size: 0.65rem; color: #8C6D58; background: #F6F3EE; padding: 1px 4px; border-radius: 3px; border: 1px solid #E5DFD7;">${refId}</code>
+                ${isExpress ? '<span class="status-chip chip-gold" style="font-size: 0.58rem; padding: 1px 4px;">⚡ Express</span>' : ''}
               </div>
             </td>
             <td>
-              <div class="host-cell-name" style="font-size: 0.85rem;">${contact}</div>
-              <div class="host-cell-sub" style="margin-top: 2px; font-size: 0.78rem;">
+              <div class="host-cell-name" style="font-size: 0.78rem;">${contact}</div>
+              <div class="host-cell-sub" style="margin-top: 1px; font-size: 0.70rem;">
                 <span>${phone}</span>
-                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Partner" style="color: #22C55E; font-size: 13px; text-decoration: none; margin-left: 3px;">💬</a>` : ''}
+                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Partner" style="color: #22C55E; font-size: 11px; text-decoration: none; margin-left: 2px;">💬</a>` : ''}
               </div>
             </td>
             <td>
-              <div style="font-size: 0.8rem; color: #4A3B32; line-height: 1.35;">${areasText}</div>
+              <div style="font-size: 0.72rem; color: #4A3B32; line-height: 1.3;">${areasText}</div>
             </td>
             <td>
-              <div style="font-size: 0.76rem; color: #241812; line-height: 1.35;">
+              <div style="font-size: 0.68rem; color: #241812; line-height: 1.3;">
                 <div><span style="color: #8C6D58;">Wash:</span> <strong>${washRate}</strong>/kg</div>
                 <div><span style="color: #8C6D58;">Linen:</span> <strong>${linenRate}</strong>/set</div>
                 <div><span style="color: #8C6D58;">Suit:</span> <strong>${suitRate}</strong></div>
               </div>
             </td>
             <td>
-              <div style="font-weight: 700; color: #B28756; font-size: 0.84rem;">⭐ ${rating}</div>
-              <small style="color: #8C6D58; font-size: 0.7rem;">${completedJobs} jobs</small>
+              <div style="font-weight: 700; color: #B28756; font-size: 0.76rem;">⭐ ${rating}</div>
+              <small style="color: #8C6D58; font-size: 0.64rem;">${completedJobs} jobs</small>
             </td>
             <td style="text-align: right;">
-              <a href="/laundry/?partner_ref=${encodeURIComponent(refId)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 4px 8px; text-decoration: none; white-space: nowrap;" title="Test Partner Dashboard">
+              <a href="/laundry/?partner_ref=${encodeURIComponent(refId)}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="font-size: 0.68rem; padding: 3px 6px; text-decoration: none; white-space: nowrap;" title="Test Partner Dashboard">
                 <span>Hub ↗</span>
               </a>
             </td>
@@ -1907,34 +1907,34 @@ export function initAdminDashboard() {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>
-              <code style="font-family: monospace; font-size: 0.78rem; font-weight: 700; color: #241812;">${orderNum}</code>
-              <div style="margin-top: 3px;">
-                <span class="status-chip ${isTurnover ? 'chip-gold' : 'chip-neutral'}" style="font-size: 0.62rem; padding: 1px 5px;">
+              <code style="font-family: monospace; font-size: 0.72rem; font-weight: 700; color: #241812;">${orderNum}</code>
+              <div style="margin-top: 2px;">
+                <span class="status-chip ${isTurnover ? 'chip-gold' : 'chip-neutral'}" style="font-size: 0.58rem; padding: 1px 4px;">
                   ${isTurnover ? '🏡 Linen' : '✨ Valet'}
                 </span>
               </div>
             </td>
             <td>
-              <div class="host-cell-name" style="font-size: 0.84rem;">${custName}</div>
-              <div class="host-cell-sub" style="margin-top: 2px; font-size: 0.76rem;">
+              <div class="host-cell-name" style="font-size: 0.76rem;">${custName}</div>
+              <div class="host-cell-sub" style="margin-top: 1px; font-size: 0.70rem;">
                 <span>${custPhone}</span>
-                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Customer" style="color: #22C55E; font-size: 12px; text-decoration: none; margin-left: 2px;">💬</a>` : ''}
+                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Customer" style="color: #22C55E; font-size: 11px; text-decoration: none; margin-left: 2px;">💬</a>` : ''}
               </div>
             </td>
             <td>
-              <div style="font-weight: 600; color: #241812; font-size: 0.82rem;">${propName} ${unit}</div>
-              <small style="color: #8C6D58; font-size: 0.74rem;">📍 ${area}</small>
+              <div style="font-weight: 600; color: #241812; font-size: 0.75rem;">${propName} ${unit}</div>
+              <small style="color: #8C6D58; font-size: 0.68rem;">📍 ${area}</small>
             </td>
             <td>
-              <div style="font-size: 0.8rem; font-weight: 600; color: #241812;">${service}</div>
-              <small style="color: #8C6D58; font-size: 0.72rem; display: block;">📅 ${pickupDate} ${timeSlot ? `• ${timeSlot}` : ''}</small>
+              <div style="font-size: 0.74rem; font-weight: 600; color: #241812;">${service}</div>
+              <small style="color: #8C6D58; font-size: 0.66rem; display: block;">📅 ${pickupDate} ${timeSlot ? `• ${timeSlot}` : ''}</small>
             </td>
             <td>
-              <div style="font-weight: 700; color: #B28756; font-size: 0.85rem;">KES ${amount.toLocaleString()}</div>
-              <small style="color: #1E8449; font-size: 0.68rem; font-weight: 600;">M-Pesa</small>
+              <div style="font-weight: 700; color: #B28756; font-size: 0.78rem;">KES ${amount.toLocaleString()}</div>
+              <small style="color: #1E8449; font-size: 0.64rem; font-weight: 600;">M-Pesa</small>
             </td>
             <td style="text-align: right;">
-              <span class="status-chip ${statusBadgeClass}" style="font-size: 0.7rem; padding: 2px 7px;">
+              <span class="status-chip ${statusBadgeClass}" style="font-size: 0.64rem; padding: 1px 6px;">
                 ${statusText}
               </span>
             </td>
