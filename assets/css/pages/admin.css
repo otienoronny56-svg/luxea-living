@@ -277,20 +277,20 @@
 
 .admin-quick-jump-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
   margin-top: 8px;
 }
 
 .quick-jump-card {
   background: #FFFFFF;
   border: 1px solid rgba(178, 150, 125, 0.22);
-  border-radius: 16px;
-  padding: 22px;
+  border-radius: 14px;
+  padding: 14px 18px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 14px;
+  gap: 10px;
   transition: all 0.25s ease;
   box-shadow: 0 4px 16px rgba(36, 24, 18, 0.03);
 }
@@ -302,26 +302,27 @@
 }
 
 .jump-icon {
-  font-size: 1.8rem;
+  font-size: 1.35rem;
   line-height: 1;
 }
 
 .jump-meta h4 {
   font-family: var(--font-serif);
-  font-size: 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: var(--color-espresso);
-  margin: 0 0 4px;
+  margin: 0 0 2px;
 }
 
 .jump-meta p {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   color: var(--color-cocoa);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 .jump-arrow {
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--color-camel-dark);
 }
@@ -406,19 +407,21 @@
 /* ==========================================================================
    1. TOP EXECUTIVE METRICS GRID
    ========================================================================== */
-.admin-metrics-grid {
+.admin-metrics-grid,
+.admin-metrics-grid.grid-compact {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-.stat-metric-card {
+.stat-metric-card,
+.stat-metric-card.card-compact {
   background: #FFFFFF;
   border: 1px solid rgba(178, 150, 125, 0.22);
-  border-radius: 20px;
-  padding: 22px 24px;
-  box-shadow: 0 6px 20px rgba(36, 24, 18, 0.04);
+  border-radius: 14px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 16px rgba(36, 24, 18, 0.03);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -427,65 +430,31 @@
 
 .stat-metric-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(36, 24, 18, 0.08);
-}
-
-/* Compact Executive Metric Cards */
-.admin-metrics-grid.grid-compact {
-  gap: 12px;
-  margin-bottom: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-}
-
-.stat-metric-card.card-compact {
-  padding: 12px 16px;
-  border-radius: 14px;
-}
-
-.stat-metric-card.card-compact .metric-card-top {
-  margin-bottom: 4px;
-}
-
-.stat-metric-card.card-compact .metric-label {
-  font-size: 0.65rem;
-  letter-spacing: 0.04em;
-}
-
-.stat-metric-card.card-compact .metric-trend-chip {
-  font-size: 0.58rem;
-  padding: 1px 6px;
-}
-
-.stat-metric-card.card-compact .metric-val {
-  font-size: 1.35rem;
-  font-weight: 700;
-  line-height: 1.15;
-}
-
-.stat-metric-card.card-compact .metric-sub {
-  font-size: 0.65rem;
-  margin-top: 3px;
+  box-shadow: 0 8px 22px rgba(36, 24, 18, 0.07);
 }
 
 .metric-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .metric-label {
-  font-size: 0.74rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: var(--color-cocoa);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .metric-trend-chip {
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 1px 6px;
   border-radius: var(--radius-pill);
   letter-spacing: 0.02em;
 }
@@ -515,18 +484,21 @@
 
 .metric-val {
   font-family: var(--font-sans);
-  font-size: 2.2rem;
-  font-weight: 800;
+  font-size: 1.35rem;
+  font-weight: 700;
   color: #241812;
-  line-height: 1;
-  letter-spacing: -0.02em;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
 }
 
 .metric-sub {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   color: var(--color-cocoa);
-  margin-top: 6px;
+  margin-top: 3px;
   opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ==========================================================================
@@ -993,35 +965,40 @@
 /* ==========================================================================
    5. DATA TABLES & ROW ACTIONS
    ========================================================================== */
-.table-responsive-box {
+.table-responsive-box,
+.admin-table-card {
   background: #FFFFFF;
   border: 1px solid rgba(178, 150, 125, 0.22);
-  border-radius: 20px;
+  border-radius: 14px;
   overflow-x: auto;
-  box-shadow: 0 6px 24px rgba(36, 24, 18, 0.04);
+  box-shadow: 0 4px 16px rgba(36, 24, 18, 0.03);
   width: 100%;
   max-width: 100%;
 }
 
-.lux-data-table {
+.lux-data-table,
+.admin-data-table {
   width: 100%;
   min-width: 760px;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   text-align: left;
-  font-size: 0.82rem;
+  font-size: 0.74rem;
+  font-family: var(--font-sans);
 }
 
-.lux-data-table thead th {
+.lux-data-table thead th,
+.admin-data-table thead th,
+.lux-data-table.table-compact thead th {
   background: #FBF9F5;
   color: #241812;
   font-family: var(--font-sans);
-  font-size: 0.72rem;
-  font-weight: 800;
+  font-size: 0.65rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 16px 20px;
+  padding: 10px 14px;
   border-bottom: 1px solid rgba(178, 150, 125, 0.2);
   white-space: normal;
   position: sticky;
@@ -1030,34 +1007,28 @@
   overflow: hidden;
 }
 
-.lux-data-table tbody td {
-  padding: 16px 20px;
+.lux-data-table tbody td,
+.admin-data-table tbody td,
+.lux-data-table.table-compact tbody td {
+  padding: 10px 14px;
   border-bottom: 1px solid rgba(178, 150, 125, 0.1);
   color: #241812;
+  font-size: 0.74rem;
+  font-family: var(--font-sans);
   vertical-align: middle;
   transition: background 0.15s ease;
   word-break: break-word;
   overflow: hidden;
 }
 
-/* Executive High-Density Compact Mode */
-.lux-data-table.table-compact thead th {
-  padding: 10px 14px;
-  font-size: 0.65rem;
-  letter-spacing: 0.05em;
-}
-
-.lux-data-table.table-compact tbody td {
-  padding: 10px 14px;
-  font-size: 0.74rem;
-}
-
-.lux-data-table tbody tr {
+.lux-data-table tbody tr,
+.admin-data-table tbody tr {
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
-.lux-data-table tbody tr:hover td {
+.lux-data-table tbody tr:hover td,
+.admin-data-table tbody tr:hover td {
   background-color: #F8F4EE;
 }
 
@@ -1069,9 +1040,9 @@
   border: 1px solid rgba(178, 150, 125, 0.25);
   color: var(--color-camel-dark);
   font-family: var(--font-mono, monospace);
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 700;
-  padding: 1px 6px;
+  padding: 1px 5px;
   border-radius: 4px;
   cursor: pointer;
   transition: var(--transition-fast);
@@ -1083,7 +1054,8 @@
   border-color: var(--color-camel-dark);
 }
 
-.lux-data-table tbody tr:last-child td {
+.lux-data-table tbody tr:last-child td,
+.admin-data-table tbody tr:last-child td {
   border-bottom: none;
 }
 
@@ -1091,30 +1063,32 @@
 .host-cell-name {
   font-weight: 700;
   color: #241812;
-  font-size: 0.9rem;
+  font-size: 0.80rem;
+  line-height: 1.25;
 }
 
 .host-cell-sub {
-  font-size: 0.74rem;
+  font-size: 0.70rem;
   color: var(--color-cocoa);
   display: flex;
   align-items: center;
   gap: 6px;
   margin-top: 2px;
+  opacity: 0.9;
 }
 
 /* Fast Table Actions Cluster */
 .table-action-btns {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   flex-wrap: wrap;
 }
 
 .btn-table-action {
-  padding: 5px 10px;
+  padding: 3px 8px;
   border-radius: var(--radius-pill);
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   font-weight: 700;
   cursor: pointer;
   border: 1px solid transparent;
@@ -1128,9 +1102,9 @@
 
 /* Quick Status Selector Dropdown */
 .status-select-inline {
-  font-size: 0.75rem;
+  font-size: 0.70rem;
   font-weight: 700;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: var(--radius-pill);
   border: 1px solid rgba(178, 150, 125, 0.3);
   background: #FFFFFF;
@@ -1558,117 +1532,119 @@
 .analytics-headline-banner {
   background: linear-gradient(135deg, #241812 0%, #150E0A 100%);
   border: 1px solid rgba(212, 175, 55, 0.35);
-  border-radius: 20px;
-  padding: 28px 32px;
+  border-radius: 14px;
+  padding: 18px 22px;
   color: #EDE8E3;
-  margin-bottom: 24px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+  margin-bottom: 18px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 28px;
+  gap: 18px;
   flex-wrap: wrap;
 }
 
 .headline-primary {
   flex: 1;
-  min-width: 280px;
+  min-width: 260px;
 }
 
 .headline-badge {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 800;
   color: #D4AF37;
-  letter-spacing: 0.1em;
-  margin-bottom: 6px;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
 }
 
 .headline-val-wrap {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .headline-val-wrap .currency-symbol {
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: #D4AF37;
 }
 
 .headline-val-wrap .headline-amount {
-  font-size: 2.8rem;
+  font-size: 1.85rem;
   font-weight: 800;
   color: #FFFFFF;
   letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 .headline-val-wrap .headline-currency-tag {
-  font-size: 0.85rem;
+  font-size: 0.76rem;
   color: #A0958C;
   font-weight: 600;
 }
 
 .headline-val-wrap .headline-kes-tag {
-  font-size: 0.85rem;
+  font-size: 0.74rem;
   color: #D4AF37;
-  margin-left: 8px;
-  padding: 3px 10px;
+  margin-left: 6px;
+  padding: 2px 8px;
   background: rgba(212, 175, 55, 0.12);
   border: 1px solid rgba(212, 175, 55, 0.28);
-  border-radius: 20px;
+  border-radius: 12px;
 }
 
 .headline-sub {
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   color: #A0958C;
-  margin: 8px 0 0 0;
-  max-width: 520px;
-  line-height: 1.5;
+  margin: 4px 0 0 0;
+  max-width: 500px;
+  line-height: 1.4;
 }
 
 .headline-kpi-stack {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .kpi-mini-card {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(212, 175, 55, 0.2);
-  border-radius: 14px;
-  padding: 14px 18px;
-  min-width: 150px;
+  border-radius: 12px;
+  padding: 10px 14px;
+  min-width: 130px;
 }
 
 .kpi-mini-label {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   color: #A0958C;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   font-weight: 600;
 }
 
 .kpi-mini-val {
-  font-size: 1.25rem;
-  font-weight: 800;
+  font-size: 1.08rem;
+  font-weight: 700;
   color: #FFFFFF;
   display: block;
+  line-height: 1.2;
 }
 
 .kpi-mini-sub {
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   color: #D4AF37;
   display: block;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 /* Charts Grid */
 .admin-charts-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 22px;
-  margin-bottom: 24px;
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
 @media (max-width: 1024px) {
@@ -1680,9 +1656,9 @@
 .chart-card {
   background: #FFFFFF;
   border: 1px solid rgba(178, 150, 125, 0.22);
-  border-radius: 20px;
-  padding: 22px 24px;
-  box-shadow: 0 6px 20px rgba(36, 24, 18, 0.04);
+  border-radius: 14px;
+  padding: 14px 18px;
+  box-shadow: 0 4px 16px rgba(36, 24, 18, 0.03);
   display: flex;
   flex-direction: column;
 }
@@ -1691,13 +1667,58 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
+}
+
+.analytics-badge {
+  font-size: 0.60rem;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+  color: #B28756;
+  text-transform: uppercase;
+}
+
+.analytics-title {
+  font-size: 0.92rem;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: #241812;
+  margin: 0;
+}
+
+.analytics-chip-gold {
+  background: #FBF4EC;
+  color: #B28756;
+  border: 1px solid rgba(178, 135, 86, 0.3);
+  font-size: 0.60rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.analytics-chip-neutral {
+  background: #F3EFEA;
+  color: #5A453A;
+  font-size: 0.60rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.analytics-chip-green {
+  background: #E8F8F0;
+  color: #1E8449;
+  border: 1px solid #B0E4C1;
+  font-size: 0.60rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
 }
 
 .chart-wrapper {
   position: relative;
   width: 100%;
-  height: 260px;
+  height: 215px;
 }
 
 .chart-currency-toggle {
@@ -1706,15 +1727,15 @@
   gap: 6px;
   background: #FFFFFF;
   border: 1px solid rgba(178, 150, 125, 0.2);
-  border-radius: 10px;
-  padding: 4px 8px;
+  border-radius: 8px;
+  padding: 3px 6px;
 }
 
 .btn-toggle-curr {
   background: none;
   border: none;
-  padding: 4px 10px;
-  font-size: 0.74rem;
+  padding: 3px 8px;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--color-cocoa);
   border-radius: 6px;
@@ -1730,49 +1751,49 @@
 /* Strategic Takeaways */
 .chart-insights-cluster {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .insight-card {
   background: #FFFFFF;
   border: 1px solid rgba(178, 150, 125, 0.2);
-  border-left: 4px solid #B28756;
-  border-radius: 14px;
-  padding: 18px 20px;
-  box-shadow: 0 4px 14px rgba(36, 24, 18, 0.03);
+  border-left: 3px solid #B28756;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 3px 12px rgba(36, 24, 18, 0.03);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .insight-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(36, 24, 18, 0.06);
+  box-shadow: 0 6px 18px rgba(36, 24, 18, 0.06);
 }
 
 .insight-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 
 .insight-icon {
-  font-size: 1.15rem;
+  font-size: 1rem;
 }
 
 .insight-title {
-  font-size: 0.8rem;
-  font-weight: 800;
+  font-size: 0.76rem;
+  font-weight: 700;
   color: #241812;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .insight-body {
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   color: var(--color-cocoa);
-  line-height: 1.55;
+  line-height: 1.45;
   margin: 0;
 }
 

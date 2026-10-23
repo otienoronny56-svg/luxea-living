@@ -707,8 +707,8 @@ export function initAdminDashboard() {
             ],
             borderColor: ['#B28756', '#0284C7', '#16A34A', '#7D5A44'],
             borderWidth: 1.5,
-            borderRadius: 8,
-            maxBarThickness: 46
+            borderRadius: 6,
+            maxBarThickness: 34
           }]
         },
         options: {
@@ -722,7 +722,9 @@ export function initAdminDashboard() {
               bodyColor: '#EDE8E3',
               borderColor: '#B28756',
               borderWidth: 1,
-              padding: 10,
+              padding: 8,
+              titleFont: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+              bodyFont: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" },
               callbacks: {
                 label: function (ctx) {
                   return analyticsCurrencyMode === 'KES'
@@ -735,14 +737,14 @@ export function initAdminDashboard() {
           scales: {
             x: {
               grid: { display: false },
-              ticks: { font: { size: 11, family: "'Plus Jakarta Sans', sans-serif", weight: '600' }, color: '#604D42' }
+              ticks: { font: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif", weight: '600' }, color: '#604D42' }
             },
             y: {
               beginAtZero: true,
               grid: { color: 'rgba(178, 150, 125, 0.12)' },
               ticks: {
                 callback: (v) => analyticsCurrencyMode === 'KES' ? `KES ${(v / 1000)}k` : `$${v}`,
-                font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+                font: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" },
                 color: '#604D42'
               }
             }
@@ -774,7 +776,7 @@ export function initAdminDashboard() {
             backgroundColor: ['#D4AF37', '#38BDF8', '#4ADE80', '#A0958C'],
             borderWidth: 2,
             borderColor: '#FFFFFF',
-            hoverOffset: 6
+            hoverOffset: 4
           }]
         },
         options: {
@@ -784,9 +786,9 @@ export function initAdminDashboard() {
             legend: {
               position: 'bottom',
               labels: {
-                boxWidth: 12,
-                padding: 12,
-                font: { size: 11, family: "'Plus Jakarta Sans', sans-serif", weight: '600' },
+                boxWidth: 10,
+                padding: 10,
+                font: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif", weight: '600' },
                 color: '#241812'
               }
             },
@@ -796,7 +798,9 @@ export function initAdminDashboard() {
               bodyColor: '#EDE8E3',
               borderColor: '#B28756',
               borderWidth: 1,
-              padding: 10,
+              padding: 8,
+              titleFont: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+              bodyFont: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" },
               callbacks: {
                 label: function (ctx) {
                   const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
@@ -829,15 +833,15 @@ export function initAdminDashboard() {
               backgroundColor: 'rgba(212, 175, 55, 0.12)',
               fill: true,
               tension: 0.35,
-              borderWidth: 2.5,
+              borderWidth: 2,
               pointBackgroundColor: '#B28756',
-              pointRadius: 4
+              pointRadius: 3
             },
             {
               label: 'Verified Host Partners',
               data: [1, 2, 4, approvedCount, 15],
               borderColor: '#4A342A',
-              borderWidth: 2,
+              borderWidth: 1.8,
               tension: 0.35,
               pointBackgroundColor: '#4A342A',
               pointRadius: 3
@@ -847,7 +851,7 @@ export function initAdminDashboard() {
               data: [2, 3, 5, cachedHostWaitlist.length, 25],
               borderColor: '#F59E0B',
               borderDash: [5, 5],
-              borderWidth: 2,
+              borderWidth: 1.8,
               tension: 0.35,
               pointBackgroundColor: '#F59E0B',
               pointRadius: 3
@@ -860,7 +864,7 @@ export function initAdminDashboard() {
           plugins: {
             legend: {
               position: 'bottom',
-              labels: { boxWidth: 10, padding: 12, font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" }, color: '#241812' }
+              labels: { boxWidth: 10, padding: 10, font: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" }, color: '#241812' }
             },
             tooltip: {
               backgroundColor: '#1E140F',
@@ -868,18 +872,20 @@ export function initAdminDashboard() {
               bodyColor: '#EDE8E3',
               borderColor: '#B28756',
               borderWidth: 1,
-              padding: 10
+              padding: 8,
+              titleFont: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+              bodyFont: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" }
             }
           },
           scales: {
             x: {
               grid: { display: false },
-              ticks: { font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" }, color: '#604D42' }
+              ticks: { font: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" }, color: '#604D42' }
             },
             y: {
               beginAtZero: true,
               grid: { color: 'rgba(178, 150, 125, 0.12)' },
-              ticks: { font: { size: 10 }, color: '#604D42' }
+              ticks: { font: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" }, color: '#604D42' }
             }
           }
         }
@@ -921,7 +927,7 @@ export function initAdminDashboard() {
               '#9CA3AF'
             ],
             borderRadius: 6,
-            barThickness: 18
+            barThickness: 14
           }]
         },
         options: {
@@ -936,7 +942,9 @@ export function initAdminDashboard() {
               bodyColor: '#EDE8E3',
               borderColor: '#B28756',
               borderWidth: 1,
-              padding: 10,
+              padding: 8,
+              titleFont: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+              bodyFont: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" },
               callbacks: {
                 label: function (ctx) {
                   return analyticsCurrencyMode === 'KES'
@@ -952,13 +960,13 @@ export function initAdminDashboard() {
               grid: { color: 'rgba(178, 150, 125, 0.12)' },
               ticks: {
                 callback: (v) => analyticsCurrencyMode === 'KES' ? `KES ${(v / 1000)}k` : `$${v}`,
-                font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+                font: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" },
                 color: '#604D42'
               }
             },
             y: {
               grid: { display: false },
-              ticks: { font: { size: 10, family: "'Plus Jakarta Sans', sans-serif", weight: '600' }, color: '#241812' }
+              ticks: { font: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif", weight: '600' }, color: '#241812' }
             }
           }
         }
@@ -1052,25 +1060,25 @@ export function initAdminDashboard() {
       tr.title = 'Click row to inspect full dossier';
       tr.innerHTML = `
         <td>
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span class="host-cell-name" style="font-size: 0.94rem; font-weight: 700; color: #241812;">${name}</span>
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span class="host-cell-name">${name}</span>
             <button type="button" class="btn-copy-micro copy-ref-btn" data-ref="${ref}" title="Click to copy Ref ID: ${ref}">
               <span>${ref}</span>
             </button>
-            ${isSuspended ? '<span class="status-chip chip-red" style="font-size:0.65rem; padding: 1px 6px;">🚫 Suspended</span>' : ''}
-            ${isDelisted ? '<span class="status-chip chip-neutral" style="font-size:0.65rem; padding: 1px 6px; background:#FEF3C7; color:#B45309;">🙈 Delisted</span>' : ''}
+            ${isSuspended ? '<span class="status-chip chip-red" style="padding: 1px 6px;">🚫 Suspended</span>' : ''}
+            ${isDelisted ? '<span class="status-chip chip-neutral" style="padding: 1px 6px; background:#FEF3C7; color:#B45309;">🙈 Delisted</span>' : ''}
           </div>
-          <div style="font-size: 0.74rem; color: #8F847C; margin-top: 3px;">${email}</div>
+          <div class="host-cell-sub" style="margin-top: 2px;">${email}</div>
         </td>
 
         <td>
-          <div style="font-weight: 600; font-size: 0.88rem; color: #241812;">${prop}</div>
-          <div style="font-size: 0.76rem; color: var(--color-cocoa); margin-top: 2px;">${loc}</div>
+          <div class="host-cell-name">${prop}</div>
+          <div class="host-cell-sub" style="margin-top: 2px;">${loc}</div>
         </td>
 
         <td>
-          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="padding: 6px 12px; font-size: 0.78rem; font-weight: 700; width: 100%; min-width: 130px;">
-            <option value="pending_review" ${status === 'pending_review' ? 'selected' : ''}>⏳ Pending Review</option>
+          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="width: 100%; min-width: 110px;">
+            <option value="pending_review" ${status === 'pending_review' ? 'selected' : ''}>⏳ Pending</option>
             <option value="approved" ${status === 'approved' ? 'selected' : ''}>✅ Approved</option>
             <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
             <option value="suspended" ${status === 'suspended' || isSuspended ? 'selected' : ''}>🚫 Suspended</option>
@@ -1078,17 +1086,17 @@ export function initAdminDashboard() {
         </td>
 
         <td style="text-align: right; white-space: nowrap;">
-          <div style="display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end;">
-            <button type="button" class="btn-table-action btn-edit-host" data-ref="${ref}" data-email="${email}" title="Edit host bio, photo, property details & security controls" style="padding: 6px 10px; font-size: 0.76rem; font-weight: 600; background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
+          <div style="display: inline-flex; align-items: center; gap: 4px; justify-content: flex-end;">
+            <button type="button" class="btn-table-action btn-edit-host" data-ref="${ref}" data-email="${email}" title="Edit host bio, photo, property details & security controls" style="background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
               <span>✏️ Edit</span>
             </button>
-            <button type="button" class="btn-table-action btn-toggle-suspend-quick" data-email="${email}" data-suspended="${isSuspended ? 'true' : 'false'}" title="${isSuspended ? 'Unsuspend portal access' : 'Block / Suspend access to earnings & portal'}" style="padding: 6px 8px; font-size: 0.74rem; font-weight: 600; ${isSuspended ? 'background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC;' : 'background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;'}">
+            <button type="button" class="btn-table-action btn-toggle-suspend-quick" data-email="${email}" data-suspended="${isSuspended ? 'true' : 'false'}" title="${isSuspended ? 'Unsuspend portal access' : 'Block / Suspend access to earnings & portal'}" style="${isSuspended ? 'background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC;' : 'background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;'}">
               <span>${isSuspended ? '🔓 Unblock' : '🔒 Block'}</span>
             </button>
-            <button type="button" class="btn-table-action btn-toggle-delist-quick" data-email="${email}" data-delisted="${isDelisted ? 'true' : 'false'}" title="${isDelisted ? 'Relist property on platform catalog' : 'Delist / Hide residence from stays catalog'}" style="padding: 6px 8px; font-size: 0.74rem; font-weight: 600; ${isDelisted ? 'background: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD;' : 'background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D;'}">
+            <button type="button" class="btn-table-action btn-toggle-delist-quick" data-email="${email}" data-delisted="${isDelisted ? 'true' : 'false'}" title="${isDelisted ? 'Relist property on platform catalog' : 'Delist / Hide residence from stays catalog'}" style="${isDelisted ? 'background: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD;' : 'background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D;'}">
               <span>${isDelisted ? '🌐 Relist' : '🚫 Delist'}</span>
             </button>
-            <button type="button" class="btn-table-action btn-inspect trigger-inspect-btn" data-ref="${ref}" title="Inspect full application dossier (photos, payout, KYC)" style="padding: 6px 10px; font-size: 0.76rem; font-weight: 700;">
+            <button type="button" class="btn-table-action btn-inspect trigger-inspect-btn" data-ref="${ref}" title="Inspect full application dossier (photos, payout, KYC)">
               <span>Inspect ↗</span>
             </button>
           </div>
@@ -1673,8 +1681,8 @@ export function initAdminDashboard() {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #B28756, #241812); color: #FFF; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #B28756, #241812); color: #FFF; font-weight: 700; font-size: 0.72rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
               ${initials}
             </div>
             <div>
@@ -1682,19 +1690,19 @@ export function initAdminDashboard() {
                 <span>${name}</span>
                 ${isSuperAdminEmail ? '<span title="Super Admin" style="font-size: 11px;">👑</span>' : ''}
               </div>
-              <div class="host-cell-sub" style="font-family: monospace; font-size: 0.72rem; color: #8F847C;" title="Supabase Auth UUID">
+              <div class="host-cell-sub" style="font-family: monospace; font-size: 0.68rem; color: #8F847C;" title="Supabase Auth UUID">
                 ${p.id ? p.id.substring(0, 13) + '...' : 'Auth UUID'}
               </div>
             </div>
           </div>
         </td>
         <td>
-          <div style="font-weight: 600; color: #241812; font-size: 0.85rem;">${email}</div>
-          ${p.phone ? `<div class="host-cell-sub" style="font-size: 0.75rem;">${p.phone}</div>` : ''}
+          <div style="font-weight: 600; color: #241812; font-size: 0.78rem;">${email}</div>
+          ${p.phone ? `<div class="host-cell-sub">${p.phone}</div>` : ''}
         </td>
         <td>
           <div style="display: flex; align-items: center; gap: 6px;">
-            <select class="form-control profile-role-select" data-user-id="${p.id}" data-email="${email}" style="padding: 4px 8px; font-size: 0.8rem; border-radius: 6px; font-weight: 600; cursor: pointer; ${currentRole === 'super_admin' ? 'border-color: #D4AF37; background: rgba(212, 175, 55, 0.08); color: #9A7B0C;' : currentRole === 'admin' ? 'border-color: #3B82F6; color: #1D4ED8;' : currentRole === 'host' ? 'border-color: #10B981; color: #047857;' : 'border-color: #D1D5DB; color: #374151;'}">
+            <select class="form-control profile-role-select" data-user-id="${p.id}" data-email="${email}" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 6px; font-weight: 600; height: 28px; cursor: pointer; ${currentRole === 'super_admin' ? 'border-color: #D4AF37; background: rgba(212, 175, 55, 0.08); color: #9A7B0C;' : currentRole === 'admin' ? 'border-color: #3B82F6; color: #1D4ED8;' : currentRole === 'host' ? 'border-color: #10B981; color: #047857;' : 'border-color: #D1D5DB; color: #374151;'}">
               <option value="super_admin" ${currentRole === 'super_admin' ? 'selected' : ''}>👑 Super Admin</option>
               <option value="admin" ${currentRole === 'admin' ? 'selected' : ''}>🛡️ System Admin</option>
               <option value="host" ${currentRole === 'host' ? 'selected' : ''}>🏡 Host Partner</option>
@@ -1712,7 +1720,7 @@ export function initAdminDashboard() {
           <small style="color: var(--color-cocoa); font-weight: 600;">${date}</small>
         </td>
         <td style="text-align: right; white-space: nowrap;">
-          <button type="button" class="btn-table-action btn-edit-profile-row" data-email="${email}" data-user-id="${p.id}" title="Edit profile bio, avatar, role & permissions" style="padding: 4px 10px; font-size: 0.75rem; font-weight: 600; background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
+          <button type="button" class="btn-table-action btn-edit-profile-row" data-email="${email}" data-user-id="${p.id}" title="Edit profile bio, avatar, role & permissions" style="background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
             <span>✏️ Edit</span>
           </button>
         </td>
