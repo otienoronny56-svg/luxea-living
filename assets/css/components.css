@@ -1043,39 +1043,3 @@
   background: #EAE0D3;
 }
 
-/* Global Defensive Modal Header Styling (prevents crunched close buttons & zero-padding headers anywhere on site) */
-.modal-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 20px 24px;
-  border-bottom: 1px solid rgba(178, 150, 125, 0.22);
-  background: #FFFFFF;
-}
-
-.modal-head > div {
-  min-width: 0;
-  flex: 1;
-}
-
-.modal-head .modal-close-btn {
-  flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid rgba(178, 150, 125, 0.28);
-  background: #FAF5EE;
-  color: var(--color-espresso, #241812);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.modal-head .modal-close-btn:hover {
-  background: #EFE4D6;
-}
-
