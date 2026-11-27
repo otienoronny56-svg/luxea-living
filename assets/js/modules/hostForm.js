@@ -701,98 +701,67 @@ function initLocationAutofill() {
 function initStatusLookup() {
   const lookupForm = document.getElementById('statusLookupForm');
   const lookupInput = document.getElementById('lookupQueryInput');
+  const lookupEmailInput = document.getElementById('lookupEmailInput');
   const lookupResults = document.getElementById('lookupResultContainer');
 
   if (!lookupForm || !lookupInput || !lookupResults) return;
 
   lookupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const query = lookupInput.value.trim().toLowerCase();
-    if (!query) return;
+    const refId = lookupInput.value.trim();
+    const email = (lookupEmailInput ? lookupEmailInput.value.trim().toLowerCase() : '');
+    if (!refId || !email) {
+      lookupResults.classList.remove('hidden');
+      lookupResults.innerHTML = `<div class="lookup-result-card" style="text-align:center;">Please provide both your Reference ID and Registered Email.</div>`;
+      return;
+    }
 
     lookupResults.classList.remove('hidden');
     lookupResults.innerHTML = `
       <div style="text-align:center; padding: 20px; color: var(--color-cocoa);">
-        <span>Searching partner registry...</span>
+        <span>Verifying partner application...</span>
       </div>
     `;
 
     let matchedApp = null;
-
-    // 1. Search Supabase
-    if (window.LuxeaDB) {
-      try {
-        const client = window.LuxeaDB.getClient();
-        if (client) {
-          const { data, error } = await client
-            .from('lux_hosts')
-            .select('*')
-            .or(`ref_id.ilike.%${query}%,email.ilike.%${query}%`)
-            .limit(1);
-
-          if (!error && data && data.length > 0) {
-            matchedApp = {
-              refId: data[0].ref_id,
-              fullName: data[0].full_name,
-              propertyName: data[0].property_name,
-              status: data[0].review_status || 'pending_review',
-              email: data[0].email,
-              date: new Date(data[0].created_at || Date.now()).toLocaleDateString('en-KE')
-            };
-          }
-        }
-      } catch (err) {
-        console.warn('Status lookup query error:', err);
-      }
-    }
-
-    // 2. Search local cached applications if not found in database
-    if (!matchedApp) {
-      const cached = JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
-      const found = cached.find(a => 
-        (a.refId && a.refId.toLowerCase().includes(query)) || 
-        (a.email && a.email.toLowerCase().includes(query))
-      );
-      if (found) {
+    if (window.LuxeaDB && typeof window.LuxeaDB.lookupHostStatus === 'function') {
+      const res = await window.LuxeaDB.lookupHostStatus(refId, email);
+      if (res && res.found && res.application) {
         matchedApp = {
-          refId: found.refId,
-          fullName: found.fullName,
-          propertyName: found.propertyName,
-          status: found.status || 'pending_review',
-          email: found.email,
-          date: found.signatureDate || new Date().toLocaleDateString('en-KE')
+          refId: res.application.ref_id,
+          propertyName: res.application.property_name,
+          status: res.application.review_status || 'pending_review',
+          date: new Date(res.application.created_at || Date.now()).toLocaleDateString('en-KE')
         };
       }
     }
 
-    // Render results
     if (matchedApp) {
       const isApproved = matchedApp.status === 'approved';
       lookupResults.innerHTML = `
         <div class="lookup-result-card">
           <div class="lookup-head">
-            <span class="lookup-ref">${matchedApp.refId}</span>
+            <span class="lookup-ref">${escapeHtml(matchedApp.refId)}</span>
             <span class="status-pill ${isApproved ? 'status-approved' : 'status-pending'}">
               ${isApproved ? 'Approved &amp; Verified' : 'Under Documentation Audit'}
             </span>
           </div>
-          <div class="lookup-detail-row"><strong>Property:</strong> ${matchedApp.propertyName}</div>
-          <div class="lookup-detail-row"><strong>Host Name:</strong> ${matchedApp.fullName}</div>
-          <div class="lookup-detail-row"><strong>Registered Email:</strong> ${matchedApp.email}</div>
+          <div class="lookup-detail-row"><strong>Property:</strong> ${escapeHtml(matchedApp.propertyName)}</div>
+          <div class="lookup-detail-row"><strong>Submitted:</strong> ${escapeHtml(matchedApp.date)}</div>
 
           <div class="lookup-msg ${isApproved ? 'approved' : 'pending'}">
-            ${isApproved 
-              ? '🎉 <strong>Congratulations!</strong> Your property has been approved by the Super Admin. You can now activate your Host Suite or set your password.' 
-              : '⏳ Your partner application is actively being vetted by our Super Admin in Nairobi. You will receive an activation invitation via email within 24 hours.'}
+            ${isApproved
+              ? '🎉 <strong>Congratulations!</strong> Your property has been approved. Check your registered inbox for your private activation link, or request a fresh link below.'
+              : '⏳ Your partner application is actively being vetted by our Super Admin team in Nairobi. You will receive a private activation link via email once approved.'}
           </div>
 
           ${isApproved ? `
-            <a href="/host/activate/?ref=${encodeURIComponent(matchedApp.refId)}&email=${encodeURIComponent(matchedApp.email)}" class="btn btn-primary btn-sm" style="width:100%; justify-content:center;">
-              Activate Host Account &amp; Access Dashboard →
+            <a href="/host/activate/?ref=${encodeURIComponent(matchedApp.refId)}" class="btn btn-primary btn-sm" style="width:100%; justify-content:center;">
+              Activate Host Account →
             </a>
           ` : `
             <div style="font-size:0.75rem; color:var(--color-cocoa-light); text-align:center;">
-              Need help? Reach out to host-concierge@luxealiving.co.ke
+              Need help? Reach out to concierge@luxealiving.co.ke
             </div>
           `}
         </div>
@@ -801,9 +770,9 @@ function initStatusLookup() {
       lookupResults.innerHTML = `
         <div class="lookup-result-card" style="text-align:center;">
           <div style="font-size:1.8rem; margin-bottom:8px;">🔍</div>
-          <strong style="color:var(--color-espresso); display:block; margin-bottom:4px;">No Application Found</strong>
+          <strong style="color:var(--color-espresso); display:block; margin-bottom:4px;">No Matching Application Found</strong>
           <p style="font-size:0.82rem; color:var(--color-cocoa); margin-bottom:12px;">
-            We couldn't locate any application matching <code>${escapeHtml(query)}</code>. Please check your Reference ID or email address.
+            We couldn't locate an application matching Reference ID <code>${escapeHtml(refId)}</code> and that email address.
           </p>
           <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('statusLookupModal').classList.remove('open')">
             Close &amp; Return to Registration

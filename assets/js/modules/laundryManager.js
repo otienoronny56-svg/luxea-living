@@ -802,95 +802,37 @@ export function initLaundryManager() {
 
   partnerLoginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const query = partnerLoginInput.value.trim();
-    if (!query) return;
-
-    const submitBtn = document.getElementById('partnerLoginSubmitBtn');
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span>Verifying Partner...</span>';
+    if (window.showToast) {
+      window.showToast('Please sign in with your verified Luxea account to access the Laundry Partner Dashboard.');
     }
-
-    try {
-      let matched = null;
-      if (window.LuxeaDB && typeof window.LuxeaDB.loginLaundryPartner === 'function') {
-        matched = await window.LuxeaDB.loginLaundryPartner(query);
-      }
-
-      if (!matched) {
-        // Fallback to match default providers
-        const qClean = query.toLowerCase();
-        matched = DEFAULT_LAUNDRY_PROVIDERS.find(p => 
-          (p.ref_id && p.ref_id.toLowerCase().includes(qClean)) ||
-          (p.phone && p.phone.includes(qClean)) ||
-          (p.business_name && p.business_name.toLowerCase().includes(qClean))
-        );
-        if (matched) {
-          localStorage.setItem('luxea_laundry_session', JSON.stringify(matched));
-        }
-      }
-
-      if (matched) {
-        partnerSession = matched;
-        if (window.showToast) window.showToast(`✅ Welcome back, ${matched.business_name || matched.businessName}!`);
-        closePartnerLoginModal();
-        if (partnerTabBtn) partnerTabBtn.style.display = 'block';
-        switchView('dashboard');
-      } else {
-        if (window.showToast) window.showToast('Partner not found. Check Reference ID or contact admin.');
-      }
-    } catch (err) {
-      console.error('Partner login error:', err);
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span>Sign In to Dashboard →</span>';
-      }
+    closePartnerLoginModal();
+    if (typeof window.openAuthModal === 'function') {
+      window.openAuthModal('member', 'signin');
     }
   });
 
-  // 9. ROUTING & DIRECT LINK ACCESS:
-  // GUESTS/CUSTOMERS ALWAYS DEFAULT TO 'browse' (Marketplace)!
-  // Partner Registration or Dashboard ONLY shown if explicitly invited via URL or logged in as partner!
+  // 9. ROUTING & DIRECT LINK ACCESS (Strictly authenticated partner dashboard; no ?partner_ref= login backdoor)
   const urlParams = new URLSearchParams(window.location.search);
   const partnerParam = urlParams.get('partner') || urlParams.get('mode');
-  const directRef = urlParams.get('partner_ref') || urlParams.get('ref');
 
-  if (directRef) {
-    // 1-Click Instant Direct Test Login: ?partner_ref=LXL-2026-WEST
-    const matched = DEFAULT_LAUNDRY_PROVIDERS.find(p => p.ref_id.toLowerCase() === directRef.toLowerCase()) || {
-      id: 'prov-spotless',
-      ref_id: directRef,
-      business_name: 'Spotless Valet & Dry Cleaners',
-      phone: '0712 345 678',
-      contact_person: 'Mary Wanjiku'
-    };
-    partnerSession = matched;
-    localStorage.setItem('luxea_laundry_session', JSON.stringify(matched));
-    if (partnerTabBtn) partnerTabBtn.style.display = 'block';
-    if (window.showToast) window.showToast(`✅ Signed in as ${matched.business_name} (${matched.ref_id})`);
-    switchView('dashboard');
-  } else if (partnerParam === 'register' || urlParams.get('invite') === 'true') {
-    // Authorized Invite Link for service providers
-    switchView('register');
-  } else if (partnerParam === 'dashboard' || partnerParam === 'portal') {
-    // Partner requested their dashboard
-    if (partnerSession) {
-      if (partnerTabBtn) partnerTabBtn.style.display = 'block';
-      switchView('dashboard');
+  (async () => {
+    partnerSession = window.LuxeaDB && typeof window.LuxeaDB.getCurrentLaundryPartner === 'function'
+      ? await window.LuxeaDB.getCurrentLaundryPartner()
+      : null;
+
+    if (partnerParam === 'register' || urlParams.get('invite') === 'true') {
+      switchView('register');
+    } else if (partnerParam === 'dashboard' || partnerParam === 'portal') {
+      if (partnerSession) {
+        if (partnerTabBtn) partnerTabBtn.style.display = 'block';
+        switchView('dashboard');
+      } else {
+        if (typeof window.openAuthModal === 'function') window.openAuthModal('member', 'signin');
+        switchView('browse');
+      }
     } else {
-      openPartnerLoginModal();
+      if (partnerSession && partnerTabBtn) partnerTabBtn.style.display = 'block';
       switchView('browse');
     }
-  } else if (partnerParam === 'login') {
-    openPartnerLoginModal();
-    switchView('browse');
-  } else {
-    // Normal Guests, Hosts, & Public Visitors:
-    // ALWAYS show the Customer Marketplace first!
-    if (partnerSession && partnerTabBtn) {
-      partnerTabBtn.style.display = 'block';
-    }
-    switchView('browse');
-  }
+  })();
 }

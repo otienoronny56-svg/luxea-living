@@ -1,0 +1,9 @@
+.env
+.env.*
+.agents/
+sql/
+scripts/
+docs/
+*.mp4
+*.docx
+*.log

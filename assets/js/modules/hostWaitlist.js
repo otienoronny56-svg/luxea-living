@@ -230,7 +230,10 @@ export function initHostWaitlist() {
     if (badgeTextEl) badgeTextEl.textContent = `PERSONAL INVITATION FROM ${cleanName.toUpperCase()}`;
     if (headingEl) headingEl.textContent = `Why did ${cleanName} send you this link?`;
     if (descEl) {
-      descEl.innerHTML = `<strong>${cleanName}</strong> nominated your property in Kenya for the <strong>Luxea Living Founding Host Circle</strong>. We are curating 50 distinguished residences across Nairobi, Diani Beach, Naivasha, and the Mara prior to public rollout.`;
+      const safeInviter = window.LuxeaSanitize
+        ? window.LuxeaSanitize.escapeHtml(cleanName)
+        : cleanName.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      descEl.innerHTML = `<strong>${safeInviter}</strong> nominated your property in Kenya for the <strong>Luxea Living Founding Host Circle</strong>. We are curating 50 distinguished residences across Nairobi, Diani Beach, Naivasha, and the Mara prior to public rollout.`;
     }
   }
 

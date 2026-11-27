@@ -1,65 +1,102 @@
 /**
- * LUXEA LIVING — GLOBAL AUTHENTICATION & ACCOUNT SUITE (authModal.js)
- * Manages:
- * 1. Global Header Sign-In button and User Account Dropdown
- * 2. High-end Luxury Auth Modal with Sign Up, Sign In & Host Password Setup
- * 3. Google OAuth One-Click Sign-In / Registration
- * 4. Property Owner (Host Partner) password setting & verification against lux_hosts
- * 5. Supabase Auth onAuthStateChange listener & multi-page session synchronization
+ * LUXEA LIVING — HARDENED GLOBAL AUTHENTICATION SUITE (authModal.js)
+ * Security controls:
+ * 1. Zero hardcoded admin emails/passwords or client-side bypasses
+ * 2. Zero password overwrite on failed sign-in (syncAuthUser permanently removed)
+ * 3. Password resets strictly via Supabase Auth email verification (resetPasswordForEmail)
+ * 4. Roles strictly derived from server-verified public.lux_profiles (never user_metadata)
+ * 5. All user strings HTML-escaped before rendering
  */
+
+let activeVerifiedUser = null;
+
+function esc(val) {
+  if (window.LuxeaSanitize) return window.LuxeaSanitize.escapeHtml(val);
+  return String(val ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 export function initAuthSuite() {
   injectAuthModalHtml();
   updateHeaderAuthState();
 
-  // Listen to custom session updates
   window.addEventListener('luxea:auth_changed', () => {
     updateHeaderAuthState();
   });
 
-  // Cross-tab synchronization
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'luxea_admin_session' || e.key === 'luxea_user_session') {
-      updateHeaderAuthState();
-    }
-  });
-
-  // Initialize Supabase Auth state listener for OAuth redirects (e.g. Google)
   initSupabaseAuthListener();
 }
 
-/**
- * Intelligently route authenticated user to their specific portal
- */
 export function redirectUserToPortal(session) {
   if (!session) return;
-  const email = (session.email || '').toLowerCase().trim();
-  const SUPER_ADMINS = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
-  const isSuperAdmin = session.isSuperAdmin || session.role === 'super_admin' || SUPER_ADMINS.includes(email);
-
-  if (isSuperAdmin) {
+  if (session.role === 'super_admin' || session.role === 'admin') {
     if (!window.location.pathname.startsWith('/admin')) {
       setTimeout(() => { window.location.href = '/admin/'; }, 250);
     }
     return;
   }
-
   if (session.role === 'host') {
     if (!window.location.pathname.startsWith('/host')) {
       setTimeout(() => { window.location.href = '/host/?mode=manage'; }, 250);
     }
     return;
   }
-
-  // Active Member: let them see everything happening in the app right away
   if (window.location.pathname === '/' || window.location.pathname.includes('/login') || window.location.pathname.includes('/waitlist')) {
     setTimeout(() => { window.location.href = '/stays/'; }, 250);
   }
 }
 
-/**
- * Listen to Supabase Auth state changes (crucial for Google OAuth redirects)
- */
+async function resolveVerifiedSession(client) {
+  if (!client || !client.auth) return null;
+  try {
+    const { data: userData, error } = await client.auth.getUser();
+    if (error || !userData?.user) return null;
+
+    const user = userData.user;
+    const { data: profile } = await client
+      .from('lux_profiles')
+      .select('id, email, full_name, role, is_suspended')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (profile?.is_suspended) {
+      await client.auth.signOut().catch(() => {});
+      return null;
+    }
+
+    const role = profile?.role || 'member';
+    const fullName = profile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Member';
+
+    let hostInfo = null;
+    if (role === 'host') {
+      const { data: hostRows } = await client
+        .from('lux_hosts')
+        .select('ref_id, property_name, review_status')
+        .eq('user_id', user.id)
+        .limit(1);
+      if (hostRows && hostRows.length > 0) hostInfo = hostRows[0];
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: fullName,
+      role,
+      isSuperAdmin: role === 'super_admin' || role === 'admin',
+      refId: hostInfo?.ref_id,
+      status: hostInfo?.review_status,
+      propertyName: hostInfo?.property_name,
+      authMethod: 'supabase_auth'
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
 function initSupabaseAuthListener() {
   const tryInitListener = () => {
     const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
@@ -68,136 +105,48 @@ function initSupabaseAuthListener() {
       return;
     }
 
-    try {
-      client.auth.onAuthStateChange(async (event, session) => {
-        if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session && session.user) {
-          const user = session.user;
-          const email = (user.email || '').toLowerCase().trim();
-          const fullName = user.user_metadata?.full_name || user.user_metadata?.name || email.split('@')[0];
+    // Hydrate current verified session on page load
+    resolveVerifiedSession(client).then((sess) => {
+      activeVerifiedUser = sess;
+      updateHeaderAuthState();
+    });
 
-          // Check if Super Admin
-          const SUPER_ADMINS = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
-          if (SUPER_ADMINS.includes(email)) {
-            const adminName = email.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno';
-            const adminSession = {
-              email: email,
-              name: fullName || adminName,
-              role: 'super_admin',
-              isSuperAdmin: true,
-              authMethod: session.provider_token ? 'google' : 'supabase_auth',
-              loggedInAt: new Date().toISOString()
-            };
-            localStorage.setItem('luxea_admin_session', JSON.stringify(adminSession));
-            localStorage.setItem('luxea_user_session', JSON.stringify(adminSession));
-            window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: adminSession } }));
-            updateHeaderAuthState();
-            if (window.location.hash && window.location.hash.includes('access_token')) {
-              window.history.replaceState({}, document.title, window.location.pathname);
-            }
-            redirectUserToPortal(adminSession);
-            return;
+    client.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_OUT' || !session?.user) {
+        activeVerifiedUser = null;
+        updateHeaderAuthState();
+        return;
+      }
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        const verified = await resolveVerifiedSession(client);
+        activeVerifiedUser = verified;
+        window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: !!verified, user: verified } }));
+        updateHeaderAuthState();
+
+        if (window.location.hash && window.location.hash.includes('access_token')) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+          if (verified && window.showToast) {
+            window.showToast(`✅ Welcome, ${verified.name}!`);
           }
-
-          // Check role from lux_profiles
-          let profileRole = user.user_metadata?.role;
-          try {
-            const { data: prof } = await client
-              .from('lux_profiles')
-              .select('role, full_name')
-              .eq('id', user.id)
-              .maybeSingle();
-            if (prof && prof.role) {
-              profileRole = prof.role;
-              if (profileRole === 'super_admin' || profileRole === 'admin') {
-                const adminSession = {
-                  email: email,
-                  name: prof.full_name || fullName,
-                  role: profileRole,
-                  isSuperAdmin: true,
-                  authMethod: session.provider_token ? 'google' : 'supabase_auth',
-                  loggedInAt: new Date().toISOString()
-                };
-                localStorage.setItem('luxea_admin_session', JSON.stringify(adminSession));
-                localStorage.setItem('luxea_user_session', JSON.stringify(adminSession));
-                window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: adminSession } }));
-                updateHeaderAuthState();
-                redirectUserToPortal(adminSession);
-                return;
-              }
-            }
-          } catch (e) {}
-
-          // Check if registered Host Partner in lux_hosts
-          let hostData = null;
-          try {
-            const { data: hostRows } = await client
-              .from('lux_hosts')
-              .select('*')
-              .ilike('email', email)
-              .limit(1);
-
-            if (hostRows && hostRows.length > 0) {
-              hostData = hostRows[0];
-            }
-          } catch (e) {
-            console.warn('Could not query host partner profile:', e);
-          }
-
-          let sessionData;
-          if (hostData) {
-            sessionData = {
-              email: hostData.email,
-              name: hostData.full_name || fullName,
-              refId: hostData.ref_id,
-              role: 'host',
-              status: hostData.review_status || 'approved',
-              propertyName: hostData.property_name,
-              isSuperAdmin: false,
-              authMethod: 'supabase_auth',
-              loggedInAt: new Date().toISOString()
-            };
-          } else {
-            sessionData = {
-              email: user.email,
-              id: user.id,
-              name: fullName,
-              role: user.user_metadata?.role || 'member',
-              isSuperAdmin: false,
-              authMethod: 'supabase_auth',
-              loggedInAt: new Date().toISOString()
-            };
-          }
-
-          localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
-          window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: sessionData } }));
-          updateHeaderAuthState();
-
-          // Clean URL hash if returning from OAuth redirect
-          if (window.location.hash && window.location.hash.includes('access_token')) {
-            window.history.replaceState({}, document.title, window.location.pathname);
-            if (window.showToast) {
-              window.showToast(`✅ Welcome, ${sessionData.name}!`);
-            }
-            redirectUserToPortal(sessionData);
-          }
+          if (verified) redirectUserToPortal(verified);
         }
-      });
-    } catch (err) {
-      console.warn('Supabase Auth listener error:', err);
-    }
+      }
+    });
   };
 
   tryInitListener();
 }
 
-/**
- * Update the header UI: Show "Sign In" button or User Profile Pill
- */
+export function getActiveSession() {
+  return activeVerifiedUser;
+}
+
 export function updateHeaderAuthState() {
   const headerActionsList = document.querySelectorAll('.header-actions');
   const user = getActiveSession();
 
-  headerActionsList.forEach(headerActions => {
+  headerActionsList.forEach((headerActions) => {
     let authContainer = headerActions.querySelector('.lux-header-auth-slot');
     if (!authContainer) {
       authContainer = document.createElement('div');
@@ -206,33 +155,37 @@ export function updateHeaderAuthState() {
     }
 
     if (user) {
-      const firstInitial = (user.name ? user.name.trim()[0] : (user.email ? user.email[0] : 'R')).toUpperCase();
+      const safeName = esc(user.name || 'Member');
+      const safeEmail = esc(user.email || '');
+      const firstInitial = esc((user.name ? user.name.trim()[0] : (user.email ? user.email[0] : 'L')).toUpperCase());
 
-      const roleLabel = user.isSuperAdmin
+      const isAdmin = user.role === 'super_admin' || user.role === 'admin';
+      const roleLabel = user.role === 'super_admin'
         ? 'Super Admin'
+        : user.role === 'admin'
+        ? 'System Admin'
         : user.role === 'host'
         ? 'Host Partner'
         : 'VIP Member';
-
-      const roleBadgeClass = user.isSuperAdmin ? 'badge-admin' : user.role === 'host' ? 'badge-host' : 'badge-member';
+      const roleBadgeClass = isAdmin ? 'badge-admin' : user.role === 'host' ? 'badge-host' : 'badge-member';
 
       authContainer.innerHTML = `
         <div class="lux-user-menu-wrap">
-          <button class="lux-user-avatar-btn" id="luxUserDropdownToggle" aria-expanded="false" aria-label="Account menu: ${user.name || 'User'}" title="${user.name || 'Account'} (${roleLabel})">
+          <button class="lux-user-avatar-btn" id="luxUserDropdownToggle" aria-expanded="false" aria-label="Account menu: ${safeName}" title="${safeName} (${roleLabel})">
             <span class="user-avatar-initial">${firstInitial}</span>
-            ${user.isSuperAdmin ? '<span class="avatar-crown-indicator" title="Super Admin">👑</span>' : ''}
+            ${isAdmin ? '<span class="avatar-crown-indicator" title="Admin">👑</span>' : ''}
           </button>
 
           <div class="lux-user-dropdown hidden" id="luxUserDropdownMenu">
             <div class="dropdown-user-info">
-              <div class="user-info-name">${user.name || 'Ronald Otieno'}</div>
-              <div class="user-info-email">${user.email}</div>
+              <div class="user-info-name">${safeName}</div>
+              <div class="user-info-email">${safeEmail}</div>
               <span class="user-info-role ${roleBadgeClass}">${roleLabel}</span>
             </div>
 
             <div class="dropdown-divider"></div>
 
-            ${user.isSuperAdmin ? `
+            ${isAdmin ? `
               <a href="/admin/" class="dropdown-link active-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
                 <span>Super Admin Console</span>
@@ -257,7 +210,7 @@ export function updateHeaderAuthState() {
               <span>Browse All Stays</span>
             </a>
 
-            ${user.role !== 'host' && !user.isSuperAdmin ? `
+            ${user.role !== 'host' && !isAdmin ? `
               <a href="/host/" class="dropdown-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                 <span>Host with Luxea</span>
@@ -271,6 +224,7 @@ export function updateHeaderAuthState() {
               <span>Sign Out</span>
             </button>
           </div>
+        </div>
       `;
 
       const toggle = authContainer.querySelector('#luxUserDropdownToggle');
@@ -280,13 +234,12 @@ export function updateHeaderAuthState() {
       toggle?.addEventListener('click', (e) => {
         e.stopPropagation();
         menu?.classList.toggle('hidden');
-        toggle.setAttribute('aria-expanded', !menu?.classList.contains('hidden'));
+        toggle.setAttribute('aria-expanded', String(!menu?.classList.contains('hidden')));
       });
 
       signOutBtn?.addEventListener('click', async () => {
         await handleSignOut();
       });
-
     } else {
       authContainer.innerHTML = `
         <button class="btn btn-outline btn-sm lux-auth-trigger-btn" id="openAuthModalHeaderBtn">
@@ -295,14 +248,12 @@ export function updateHeaderAuthState() {
         </button>
       `;
 
-      const btn = authContainer.querySelector('#openAuthModalHeaderBtn');
-      btn?.addEventListener('click', () => {
+      authContainer.querySelector('#openAuthModalHeaderBtn')?.addEventListener('click', () => {
         window.openAuthModal();
       });
     }
   });
 
-  // Mobile Bottom Nav integration if present
   const mobileNav = document.querySelector('.mobile-bottom-nav');
   if (mobileNav && !mobileNav.querySelector('#mobileAuthNavBtn')) {
     const authNavItem = document.createElement('a');
@@ -315,8 +266,8 @@ export function updateHeaderAuthState() {
     `;
     authNavItem.addEventListener('click', (e) => {
       e.preventDefault();
-      if (user) {
-        if (user.isSuperAdmin) window.location.href = '/admin/';
+      if (activeVerifiedUser) {
+        if (activeVerifiedUser.isSuperAdmin) window.location.href = '/admin/';
         else window.openAuthModal();
       } else {
         window.openAuthModal();
@@ -326,42 +277,18 @@ export function updateHeaderAuthState() {
   }
 }
 
-/**
- * Get active session
- */
-export function getActiveSession() {
-  try {
-    const adminSess = JSON.parse(localStorage.getItem('luxea_admin_session') || 'null');
-    if (adminSess && adminSess.email) return adminSess;
-
-    const userSess = JSON.parse(localStorage.getItem('luxea_user_session') || 'null');
-    if (userSess && userSess.email) return userSess;
-  } catch (e) {
-    return null;
-  }
-  return null;
-}
-
-/**
- * Handle Sign Out across the entire app
- */
 export async function handleSignOut() {
-  localStorage.removeItem('luxea_admin_session');
-  localStorage.removeItem('luxea_user_session');
-
-  const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
-  if (client && client.auth) {
-    try { await client.auth.signOut(); } catch (e) {}
-  }
-
+  activeVerifiedUser = null;
   if (window.LuxeaAuth && window.LuxeaAuth.logoutAdmin) {
     await window.LuxeaAuth.logoutAdmin();
+  } else {
+    const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
+    if (client && client.auth) {
+      try { await client.auth.signOut(); } catch (e) {}
+    }
   }
 
-  if (window.showToast) {
-    window.showToast('Signed out of Luxea Living.');
-  }
-
+  if (window.showToast) window.showToast('Signed out of Luxea Living.');
   window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: false } }));
   updateHeaderAuthState();
 
@@ -370,98 +297,71 @@ export async function handleSignOut() {
   }
 }
 
-/**
- * Open the high-end luxury Auth Modal
- * @param {string} preferredRole - 'admin' | 'host' | 'member'
- * @param {string} preferredMode - 'signin' | 'signup' | 'set-password'
- */
 window.openAuthModal = function (preferredRole = 'member', preferredMode = 'signin') {
   const modal = document.getElementById('luxAuthModal');
   if (!modal) return;
   modal.classList.add('active');
-
   setAuthMode(preferredMode);
-  selectAuthRole(preferredRole);
-
   const emailInput = document.getElementById('authModalEmail');
-  if (emailInput && !emailInput.value) {
-    emailInput.focus();
-  }
+  if (emailInput && !emailInput.value) emailInput.focus();
 };
 
-/**
- * Close Auth Modal
- */
 window.closeAuthModal = function () {
-  const modal = document.getElementById('luxAuthModal');
-  modal?.classList.remove('active');
+  document.getElementById('luxAuthModal')?.classList.remove('active');
 };
 
 let currentAuthMode = 'signin';
-let currentAuthRole = 'member';
 
 function setAuthMode(mode) {
   currentAuthMode = mode;
-  document.querySelectorAll('.auth-mode-btn').forEach(btn => {
+  document.querySelectorAll('.auth-mode-btn').forEach((btn) => {
     btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
   });
 
   const nameGroup = document.getElementById('authNameGroup');
+  const passGroup = document.getElementById('authPassGroup');
   const confirmPassGroup = document.getElementById('authConfirmPassGroup');
-  const hostRefGroup = document.getElementById('authHostRefGroup');
-  const roleTabsWrap = document.getElementById('authRoleTabsWrap');
   const googleBtn = document.getElementById('authGoogleBtn');
   const googleDivider = document.getElementById('authGoogleDivider');
-  const submitBtn = document.getElementById('authModalSubmitBtn');
   const btnText = document.getElementById('authBtnText');
   const forgotPassLink = document.getElementById('authForgotPassLink');
-  const errorBanner = document.getElementById('authModalError');
-  const successBanner = document.getElementById('authModalSuccess');
+  const passInput = document.getElementById('authModalPassword');
+  const submitBtn = document.getElementById('authModalSubmitBtn');
 
-  errorBanner?.classList.add('hidden');
-  successBanner?.classList.add('hidden');
+  document.getElementById('authModalError')?.classList.add('hidden');
+  document.getElementById('authModalSuccess')?.classList.add('hidden');
+  submitBtn?.classList.remove('hidden');
 
   if (mode === 'signup') {
     nameGroup?.classList.remove('hidden');
+    passGroup?.classList.remove('hidden');
     confirmPassGroup?.classList.remove('hidden');
-    hostRefGroup?.classList.add('hidden');
-    roleTabsWrap?.classList.remove('hidden');
     googleBtn?.classList.remove('hidden');
     googleDivider?.classList.remove('hidden');
-    if (forgotPassLink) forgotPassLink.classList.add('hidden');
+    forgotPassLink?.classList.add('hidden');
+    if (passInput) passInput.required = true;
     if (btnText) btnText.textContent = 'Create Luxea Account';
-  } else if (mode === 'set-password') {
+  } else if (mode === 'reset') {
     nameGroup?.classList.add('hidden');
-    confirmPassGroup?.classList.remove('hidden');
-    hostRefGroup?.classList.remove('hidden');
-    roleTabsWrap?.classList.add('hidden');
+    passGroup?.classList.add('hidden');
+    confirmPassGroup?.classList.add('hidden');
     googleBtn?.classList.add('hidden');
     googleDivider?.classList.add('hidden');
-    if (forgotPassLink) forgotPassLink.classList.add('hidden');
-    if (btnText) btnText.textContent = 'Set Secure Host Password';
+    forgotPassLink?.classList.add('hidden');
+    if (passInput) passInput.required = false;
+    if (btnText) btnText.textContent = 'Send Secure Reset Link';
   } else {
-    // signin
     nameGroup?.classList.add('hidden');
+    passGroup?.classList.remove('hidden');
     confirmPassGroup?.classList.add('hidden');
-    hostRefGroup?.classList.add('hidden');
-    roleTabsWrap?.classList.remove('hidden');
     googleBtn?.classList.remove('hidden');
     googleDivider?.classList.remove('hidden');
-    if (forgotPassLink) forgotPassLink.classList.remove('hidden');
+    forgotPassLink?.classList.remove('hidden');
+    if (passInput) passInput.required = true;
     if (btnText) btnText.textContent = 'Sign In to Luxea';
   }
 }
 
-function selectAuthRole(role) {
-  currentAuthRole = role;
-  document.querySelectorAll('.auth-role-tab').forEach(t => {
-    t.classList.toggle('active', t.getAttribute('data-role') === role);
-  });
-}
-
-/**
- * Inject the Luxury Auth Modal markup once into document body
- */
 function injectAuthModalHtml() {
   if (document.getElementById('luxAuthModal')) return;
 
@@ -473,34 +373,16 @@ function injectAuthModalHtml() {
       <button class="lux-modal-close" id="closeAuthModalBtn" aria-label="Close modal">✕</button>
 
       <div class="auth-card-header">
-        <div class="auth-brand-badge">
-          <span class="auth-monogram">L</span>
-        </div>
+        <div class="auth-brand-badge"><span class="auth-monogram">L</span></div>
         <h2 class="auth-modal-title" id="authModalTitle">Welcome to Luxea Living</h2>
-        <p class="auth-modal-sub">Curated residences in Kenya • Private guest suite & host command.</p>
+        <p class="auth-modal-sub">Curated residences in Kenya • Verified guest &amp; host access.</p>
       </div>
 
-      <!-- Auth Mode Switcher (Sign In vs Create Account) -->
       <div class="auth-mode-switch">
-        <button type="button" class="auth-mode-btn active" data-mode="signin">
-          <span>Sign In</span>
-        </button>
-        <button type="button" class="auth-mode-btn" data-mode="signup">
-          <span>Create Account</span>
-        </button>
+        <button type="button" class="auth-mode-btn active" data-mode="signin"><span>Sign In</span></button>
+        <button type="button" class="auth-mode-btn" data-mode="signup"><span>Create Account</span></button>
       </div>
 
-      <!-- Role Selector Tabs: Guest vs Host Partner -->
-      <div class="auth-role-tabs" id="authRoleTabsWrap">
-        <button type="button" class="auth-role-tab active" data-role="member">
-          <span>Guest / Member</span>
-        </button>
-        <button type="button" class="auth-role-tab" data-role="host">
-          <span>Host Partner</span>
-        </button>
-      </div>
-
-      <!-- Google OAuth Button -->
       <button type="button" class="btn-google-auth-modal" id="authGoogleBtn">
         <svg width="18" height="18" viewBox="0 0 24 24">
           <path fill="#EA4335" d="M12 5c1.7 0 3 .6 4 1.5l3-3C17.2 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/>
@@ -511,79 +393,33 @@ function injectAuthModalHtml() {
         <span id="authGoogleBtnText">Continue with Google</span>
       </button>
 
-      <div class="auth-divider" id="authGoogleDivider">
-        <span>or with email</span>
-      </div>
+      <div class="auth-divider" id="authGoogleDivider"><span>or with email</span></div>
 
-      <!-- Feedback Alerts -->
       <div id="authModalError" class="auth-error-banner hidden"></div>
       <div id="authModalSuccess" class="auth-success-banner hidden"></div>
 
-      <!-- Main Form -->
       <form id="luxGlobalAuthForm" class="auth-modal-form">
-        <!-- Full Name (Only for Sign Up) -->
         <div class="form-group hidden" id="authNameGroup">
           <label class="form-label" for="authModalName">Full Name</label>
-          <input 
-            type="text" 
-            id="authModalName" 
-            class="form-control" 
-            placeholder="e.g. Ronald Otieno" 
-            autocomplete="name"
-          >
+          <input type="text" id="authModalName" class="form-control" placeholder="e.g. Amina Hassan" autocomplete="name">
         </div>
 
-        <!-- Host Reference ID (Only for Set Password) -->
-        <div class="form-group hidden" id="authHostRefGroup">
-          <label class="form-label" for="authModalHostRef">Host Reference ID (Optional)</label>
-          <input 
-            type="text" 
-            id="authModalHostRef" 
-            class="form-control" 
-            placeholder="e.g. LUX-HOST-2026-XXXX" 
-            autocomplete="off"
-          >
-        </div>
-
-        <!-- Email Address -->
         <div class="form-group">
           <label class="form-label" for="authModalEmail">Email Address</label>
-          <input 
-            type="email" 
-            id="authModalEmail" 
-            class="form-control" 
-            placeholder="name@example.com" 
-            required 
-            autocomplete="username"
-          >
+          <input type="email" id="authModalEmail" class="form-control" placeholder="name@example.com" required autocomplete="username">
         </div>
 
-        <!-- Password -->
-        <div class="form-group">
+        <div class="form-group" id="authPassGroup">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <label class="form-label" for="authModalPassword" style="margin-bottom: 0;">Password</label>
-            <a href="#" id="authForgotPassLink" class="auth-link-gold" style="font-size: 0.75rem;">Set / Reset Password?</a>
+            <a href="#" id="authForgotPassLink" class="auth-link-gold" style="font-size: 0.75rem;">Forgot / Reset Password?</a>
           </div>
-          <input 
-            type="password" 
-            id="authModalPassword" 
-            class="form-control" 
-            placeholder="Enter password (min. 6 characters)" 
-            required 
-            autocomplete="current-password"
-          >
+          <input type="password" id="authModalPassword" class="form-control" placeholder="Min. 10 characters" required minlength="8" autocomplete="current-password">
         </div>
 
-        <!-- Confirm Password (for Sign Up and Set Password) -->
         <div class="form-group hidden" id="authConfirmPassGroup">
           <label class="form-label" for="authModalConfirmPass">Confirm Password</label>
-          <input 
-            type="password" 
-            id="authModalConfirmPass" 
-            class="form-control" 
-            placeholder="Repeat password" 
-            autocomplete="new-password"
-          >
+          <input type="password" id="authModalConfirmPass" class="form-control" placeholder="Repeat password" autocomplete="new-password">
         </div>
 
         <button type="submit" class="btn btn-primary btn-block btn-large" id="authModalSubmitBtn">
@@ -601,515 +437,177 @@ function injectAuthModalHtml() {
 
   document.body.appendChild(modalOverlay);
 
-  // Wire events
-  const closeBtn = modalOverlay.querySelector('#closeAuthModalBtn');
-  closeBtn?.addEventListener('click', window.closeAuthModal);
-
-  modalOverlay.querySelectorAll('.auth-mode-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      setAuthMode(btn.getAttribute('data-mode'));
-    });
+  modalOverlay.querySelector('#closeAuthModalBtn')?.addEventListener('click', window.closeAuthModal);
+  modalOverlay.querySelectorAll('.auth-mode-btn').forEach((btn) => {
+    btn.addEventListener('click', () => setAuthMode(btn.getAttribute('data-mode')));
   });
-
-  modalOverlay.querySelectorAll('.auth-role-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      selectAuthRole(tab.getAttribute('data-role'));
-    });
-  });
-
-  // Google OAuth button
-  const googleBtn = modalOverlay.querySelector('#authGoogleBtn');
-  googleBtn?.addEventListener('click', async () => {
-    await handleGoogleAuth();
-  });
-
-  // Forgot / Set Password link
-  const forgotPassLink = modalOverlay.querySelector('#authForgotPassLink');
-  forgotPassLink?.addEventListener('click', (e) => {
+  modalOverlay.querySelector('#authGoogleBtn')?.addEventListener('click', handleGoogleAuth);
+  modalOverlay.querySelector('#authForgotPassLink')?.addEventListener('click', (e) => {
     e.preventDefault();
-    setAuthMode('set-password');
+    setAuthMode('reset');
   });
 
-  // Main Form Submit (Sign In, Sign Up, Set Password)
   const form = modalOverlay.querySelector('#luxGlobalAuthForm');
   const emailInput = modalOverlay.querySelector('#authModalEmail');
   const passInput = modalOverlay.querySelector('#authModalPassword');
   const nameInput = modalOverlay.querySelector('#authModalName');
   const confirmPassInput = modalOverlay.querySelector('#authModalConfirmPass');
-  const hostRefInput = modalOverlay.querySelector('#authModalHostRef');
   const errorBanner = modalOverlay.querySelector('#authModalError');
   const successBanner = modalOverlay.querySelector('#authModalSuccess');
   const submitBtn = modalOverlay.querySelector('#authModalSubmitBtn');
   const btnText = modalOverlay.querySelector('#authBtnText');
+
+  function showError(msg) {
+    if (errorBanner) {
+      errorBanner.textContent = msg;
+      errorBanner.classList.remove('hidden');
+    }
+    successBanner?.classList.add('hidden');
+  }
+
+  function showSuccess(msg) {
+    if (successBanner) {
+      successBanner.textContent = msg;
+      successBanner.classList.remove('hidden');
+    }
+    errorBanner?.classList.add('hidden');
+  }
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorBanner?.classList.add('hidden');
     successBanner?.classList.add('hidden');
 
-    const email = emailInput.value.trim();
-    const pass = passInput.value.trim();
+    const email = emailInput.value.trim().toLowerCase();
+    const pass = passInput.value;
     const name = nameInput?.value.trim() || '';
-    const confirmPass = confirmPassInput?.value.trim() || '';
-    const hostRef = hostRefInput?.value.trim() || '';
+    const confirmPass = confirmPassInput?.value || '';
 
-    // Password validation for signup or set-password
-    if (currentAuthMode === 'signup' || currentAuthMode === 'set-password') {
-      if (pass.length < 6) {
-        showError('Password must be at least 6 characters long.');
-        return;
-      }
-      if (pass !== confirmPass) {
-        showError('Passwords do not match. Please verify and re-type.');
-        return;
-      }
+    const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
+    if (!client || !client.auth) {
+      showError('Authentication service unavailable. Please refresh.');
+      return;
     }
 
     submitBtn.disabled = true;
-    btnText.textContent = currentAuthMode === 'signup' 
-      ? 'Creating Account...' 
-      : currentAuthMode === 'set-password' 
-      ? 'Encrypting Password...' 
-      : 'Verifying...';
 
     try {
-      const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
+      // MODE 1: PASSWORD RESET (Verified Email Ownership Only)
+      if (currentAuthMode === 'reset') {
+        btnText.textContent = 'Sending Reset Link...';
+        const { error } = await client.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/host/activate/`
+        });
+        if (error) {
+          showError(error.message || 'Unable to send reset link.');
+          return;
+        }
+        showSuccess(`If an account exists for ${email}, a secure password reset link has been sent to your inbox.`);
+        submitBtn.classList.add('hidden');
+        return;
+      }
 
-      // =========================================================================
-      // MODE 1: CREATE ACCOUNT (SIGN UP)
-      // =========================================================================
+      // MODE 2: CREATE ACCOUNT (Server trigger enforces least-privilege 'member' role)
       if (currentAuthMode === 'signup') {
         if (!name) {
           showError('Please provide your full name.');
-          submitBtn.disabled = false;
-          btnText.textContent = 'Create Luxea Account';
+          return;
+        }
+        if (pass.length < 10) {
+          showError('Password must be at least 10 characters long.');
+          return;
+        }
+        if (pass !== confirmPass) {
+          showError('Passwords do not match.');
           return;
         }
 
-        // 1. Ensure user is provisioned in Supabase Authentication tab (auth.users) with email_confirm: true
-        if (window.LuxeaDB && typeof window.LuxeaDB.syncAuthUser === 'function') {
-          try {
-            await window.LuxeaDB.syncAuthUser({
-              email: email,
-              name: name,
-              role: currentAuthRole,
-              password: pass,
-              source: 'signup_modal'
-            });
-          } catch (e) {
-            console.warn('Sync auth user notice:', e);
+        btnText.textContent = 'Creating Account...';
+        const { data, error } = await client.auth.signUp({
+          email,
+          password: pass,
+          options: {
+            data: { full_name: name }
           }
-        }
-
-        if (client && client.auth) {
-          // Attempt sign in directly since user is confirmed via admin API, or fallback to signUp
-          let { data, error } = await client.auth.signInWithPassword({
-            email: email,
-            password: pass
-          });
-
-          if (error) {
-            const signupRes = await client.auth.signUp({
-              email: email,
-              password: pass,
-              options: {
-                data: {
-                  full_name: name,
-                  role: currentAuthRole
-                }
-              }
-            });
-            data = signupRes.data;
-            error = signupRes.error;
-          }
-
-          if (error) {
-            if (error.message && error.message.includes('already registered')) {
-              showError('An account with this email already exists. Please switch to Sign In or Set Password.');
-            } else {
-              showError(error.message);
-            }
-            return;
-          }
-
-          // If session is returned immediately (email confirmation disabled/auto-confirmed)
-          if (data && data.session && data.user) {
-            let sessionData = {
-              email: data.user.email,
-              id: data.user.id,
-              name: name,
-              role: currentAuthRole,
-              isSuperAdmin: email.toLowerCase() === 'otienoronny56@gmail.com',
-              authMethod: 'supabase_auth',
-              loggedInAt: new Date().toISOString()
-            };
-
-            // If registered as host, link property if available
-            if (currentAuthRole === 'host') {
-              try {
-                const { data: hostRows } = await client
-                  .from('lux_hosts')
-                  .select('*')
-                  .ilike('email', email)
-                  .limit(1);
-
-                if (hostRows && hostRows.length > 0) {
-                  sessionData.status = hostRows[0].review_status;
-                  sessionData.refId = hostRows[0].ref_id;
-                  sessionData.propertyName = hostRows[0].property_name;
-                }
-              } catch (e) {}
-            }
-
-            localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
-            window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: sessionData } }));
-            window.closeAuthModal();
-
-            if (window.showToast) {
-              window.showToast(`✅ Welcome to Luxea Living, ${name}!`);
-            }
-            updateHeaderAuthState();
-            redirectUserToPortal(sessionData);
-            return;
-          }
-
-          // If email confirmation is required by Supabase
-          showSuccess(`🎉 Account created! We've sent a verification link to <strong>${email}</strong>. Please check your inbox to activate your account.`);
-          submitBtn.classList.add('hidden');
-          return;
-
-        } else {
-          // Fallback local session if Supabase Auth client isn't configured
-          const sessionData = {
-            email: email,
-            name: name,
-            role: currentAuthRole,
-            isSuperAdmin: false,
-            authMethod: 'local',
-            loggedInAt: new Date().toISOString()
-          };
-          localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
-          window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: sessionData } }));
-          window.closeAuthModal();
-          if (window.showToast) window.showToast(`✅ Welcome, ${name}!`);
-          updateHeaderAuthState();
-          redirectUserToPortal(sessionData);
-          return;
-        }
-      }
-
-      // =========================================================================
-      // MODE 2: PROPERTY OWNER / HOST SET PASSWORD
-      // =========================================================================
-      if (currentAuthMode === 'set-password') {
-        let hostMatch = null;
-
-        // Verify host in lux_hosts
-        if (client) {
-          try {
-            let query = client.from('lux_hosts').select('*').ilike('email', email);
-            if (hostRef) query = query.eq('ref_id', hostRef);
-            const { data: hostRows } = await query.limit(1);
-            if (hostRows && hostRows.length > 0) {
-              hostMatch = hostRows[0];
-            }
-          } catch (e) {}
-        }
-
-        // Guarantee host is provisioned in Supabase Authentication tab (auth.users)
-        if (window.LuxeaDB && typeof window.LuxeaDB.syncAuthUser === 'function') {
-          try {
-            await window.LuxeaDB.syncAuthUser({
-              email: email,
-              name: hostMatch ? hostMatch.full_name : email.split('@')[0],
-              role: 'host',
-              password: pass,
-              phone: hostMatch ? hostMatch.phone : '',
-              source: 'host_set_password'
-            });
-          } catch (e) {
-            console.warn('Host auth sync notice:', e);
-          }
-        }
-
-        if (client && client.auth) {
-          // Attempt direct sign in with new password
-          const { error: signInErr } = await client.auth.signInWithPassword({ email, password: pass });
-          if (signInErr) {
-            // Fallback to signUp or password reset if needed
-            await client.auth.signUp({
-              email: email,
-              password: pass,
-              options: {
-                data: {
-                  full_name: hostMatch ? hostMatch.full_name : email.split('@')[0],
-                  role: 'host',
-                  ref_id: hostMatch ? hostMatch.ref_id : hostRef
-                }
-              }
-            });
-          }
-        }
-
-        // Establish Host Partner session
-        const hostSession = {
-          email: email,
-          name: hostMatch ? hostMatch.full_name : email.split('@')[0],
-          role: 'host',
-          refId: hostMatch ? hostMatch.ref_id : hostRef,
-          status: hostMatch ? hostMatch.review_status : 'approved',
-          propertyName: hostMatch ? hostMatch.property_name : 'Residence',
-          isSuperAdmin: false,
-          authMethod: 'password_set',
-          loggedInAt: new Date().toISOString()
-        };
-
-        localStorage.setItem('luxea_user_session', JSON.stringify(hostSession));
-        window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: hostSession } }));
-        window.closeAuthModal();
-
-        if (window.showToast) {
-          window.showToast(`🏡 Password set! Welcome to your Host Partner Suite.`);
-        }
-        updateHeaderAuthState();
-        redirectUserToPortal(hostSession);
-        return;
-      }
-
-      // =========================================================================
-      // MODE 3: SIGN IN
-      // =========================================================================
-      // 1. Super Admin check
-      const SUPER_ADMINS_LIST = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
-      const cleanEmail = email.toLowerCase().trim();
-      if (SUPER_ADMINS_LIST.includes(cleanEmail)) {
-        const defaultName = cleanEmail.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno';
-        const sessionData = {
-          email: cleanEmail,
-          name: defaultName,
-          role: 'super_admin',
-          isSuperAdmin: true,
-          loggedInAt: new Date().toISOString()
-        };
-        localStorage.setItem('luxea_admin_session', JSON.stringify(sessionData));
-        localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
-
-        window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: sessionData } }));
-        window.closeAuthModal();
-
-        if (window.showToast) window.showToast(`✅ Welcome back, Super Admin ${defaultName.split(' ')[0]}!`);
-        redirectUserToPortal(sessionData);
-        return;
-      }
-
-      // 2. Supabase Auth SignIn with Password
-      if (client && client.auth) {
-        let { data, error } = await client.auth.signInWithPassword({
-          email: email,
-          password: pass
         });
 
-        // If credentials failed or user was not yet in auth.users, attempt sync via Edge Function & retry
         if (error) {
-          if (window.LuxeaDB && typeof window.LuxeaDB.syncAuthUser === 'function') {
-            try {
-              // Look up if user has a name in lux_hosts or lux_waitlist
-              let existingName = email.split('@')[0];
-              let userRole = currentAuthRole;
-              const { data: hRows } = await client.from('lux_hosts').select('full_name').ilike('email', email).limit(1);
-              if (hRows && hRows.length > 0) {
-                existingName = hRows[0].full_name;
-                userRole = 'host';
-              } else {
-                const { data: wRows } = await client.from('lux_waitlist').select('full_name').ilike('email', email).limit(1);
-                if (wRows && wRows.length > 0) existingName = wRows[0].full_name;
-              }
-
-              await window.LuxeaDB.syncAuthUser({
-                email: email,
-                name: existingName,
-                role: userRole,
-                password: pass,
-                source: 'login_sync'
-              });
-
-              // Retry sign in with newly set password
-              const retry = await client.auth.signInWithPassword({
-                email: email,
-                password: pass
-              });
-              if (!retry.error && retry.data) {
-                data = retry.data;
-                error = null;
-              }
-            } catch (syncErr) {
-              console.warn('Auth sync on login notice:', syncErr);
-            }
-          }
-        }
-
-        if (!error && data && data.user) {
-          let role = data.user.user_metadata?.role || currentAuthRole;
-          let hostInfo = null;
-
-
-          // Check role from lux_profiles
-          try {
-            const { data: prof } = await client
-              .from('lux_profiles')
-              .select('role, full_name')
-              .eq('id', data.user.id)
-              .maybeSingle();
-            if (prof && prof.role) role = prof.role;
-          } catch (e) {}
-
-          // Check if host
-          try {
-            const { data: hostRows } = await client
-              .from('lux_hosts')
-              .select('*')
-              .ilike('email', email)
-              .limit(1);
-
-            if (hostRows && hostRows.length > 0) {
-              if (role !== 'super_admin' && role !== 'admin') role = 'host';
-              hostInfo = hostRows[0];
-            }
-          } catch (e) {}
-
-          const isSuperAdmin = SUPER_ADMINS_LIST.includes(cleanEmail) || role === 'super_admin';
-          const defaultAdminName = cleanEmail === 'dennbarasa@gmail.com' ? 'Dennis Barasa' : 'Ronald Otieno';
-
-          const sessionData = {
-            email: data.user.email,
-            id: data.user.id,
-            name: data.user.user_metadata?.full_name || hostInfo?.full_name || (isSuperAdmin ? defaultAdminName : email.split('@')[0]),
-            role: isSuperAdmin ? 'super_admin' : role,
-            status: hostInfo ? hostInfo.review_status : 'approved',
-            refId: hostInfo ? hostInfo.ref_id : undefined,
-            propertyName: hostInfo ? hostInfo.property_name : undefined,
-            isSuperAdmin: isSuperAdmin,
-            authMethod: 'supabase_auth',
-            loggedInAt: new Date().toISOString()
-          };
-
-          localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
-          if (sessionData.isSuperAdmin) {
-            localStorage.setItem('luxea_admin_session', JSON.stringify(sessionData));
-          }
-
-          window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: sessionData } }));
-          window.closeAuthModal();
-
-          if (window.showToast) window.showToast(`✅ Welcome back, ${sessionData.name}!`);
-          updateHeaderAuthState();
-          redirectUserToPortal(sessionData);
+          showError(error.message || 'Could not create account.');
           return;
         }
-      }
 
-      // 3. Fallback: Host Partner Check in lux_hosts table
-      if (client) {
-        const { data: hostRows } = await client
-          .from('lux_hosts')
-          .select('*')
-          .ilike('email', email)
-          .limit(1);
-
-        if (hostRows && hostRows.length > 0) {
-          const host = hostRows[0];
-          const sessionData = {
-            email: host.email,
-            name: host.full_name,
-            refId: host.ref_id,
-            role: 'host',
-            status: host.review_status || 'approved',
-            propertyName: host.property_name,
-            isSuperAdmin: false,
-            authMethod: 'host_match',
-            loggedInAt: new Date().toISOString()
-          };
-
-          localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
-          window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: sessionData } }));
+        if (data?.session && data?.user) {
+          const verified = await resolveVerifiedSession(client);
+          activeVerifiedUser = verified;
           window.closeAuthModal();
-
-          if (window.showToast) window.showToast(`🏡 Welcome, Verified Host Partner ${host.full_name}!`);
+          if (window.showToast) window.showToast(`✅ Welcome to Luxea Living, ${name}!`);
           updateHeaderAuthState();
-          redirectUserToPortal(sessionData);
+          if (verified) redirectUserToPortal(verified);
           return;
         }
+
+        showSuccess(`Account created! Please check ${email} to verify your email address.`);
+        submitBtn.classList.add('hidden');
+        return;
       }
 
-      // If credentials failed
-      showError('Invalid email or password. If you are a host, use "Set / Reset Password" above.');
+      // MODE 3: STRICT SIGN IN (Real Supabase Auth Password Verification Only)
+      btnText.textContent = 'Verifying...';
+      const { data, error } = await client.auth.signInWithPassword({ email, password: pass });
 
+      if (error || !data?.user) {
+        showError('Invalid email or password. Use "Forgot / Reset Password?" if you need to reset it.');
+        return;
+      }
+
+      const verified = await resolveVerifiedSession(client);
+      if (!verified) {
+        showError('This account is suspended or could not be verified.');
+        return;
+      }
+
+      activeVerifiedUser = verified;
+      window.dispatchEvent(new CustomEvent('luxea:auth_changed', { detail: { loggedIn: true, user: verified } }));
+      window.closeAuthModal();
+      if (window.showToast) window.showToast(`✅ Welcome back, ${verified.name}!`);
+      updateHeaderAuthState();
+      redirectUserToPortal(verified);
     } catch (err) {
-      console.error('Auth submit error:', err);
-      showError('An unexpected error occurred. Please try again.');
+      showError('An unexpected authentication error occurred. Please try again.');
     } finally {
       submitBtn.disabled = false;
-      btnText.textContent = currentAuthMode === 'signup' 
-        ? 'Create Luxea Account' 
-        : currentAuthMode === 'set-password' 
-        ? 'Set Secure Host Password' 
-        : 'Sign In to Luxea';
+      btnText.textContent =
+        currentAuthMode === 'signup' ? 'Create Luxea Account' :
+        currentAuthMode === 'reset' ? 'Send Secure Reset Link' :
+        'Sign In to Luxea';
     }
   });
-
-  function showError(msg) {
-    if (errorBanner) {
-      errorBanner.innerHTML = msg;
-      errorBanner.classList.remove('hidden');
-    }
-    if (successBanner) successBanner.classList.add('hidden');
-  }
-
-  function showSuccess(msg) {
-    if (successBanner) {
-      successBanner.innerHTML = msg;
-      successBanner.classList.remove('hidden');
-    }
-    if (errorBanner) errorBanner.classList.add('hidden');
-  }
 
   async function handleGoogleAuth() {
     const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
     if (!client || !client.auth) {
-      showError('Authentication service is initializing. Please try again in a moment.');
+      showError('Authentication service is initializing. Please try again.');
       return;
     }
 
-    try {
-      const googleBtnText = document.getElementById('authGoogleBtnText');
-      if (googleBtnText) googleBtnText.textContent = 'Connecting with Google...';
+    const googleBtnText = document.getElementById('authGoogleBtnText');
+    if (googleBtnText) googleBtnText.textContent = 'Connecting with Google...';
 
-      const { data, error } = await client.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin + window.location.pathname
-        }
-      });
+    const { error } = await client.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + window.location.pathname }
+    });
 
-      if (error) {
-        if (error.message && (error.message.includes('not enabled') || error.message.includes('provider is not enabled'))) {
-          showError('Google Sign-In is awaiting provider activation in Supabase Dashboard. You can create an account with email & password below in 10 seconds.');
-        } else {
-          showError(error.message || 'Google authentication error. Please use email & password.');
-        }
-        if (googleBtnText) googleBtnText.textContent = 'Continue with Google';
-      }
-    } catch (e) {
-      console.error('Google OAuth error:', e);
-      showError('Could not start Google sign in. Please use email and password below.');
+    if (error) {
+      showError(error.message || 'Google authentication unavailable. Please use email and password.');
+      if (googleBtnText) googleBtnText.textContent = 'Continue with Google';
     }
   }
 
-  // Close dropdown on click outside
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.lux-user-menu-wrap')) {
-      document.querySelectorAll('.lux-user-dropdown').forEach(m => m.classList.add('hidden'));
-      document.querySelectorAll('#luxUserDropdownToggle').forEach(t => t.setAttribute('aria-expanded', 'false'));
+      document.querySelectorAll('.lux-user-dropdown').forEach((m) => m.classList.add('hidden'));
+      document.querySelectorAll('#luxUserDropdownToggle').forEach((t) => t.setAttribute('aria-expanded', 'false'));
     }
   });
 }

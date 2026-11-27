@@ -1,16 +1,36 @@
 /**
  * LUXEA LIVING — SUPER ADMIN COMMAND MODULE (admin.js)
  * High-End Executive Command Center
- * Features:
- * 1. Authentication Gateway: otienoronny56@gmail.com / Luxeaadmin
- * 2. Executive Analytics: Portfolio valuation, ADR, Regional gauges, Category mix & Funnel
- * 3. Modernized Data Tables: Inline Status Switcher, Direct WhatsApp outreach, Photo Lightbox
- * 4. Live Stays Inventory Management with Realtime Supabase Sync
- * 5. VIP Waitlist Management & Multi-format CSV exports
+ * Security:
+ * 1. Strictly backend-authenticated via Supabase Auth JWT + public.lux_profiles role verification
+ * 2. Zero hardcoded passwords or client-side localStorage auth bypasses
+ * 3. HTML-escaped rendering (XSS protection) & CSV formula injection protection
+ * 4. Private KYC documents opened via short-lived 5-minute signed URLs
  */
 
 import { LUXEA_STAYS } from './staysData.js';
 import { DEFAULT_LAUNDRY_PROVIDERS } from './laundryManager.js';
+
+function esc(v) {
+  if (window.LuxeaSanitize) return window.LuxeaSanitize.escapeHtml(v);
+  return String(v ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function safeUrl(u, fallback = '') {
+  if (window.LuxeaSanitize) return window.LuxeaSanitize.safeUrl(u, fallback);
+  return fallback;
+}
+
+function csvCell(v) {
+  let s = String(v ?? '').replace(/\r?\n/g, ' ');
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return `"${s.replace(/"/g, '""')}"`;
+}
 
 export function initAdminDashboard() {
   const loginGateway = document.getElementById('adminLoginGateway');
@@ -135,34 +155,18 @@ export function initAdminDashboard() {
   let currentStatusFilter = 'all';
 
   // =========================================================================
-  // 1. AUTHENTICATION GATE
+  // 1. STRICT SERVER-VERIFIED AUTHENTICATION GATE (SUPABASE JWT + lux_profiles)
   // =========================================================================
-  function checkAuth() {
+  async function checkAuth() {
     const publicHeader = document.getElementById('adminPublicHeader');
     const mobileBottomNav = document.querySelector('.mobile-bottom-nav');
 
-    // Verify if Super Admin is logged in (via session or Supabase Google auth)
-    let isSuperAdmin = false;
-    let admin = null;
+    const verification = window.LuxeaAuth && typeof window.LuxeaAuth.verifyAdminSession === 'function'
+      ? await window.LuxeaAuth.verifyAdminSession()
+      : { valid: false };
 
-    const SUPER_ADMINS_LIST = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
-
-    if (window.LuxeaAuth && window.LuxeaAuth.isAdminLoggedIn()) {
-      isSuperAdmin = true;
-      admin = window.LuxeaAuth.getCurrentAdmin();
-    } else {
-      const userSession = JSON.parse(localStorage.getItem('luxea_user_session') || '{}');
-      const email = (userSession?.email || '').toLowerCase().trim();
-      if (SUPER_ADMINS_LIST.includes(email) || userSession.role === 'super_admin' || userSession.isSuperAdmin) {
-        isSuperAdmin = true;
-        admin = userSession;
-        admin.isSuperAdmin = true;
-        if (!admin.name) admin.name = email.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno';
-        localStorage.setItem('luxea_admin_session', JSON.stringify(admin));
-      }
-    }
-
-    if (isSuperAdmin && admin) {
+    if (verification.valid && verification.admin) {
+      const admin = verification.admin;
       loginGateway?.classList.add('hidden');
       dashboardView?.classList.remove('hidden');
       if (publicHeader) publicHeader.classList.add('hidden');
@@ -170,50 +174,49 @@ export function initAdminDashboard() {
       adminBadge?.classList.remove('hidden');
       logoutBtn?.classList.remove('hidden');
 
-      const adminName = admin.name || (admin.email && admin.email.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno');
+      const adminName = admin.name || admin.email || 'Admin';
       const firstName = adminName.split(' ')[0];
       const sidebarName = document.getElementById('sidebarAdminName');
       if (sidebarName) sidebarName.textContent = firstName;
-      if (adminBadge) adminBadge.textContent = `Super Admin`;
+      if (adminBadge) adminBadge.textContent = admin.role === 'super_admin' ? 'Super Admin' : 'System Admin';
+
+      if (window.LuxeaDB && typeof window.LuxeaDB.initAdminRealtime === 'function') {
+        window.LuxeaDB.initAdminRealtime();
+      }
       loadDashboardData();
     } else {
+      if (window.LuxeaDB && typeof window.LuxeaDB.stopAdminRealtime === 'function') {
+        window.LuxeaDB.stopAdminRealtime();
+      }
       loginGateway?.classList.remove('hidden');
       dashboardView?.classList.add('hidden');
       if (publicHeader) publicHeader.classList.remove('hidden');
       if (mobileBottomNav) mobileBottomNav.classList.remove('hidden');
       adminBadge?.classList.add('hidden');
       logoutBtn?.classList.add('hidden');
+      if (verification.reason === 'not_admin' && loginErrorMsg) {
+        loginErrorMsg.textContent = 'Access denied. Your signed-in account does not have active Administrator privileges.';
+        loginErrorMsg.classList.remove('hidden');
+      }
     }
   }
 
-  // Auto-listen to Supabase OAuth return for Super Admin
+  // Listen to Supabase Auth OAuth return & token changes — always re-verify on server
   const authClient = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
   if (authClient && authClient.auth) {
     try {
-      authClient.auth.onAuthStateChange((event, session) => {
-        if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session && session.user) {
-          const email = (session.user.email || '').toLowerCase().trim();
-          const SUPER_ADMINS_LIST = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
-          if (SUPER_ADMINS_LIST.includes(email)) {
-            const defaultName = email.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno';
-            const sessionData = {
-              email: email,
-              name: session.user.user_metadata?.full_name || defaultName,
-              role: 'super_admin',
-              isSuperAdmin: true,
-              loggedInAt: new Date().toISOString()
-            };
-            localStorage.setItem('luxea_admin_session', JSON.stringify(sessionData));
-            localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
-            if (window.showToast) window.showToast(`✅ Welcome, Super Admin ${defaultName.split(' ')[0]}!`);
-            checkAuth();
+      authClient.auth.onAuthStateChange((event) => {
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+          if (window.location.hash && window.location.hash.includes('access_token')) {
+            window.history.replaceState({}, document.title, window.location.pathname);
           }
+          checkAuth();
         }
       });
     } catch (e) {}
   }
 
-  // Google OAuth for Super Admin
+  // Google OAuth for Verified Admins
   const adminGoogleBtn = document.getElementById('adminGoogleBtn');
   adminGoogleBtn?.addEventListener('click', async () => {
     const client = window.LuxeaDB ? window.LuxeaDB.getClient() : null;
@@ -223,20 +226,18 @@ export function initAdminDashboard() {
       try {
         await client.auth.signInWithOAuth({
           provider: 'google',
-          options: {
-            redirectTo: window.location.origin + '/admin/'
-          }
+          options: { redirectTo: window.location.origin + '/admin/' }
         });
       } catch (err) {
-        console.error('Admin Google sign in error:', err);
         if (loginErrorMsg) {
-          loginErrorMsg.textContent = 'Could not start Google Sign-In. Use credentials below.';
+          loginErrorMsg.textContent = 'Could not start Google Sign-In. Use verified credentials below.';
           loginErrorMsg.classList.remove('hidden');
         }
       }
     }
   });
 
+  // Strict Email + Password Admin Login via Supabase Auth (ZERO client-side bypass)
   loginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     loginErrorMsg?.classList.add('hidden');
@@ -244,84 +245,31 @@ export function initAdminDashboard() {
     if (submitBtn) submitBtn.disabled = true;
 
     const email = loginEmail.value.trim().toLowerCase();
-    const pass = loginPass.value.trim();
+    const pass = loginPass.value;
 
-    const SUPER_ADMINS_LIST = ['otienoronny56@gmail.com', 'denisbaraza@gmail.com', 'dennbarasa@gmail.com', 'dennisbaraza@gmail.com'];
-
-    // Direct automatic unlock for designated Super Admins (Ronald Otieno & Dennis Barasa)
-    if (SUPER_ADMINS_LIST.includes(email)) {
-      const defaultName = email.includes('den') ? 'Dennis Barasa' : 'Ronald Otieno';
-      const sessionData = {
-        email: email,
-        name: defaultName,
-        role: 'super_admin',
-        isSuperAdmin: true,
-        loggedInAt: new Date().toISOString()
-      };
-      localStorage.setItem('luxea_admin_session', JSON.stringify(sessionData));
-      localStorage.setItem('luxea_user_session', JSON.stringify(sessionData));
-      if (window.showToast) window.showToast(`✅ Welcome, Super Admin ${defaultName.split(' ')[0]}!`);
-      checkAuth();
-      if (submitBtn) submitBtn.disabled = false;
-      return;
-    }
-
-    if (window.LuxeaAuth) {
-      const result = await window.LuxeaAuth.loginAdmin(email, pass);
-      if (result.success) {
-        if (window.showToast) window.showToast('✅ Welcome, Super Admin!');
-        checkAuth();
-      } else {
-        if (loginErrorMsg) {
+    try {
+      if (window.LuxeaAuth) {
+        const result = await window.LuxeaAuth.loginAdmin(email, pass);
+        if (result.success) {
+          if (window.showToast) window.showToast(`✅ Welcome, ${result.user?.name?.split(' ')[0] || 'Admin'}!`);
+          await checkAuth();
+        } else if (loginErrorMsg) {
           loginErrorMsg.textContent = result.message || 'Invalid admin credentials.';
           loginErrorMsg.classList.remove('hidden');
         }
       }
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
     }
-
-    if (submitBtn) submitBtn.disabled = false;
   });
 
   logoutBtn?.addEventListener('click', async () => {
     if (window.LuxeaAuth) {
       await window.LuxeaAuth.logoutAdmin();
       if (window.showToast) window.showToast('Signed out of Super Admin Console.');
-      checkAuth();
+      await checkAuth();
     }
   });
-
-  // Guarantee LuxeaDB methods if older supabase.js is in browser cache
-  if (window.LuxeaDB) {
-    if (typeof window.LuxeaDB.provisionUser !== 'function') {
-      window.LuxeaDB.provisionUser = async function (accountData) {
-        if (typeof this.sendAutomatedEmail === 'function') {
-          return await this.sendAutomatedEmail('admin_provision_user', accountData);
-        }
-        try {
-          const res = await fetch('https://abzcabiqdkmfaijnqbkf.supabase.co/functions/v1/luxea-mailer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'admin_provision_user', record: accountData })
-          });
-          return await res.json();
-        } catch (e) {
-          return { success: false, error: e.message };
-        }
-      };
-    }
-    if (typeof window.LuxeaDB.fetchProfiles !== 'function') {
-      window.LuxeaDB.fetchProfiles = async function () {
-        const client = this.getClient();
-        if (client) {
-          try {
-            const { data, error } = await client.from('lux_profiles').select('*').order('created_at', { ascending: false });
-            if (!error && data) return data;
-          } catch (e) {}
-        }
-        return [];
-      };
-    }
-  }
 
   // =========================================================================
   // 2. DATA LOADING & ANALYTICS CALCULATION
@@ -640,7 +588,7 @@ export function initAdminDashboard() {
 
     const insightVettingText = document.getElementById('insightVettingText');
     if (insightVettingText) {
-      const pendingNames = cachedHosts.filter(h => !h.review_status || h.review_status === 'pending_review').map(h => h.full_name || h.fullName).join(', ');
+      const pendingNames = cachedHosts.filter(h => !h.review_status || h.review_status === 'pending_review').map(h => esc(h.full_name || h.fullName)).join(', ');
       insightVettingText.innerHTML = `<strong>${approvalPct}%</strong> approval rate across evaluated host submissions (${approvedHosts} approved, ${pendingHosts} pending). ${pendingHosts > 0 ? `<strong>${pendingNames || 'Pending Hosts'}</strong> is currently under curatorial inspection for high-speed fiber and staging before catalog launch.` : 'All submitted host dossiers are fully audited and contracted.'}`;
     }
 
@@ -1061,23 +1009,23 @@ export function initAdminDashboard() {
       tr.innerHTML = `
         <td>
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span class="host-cell-name">${name}</span>
-            <button type="button" class="btn-copy-micro copy-ref-btn" data-ref="${ref}" title="Click to copy Ref ID: ${ref}">
-              <span>${ref}</span>
+            <span class="host-cell-name">${esc(name)}</span>
+            <button type="button" class="btn-copy-micro copy-ref-btn" data-ref="${esc(ref)}" title="Click to copy Ref ID: ${esc(ref)}">
+              <span>${esc(ref)}</span>
             </button>
             ${isSuspended ? '<span class="status-chip chip-red" style="padding: 1px 6px;">🚫 Suspended</span>' : ''}
             ${isDelisted ? '<span class="status-chip chip-neutral" style="padding: 1px 6px; background:#FEF3C7; color:#B45309;">🙈 Delisted</span>' : ''}
           </div>
-          <div class="host-cell-sub" style="margin-top: 2px;">${email}</div>
+          <div class="host-cell-sub" style="margin-top: 2px;">${esc(email)}</div>
         </td>
 
         <td>
-          <div class="host-cell-name">${prop}</div>
-          <div class="host-cell-sub" style="margin-top: 2px;">${loc}</div>
+          <div class="host-cell-name">${esc(prop)}</div>
+          <div class="host-cell-sub" style="margin-top: 2px;">${esc(loc)}</div>
         </td>
 
         <td>
-          <select class="status-select-inline status-${status} host-status-select" data-ref="${ref}" style="width: 100%; min-width: 110px;">
+          <select class="status-select-inline status-${esc(status)} host-status-select" data-ref="${esc(ref)}" style="width: 100%; min-width: 110px;">
             <option value="pending_review" ${status === 'pending_review' ? 'selected' : ''}>⏳ Pending</option>
             <option value="approved" ${status === 'approved' ? 'selected' : ''}>✅ Approved</option>
             <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
@@ -1087,16 +1035,16 @@ export function initAdminDashboard() {
 
         <td style="text-align: right; white-space: nowrap;">
           <div style="display: inline-flex; align-items: center; gap: 4px; justify-content: flex-end;">
-            <button type="button" class="btn-table-action btn-edit-host" data-ref="${ref}" data-email="${email}" title="Edit host bio, photo, property details & security controls" style="background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
+            <button type="button" class="btn-table-action btn-edit-host" data-ref="${esc(ref)}" data-email="${esc(email)}" title="Edit host bio, photo, property details & security controls" style="background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
               <span>✏️ Edit</span>
             </button>
-            <button type="button" class="btn-table-action btn-toggle-suspend-quick" data-email="${email}" data-suspended="${isSuspended ? 'true' : 'false'}" title="${isSuspended ? 'Unsuspend portal access' : 'Block / Suspend access to earnings & portal'}" style="${isSuspended ? 'background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC;' : 'background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;'}">
+            <button type="button" class="btn-table-action btn-toggle-suspend-quick" data-email="${esc(email)}" data-suspended="${isSuspended ? 'true' : 'false'}" title="${isSuspended ? 'Unsuspend portal access' : 'Block / Suspend access to earnings & portal'}" style="${isSuspended ? 'background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC;' : 'background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;'}">
               <span>${isSuspended ? '🔓 Unblock' : '🔒 Block'}</span>
             </button>
-            <button type="button" class="btn-table-action btn-toggle-delist-quick" data-email="${email}" data-delisted="${isDelisted ? 'true' : 'false'}" title="${isDelisted ? 'Relist property on platform catalog' : 'Delist / Hide residence from stays catalog'}" style="${isDelisted ? 'background: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD;' : 'background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D;'}">
+            <button type="button" class="btn-table-action btn-toggle-delist-quick" data-email="${esc(email)}" data-delisted="${isDelisted ? 'true' : 'false'}" title="${isDelisted ? 'Relist property on platform catalog' : 'Delist / Hide residence from stays catalog'}" style="${isDelisted ? 'background: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD;' : 'background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D;'}">
               <span>${isDelisted ? '🌐 Relist' : '🚫 Delist'}</span>
             </button>
-            <button type="button" class="btn-table-action btn-inspect trigger-inspect-btn" data-ref="${ref}" title="Inspect full application dossier (photos, payout, KYC)">
+            <button type="button" class="btn-table-action btn-inspect trigger-inspect-btn" data-ref="${esc(ref)}" title="Inspect full application dossier (photos, payout, KYC)">
               <span>Inspect ↗</span>
             </button>
           </div>
@@ -1214,15 +1162,15 @@ export function initAdminDashboard() {
     currentInspectedRef = refId;
     if (inspectRefBadge) {
       inspectRefBadge.innerHTML = `
-        <span>${refId}</span>
-        <a href="/admin/host-dossier.html?ref=${refId}" target="_blank" rel="noopener noreferrer" style="color: #241812; font-size: 0.72rem; text-decoration: underline; margin-left: 10px; font-weight: 600;">Open Separate Page ↗</a>
+        <span>${esc(refId)}</span>
+        <a href="/admin/host-dossier.html?ref=${encodeURIComponent(refId)}" target="_blank" rel="noopener noreferrer" style="color: #241812; font-size: 0.72rem; text-decoration: underline; margin-left: 10px; font-weight: 600;">Open Separate Page ↗</a>
       `;
     }
     if (inspectTitle) inspectTitle.textContent = `${host.fullName || host.full_name} — ${host.propertyName || host.property_name}`;
 
     const status = host.review_status || 'pending_review';
     if (inspectStatusLabel) {
-      inspectStatusLabel.innerHTML = `Review Status: <strong style="text-transform: uppercase;">${status}</strong>`;
+      inspectStatusLabel.innerHTML = `Review Status: <strong style="text-transform: uppercase;">${esc(status)}</strong>`;
     }
 
     const photos = host.property_photos_urls || [];
@@ -1230,9 +1178,10 @@ export function initAdminDashboard() {
     if (Array.isArray(photos) && photos.length > 0) {
       photosHtml = `
         <div class="inspect-photos-gallery">
-          ${photos.map(p => `
-            <img src="${p}" alt="Property Staging" class="inspect-photo-thumb" onclick="window.open('${p}', '_blank')">
-          `).join('')}
+          ${photos.map((p) => {
+            const cleanP = safeUrl(p);
+            return cleanP ? `<a href="${esc(cleanP)}" target="_blank" rel="noopener noreferrer"><img src="${esc(cleanP)}" alt="Property Staging" class="inspect-photo-thumb"></a>` : '';
+          }).join('')}
         </div>
       `;
     } else {
@@ -1243,43 +1192,43 @@ export function initAdminDashboard() {
     const phone = host.phone || '';
     const digitsOnly = phone.replace(/[^0-9]/g, '');
     const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
-    const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${host.fullName || host.full_name}, this is Ronald from Luxea Living regarding your host application (${refId}).`)}` : '';
+    const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${host.fullName || host.full_name}, this is Luxea Living regarding your host application (${refId}).`)}` : '';
 
     if (inspectBody) {
       inspectBody.innerHTML = `
         <div class="inspect-item">
           <span class="inspect-label">Host Partner Details</span>
-          <div class="inspect-val"><strong>Name:</strong> ${host.fullName || host.full_name}</div>
+          <div class="inspect-val"><strong>Name:</strong> ${esc(host.fullName || host.full_name)}</div>
           <div class="inspect-val" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-            <strong>Phone:</strong> <span>${phone || '—'}</span>
-            ${phone ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-wa-action" style="padding: 2px 8px; font-size: 0.72rem; margin-left: 6px;">💬 Chat on WhatsApp</a>` : ''}
+            <strong>Phone:</strong> <span>${esc(phone || '—')}</span>
+            ${phone ? `<a href="${esc(waUrl)}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-wa-action" style="padding: 2px 8px; font-size: 0.72rem; margin-left: 6px;">💬 Chat on WhatsApp</a>` : ''}
           </div>
           <div class="inspect-val" style="margin-top: 4px;">
-            <strong>Email:</strong> <a href="mailto:${host.email}" style="color: var(--color-camel-dark); text-decoration: underline;">${host.email}</a>
+            <strong>Email:</strong> <a href="mailto:${esc(host.email)}" style="color: var(--color-camel-dark); text-decoration: underline;">${esc(host.email)}</a>
           </div>
           <div class="inspect-val" style="margin-top: 4px;">
-            <strong>National ID / Passport:</strong> ${host.nationalId || host.national_id || 'On File'}
-            ${idDocUrl ? `<a href="${idDocUrl}" target="_blank" rel="noopener noreferrer" style="color: #B28756; font-size: 0.75rem; text-decoration: underline; margin-left: 8px; font-weight: 700;">View Document ↗</a>` : ''}
+            <strong>National ID / Passport:</strong> ${esc(host.nationalId || host.national_id || 'On File')}
+            ${idDocUrl ? `<button type="button" id="inspectOpenPrivateIdBtn" style="background:none;border:none;color:#B28756;font-size:0.75rem;text-decoration:underline;margin-left:8px;font-weight:700;cursor:pointer;">🔒 View Private Document ↗</button>` : ''}
           </div>
-          <div class="inspect-val" style="margin-top: 4px;"><strong>KRA PIN:</strong> ${host.kraPin || host.kra_pin || 'On File'}</div>
-          <div class="inspect-val" style="margin-top: 4px;"><strong>Date of Birth:</strong> ${host.dob || '—'}</div>
+          <div class="inspect-val" style="margin-top: 4px;"><strong>KRA PIN:</strong> ${esc(host.kraPin || host.kra_pin || 'On File')}</div>
+          <div class="inspect-val" style="margin-top: 4px;"><strong>Date of Birth:</strong> ${esc(host.dob || '—')}</div>
         </div>
 
         <div class="inspect-item">
           <span class="inspect-label">Property Specifications</span>
-          <div class="inspect-val"><strong>Property:</strong> ${host.propertyName || host.property_name}</div>
-          <div class="inspect-val"><strong>Type:</strong> ${host.propertyType || host.property_type}</div>
-          <div class="inspect-val"><strong>Location:</strong> ${host.area || host.area_suburb}, ${host.county}</div>
-          <div class="inspect-val"><strong>Address:</strong> ${host.propertyAddress || host.property_address || '—'}</div>
-          <div class="inspect-val"><strong>Layout:</strong> ${host.bedrooms} Beds • ${host.bathrooms} Baths • Max ${host.maxGuests || 2} Guests</div>
-          <div class="inspect-val"><strong>Amenities:</strong> ${host.amenities || 'Standard luxury portfolio amenities'}</div>
+          <div class="inspect-val"><strong>Property:</strong> ${esc(host.propertyName || host.property_name)}</div>
+          <div class="inspect-val"><strong>Type:</strong> ${esc(host.propertyType || host.property_type)}</div>
+          <div class="inspect-val"><strong>Location:</strong> ${esc(host.area || host.area_suburb)}, ${esc(host.county)}</div>
+          <div class="inspect-val"><strong>Address:</strong> ${esc(host.propertyAddress || host.property_address || '—')}</div>
+          <div class="inspect-val"><strong>Layout:</strong> ${esc(host.bedrooms)} Beds • ${esc(host.bathrooms)} Baths • Max ${esc(host.maxGuests || host.max_guests || 2)} Guests</div>
+          <div class="inspect-val"><strong>Amenities:</strong> ${esc(host.amenities || 'Standard luxury portfolio amenities')}</div>
         </div>
 
         <div class="inspect-item inspect-row-full" style="background: #F5EFE6;">
           <span class="inspect-label">Payout &amp; Settlement Information</span>
-          <div class="inspect-val"><strong>Method:</strong> ${(host.payoutDetails && host.payoutDetails.method) || host.payoutMethod || host.payout_method || 'M-Pesa'}</div>
+          <div class="inspect-val"><strong>Method:</strong> ${esc((host.payoutDetails && host.payoutDetails.method) || host.payoutMethod || host.payout_method || 'M-Pesa')}</div>
           <div class="inspect-val" style="color: #241812; font-family: monospace;">
-            <strong>Account / Mobile:</strong> ${(host.payoutDetails && (host.payoutDetails.number || host.payoutDetails.account)) || host.mpesa_number || host.bank_account_number || 'Registered'}
+            <strong>Account / Mobile:</strong> ${esc((host.payoutDetails && (host.payoutDetails.number || host.payoutDetails.account)) || host.mpesa_number || host.bank_account_number || 'Registered')}
           </div>
         </div>
 
@@ -1289,10 +1238,23 @@ export function initAdminDashboard() {
         </div>
 
         <div class="inspect-row-full" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--color-cocoa); padding-top: 10px;">
-          <span><strong>Digital Signature:</strong> ${host.signature || host.fullName || host.full_name}</span>
-          <span><strong>Submitted:</strong> ${host.signatureDate || host.signature_date || host.submittedAt || 'Recent'}</span>
+          <span><strong>Digital Signature:</strong> ${esc(host.signature || host.fullName || host.full_name)}</span>
+          <span><strong>Submitted:</strong> ${esc(host.signatureDate || host.signature_date || host.submittedAt || 'Recent')}</span>
         </div>
       `;
+
+      const privateDocBtn = inspectBody.querySelector('#inspectOpenPrivateIdBtn');
+      if (privateDocBtn && idDocUrl) {
+        privateDocBtn.addEventListener('click', async () => {
+          privateDocBtn.disabled = true;
+          privateDocBtn.textContent = 'Signing secure URL...';
+          const signed = await window.LuxeaDB.getSignedDocumentUrl(idDocUrl);
+          privateDocBtn.disabled = false;
+          privateDocBtn.textContent = '🔒 View Private Document ↗';
+          if (signed) window.open(signed, '_blank', 'noopener,noreferrer');
+          else if (window.showToast) window.showToast('Could not generate signed link for this document.');
+        });
+      }
     }
 
     inspectModal.classList.add('open');
@@ -1394,17 +1356,17 @@ export function initAdminDashboard() {
       tr.innerHTML = `
         <td>
           <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="${stay.cover_image_url || stay.image || '/assets/images/hero-1.webp'}" alt="${stay.name}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0;" loading="lazy">
+            <img src="${esc(safeUrl(stay.cover_image_url || stay.image, '/assets/images/hero-1.webp'))}" alt="${esc(stay.name)}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0;" loading="lazy">
             <div>
-              <div class="host-cell-name">${stay.name}</div>
-              <span class="status-chip chip-neutral" style="padding: 1px 6px; font-size: 0.66rem; margin-top: 2px;">${stay.property_type || stay.category || 'Apartment'}</span>
+              <div class="host-cell-name">${esc(stay.name)}</div>
+              <span class="status-chip chip-neutral" style="padding: 1px 6px; font-size: 0.66rem; margin-top: 2px;">${esc(stay.property_type || stay.category || 'Apartment')}</span>
             </div>
           </div>
         </td>
 
         <td>
-          <div style="font-weight: 600; font-size: 0.82rem; color: #241812;">${stay.city || 'Nairobi'}, ${stay.area || stay.county || 'Kenya'}</div>
-          <div class="host-cell-sub" style="margin-top: 2px;">Owner: ${hostName}</div>
+          <div style="font-weight: 600; font-size: 0.82rem; color: #241812;">${esc(stay.city || 'Nairobi')}, ${esc(stay.area || stay.county || 'Kenya')}</div>
+          <div class="host-cell-sub" style="margin-top: 2px;">Owner: ${esc(hostName)}</div>
         </td>
 
         <td>
@@ -1414,14 +1376,14 @@ export function initAdminDashboard() {
 
         <td>
           <label class="lux-toggle-switch">
-            <input type="checkbox" class="lux-toggle-input admin-stay-avail-toggle" data-id="${stay.id || stay.slug}" ${isAvail ? 'checked' : ''}>
+            <input type="checkbox" class="lux-toggle-input admin-stay-avail-toggle" data-id="${esc(stay.id || stay.slug)}" ${isAvail ? 'checked' : ''}>
             <span class="lux-toggle-slider"></span>
             <span class="lux-toggle-status-text" style="font-size: 0.74rem;">${isAvail ? 'Live' : 'Hidden'}</span>
           </label>
         </td>
 
         <td style="text-align: right;">
-          <a href="/stays/?id=${stay.id || stay.slug}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect" style="padding: 4px 8px; font-size: 0.72rem;">
+          <a href="/stays/?id=${encodeURIComponent(stay.id || stay.slug)}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect" style="padding: 4px 8px; font-size: 0.72rem;">
             <span>Preview ↗</span>
           </a>
         </td>
@@ -1493,25 +1455,25 @@ export function initAdminDashboard() {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <strong style="font-family: monospace; color: #B28756; font-size: 0.8rem;">${pass}</strong>
+          <strong style="font-family: monospace; color: #B28756; font-size: 0.8rem;">${esc(pass)}</strong>
         </td>
         <td>
-          <div class="host-cell-name">${name}</div>
+          <div class="host-cell-name">${esc(name)}</div>
           <div class="host-cell-sub" style="margin-top: 2px;">
-            <span>${phone}</span>
-            ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
+            <span>${esc(phone)}</span>
+            ${waUrl ? `<a href="${esc(waUrl)}" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
             <span>•</span>
-            <span title="${email}" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>
+            <span title="${esc(email)}" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${esc(email)}</span>
           </div>
         </td>
         <td>
-          <div style="font-weight: 500; color: #241812; font-size: 0.8rem;">${dest}</div>
+          <div style="font-weight: 500; color: #241812; font-size: 0.8rem;">${esc(dest)}</div>
         </td>
         <td>
-          <span class="status-chip chip-gold" style="padding: 2px 8px; font-size: 0.72rem;">${tier}</span>
+          <span class="status-chip chip-gold" style="padding: 2px 8px; font-size: 0.72rem;">${esc(tier)}</span>
         </td>
         <td style="text-align: right;">
-          <small style="color: var(--color-cocoa); font-weight: 600;">${date}</small>
+          <small style="color: var(--color-cocoa); font-weight: 600;">${esc(date)}</small>
         </td>
       `;
 
@@ -1562,40 +1524,41 @@ export function initAdminDashboard() {
       const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
       const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${name}, this is Ronald from Luxea Living regarding your host registration (${pass}).`)}` : '';
 
+      const safePortfolioLink = safeUrl(link);
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <strong style="font-family: monospace; color: #D4AF37; font-size: 0.8rem;">${pass}</strong>
+          <strong style="font-family: monospace; color: #D4AF37; font-size: 0.8rem;">${esc(pass)}</strong>
           <div style="margin-top: 2px;">
-            <span class="status-chip chip-gold" style="padding: 1px 6px; font-size: 0.65rem;">${tier}</span>
+            <span class="status-chip chip-gold" style="padding: 1px 6px; font-size: 0.65rem;">${esc(tier)}</span>
           </div>
         </td>
         <td>
-          <div class="host-cell-name">${name}</div>
+          <div class="host-cell-name">${esc(name)}</div>
           <div class="host-cell-sub" style="margin-top: 2px;">
-            <span>${phone}</span>
-            ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
+            <span>${esc(phone)}</span>
+            ${waUrl ? `<a href="${esc(waUrl)}" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
             <span>•</span>
-            <span title="${email}" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${email}</span>
+            <span title="${esc(email)}" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${esc(email)}</span>
           </div>
         </td>
         <td>
-          <div style="font-weight: 700; color: #241812; font-size: 0.85rem;">${propName}</div>
+          <div style="font-weight: 700; color: #241812; font-size: 0.85rem;">${esc(propName)}</div>
           <div class="host-cell-sub" style="margin-top: 2px;">
-            <span>${propType} • ${beds} Bed</span>
+            <span>${esc(propType)} • ${esc(beds)} Bed</span>
             <span>•</span>
-            <span style="font-weight: 600;">${region}</span>
+            <span style="font-weight: 600;">${esc(region)}</span>
           </div>
         </td>
         <td>
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span class="status-chip ${readiness.toLowerCase().includes('ready') ? 'chip-green' : 'chip-neutral'}" style="padding: 1px 6px; font-size: 0.68rem;">${readiness}</span>
+            <span class="status-chip ${readiness.toLowerCase().includes('ready') ? 'chip-green' : 'chip-neutral'}" style="padding: 1px 6px; font-size: 0.68rem;">${esc(readiness)}</span>
             <span style="color: #22C55E; font-weight: 700; font-size: 0.7rem;">0% (90d)</span>
           </div>
-          ${link ? `<div style="margin-top: 2px;"><a href="${link}" target="_blank" rel="noopener noreferrer" style="color: #B28756; text-decoration: underline; font-size: 0.72rem;">Portfolio Link ↗</a></div>` : ''}
+          ${safePortfolioLink ? `<div style="margin-top: 2px;"><a href="${esc(safePortfolioLink)}" target="_blank" rel="noopener noreferrer" style="color: #B28756; text-decoration: underline; font-size: 0.72rem;">Portfolio Link ↗</a></div>` : ''}
         </td>
         <td style="text-align: right;">
-          <small style="color: var(--color-cocoa); font-weight: 600;">${date}</small>
+          <small style="color: var(--color-cocoa); font-weight: 600;">${esc(date)}</small>
         </td>
       `;
 
@@ -1676,33 +1639,33 @@ export function initAdminDashboard() {
         linkedBadge = `<span class="status-chip chip-green" style="padding: 1px 6px; font-size: 0.65rem;">VIP Waitlist</span>`;
       }
 
-      const isSuperAdminEmail = email.toLowerCase() === 'otienoronny56@gmail.com' || email.toLowerCase() === 'dennbarasa@gmail.com';
+      const isSuperAdminRole = currentRole === 'super_admin';
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
           <div style="display: flex; align-items: center; gap: 8px;">
             <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #B28756, #241812); color: #FFF; font-weight: 700; font-size: 0.72rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
-              ${initials}
+              ${esc(initials)}
             </div>
             <div>
               <div class="host-cell-name" style="display: flex; align-items: center; gap: 6px;">
-                <span>${name}</span>
-                ${isSuperAdminEmail ? '<span title="Super Admin" style="font-size: 11px;">👑</span>' : ''}
+                <span>${esc(name)}</span>
+                ${isSuperAdminRole ? '<span title="Super Admin" style="font-size: 11px;">👑</span>' : ''}
               </div>
               <div class="host-cell-sub" style="font-family: monospace; font-size: 0.68rem; color: #8F847C;" title="Supabase Auth UUID">
-                ${p.id ? p.id.substring(0, 13) + '...' : 'Auth UUID'}
+                ${p.id ? esc(p.id.substring(0, 13)) + '...' : 'Auth UUID'}
               </div>
             </div>
           </div>
         </td>
         <td>
-          <div style="font-weight: 600; color: #241812; font-size: 0.78rem;">${email}</div>
-          ${p.phone ? `<div class="host-cell-sub">${p.phone}</div>` : ''}
+          <div style="font-weight: 600; color: #241812; font-size: 0.78rem;">${esc(email)}</div>
+          ${p.phone ? `<div class="host-cell-sub">${esc(p.phone)}</div>` : ''}
         </td>
         <td>
           <div style="display: flex; align-items: center; gap: 6px;">
-            <select class="form-control profile-role-select" data-user-id="${p.id}" data-email="${email}" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 6px; font-weight: 600; height: 28px; cursor: pointer; ${currentRole === 'super_admin' ? 'border-color: #D4AF37; background: rgba(212, 175, 55, 0.08); color: #9A7B0C;' : currentRole === 'admin' ? 'border-color: #3B82F6; color: #1D4ED8;' : currentRole === 'host' ? 'border-color: #10B981; color: #047857;' : 'border-color: #D1D5DB; color: #374151;'}">
+            <select class="form-control profile-role-select" data-user-id="${esc(p.id)}" data-email="${esc(email)}" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 6px; font-weight: 600; height: 28px; cursor: pointer; ${currentRole === 'super_admin' ? 'border-color: #D4AF37; background: rgba(212, 175, 55, 0.08); color: #9A7B0C;' : currentRole === 'admin' ? 'border-color: #3B82F6; color: #1D4ED8;' : currentRole === 'host' ? 'border-color: #10B981; color: #047857;' : 'border-color: #D1D5DB; color: #374151;'}">
               <option value="super_admin" ${currentRole === 'super_admin' ? 'selected' : ''}>👑 Super Admin</option>
               <option value="admin" ${currentRole === 'admin' ? 'selected' : ''}>🛡️ System Admin</option>
               <option value="host" ${currentRole === 'host' ? 'selected' : ''}>🏡 Host Partner</option>
@@ -1717,10 +1680,10 @@ export function initAdminDashboard() {
           ${linkedBadge}
         </td>
         <td style="text-align: right;">
-          <small style="color: var(--color-cocoa); font-weight: 600;">${date}</small>
+          <small style="color: var(--color-cocoa); font-weight: 600;">${esc(date)}</small>
         </td>
         <td style="text-align: right; white-space: nowrap;">
-          <button type="button" class="btn-table-action btn-edit-profile-row" data-email="${email}" data-user-id="${p.id}" title="Edit profile bio, avatar, role & permissions" style="background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
+          <button type="button" class="btn-table-action btn-edit-profile-row" data-email="${esc(email)}" data-user-id="${esc(p.id)}" title="Edit profile bio, avatar, role & permissions" style="background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
             <span>✏️ Edit</span>
           </button>
         </td>
@@ -2151,18 +2114,18 @@ export function initAdminDashboard() {
 
     const headers = ['Ref ID', 'Full Name', 'Phone', 'Email', 'Property Name', 'County', 'Area', 'Property Type', 'Bedrooms', 'Payout Method', 'Status', 'Date'];
     const rows = cachedHosts.map(h => [
-      `"${h.refId || h.ref_id || ''}"`,
-      `"${h.fullName || h.full_name || ''}"`,
-      `"${h.phone || ''}"`,
-      `"${h.email || ''}"`,
-      `"${h.propertyName || h.property_name || ''}"`,
-      `"${h.county || ''}"`,
-      `"${h.area || h.area_suburb || ''}"`,
-      `"${h.propertyType || h.property_type || ''}"`,
+      csvCell(h.refId || h.ref_id || ''),
+      csvCell(h.fullName || h.full_name || ''),
+      csvCell(h.phone || ''),
+      csvCell(h.email || ''),
+      csvCell(h.propertyName || h.property_name || ''),
+      csvCell(h.county || ''),
+      csvCell(h.area || h.area_suburb || ''),
+      csvCell(h.propertyType || h.property_type || ''),
       h.bedrooms || 1,
-      `"${(h.payoutDetails && h.payoutDetails.method) || h.payoutMethod || h.payout_method || ''}"`,
-      `"${h.review_status || 'pending_review'}"`,
-      `"${h.signatureDate || h.created_at || ''}"`
+      csvCell((h.payoutDetails && h.payoutDetails.method) || h.payoutMethod || h.payout_method || ''),
+      csvCell(h.review_status || 'pending_review'),
+      csvCell(h.signatureDate || h.created_at || '')
     ]);
 
     downloadCsv('luxea_host_partners.csv', [headers.join(','), ...rows.map(r => r.join(','))].join('\n'));
@@ -2176,13 +2139,13 @@ export function initAdminDashboard() {
 
     const headers = ['Pass #', 'Full Name', 'Email', 'Phone', 'Preferred Destinations', 'Tier', 'Joined Date'];
     const rows = cachedGuests.map(g => [
-      `"${g.pass_number || g.passNumber || ''}"`,
-      `"${g.full_name || g.fullName || ''}"`,
-      `"${g.email || ''}"`,
-      `"${g.phone || ''}"`,
-      `"${g.preferred_destinations || g.destinations || ''}"`,
-      `"${g.tier || 'Founding Circle'}"`,
-      `"${g.created_at || ''}"`
+      csvCell(g.pass_number || g.passNumber || ''),
+      csvCell(g.full_name || g.fullName || ''),
+      csvCell(g.email || ''),
+      csvCell(g.phone || ''),
+      csvCell(g.preferred_destinations || g.destinations || ''),
+      csvCell(g.tier || 'Founding Circle'),
+      csvCell(g.created_at || '')
     ]);
 
     downloadCsv('luxea_vip_waitlist.csv', [headers.join(','), ...rows.map(r => r.join(','))].join('\n'));
@@ -2196,19 +2159,19 @@ export function initAdminDashboard() {
 
     const headers = ['Pass #', 'Full Name', 'Email', 'Phone', 'Property Name', 'Property Type', 'Bedrooms', 'Region', 'Readiness', 'Portfolio Link', 'Notes', 'Tier', 'Date'];
     const rows = cachedHostWaitlist.map(h => [
-      `"${h.pass_number || h.passNumber || ''}"`,
-      `"${h.full_name || h.fullName || ''}"`,
-      `"${h.email || ''}"`,
-      `"${h.phone || ''}"`,
-      `"${h.property_name || h.propertyName || ''}"`,
-      `"${h.property_type || h.propertyType || ''}"`,
+      csvCell(h.pass_number || h.passNumber || ''),
+      csvCell(h.full_name || h.fullName || ''),
+      csvCell(h.email || ''),
+      csvCell(h.phone || ''),
+      csvCell(h.property_name || h.propertyName || ''),
+      csvCell(h.property_type || h.propertyType || ''),
       h.bedrooms || 1,
-      `"${h.region || ''}"`,
-      `"${h.operational_status || h.operationalStatus || ''}"`,
-      `"${h.portfolio_link || h.portfolioLink || ''}"`,
-      `"${(h.notes || '').replace(/"/g, '""')}"`,
-      `"${h.tier || 'Founding Host Partner'}"`,
-      `"${h.created_at || h.timestamp || ''}"`
+      csvCell(h.region || ''),
+      csvCell(h.operational_status || h.operationalStatus || ''),
+      csvCell(h.portfolio_link || h.portfolioLink || ''),
+      csvCell(h.notes || ''),
+      csvCell(h.tier || 'Founding Host Partner'),
+      csvCell(h.created_at || h.timestamp || '')
     ]);
 
     downloadCsv('luxea_founding_host_waitlist.csv', [headers.join(','), ...rows.map(r => r.join(','))].join('\n'));
@@ -2570,15 +2533,8 @@ export function initAdminDashboard() {
       let res = null;
       if (window.LuxeaDB && typeof window.LuxeaDB.provisionUser === 'function') {
         res = await window.LuxeaDB.provisionUser(accountData);
-      } else if (window.LuxeaDB && typeof window.LuxeaDB.sendAutomatedEmail === 'function') {
-        res = await window.LuxeaDB.sendAutomatedEmail('admin_provision_user', accountData);
       } else {
-        const fetchRes = await fetch('https://abzcabiqdkmfaijnqbkf.supabase.co/functions/v1/luxea-mailer', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'admin_provision_user', record: accountData })
-        });
-        res = await fetchRes.json();
+        res = { success: false, error: 'Database provisioning client unavailable.' };
       }
       if (res && res.success) {
         if (window.showToast) {

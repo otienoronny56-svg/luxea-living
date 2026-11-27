@@ -687,13 +687,36 @@
   </main>
 
   <script type="module">
+    const esc = (v) => window.LuxeaSanitize ? window.LuxeaSanitize.escapeHtml(v) : String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const safeUrl = (u) => window.LuxeaSanitize ? window.LuxeaSanitize.safeUrl(u) : '';
+
+    // Hide page immediately until server-verified Admin JWT succeeds
+    document.body.style.visibility = 'hidden';
+
     document.addEventListener('DOMContentLoaded', async () => {
+      // 0. STRICT SERVER-VERIFIED ADMIN AUTH GATE
+      const authCheck = window.LuxeaAuth ? await window.LuxeaAuth.verifyAdminSession() : { valid: false };
+      if (!authCheck.valid) {
+        window.location.replace('/admin/');
+        return;
+      }
+      document.body.style.visibility = 'visible';
+
+      const adminPill = document.querySelector('.super-admin-pill span:last-child');
+      if (adminPill && authCheck.admin?.name) {
+        adminPill.textContent = `Admin: ${authCheck.admin.name.split(' ')[0]}`;
+      }
+
       const urlParams = new URLSearchParams(window.location.search);
-      const refId = urlParams.get('ref') || 'LXH-2026-1042';
+      const refId = (urlParams.get('ref') || '').trim();
+      if (!refId) {
+        document.getElementById('heroHostName').textContent = 'Missing Host Reference ID';
+        return;
+      }
 
       let currentHost = null;
 
-      // 1. Fetch host from Supabase or local cache
+      // 1. Fetch host from Supabase (strictly RLS-protected)
       if (window.LuxeaDB) {
         const client = window.LuxeaDB.getClient();
         if (client) {
@@ -713,23 +736,17 @@
         }
       }
 
-      // Fallback to local cache
-      if (!currentHost) {
-        const cached = JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
-        currentHost = cached.find(h => (h.refId || h.ref_id) === refId) || cached[0];
-      }
-
       if (!currentHost) {
         document.getElementById('heroHostName').textContent = 'Host Dossier Not Found';
         return;
       }
 
-      // 2. Populate UI
-      const ref = currentHost.ref_id || currentHost.refId || refId;
-      const name = currentHost.full_name || currentHost.fullName || 'Host Partner';
-      const prop = currentHost.property_name || currentHost.propertyName || 'Bespoke Residence';
-      const propType = currentHost.property_type || currentHost.propertyType || 'Apartment';
-      const loc = `${currentHost.area_suburb || currentHost.area || 'Nairobi'}, ${currentHost.county || 'Kenya'}`;
+      // 2. Populate UI safely (textContent / escaped URLs)
+      const ref = currentHost.ref_id || refId;
+      const name = currentHost.full_name || 'Host Partner';
+      const prop = currentHost.property_name || 'Bespoke Residence';
+      const propType = currentHost.property_type || 'Apartment';
+      const loc = `${currentHost.area_suburb || 'Nairobi'}, ${currentHost.county || 'Kenya'}`;
       const status = currentHost.review_status || 'pending_review';
 
       document.title = `Host Dossier: ${name} (${ref}) | Luxea Living`;
@@ -739,154 +756,172 @@
       document.getElementById('heroPropName').textContent = prop;
       document.getElementById('heroLocation').textContent = loc;
 
-      // Status Badge
       const statusBadge = document.getElementById('heroStatusBadge');
       statusBadge.textContent = status.replace('_', ' ').toUpperCase();
       statusBadge.className = `status-badge-lg status-${status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : 'pending'}`;
 
-      // Personal & Legal
       document.getElementById('valFullName').textContent = name;
-      document.getElementById('valNationalId').textContent = currentHost.national_id || currentHost.nationalId || 'On File';
-      document.getElementById('valKraPin').textContent = currentHost.kra_pin || currentHost.kraPin || 'A000000000X';
-      
+      document.getElementById('valNationalId').textContent = currentHost.national_id || 'On File';
+      document.getElementById('valKraPin').textContent = currentHost.kra_pin || 'On File';
+
       const phoneEl = document.getElementById('valPhone');
       phoneEl.textContent = currentHost.phone || '—';
-      phoneEl.href = `tel:${currentHost.phone}`;
+      phoneEl.href = currentHost.phone ? `tel:${currentHost.phone.replace(/[^0-9+]/g, '')}` : '#';
 
       const emailEl = document.getElementById('valEmail');
       emailEl.textContent = currentHost.email || '—';
-      emailEl.href = `mailto:${currentHost.email}`;
+      emailEl.href = currentHost.email ? `mailto:${currentHost.email}` : '#';
 
       document.getElementById('valDob').textContent = currentHost.dob || '—';
 
+      // Private ID document opened via 5-minute signed URL
       const idDocEl = document.getElementById('valIdDoc');
+      idDocEl.textContent = '';
       if (currentHost.id_document_url) {
-        idDocEl.innerHTML = `<a href="${currentHost.id_document_url}" target="_blank" rel="noopener noreferrer" style="color: var(--dossier-gold-dark); font-weight: bold; text-decoration: underline;">📄 View ID Document ↗</a>`;
+        const docBtn = document.createElement('button');
+        docBtn.type = 'button';
+        docBtn.textContent = '🔒 View Private ID Document (Signed Link) ↗';
+        docBtn.style.cssText = 'background:none;border:none;padding:0;color:var(--dossier-gold-dark);font-weight:bold;text-decoration:underline;cursor:pointer;font-family:inherit;font-size:inherit;';
+        docBtn.addEventListener('click', async () => {
+          docBtn.disabled = true;
+          docBtn.textContent = 'Generating secure link...';
+          const signedUrl = await window.LuxeaDB.getSignedDocumentUrl(currentHost.id_document_url);
+          docBtn.disabled = false;
+          docBtn.textContent = '🔒 View Private ID Document (Signed Link) ↗';
+          if (signedUrl) {
+            window.open(signedUrl, '_blank', 'noopener,noreferrer');
+          } else {
+            alert('Could not open document. Verify the file exists in lux_documents.');
+          }
+        });
+        idDocEl.appendChild(docBtn);
       } else {
         idDocEl.textContent = 'Digital Verification on Record';
       }
 
-      // Property Asset
       document.getElementById('valPropName').textContent = prop;
       document.getElementById('valPropType').textContent = propType;
       document.getElementById('valPropLocation').textContent = loc;
-      document.getElementById('valPropAddress').textContent = currentHost.property_address || currentHost.propertyAddress || loc;
-      document.getElementById('valPropLayout').textContent = `${currentHost.bedrooms || 1} Bed(s) • ${currentHost.bathrooms || 1} Bath(s) • Max ${currentHost.max_guests || currentHost.maxGuests || 2} Guests`;
+      document.getElementById('valPropAddress').textContent = currentHost.property_address || loc;
+      document.getElementById('valPropLayout').textContent = `${currentHost.bedrooms || 1} Bed(s) • ${currentHost.bathrooms || 1} Bath(s) • Max ${currentHost.max_guests || 2} Guests`;
 
       const mapsEl = document.getElementById('valMapsLink');
-      if (currentHost.google_maps_link) {
-        mapsEl.innerHTML = `<a href="${currentHost.google_maps_link}" target="_blank" rel="noopener noreferrer" style="color: var(--dossier-gold-dark); text-decoration: underline;">Open in Google Maps ↗</a>`;
+      mapsEl.textContent = '';
+      const validMapsUrl = safeUrl(currentHost.google_maps_link);
+      if (validMapsUrl) {
+        const a = document.createElement('a');
+        a.href = validMapsUrl;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.style.cssText = 'color: var(--dossier-gold-dark); text-decoration: underline;';
+        a.textContent = 'Open in Google Maps ↗';
+        mapsEl.appendChild(a);
       } else {
         mapsEl.textContent = 'Coordinates Verified';
       }
 
-      // Amenities
       const amenitiesWrap = document.getElementById('valAmenitiesWrap');
-      amenitiesWrap.innerHTML = '';
+      amenitiesWrap.textContent = '';
       const rawAmenities = currentHost.amenities || 'High-Speed Fiber, 24/7 Security, Balcony, Covered Parking';
-      const amenitiesList = Array.isArray(rawAmenities) ? rawAmenities : rawAmenities.split(',').map(s => s.trim());
-      amenitiesList.forEach(a => {
+      const amenitiesList = Array.isArray(rawAmenities) ? rawAmenities : String(rawAmenities).split(',').map((s) => s.trim());
+      amenitiesList.forEach((a) => {
         if (a) {
           const pill = document.createElement('span');
           pill.className = 'amenity-pill';
-          pill.innerHTML = `<span>✦</span> ${a}`;
+          pill.textContent = `✦ ${a}`;
           amenitiesWrap.appendChild(pill);
         }
       });
 
-      // Payout & Financial
-      const payoutMethod = currentHost.payout_method || currentHost.payoutMethod || (currentHost.payoutDetails && currentHost.payoutDetails.method) || 'M-Pesa';
+      const payoutMethod = currentHost.payout_method || 'M-Pesa';
       document.getElementById('valPayoutMethod').textContent = payoutMethod;
       document.getElementById('valPayoutTag').textContent = payoutMethod;
+      document.getElementById('valPayoutNumber').textContent = currentHost.mpesa_number || currentHost.bank_account_number || 'Registered';
+      document.getElementById('valPayoutName').textContent = currentHost.mpesa_name || currentHost.bank_account_name || name;
+      document.getElementById('valBankName').textContent = currentHost.bank_name || (payoutMethod === 'M-Pesa' ? 'Safaricom M-Pesa Settlement' : 'Commercial Bank of Kenya');
 
-      const payoutNumber = (currentHost.payoutDetails && (currentHost.payoutDetails.number || currentHost.payoutDetails.account)) || currentHost.mpesa_number || currentHost.bank_account_number || 'Registered';
-      document.getElementById('valPayoutNumber').textContent = payoutNumber;
-
-      const payoutName = currentHost.mpesa_name || currentHost.bank_account_name || (currentHost.payoutDetails && (currentHost.payoutDetails.name || currentHost.payoutDetails.accName)) || name;
-      document.getElementById('valPayoutName').textContent = payoutName;
-
-      document.getElementById('valBankName').textContent = currentHost.bank_name || (currentHost.payoutDetails && currentHost.payoutDetails.bank) || (payoutMethod === 'M-Pesa' ? 'Safaricom M-Pesa Settlement' : 'Commercial Bank of Kenya');
-
-      // Legal Signature
       document.getElementById('valSignature').textContent = currentHost.signature || name;
-      document.getElementById('valSignatureDate').textContent = currentHost.signature_date || currentHost.signatureDate || currentHost.created_at?.split('T')[0] || 'Recent';
+      document.getElementById('valSignatureDate').textContent = currentHost.signature_date || currentHost.created_at?.split('T')[0] || 'Recent';
 
-      // Audit Notes
       const notesEl = document.getElementById('valInternalNotes');
       notesEl.value = currentHost.internal_notes || '';
 
-      // Save Notes Handler
       document.getElementById('saveNotesBtn')?.addEventListener('click', async () => {
-        const notes = notesEl.value;
-        if (window.LuxeaDB) {
-          const client = window.LuxeaDB.getClient();
-          if (client) {
-            await client.from('lux_hosts').update({ internal_notes: notes }).eq('ref_id', ref);
+        const client = window.LuxeaDB?.getClient();
+        if (client) {
+          const { error } = await client.from('lux_hosts').update({ internal_notes: notesEl.value }).eq('ref_id', ref);
+          if (error) {
+            alert('Failed to save notes: ' + error.message);
+            return;
           }
         }
         if (window.showToast) window.showToast('✅ Curatorial audit notes saved.');
         else alert('Audit notes saved successfully!');
       });
 
-      // Photos Gallery
       const galleryGrid = document.getElementById('galleryGrid');
-      galleryGrid.innerHTML = '';
-      const photos = currentHost.property_photos_urls || [];
-      const photoList = Array.isArray(photos) && photos.length > 0 ? photos : ['/assets/images/penthouse.jpg', '/assets/images/suite.jpg', '/assets/images/villa.jpg'];
-      
-      document.getElementById('photosCountTag').textContent = `${photoList.length} Verified Photos`;
+      galleryGrid.textContent = '';
+      const photos = Array.isArray(currentHost.property_photos_urls) && currentHost.property_photos_urls.length > 0
+        ? currentHost.property_photos_urls
+        : ['/assets/images/penthouse.jpg', '/assets/images/suite.jpg', '/assets/images/villa.jpg'];
 
-      photoList.forEach((url, i) => {
+      document.getElementById('photosCountTag').textContent = `${photos.length} Verified Photos`;
+
+      photos.forEach((rawUrl, i) => {
+        const cleanPhoto = safeUrl(rawUrl, '/assets/images/villa.jpg');
+        if (!cleanPhoto) return;
         const item = document.createElement('div');
         item.className = 'gallery-item';
-        item.innerHTML = `
-          <img src="${url}" alt="Property photo ${i+1}" class="gallery-img">
-          <div class="gallery-overlay">Photo ${i+1} • Staging Verified ↗</div>
-        `;
-        item.addEventListener('click', () => window.open(url, '_blank'));
+        const img = document.createElement('img');
+        img.src = cleanPhoto;
+        img.alt = `Property photo ${i + 1}`;
+        img.className = 'gallery-img';
+        const overlay = document.createElement('div');
+        overlay.className = 'gallery-overlay';
+        overlay.textContent = `Photo ${i + 1} • Staging Verified ↗`;
+        item.appendChild(img);
+        item.appendChild(overlay);
+        item.addEventListener('click', () => window.open(cleanPhoto, '_blank', 'noopener,noreferrer'));
         galleryGrid.appendChild(item);
       });
 
-      // WhatsApp Button
       const digits = (currentHost.phone || '').replace(/[^0-9]/g, '');
       const waNumber = digits.startsWith('0') ? '254' + digits.substring(1) : digits.startsWith('254') ? digits : '254' + digits;
       const waBtn = document.getElementById('execWaBtn');
-      waBtn.href = `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${name}, this is Ronald from Luxea Living regarding your host partner application (${ref}).`)}`;
+      waBtn.href = `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${name}, this is Luxea Living regarding your host partner application (${ref}).`)}`;
 
-      // 3. Approval & Rejection Actions
       const approveBtn = document.getElementById('execApproveBtn');
       const rejectBtn = document.getElementById('execRejectBtn');
 
       approveBtn?.addEventListener('click', async () => {
-        if (!confirm(`Are you sure you want to officially APPROVE host partner ${name} (${ref})?\n\nThis will trigger the automated Verification Approved email with their password activation link.`)) return;
-
+        if (!confirm(`Approve host partner ${name} (${ref})? This triggers the secure activation link email.`)) return;
         approveBtn.disabled = true;
-        approveBtn.textContent = 'Approving & Dispatching...';
-
-        if (window.LuxeaDB) {
-          await window.LuxeaDB.updateHostStatus(ref, 'approved');
+        approveBtn.textContent = 'Approving...';
+        const res = await window.LuxeaDB.updateHostStatus(ref, 'approved');
+        if (res.success) {
+          statusBadge.textContent = 'APPROVED';
+          statusBadge.className = 'status-badge-lg status-approved';
+          approveBtn.textContent = '✓ Host Approved';
+          approveBtn.style.background = '#03543F';
+        } else {
+          approveBtn.disabled = false;
+          approveBtn.textContent = 'Approve Host Partner';
+          alert('Error: ' + (res.error || 'Could not approve host'));
         }
-
-        statusBadge.textContent = 'APPROVED';
-        statusBadge.className = 'status-badge-lg status-approved';
-        approveBtn.textContent = '✓ Host Approved';
-        approveBtn.style.background = '#03543F';
-
-        alert(`🎉 Host partner ${name} (${ref}) is officially APPROVED!\n\nThe Stage 2 Verification Approved email with their account activation link has been dispatched via Resend.`);
       });
 
       rejectBtn?.addEventListener('click', async () => {
         if (!confirm(`Mark host application ${ref} as Rejected?`)) return;
-
         rejectBtn.disabled = true;
-        if (window.LuxeaDB) {
-          await window.LuxeaDB.updateHostStatus(ref, 'rejected');
+        const res = await window.LuxeaDB.updateHostStatus(ref, 'rejected');
+        if (res.success) {
+          statusBadge.textContent = 'REJECTED';
+          statusBadge.className = 'status-badge-lg status-rejected';
+        } else {
+          rejectBtn.disabled = false;
+          alert('Error: ' + (res.error || 'Could not reject host'));
         }
-
-        statusBadge.textContent = 'REJECTED';
-        statusBadge.className = 'status-badge-lg status-rejected';
       });
-
     });
   </script>
 </body>

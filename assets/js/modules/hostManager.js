@@ -277,9 +277,12 @@ export function initHostManager(containerId = 'hostManagerContainer') {
       card.className = `host-manage-card ${isAvailable ? 'card-available' : 'card-unavailable'}`;
       card.setAttribute('data-id', listing.id);
 
+      const esc = (v) => window.LuxeaSanitize ? window.LuxeaSanitize.escapeHtml(v) : String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const safeImg = (u) => window.LuxeaSanitize ? window.LuxeaSanitize.safeUrl(u, '/assets/images/villa.jpg') : '/assets/images/villa.jpg';
+
       card.innerHTML = `
-        <div class="manage-card-thumb-wrap" data-listing-id="${listing.id}">
-          <img src="${hostGallery[0]}" alt="${listing.name}" class="manage-thumb-img" id="thumb-${listing.id}">
+        <div class="manage-card-thumb-wrap" data-listing-id="${esc(listing.id)}">
+          <img src="${esc(safeImg(hostGallery[0]))}" alt="${esc(listing.name)}" class="manage-thumb-img" id="thumb-${esc(listing.id)}">
           ${hasGalleryMultiple ? `
             <button class="card-carousel-arrow arrow-prev" aria-label="Previous photo" style="z-index: 12; width: 28px; height: 28px;">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
@@ -293,12 +296,12 @@ export function initHostManager(containerId = 'hostManagerContainer') {
           ` : ''}
           <div class="manage-thumb-overlay">
             <label class="bucket-upload-label" title="Upload more photos">
-              <input type="file" class="card-bucket-file-input" data-id="${listing.id}" accept="image/*" multiple style="display: none;">
+              <input type="file" class="card-bucket-file-input" data-id="${esc(listing.id)}" accept="image/*" multiple style="display: none;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
               <span>+ Add Photos (${hostGallery.length})</span>
             </label>
           </div>
-          <span class="status-indicator-pill ${isAvailable ? 'pill-green' : 'pill-red'}" id="statusPill-${listing.id}">
+          <span class="status-indicator-pill ${isAvailable ? 'pill-green' : 'pill-red'}" id="statusPill-${esc(listing.id)}">
             ${isAvailable ? '🟢 Accepting Guests' : '🔴 Unavailable / Blocked'}
           </span>
         </div>
@@ -306,15 +309,15 @@ export function initHostManager(containerId = 'hostManagerContainer') {
         <div class="manage-card-body">
           <div class="manage-title-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
             <div style="flex: 1;">
-              <span class="manage-type-tag">${(listing.property_type || 'Apartment').toUpperCase()} • ${listing.city}</span>
-              <h3 class="manage-prop-name">${listing.name}</h3>
+              <span class="manage-type-tag">${esc((listing.property_type || 'Apartment').toUpperCase())} • ${esc(listing.city)}</span>
+              <h3 class="manage-prop-name">${esc(listing.name)}</h3>
               <p class="manage-price-line">KSh ${(listing.price_per_night_kes || 12000).toLocaleString()}<small> / night</small> <span style="font-size: 0.78rem; color: var(--color-cocoa); font-weight: normal;">(≈ $${listing.price_per_night_usd || Math.round((listing.price_per_night_kes || 12000) / 130)})</span></p>
             </div>
             <div style="display: flex; gap: 6px;">
-              <button class="btn btn-secondary btn-sm edit-stay-btn" data-id="${listing.id}" style="padding: 5px 11px; font-size: 0.75rem; border-radius: var(--radius-pill); white-space: nowrap;">
+              <button class="btn btn-secondary btn-sm edit-stay-btn" data-id="${esc(listing.id)}" style="padding: 5px 11px; font-size: 0.75rem; border-radius: var(--radius-pill); white-space: nowrap;">
                 ✏️ Edit
               </button>
-              <button class="btn btn-outline btn-sm delete-stay-btn" data-id="${listing.id}" data-name="${listing.name}" style="padding: 5px 10px; font-size: 0.75rem; border-radius: var(--radius-pill); color: #C0392B; border-color: rgba(192, 57, 43, 0.35); white-space: nowrap;" title="Delete Stay">
+              <button class="btn btn-outline btn-sm delete-stay-btn" data-id="${esc(listing.id)}" data-name="${esc(listing.name)}" style="padding: 5px 10px; font-size: 0.75rem; border-radius: var(--radius-pill); color: #C0392B; border-color: rgba(192, 57, 43, 0.35); white-space: nowrap;" title="Delete Stay">
                 🗑️ Delete
               </button>
             </div>
