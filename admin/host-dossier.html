@@ -621,12 +621,24 @@
         </div>
       </section>
 
-      <!-- PANEL 5: PHOTOS -->
+      <!-- PANEL 5: HOST'S PROPERTIES (LIVE LISTINGS) -->
+      <section class="dossier-panel dossier-panel-full">
+        <div class="panel-header">
+          <div class="panel-title-wrap">
+            <div class="panel-icon-badge">🏘️</div>
+            <h2 class="panel-title">Host's Properties</h2>
+          </div>
+          <span class="panel-tag" id="hostPropsCountTag">0 Stays</span>
+        </div>
+        <div id="hostPropsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px;"></div>
+      </section>
+
+      <!-- PANEL 6: ALL UPLOADED PHOTOS -->
       <section class="dossier-panel dossier-panel-full">
         <div class="panel-header">
           <div class="panel-title-wrap">
             <div class="panel-icon-badge">📷</div>
-            <h2 class="panel-title">Property Photos</h2>
+            <h2 class="panel-title">All Uploaded Photos</h2>
           </div>
           <span class="panel-tag" id="photosCountTag">0 Photos</span>
         </div>
@@ -803,32 +815,153 @@
         else notify('Notes saved.');
       });
 
+      // Fetch all properties owned by this host (by host_ref_id or owner_id)
+      let hostProperties = [];
+      if (window.LuxeaDB) {
+        const client = window.LuxeaDB.getClient();
+        if (client) {
+          const filters = [`host_ref_id.eq.${ref}`];
+          if (currentHost.user_id) filters.push(`owner_id.eq.${currentHost.user_id}`);
+          const { data: propsData } = await client
+            .from('lux_properties')
+            .select('*')
+            .or(filters.join(','))
+            .order('created_at', { ascending: false });
+          if (Array.isArray(propsData)) hostProperties = propsData;
+        }
+      }
+
+      const propsGrid = document.getElementById('hostPropsGrid');
+      const propsCountTag = document.getElementById('hostPropsCountTag');
+      if (propsCountTag) propsCountTag.textContent = `${hostProperties.length} Stay${hostProperties.length === 1 ? '' : 's'}`;
+      if (propsGrid) {
+        propsGrid.textContent = '';
+        if (hostProperties.length === 0) {
+          const empty = document.createElement('p');
+          empty.style.cssText = 'color: var(--cocoa); font-size: 0.86rem; margin: 4px 0;';
+          empty.textContent = 'No live properties published by this host yet.';
+          propsGrid.appendChild(empty);
+        } else {
+          const usdRate = (window.LUXEA_CONFIG?.currency?.exchangeRateUsdToKes) || 130;
+          hostProperties.forEach((p) => {
+            const kes = Math.round(parseFloat(p.price_per_night_kes) || ((parseFloat(p.price_per_night_usd) || 0) * usdRate));
+            const isLive = p.is_available !== false;
+            const pPhotos = Array.isArray(p.gallery_images) ? p.gallery_images : [];
+            const cover = safeUrl(p.cover_image_url || pPhotos[0], '/assets/images/villa.jpg');
+
+            const card = document.createElement('div');
+            card.style.cssText = 'border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#FDFBF7; display:flex; flex-direction:column;';
+
+            const thumb = document.createElement('img');
+            thumb.src = cover;
+            thumb.alt = p.name || 'Stay';
+            thumb.style.cssText = 'width:100%; height:150px; object-fit:cover; display:block; background:#EFE8DF;';
+
+            const body = document.createElement('div');
+            body.style.cssText = 'padding:14px 16px; display:flex; flex-direction:column; gap:6px; flex:1;';
+
+            const topRow = document.createElement('div');
+            topRow.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px;';
+            const title = document.createElement('strong');
+            title.textContent = p.name || 'Stay';
+            title.style.cssText = 'font-size:0.95rem; color:var(--espresso);';
+            const pill = document.createElement('span');
+            pill.className = `status-badge-lg ${isLive ? 'status-approved' : 'status-rejected'}`;
+            pill.textContent = isLive ? 'Live' : 'Hidden';
+            pill.style.cssText = 'font-size:0.65rem; padding:2px 8px;';
+            topRow.appendChild(title);
+            topRow.appendChild(pill);
+
+            const meta = document.createElement('div');
+            meta.style.cssText = 'font-size:0.8rem; color:var(--cocoa);';
+            meta.textContent = `${p.property_type || 'Stay'} • ${[p.area, p.city].filter(Boolean).join(', ') || 'Kenya'}`;
+
+            const price = document.createElement('div');
+            price.style.cssText = 'font-size:0.95rem; font-weight:800; color:var(--espresso); margin-top:2px;';
+            price.textContent = `KSh ${kes.toLocaleString()} / night`;
+
+            const foot = document.createElement('div');
+            foot.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid rgba(178,135,86,0.15);';
+
+            const toggleBtn = document.createElement('button');
+            toggleBtn.type = 'button';
+            toggleBtn.className = 'btn-exec-action btn-print-lg';
+            toggleBtn.style.cssText = 'padding:6px 10px; font-size:0.75rem;';
+            toggleBtn.textContent = isLive ? 'Hide Stay' : 'Make Live';
+            toggleBtn.addEventListener('click', async () => {
+              const client = window.LuxeaDB?.getClient();
+              if (!client) return;
+              const nextState = !(p.is_available !== false);
+              const { error } = await client.from('lux_properties').update({ is_available: nextState }).eq('id', p.id);
+              if (error) notify('Failed: ' + error.message);
+              else {
+                p.is_available = nextState;
+                pill.textContent = nextState ? 'Live' : 'Hidden';
+                pill.className = `status-badge-lg ${nextState ? 'status-approved' : 'status-rejected'}`;
+                toggleBtn.textContent = nextState ? 'Hide Stay' : 'Make Live';
+                notify(nextState ? 'Stay is now Live.' : 'Stay is now Hidden.');
+              }
+            });
+
+            const auditLink = document.createElement('a');
+            auditLink.href = `/admin/stay-audit?id=${encodeURIComponent(p.id || p.slug)}&from=host-dossier&hostRef=${encodeURIComponent(ref)}`;
+            auditLink.className = 'btn-exec-action btn-edit-lg';
+            auditLink.style.cssText = 'padding:6px 12px; font-size:0.75rem;';
+            auditLink.textContent = 'Audit Stay →';
+
+            foot.appendChild(toggleBtn);
+            foot.appendChild(auditLink);
+            body.appendChild(topRow);
+            body.appendChild(meta);
+            body.appendChild(price);
+            body.appendChild(foot);
+            card.appendChild(thumb);
+            card.appendChild(body);
+            propsGrid.appendChild(card);
+          });
+        }
+      }
+
+      // Combine all uploaded photos (application photos + all live property photos, deduplicated)
       const galleryGrid = document.getElementById('galleryGrid');
       galleryGrid.textContent = '';
-      const photos = Array.isArray(currentHost.property_photos_urls) && currentHost.property_photos_urls.length > 0
-        ? currentHost.property_photos_urls
-        : [];
+      const photoEntries = [];
+      const seenUrls = new Set();
+      const pushPhoto = (u, label) => {
+        if (!u || typeof u !== 'string' || seenUrls.has(u)) return;
+        seenUrls.add(u);
+        photoEntries.push({ url: u, label });
+      };
 
-      document.getElementById('photosCountTag').textContent = `${photos.length} Photo${photos.length === 1 ? '' : 's'}`;
+      if (Array.isArray(currentHost.property_photos_urls)) {
+        currentHost.property_photos_urls.forEach((u, i) => pushPhoto(u, `Application #${i + 1}`));
+      }
+      hostProperties.forEach((p) => {
+        if (p.cover_image_url) pushPhoto(p.cover_image_url, `${p.name || 'Stay'} (Cover)`);
+        const gal = Array.isArray(p.gallery_images) ? p.gallery_images : [];
+        gal.forEach((u, i) => pushPhoto(u, `${p.name || 'Stay'} #${i + 1}`));
+      });
 
-      if (photos.length === 0) {
+      document.getElementById('photosCountTag').textContent = `${photoEntries.length} Photo${photoEntries.length === 1 ? '' : 's'}`;
+
+      if (photoEntries.length === 0) {
         const empty = document.createElement('p');
         empty.style.cssText = 'color: var(--cocoa); font-size: 0.86rem; margin: 4px 0;';
         empty.textContent = 'No photos uploaded yet.';
         galleryGrid.appendChild(empty);
       } else {
-        photos.forEach((rawUrl, i) => {
-          const cleanPhoto = safeUrl(rawUrl, '/assets/images/villa.jpg');
+        photoEntries.forEach(({ url, label }) => {
+          const cleanPhoto = safeUrl(url, '/assets/images/villa.jpg');
           if (!cleanPhoto) return;
           const item = document.createElement('div');
           item.className = 'gallery-item';
           const img = document.createElement('img');
           img.src = cleanPhoto;
-          img.alt = `Photo ${i + 1}`;
+          img.alt = label;
           img.className = 'gallery-img';
           const overlay = document.createElement('div');
           overlay.className = 'gallery-overlay';
-          overlay.textContent = `Photo ${i + 1} ↗`;
+          overlay.textContent = `${label} ↗`;
           item.appendChild(img);
           item.appendChild(overlay);
           item.addEventListener('click', () => window.open(cleanPhoto, '_blank', 'noopener,noreferrer'));

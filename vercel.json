@@ -41,6 +41,8 @@
     { "source": "/admin/login/", "destination": "/admin/index.html" },
     { "source": "/admin/host-dossier", "destination": "/admin/host-dossier.html" },
     { "source": "/admin/host", "destination": "/admin/host-dossier.html" },
+    { "source": "/admin/stay-audit", "destination": "/admin/stay-audit.html" },
+    { "source": "/admin/stay", "destination": "/admin/stay-audit.html" },
     { "source": "/admin/edit-account", "destination": "/admin/edit-account.html" },
     { "source": "/admin/add-account", "destination": "/admin/add-account.html" },
     { "source": "/admin", "destination": "/admin/index.html" },

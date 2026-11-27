@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stay Audit | Luxea Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/components.css?v=2.7.0">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js?v=2.7.0"></script>
+  <script src="/assets/js/supabase.js?v=2.7.0"></script>
+
+  <style>
+    :root {
+      --bg: #F9F6F0;
+      --card: #FFFFFF;
+      --border: rgba(178, 135, 86, 0.22);
+      --espresso: #241812;
+      --cocoa: #604D42;
+      --gold: #B28756;
+      --gold-dark: #8C6436;
+      --gold-soft: rgba(178, 135, 86, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--espresso);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .exec-nav-bar {
+      background: #FFFFFF;
+      border-bottom: 1px solid rgba(178, 135, 86, 0.2);
+      padding: 14px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    .exec-nav-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .exec-nav-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn-back-console {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #F4ECE1;
+      color: var(--espresso);
+      border: 1px solid rgba(178, 135, 86, 0.3);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .btn-back-console:hover { background: #EAE0D3; }
+
+    .exec-breadcrumb {
+      font-size: 0.8rem;
+      color: var(--cocoa);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-container {
+      max-width: 1180px;
+      margin: 28px auto 64px;
+      padding: 0 24px;
+    }
+
+    .hero-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .hero-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .hero-thumb {
+      width: 84px;
+      height: 84px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      background: #EFE8DF;
+    }
+
+    .hero-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.95rem;
+      font-weight: 700;
+      margin: 0 0 6px;
+      line-height: 1.15;
+    }
+
+    .hero-meta {
+      font-size: 0.86rem;
+      color: var(--cocoa);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .pill-live { background: #DEF7EC; color: #03543F; border: 1px solid #BCF0DA; }
+    .pill-off  { background: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; }
+    .pill-gold { background: var(--gold-soft); color: var(--gold-dark); border: 1px solid var(--gold); }
+
+    .hero-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .btn-live   { background: #057A55; color: #FFFFFF; }
+    .btn-hide   { background: #FEF3C7; color: #B45309; border-color: #FCD34D; }
+    .btn-gold   { background: #FAF5EE; color: #9A7B0C; border-color: #D4AF37; }
+    .btn-ghost  { background: #F4ECE1; color: var(--espresso); border-color: rgba(178, 135, 86, 0.35); }
+    .btn-danger { background: #FEE2E2; color: #B91C1C; border-color: #FCA5A5; }
+
+    /* Numbers Strip */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--cocoa);
+      margin-bottom: 6px;
+    }
+
+    .stat-num {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--espresso);
+    }
+
+    /* Main 2-column layout */
+    .audit-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 920px) {
+      .stats-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .audit-grid { grid-template-columns: 1fr; }
+      .page-container { padding: 0 16px; }
+      .hero-card { padding: 20px; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+    }
+
+    .panel-full { grid-column: 1 / -1; }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid rgba(178, 135, 86, 0.16);
+      flex-wrap: wrap;
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--espresso);
+      margin-bottom: 5px;
+    }
+
+    .field .form-control { width: 100%; }
+
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px dashed rgba(0, 0, 0, 0.07);
+      font-size: 0.86rem;
+    }
+
+    .data-row:last-child { border-bottom: none; }
+    .data-label { color: var(--cocoa); font-weight: 500; flex-shrink: 0; }
+    .data-val { font-weight: 600; text-align: right; word-break: break-word; }
+
+    /* Photo Manager Grid */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .photo-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #FDFBF7;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .photo-img-wrap {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      background: #1B1510;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .photo-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cover-tag {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: #241812;
+      color: #D4AF37;
+      font-size: 0.66rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .photo-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+    }
+
+    .photo-btn {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(178, 135, 86, 0.3);
+      background: #FFFFFF;
+      color: var(--espresso);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .photo-btn:hover { background: #F4ECE1; }
+    .photo-btn.danger { color: #B91C1C; border-color: #FCA5A5; background: #FEF2F2; }
+
+    .toast-banner {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--espresso);
+      color: #F5EFE6;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      z-index: 200;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="exec-nav-bar">
+    <div class="exec-nav-inner">
+      <div class="exec-nav-left">
+        <a href="/admin?tab=stays" class="btn-back-console" id="backLink">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span id="backLabel">Back to Stays</span>
+        </a>
+        <div class="exec-breadcrumb">
+          <span>Admin</span>
+          <span>›</span>
+          <span>Stays</span>
+          <span>›</span>
+          <strong id="breadStayName">Audit</strong>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <a href="/stays" target="_blank" rel="noopener noreferrer" class="btn-action btn-ghost" id="publicStayLink">Guest View ↗</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-container">
+
+    <!-- Hero Summary -->
+    <div class="hero-card">
+      <div class="hero-left">
+        <img id="heroCoverImg" src="/assets/images/villa.jpg" alt="Stay cover" class="hero-thumb">
+        <div>
+          <h1 class="hero-title" id="heroStayName">Loading Stay...</h1>
+          <div class="hero-meta">
+            <span class="pill-badge pill-gold" id="heroTypeBadge">Stay</span>
+            <span id="heroLocation">—</span>
+            <span class="pill-badge pill-live" id="heroAvailBadge">Live</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <button type="button" class="btn-action btn-hide" id="btnToggleAvail">Hide Stay</button>
+        <button type="button" class="btn-action btn-gold" id="btnToggleFeatured">Feature</button>
+        <a href="/admin?tab=hosts" class="btn-action btn-ghost" id="btnOpenHost" style="display: none;">Host Page ↗</a>
+        <button type="button" class="btn-action btn-danger" id="btnDeleteStay">Delete</button>
+      </div>
+    </div>
+
+    <!-- Numbers Strip (Standard KSh) -->
+    <div class="stats-strip">
+      <div class="stat-box">
+        <div class="stat-label">Rate / Night</div>
+        <div class="stat-num" id="statRateKes">KSh 0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Monthly (70%)</div>
+        <div class="stat-num" id="statMonthlyKes">KSh 0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Layout</div>
+        <div class="stat-num" id="statLayout" style="font-size: 1.1rem;">—</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Photos</div>
+        <div class="stat-num" id="statPhotosCount">0</div>
+      </div>
+    </div>
+
+    <div class="audit-grid">
+
+      <!-- LEFT: EDIT STAY DETAILS & PRICING (KSh) -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Stay Details &amp; Pricing</h2>
+        </div>
+
+        <form id="stayEditForm">
+          <div class="form-grid-2">
+            <div class="field">
+              <label for="fName">Stay Name *</label>
+              <input type="text" id="fName" class="form-control" required>
+            </div>
+            <div class="field">
+              <label for="fType">Type</label>
+              <select id="fType" class="form-control">
+                <option value="apartment">Apartment</option>
+                <option value="penthouse">Penthouse</option>
+                <option value="villa">Villa</option>
+                <option value="townhouse">Townhome</option>
+                <option value="hotel">Hotel</option>
+                <option value="studio">Studio</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="field">
+              <label for="fCity">City *</label>
+              <input type="text" id="fCity" class="form-control" required>
+            </div>
+            <div class="field">
+              <label for="fArea">Area / Estate</label>
+              <input type="text" id="fArea" class="form-control">
+            </div>
+            <div class="field">
+              <label for="fCounty">County</label>
+              <input type="text" id="fCounty" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="field">
+              <label for="fPriceKes">Rate / Night (KSh) *</label>
+              <input type="number" id="fPriceKes" class="form-control" min="0" step="100" required>
+            </div>
+            <div class="field">
+              <label for="fBeds">Bedrooms</label>
+              <input type="number" id="fBeds" class="form-control" min="0">
+            </div>
+            <div class="field">
+              <label for="fBaths">Bathrooms</label>
+              <input type="number" id="fBaths" class="form-control" min="0" step="0.5">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="field">
+              <label for="fAvailFrom">Available From</label>
+              <input type="date" id="fAvailFrom" class="form-control">
+            </div>
+            <div class="field">
+              <label for="fAvailTo">Available To</label>
+              <input type="date" id="fAvailTo" class="form-control">
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom: 14px;">
+            <label for="fAmenities">Amenities (comma separated)</label>
+            <input type="text" id="fAmenities" class="form-control" placeholder="Wi-Fi, Pool, Parking, Security">
+          </div>
+
+          <div class="field" style="margin-bottom: 16px;">
+            <label for="fDescription">Description</label>
+            <textarea id="fDescription" class="form-control" rows="3"></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="submit" class="btn btn-primary btn-sm" id="saveStayBtn">Save Changes</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- RIGHT: LOCATION & LINKED HOST -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <section class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Location &amp; Listing Info</h2>
+            <a href="#" target="_blank" rel="noopener noreferrer" id="mapsLink" class="photo-btn">Google Maps ↗</a>
+          </div>
+          <div>
+            <div class="data-row">
+              <span class="data-label">City</span>
+              <span class="data-val" id="infoCity">—</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Area</span>
+              <span class="data-val" id="infoArea">—</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">County</span>
+              <span class="data-val" id="infoCounty">—</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Listing ID</span>
+              <span class="data-val" id="infoId" style="font-family: monospace; font-size: 0.76rem;">—</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Updated</span>
+              <span class="data-val" id="infoUpdated">—</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Host / Owner</h2>
+            <a href="#" id="ownerDossierBtn" class="photo-btn" style="display: none;">Open Host ↗</a>
+          </div>
+          <div id="ownerCardBody">
+            <div class="data-row">
+              <span class="data-label">Host Name</span>
+              <span class="data-val" id="ownerName">—</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Ref ID</span>
+              <span class="data-val" id="ownerRef" style="font-family: monospace;">—</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Phone</span>
+              <span class="data-val" id="ownerPhone">—</span>
+            </div>
+            <div class="data-row">
+              <span class="data-label">Email</span>
+              <span class="data-val" id="ownerEmail">—</span>
+            </div>
+            <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;" id="ownerActionsRow"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- FULL WIDTH: PHOTO AUDIT & UPLOAD MANAGER -->
+      <section class="panel panel-full">
+        <div class="panel-header">
+          <h2 class="panel-title">Uploaded Photos (<span id="galleryCountLabel">0</span>)</h2>
+          <label class="btn-action btn-gold" style="cursor: pointer;">
+            <input type="file" id="uploadPhotosInput" accept="image/*" multiple style="display: none;">
+            <span>+ Upload Photos</span>
+          </label>
+        </div>
+        <div class="photo-grid" id="photoGrid"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="toast-banner" id="toastBanner"></div>
+
+  <script type="module">
+    const safeUrl = (u, fallback = '/assets/images/villa.jpg') =>
+      window.LuxeaSanitize ? window.LuxeaSanitize.safeUrl(u, fallback) : fallback;
+
+    function notify(msg) {
+      const el = document.getElementById('toastBanner');
+      if (!el) return;
+      el.textContent = msg;
+      el.style.display = 'block';
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.style.display = 'none'; }, 3200);
+    }
+
+    document.body.style.visibility = 'hidden';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const authCheck = window.LuxeaAuth ? await window.LuxeaAuth.verifyAdminSession() : { valid: false };
+      if (!authCheck.valid) {
+        window.location.replace('/admin');
+        return;
+      }
+      document.body.style.visibility = 'visible';
+
+      const params = new URLSearchParams(window.location.search);
+      const stayId = (params.get('id') || '').trim();
+      const from = params.get('from') || 'stays';
+      const hostRefParam = (params.get('hostRef') || '').trim();
+
+      const backLink = document.getElementById('backLink');
+      const backLabel = document.getElementById('backLabel');
+      if (from === 'host-dossier' && hostRefParam) {
+        backLink.href = `/admin/host-dossier?ref=${encodeURIComponent(hostRefParam)}`;
+        backLabel.textContent = 'Back to Host';
+      } else {
+        backLink.href = `/admin?tab=${encodeURIComponent(from)}`;
+        backLabel.textContent = 'Back to Stays';
+      }
+
+      if (!stayId) {
+        document.getElementById('heroStayName').textContent = 'Missing Stay ID';
+        return;
+      }
+
+      const client = window.LuxeaDB?.getClient();
+      if (!client) return;
+
+      let stay = null;
+      let linkedHost = null;
+
+      async function loadStay() {
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(stayId);
+        const query = isUuid
+          ? client.from('lux_properties').select('*').eq('id', stayId).maybeSingle()
+          : client.from('lux_properties').select('*').eq('slug', stayId).maybeSingle();
+        const { data } = await query;
+        stay = data || null;
+
+        if (!stay) {
+          document.getElementById('heroStayName').textContent = 'Stay Not Found';
+          return;
+        }
+
+        // Look up linked host
+        linkedHost = null;
+        if (stay.host_ref_id) {
+          const { data: h1 } = await client.from('lux_hosts').select('*').eq('ref_id', stay.host_ref_id).maybeSingle();
+          if (h1) linkedHost = h1;
+        }
+        if (!linkedHost && stay.owner_id) {
+          const { data: h2 } = await client.from('lux_hosts').select('*').eq('user_id', stay.owner_id).limit(1);
+          if (h2 && h2[0]) linkedHost = h2[0];
+        }
+
+        renderStay();
+      }
+
+      function getPhotosList() {
+        const list = [];
+        const add = (u) => {
+          if (u && typeof u === 'string' && !list.includes(u)) list.push(u);
+        };
+        if (stay.cover_image_url) add(stay.cover_image_url);
+        let gal = stay.gallery_images;
+        if (typeof gal === 'string' && gal.trim().startsWith('[')) {
+          try { gal = JSON.parse(gal); } catch (e) { gal = []; }
+        }
+        if (Array.isArray(gal)) gal.forEach(add);
+        return list;
+      }
+
+      function renderStay() {
+        const usdRate = (window.LUXEA_CONFIG?.currency?.exchangeRateUsdToKes) || 130;
+        const kesPrice = Math.round(parseFloat(stay.price_per_night_kes) || ((parseFloat(stay.price_per_night_usd) || 0) * usdRate));
+        const monthlyKes = Math.round(kesPrice * 30 * 0.7);
+        const isLive = stay.is_available !== false;
+        const isFeatured = stay.is_featured === true;
+        const photos = getPhotosList();
+
+        document.title = `${stay.name || 'Stay'} | Luxea Admin`;
+        document.getElementById('breadStayName').textContent = stay.name || 'Stay';
+        document.getElementById('heroStayName').textContent = stay.name || 'Stay';
+        document.getElementById('heroTypeBadge').textContent = stay.property_type || stay.category || 'Stay';
+        document.getElementById('heroLocation').textContent = [stay.area, stay.city, stay.county].filter(Boolean).join(', ') || 'Kenya';
+        document.getElementById('heroCoverImg').src = safeUrl(stay.cover_image_url || photos[0]);
+        document.getElementById('publicStayLink').href = `/stays?id=${encodeURIComponent(stay.id || stay.slug)}`;
+
+        const availBadge = document.getElementById('heroAvailBadge');
+        availBadge.textContent = isLive ? 'Live' : 'Hidden';
+        availBadge.className = `pill-badge ${isLive ? 'pill-live' : 'pill-off'}`;
+
+        const btnAvail = document.getElementById('btnToggleAvail');
+        btnAvail.textContent = isLive ? 'Hide Stay' : 'Make Live';
+        btnAvail.className = `btn-action ${isLive ? 'btn-hide' : 'btn-live'}`;
+
+        const btnFeat = document.getElementById('btnToggleFeatured');
+        btnFeat.textContent = isFeatured ? 'Featured ★' : 'Feature';
+
+        document.getElementById('statRateKes').textContent = `KSh ${kesPrice.toLocaleString()}`;
+        document.getElementById('statMonthlyKes').textContent = `KSh ${monthlyKes.toLocaleString()}`;
+        document.getElementById('statLayout').textContent = `${stay.bedrooms || 1} Bed • ${stay.bathrooms || 1} Bath`;
+        document.getElementById('statPhotosCount').textContent = photos.length;
+        document.getElementById('galleryCountLabel').textContent = photos.length;
+
+        // Form fields
+        document.getElementById('fName').value = stay.name || '';
+        const typeVal = (stay.property_type || stay.category || 'apartment').toLowerCase();
+        const typeSel = document.getElementById('fType');
+        typeSel.value = ['apartment', 'penthouse', 'villa', 'townhouse', 'hotel', 'studio'].includes(typeVal) ? typeVal : 'apartment';
+        document.getElementById('fCity').value = stay.city || '';
+        document.getElementById('fArea').value = stay.area || '';
+        document.getElementById('fCounty').value = stay.county || '';
+        document.getElementById('fPriceKes').value = kesPrice;
+        document.getElementById('fBeds').value = stay.bedrooms ?? 1;
+        document.getElementById('fBaths').value = stay.bathrooms ?? 1;
+        document.getElementById('fAvailFrom').value = stay.available_from || '';
+        document.getElementById('fAvailTo').value = stay.available_to || '';
+        const ams = Array.isArray(stay.amenities) ? stay.amenities.join(', ') : (stay.amenities || '');
+        document.getElementById('fAmenities').value = ams;
+        document.getElementById('fDescription').value = stay.description || '';
+
+        // Location info
+        document.getElementById('infoCity').textContent = stay.city || '—';
+        document.getElementById('infoArea').textContent = stay.area || '—';
+        document.getElementById('infoCounty').textContent = stay.county || '—';
+        document.getElementById('infoId').textContent = stay.id || stay.slug || '—';
+        document.getElementById('infoUpdated').textContent = stay.updated_at ? new Date(stay.updated_at).toLocaleDateString('en-GB') : '—';
+        const mapQ = [stay.name, stay.area, stay.city, stay.county, 'Kenya'].filter(Boolean).join(', ');
+        document.getElementById('mapsLink').href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQ)}`;
+
+        // Host info
+        const btnOpenHost = document.getElementById('btnOpenHost');
+        const ownerDossierBtn = document.getElementById('ownerDossierBtn');
+        const ownerActions = document.getElementById('ownerActionsRow');
+        ownerActions.textContent = '';
+
+        if (linkedHost) {
+          const href = `/admin/host-dossier?ref=${encodeURIComponent(linkedHost.ref_id)}&from=stays`;
+          btnOpenHost.href = href;
+          btnOpenHost.style.display = 'inline-flex';
+          ownerDossierBtn.href = href;
+          ownerDossierBtn.style.display = 'inline-flex';
+
+          document.getElementById('ownerName').textContent = linkedHost.full_name || 'Host';
+          document.getElementById('ownerRef').textContent = linkedHost.ref_id || '—';
+          document.getElementById('ownerPhone').textContent = linkedHost.phone || '—';
+          document.getElementById('ownerEmail').textContent = linkedHost.email || '—';
+
+          if (linkedHost.phone) {
+            const digits = linkedHost.phone.replace(/[^0-9]/g, '');
+            const waNum = digits.startsWith('0') ? '254' + digits.slice(1) : digits.startsWith('254') ? digits : '254' + digits;
+            const wa = document.createElement('a');
+            wa.href = `https://wa.me/${waNum}?text=${encodeURIComponent(`Hello ${linkedHost.full_name}, regarding your listing "${stay.name}" on Luxea Living.`)}`;
+            wa.target = '_blank';
+            wa.rel = 'noopener noreferrer';
+            wa.className = 'btn-action btn-live';
+            wa.style.background = '#25D366';
+            wa.textContent = 'WhatsApp Host';
+            ownerActions.appendChild(wa);
+          }
+
+          const editHost = document.createElement('a');
+          editHost.href = `/admin/edit-account?ref=${encodeURIComponent(linkedHost.ref_id)}&email=${encodeURIComponent(linkedHost.email || '')}&from=hosts`;
+          editHost.className = 'btn-action btn-gold';
+          editHost.textContent = 'Edit Host';
+          ownerActions.appendChild(editHost);
+        } else {
+          btnOpenHost.style.display = 'none';
+          ownerDossierBtn.style.display = 'none';
+          document.getElementById('ownerName').textContent = 'Luxea Managed';
+          document.getElementById('ownerRef').textContent = stay.host_ref_id || 'Direct';
+          document.getElementById('ownerPhone').textContent = '—';
+          document.getElementById('ownerEmail').textContent = '—';
+        }
+
+        renderPhotos(photos);
+      }
+
+      function renderPhotos(photos) {
+        const grid = document.getElementById('photoGrid');
+        grid.textContent = '';
+
+        if (!photos.length) {
+          const p = document.createElement('p');
+          p.style.cssText = 'color: var(--cocoa); font-size: 0.86rem; margin: 4px 0;';
+          p.textContent = 'No photos uploaded yet. Use "+ Upload Photos" above to add images.';
+          grid.appendChild(p);
+          return;
+        }
+
+        photos.forEach((url, idx) => {
+          const clean = safeUrl(url);
+          const isCover = url === stay.cover_image_url || (idx === 0 && !stay.cover_image_url);
+
+          const card = document.createElement('div');
+          card.className = 'photo-card';
+
+          const imgWrap = document.createElement('div');
+          imgWrap.className = 'photo-img-wrap';
+          imgWrap.addEventListener('click', () => window.open(clean, '_blank', 'noopener,noreferrer'));
+
+          const img = document.createElement('img');
+          img.src = clean;
+          img.alt = `Photo ${idx + 1}`;
+          imgWrap.appendChild(img);
+
+          if (isCover) {
+            const tag = document.createElement('span');
+            tag.className = 'cover-tag';
+            tag.textContent = 'Cover';
+            imgWrap.appendChild(tag);
+          }
+
+          const actions = document.createElement('div');
+          actions.className = 'photo-actions';
+
+          const leftBtns = document.createElement('div');
+          leftBtns.style.cssText = 'display: flex; gap: 5px;';
+
+          if (!isCover) {
+            const setCoverBtn = document.createElement('button');
+            setCoverBtn.type = 'button';
+            setCoverBtn.className = 'photo-btn';
+            setCoverBtn.textContent = 'Set Cover';
+            setCoverBtn.addEventListener('click', async () => {
+              const { error } = await client.from('lux_properties').update({ cover_image_url: url, updated_at: new Date().toISOString() }).eq('id', stay.id);
+              if (error) notify('Failed: ' + error.message);
+              else {
+                stay.cover_image_url = url;
+                renderStay();
+                notify('Cover photo updated.');
+              }
+            });
+            leftBtns.appendChild(setCoverBtn);
+          }
+
+          const viewA = document.createElement('a');
+          viewA.href = clean;
+          viewA.target = '_blank';
+          viewA.rel = 'noopener noreferrer';
+          viewA.className = 'photo-btn';
+          viewA.textContent = 'Full ↗';
+          leftBtns.appendChild(viewA);
+
+          const rmBtn = document.createElement('button');
+          rmBtn.type = 'button';
+          rmBtn.className = 'photo-btn danger';
+          rmBtn.textContent = 'Remove';
+          rmBtn.addEventListener('click', async () => {
+            if (!confirm('Remove this photo from the listing?')) return;
+            const remaining = photos.filter(p => p !== url);
+            const nextCover = url === stay.cover_image_url ? (remaining[0] || null) : stay.cover_image_url;
+            const { error } = await client.from('lux_properties').update({
+              gallery_images: remaining,
+              cover_image_url: nextCover,
+              updated_at: new Date().toISOString()
+            }).eq('id', stay.id);
+            if (error) notify('Failed: ' + error.message);
+            else {
+              stay.gallery_images = remaining;
+              stay.cover_image_url = nextCover;
+              renderStay();
+              notify('Photo removed.');
+            }
+          });
+
+          actions.appendChild(leftBtns);
+          actions.appendChild(rmBtn);
+          card.appendChild(imgWrap);
+          card.appendChild(actions);
+          grid.appendChild(card);
+        });
+      }
+
+      // Toggle Live / Hidden
+      document.getElementById('btnToggleAvail').addEventListener('click', async () => {
+        if (!stay) return;
+        const next = !(stay.is_available !== false);
+        const { error } = await client.from('lux_properties').update({ is_available: next, updated_at: new Date().toISOString() }).eq('id', stay.id);
+        if (error) notify('Error: ' + error.message);
+        else {
+          stay.is_available = next;
+          renderStay();
+          notify(next ? 'Stay is now Live.' : 'Stay is now Hidden.');
+        }
+      });
+
+      // Toggle Featured
+      document.getElementById('btnToggleFeatured').addEventListener('click', async () => {
+        if (!stay) return;
+        const next = !(stay.is_featured === true);
+        const { error } = await client.from('lux_properties').update({ is_featured: next, updated_at: new Date().toISOString() }).eq('id', stay.id);
+        if (error) notify('Error: ' + error.message);
+        else {
+          stay.is_featured = next;
+          renderStay();
+          notify(next ? 'Marked as Featured.' : 'Removed from Featured.');
+        }
+      });
+
+      // Delete Stay
+      document.getElementById('btnDeleteStay').addEventListener('click', async () => {
+        if (!stay) return;
+        if (!confirm(`Delete "${stay.name}" permanently?`)) return;
+        const res = await window.LuxeaDB.deletePropertyListing(stay.id);
+        if (res && res.success) {
+          notify('Stay deleted. Returning...');
+          setTimeout(() => { window.location.href = '/admin?tab=stays'; }, 600);
+        } else {
+          notify('Error deleting stay.');
+        }
+      });
+
+      // Save Edit Form
+      document.getElementById('stayEditForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!stay) return;
+        const saveBtn = document.getElementById('saveStayBtn');
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+
+        const usdRate = (window.LUXEA_CONFIG?.currency?.exchangeRateUsdToKes) || 130;
+        const kesVal = parseFloat(document.getElementById('fPriceKes').value) || 0;
+        const cityVal = document.getElementById('fCity').value.trim();
+        const typeVal = document.getElementById('fType').value;
+        const amenitiesArr = document.getElementById('fAmenities').value.split(',').map(s => s.trim()).filter(Boolean);
+
+        const payload = {
+          name: document.getElementById('fName').value.trim(),
+          property_type: typeVal,
+          category: typeVal,
+          city: cityVal,
+          location_group: cityVal.toLowerCase(),
+          area: document.getElementById('fArea').value.trim(),
+          county: document.getElementById('fCounty').value.trim(),
+          price_per_night_kes: kesVal,
+          price_per_night_usd: Math.round(kesVal / usdRate),
+          bedrooms: parseInt(document.getElementById('fBeds').value, 10) || 1,
+          bathrooms: parseFloat(document.getElementById('fBaths').value) || 1,
+          available_from: document.getElementById('fAvailFrom').value || null,
+          available_to: document.getElementById('fAvailTo').value || null,
+          amenities: amenitiesArr,
+          description: document.getElementById('fDescription').value.trim(),
+          updated_at: new Date().toISOString()
+        };
+
+        const { data, error } = await client.from('lux_properties').update(payload).eq('id', stay.id).select().maybeSingle();
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Changes';
+
+        if (error) {
+          notify('Save failed: ' + error.message);
+        } else {
+          stay = data || { ...stay, ...payload };
+          renderStay();
+          notify('Stay updated.');
+        }
+      });
+
+      // Upload New Photos
+      document.getElementById('uploadPhotosInput').addEventListener('change', async (e) => {
+        const files = e.target.files;
+        if (!files || !files.length || !stay) return;
+        notify(`Uploading ${files.length} photo(s)...`);
+        const urls = await window.LuxeaDB.uploadListingPhotos(files, 'properties');
+        if (urls && urls.length) {
+          const existing = getPhotosList();
+          const merged = [...existing, ...urls.filter(u => !existing.includes(u))];
+          const cover = stay.cover_image_url || merged[0];
+          const { error } = await client.from('lux_properties').update({
+            gallery_images: merged,
+            cover_image_url: cover,
+            updated_at: new Date().toISOString()
+          }).eq('id', stay.id);
+          if (error) notify('Failed: ' + error.message);
+          else {
+            stay.gallery_images = merged;
+            stay.cover_image_url = cover;
+            renderStay();
+            notify(`Added ${urls.length} photo(s).`);
+          }
+        } else {
+          notify('Photo upload failed.');
+        }
+        e.target.value = '';
+      });
+
+      await loadStay();
+    });
+  </script>
+</body>
+</html>

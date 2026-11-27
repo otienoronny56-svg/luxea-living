@@ -1333,7 +1333,10 @@ export function initAdminDashboard() {
       const fullArea = `${stay.city || 'Nairobi'}, ${stay.area || stay.county || 'Kenya'}`;
       const shortArea = abbrLocation(fullArea);
       const shortType = abbrType(stay.property_type || stay.category || 'Apartment');
+      const stayAuditUrl = `/admin/stay-audit?id=${encodeURIComponent(stay.id || stay.slug)}&from=stays`;
       const tr = document.createElement('tr');
+      tr.className = 'stay-table-row';
+      tr.title = 'Click to audit & manage stay';
       tr.innerHTML = `
         <td>
           <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
@@ -1364,11 +1367,16 @@ export function initAdminDashboard() {
         </td>
 
         <td style="text-align: right;">
-          <a href="/stays/?id=${encodeURIComponent(stay.id || stay.slug)}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect" style="padding: 4px 8px; font-size: 0.7rem;">
-            <span>Open ↗</span>
+          <a href="${esc(stayAuditUrl)}" class="btn-table-action btn-inspect" style="padding: 4px 10px; font-size: 0.72rem;">
+            <span>Audit →</span>
           </a>
         </td>
       `;
+
+      tr.addEventListener('click', (e) => {
+        if (e.target.closest('.lux-toggle-switch') || e.target.closest('a') || e.target.closest('button')) return;
+        window.location.href = stayAuditUrl;
+      });
 
       staysTableBody.appendChild(tr);
     });
