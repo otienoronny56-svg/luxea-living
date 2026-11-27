@@ -259,15 +259,15 @@ export function initLaundryManager() {
             <div class="provider-pricing-box">
               <div class="pricing-row">
                 <span>🧺 Wash &amp; Fold</span>
-                <strong>KES ${provider.price_wash_fold_per_kg} / kg</strong>
+                <strong><span data-kes="${provider.price_wash_fold_per_kg}">KSh ${provider.price_wash_fold_per_kg}</span> / kg</strong>
               </div>
               <div class="pricing-row">
                 <span>👔 Dry Clean Suit</span>
-                <strong>KES ${provider.price_dry_clean_suit}</strong>
+                <strong data-kes="${provider.price_dry_clean_suit}">KSh ${provider.price_dry_clean_suit}</strong>
               </div>
               <div class="pricing-row">
                 <span>🏡 Host Linen Set</span>
-                <strong>KES ${provider.price_linen_turnover_set}</strong>
+                <strong data-kes="${provider.price_linen_turnover_set}">KSh ${provider.price_linen_turnover_set}</strong>
               </div>
               ${provider.express_available ? `
                 <div style="font-size: 0.74rem; color: #166534; font-weight: 600; margin-top: 6px; display: flex; align-items: center; gap: 4px;">
@@ -402,7 +402,7 @@ export function initLaundryManager() {
             </div>
             <div class="order-detail-item">
               <strong>Estimated Total</strong>
-              <span style="font-weight: 700; color: var(--color-espresso);">KES ${(parseFloat(order.total_amount_kes) || 1200).toLocaleString()}</span>
+              <span style="font-weight: 700; color: var(--color-espresso);" data-kes="${parseFloat(order.total_amount_kes) || 1200}">KSh ${(parseFloat(order.total_amount_kes) || 1200).toLocaleString()}</span>
               <small style="color: #166534; font-weight: 600; display: block;">M-Pesa on Delivery</small>
             </div>
           </div>
@@ -553,7 +553,10 @@ export function initLaundryManager() {
 
     if (elStatPending) elStatPending.textContent = pendingOrders.length;
     if (elStatActive) elStatActive.textContent = activeOrders.length;
-    if (elStatEarnings) elStatEarnings.textContent = `KES ${totalEarnings.toLocaleString()}`;
+    if (elStatEarnings) {
+      elStatEarnings.setAttribute('data-kes', totalEarnings);
+      elStatEarnings.textContent = window.LuxeaCurrency ? window.LuxeaCurrency.formatFromKes(totalEarnings) : `KSh ${totalEarnings.toLocaleString()}`;
+    }
 
     if (!ordersContainer) return;
 
@@ -614,7 +617,7 @@ export function initLaundryManager() {
           <div class="order-actions-row">
             <div>
               <span style="font-size: 0.75rem; color: var(--color-cocoa); text-transform: uppercase; font-weight: 600;">Payout Amount:</span>
-              <span class="order-price-val">KES ${(parseFloat(order.total_amount_kes) || 1200).toLocaleString()}</span>
+              <span class="order-price-val" data-kes="${parseFloat(order.total_amount_kes) || 1200}">KSh ${(parseFloat(order.total_amount_kes) || 1200).toLocaleString()}</span>
             </div>
 
             <div style="display: flex; gap: 8px;">

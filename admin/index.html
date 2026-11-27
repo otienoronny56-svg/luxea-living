@@ -13,14 +13,14 @@
   
   <link rel="stylesheet" href="/assets/css/main.css">
   <link rel="stylesheet" href="/assets/css/components.css">
-  <link rel="stylesheet" href="/assets/css/pages/admin.css">
+  <link rel="stylesheet" href="/assets/css/pages/admin.css?v=2.5.0">
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-  <script src="/assets/js/config.js?v=2.4.2"></script>
-  <script src="/assets/js/supabase.js?v=2.4.2"></script>
+  <script src="/assets/js/config.js?v=2.5.0"></script>
+  <script src="/assets/js/supabase.js?v=2.5.0"></script>
 </head>
 <body>
 
@@ -116,7 +116,7 @@
       <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
       <!-- ======================================================================
-           LEFT PANEL: EXECUTIVE COMMAND SIDEBAR
+           LEFT PANEL: ADMIN SIDEBAR
            ====================================================================== -->
       <aside class="admin-sidebar" id="adminSidebar">
         <!-- Brand & Monogram -->
@@ -125,29 +125,26 @@
             <span class="brand-monogram">L</span>
             <div class="admin-brand-meta">
               <span class="admin-brand-name">Luxea</span>
-              <span class="admin-brand-sub">Executive Console</span>
+              <span class="admin-brand-sub">Admin</span>
             </div>
           </a>
         </div>
 
-        <!-- Navigation Registries & Actions -->
+        <!-- Navigation -->
         <nav class="admin-sidebar-nav">
-          <div class="sidebar-section-title">Command Overview</div>
+          <div class="sidebar-section-title">Menu</div>
 
           <button type="button" class="sidebar-nav-item active" id="tabOverviewBtn">
             <span class="nav-item-left">
               <span class="nav-icon">📊</span>
-              <span>Executive Overview</span>
+              <span>Overview</span>
             </span>
-            <span class="domain-tag">HQ</span>
           </button>
-
-          <div class="sidebar-section-title">Command Registries</div>
 
           <button type="button" class="sidebar-nav-item" id="tabHostsBtn">
             <span class="nav-item-left">
               <span class="nav-icon">📋</span>
-              <span>Host Applications</span>
+              <span>Hosts</span>
             </span>
             <span class="tab-badge" id="hostTabCounter">0</span>
           </button>
@@ -155,7 +152,7 @@
           <button type="button" class="sidebar-nav-item" id="tabStaysBtn">
             <span class="nav-item-left">
               <span class="nav-icon">🏡</span>
-              <span>Live Stays Catalog</span>
+              <span>Stays</span>
             </span>
             <span class="tab-badge" id="staysTabCounter">0</span>
           </button>
@@ -163,7 +160,7 @@
           <button type="button" class="sidebar-nav-item" id="tabGuestsBtn">
             <span class="nav-item-left">
               <span class="nav-icon">✨</span>
-              <span>VIP Guest Waitlist</span>
+              <span>VIP Guests</span>
             </span>
             <span class="tab-badge" id="guestTabCounter">0</span>
           </button>
@@ -171,7 +168,7 @@
           <button type="button" class="sidebar-nav-item" id="tabHostWaitlistBtn">
             <span class="nav-item-left">
               <span class="nav-icon">🤝</span>
-              <span>Host Waitlist <span class="domain-tag">partners.</span></span>
+              <span>Host Waitlist</span>
             </span>
             <span class="tab-badge" id="hostWaitlistTabCounter" style="background: rgba(212, 175, 55, 0.2); color: #9A7B0C;">0</span>
           </button>
@@ -179,7 +176,7 @@
           <button type="button" class="sidebar-nav-item" id="tabProfilesBtn">
             <span class="nav-item-left">
               <span class="nav-icon">👥</span>
-              <span>User Profiles &amp; Roles</span>
+              <span>Users</span>
             </span>
             <span class="tab-badge" id="profilesTabCounter" style="background: rgba(46, 204, 113, 0.2); color: #27AE60;">0</span>
           </button>
@@ -187,51 +184,50 @@
           <button type="button" class="sidebar-nav-item" id="tabLaundryBtn">
             <span class="nav-item-left">
               <span class="nav-icon">🧺</span>
-              <span>Laundry Service Partners</span>
+              <span>Laundry</span>
             </span>
             <span class="tab-badge" id="laundryTabCounter" style="background: rgba(14, 165, 233, 0.2); color: #0284C7;">0</span>
           </button>
 
-          <div class="sidebar-section-title">Data Operations</div>
+          <div class="sidebar-section-title">Data</div>
 
-          <button type="button" class="sidebar-nav-action" id="refreshAdminDataBtn" title="Sync live Supabase updates">
+          <button type="button" class="sidebar-nav-action" id="refreshAdminDataBtn" title="Refresh data">
             <span class="nav-item-left">
               <span class="nav-icon">🔄</span>
-              <span>Sync Live Engine</span>
+              <span>Refresh</span>
             </span>
-            <span class="domain-tag">Live</span>
           </button>
 
-          <button type="button" class="sidebar-nav-action" id="exportHostsCsvBtn" title="Download host partner applications roster as CSV">
+          <button type="button" class="sidebar-nav-action" id="exportHostsCsvBtn" title="Download hosts CSV">
             <span class="nav-item-left">
               <span class="nav-icon">📥</span>
-              <span>Export Hosts CSV</span>
+              <span>Hosts CSV</span>
             </span>
             <span class="domain-tag">.csv</span>
           </button>
 
-          <button type="button" class="sidebar-nav-action" id="exportGuestsCsvBtn" title="Download guest VIP waitlist as CSV">
+          <button type="button" class="sidebar-nav-action" id="exportGuestsCsvBtn" title="Download guests CSV">
             <span class="nav-item-left">
               <span class="nav-icon">📥</span>
-              <span>Export Guests CSV</span>
+              <span>Guests CSV</span>
             </span>
             <span class="domain-tag">.csv</span>
           </button>
 
-          <button type="button" class="sidebar-nav-action" id="exportHostWaitlistCsvBtn" title="Download host partner waitlist as CSV">
+          <button type="button" class="sidebar-nav-action" id="exportHostWaitlistCsvBtn" title="Download host waitlist CSV">
             <span class="nav-item-left">
               <span class="nav-icon">📥</span>
-              <span>Export Waitlist CSV</span>
+              <span>Waitlist CSV</span>
             </span>
             <span class="domain-tag">.csv</span>
           </button>
 
-          <div class="sidebar-section-title">Direct Portals</div>
+          <div class="sidebar-section-title">Site</div>
 
           <a href="/" class="sidebar-nav-action" target="_blank" rel="noopener">
             <span class="nav-item-left">
               <span class="nav-icon">🌐</span>
-              <span>Live Guest Site</span>
+              <span>Home</span>
             </span>
             <span class="domain-tag">↗</span>
           </a>
@@ -239,7 +235,7 @@
           <a href="/host/" class="sidebar-nav-action" target="_blank" rel="noopener">
             <span class="nav-item-left">
               <span class="nav-icon">🔑</span>
-              <span>Host Onboarding</span>
+              <span>Host Page</span>
             </span>
             <span class="domain-tag">↗</span>
           </a>
@@ -247,7 +243,7 @@
           <a href="/partners/" class="sidebar-nav-action" target="_blank" rel="noopener">
             <span class="nav-item-left">
               <span class="nav-icon">💎</span>
-              <span>Founding Waitlist</span>
+              <span>Partners</span>
             </span>
             <span class="domain-tag">↗</span>
           </a>
@@ -255,7 +251,7 @@
           <a href="/laundry/" class="sidebar-nav-action" target="_blank" rel="noopener">
             <span class="nav-item-left">
               <span class="nav-icon">🧺</span>
-              <span>Valet Laundry Hub</span>
+              <span>Laundry</span>
             </span>
             <span class="domain-tag">↗</span>
           </a>
@@ -270,195 +266,155 @@
               <span id="superAdminBadge">Super Admin</span>
             </div>
           </div>
-          <button type="button" class="btn-sidebar-logout" id="adminLogoutBtn" title="Sign out of console">
+          <button type="button" class="btn-sidebar-logout" id="adminLogoutBtn" title="Sign out">
             Sign Out
           </button>
         </div>
       </aside>
 
       <!-- ======================================================================
-           RIGHT WORKSPACE: EXECUTIVE DASHBOARD
+           RIGHT WORKSPACE: DASHBOARD
            ====================================================================== -->
       <main class="admin-workspace">
 
-        <!-- Topbar with mobile toggle and engine status -->
+        <!-- Clean Topbar -->
         <div class="workspace-topbar">
           <div class="workspace-title-group">
-            <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation menu">
+            <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle menu">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
             <div>
-              <span class="badge-tag badge-gold" style="font-size: 0.68rem; padding: 2px 8px;">SUPER ADMIN COMMAND</span>
-              <h1 class="workspace-view-title" id="adminViewTitle">Executive Overview</h1>
-              <p id="adminViewSub" style="color: var(--color-cocoa); font-size: 0.82rem; margin: 2px 0 0;">
-                High-level command center, portfolio valuation, and visual analytics intelligence.
-              </p>
+              <h1 class="workspace-view-title" id="adminViewTitle">Overview</h1>
+              <p id="adminViewSub" class="hidden"></p>
             </div>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div class="chart-currency-toggle" title="Switch currency (Default: KSh)">
+              <button type="button" class="btn-toggle-curr active" id="btnToggleKes">KSh</button>
+              <button type="button" class="btn-toggle-curr" id="btnToggleUsd">USD</button>
+            </div>
             <div class="supabase-status-chip">
               <span class="supabase-status-dot connected" id="supabaseStatusDot"></span>
-              <span id="supabaseStatusText">Supabase Engine Live</span>
+              <span id="supabaseStatusText">Online</span>
             </div>
-            <a href="/" target="_blank" class="btn btn-ghost btn-sm" style="font-size: 0.8rem; text-decoration: none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-              <span>Live Site</span>
+            <a href="/" target="_blank" class="btn btn-ghost btn-sm" style="font-size: 0.78rem; text-decoration: none;">
+              <span>Site ↗</span>
             </a>
           </div>
         </div>
 
         <!-- ==================================================================
-             VIEW 0: EXECUTIVE OVERVIEW (HQ COMMAND DASHBOARD)
+             VIEW 0: OVERVIEW (NUMBERS FIRST)
              ================================================================== -->
         <div id="viewOverview" class="admin-view-page">
-          <!-- Top Executive Metrics Grid -->
+          <!-- Top Metrics Grid -->
           <div class="admin-metrics-grid">
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Host Partners</span>
-                <span class="metric-trend-chip chip-neutral" id="trendHostsTotal">Live DB</span>
+                <span class="metric-label">Hosts</span>
               </div>
               <div class="metric-val" id="metricTotalHosts">0</div>
-              <div class="metric-sub">Nairobi, Coast &amp; Rift Valley</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label" style="color: #9A7B0C;">Pending Vetting</span>
-                <span class="metric-trend-chip chip-amber" id="trendPendingBadge">Action Req</span>
+                <span class="metric-label" style="color: #9A7B0C;">Pending</span>
+                <span class="metric-trend-chip chip-amber" id="trendPendingBadge">0</span>
               </div>
               <div class="metric-val" style="color: #9A7B0C;" id="metricPendingHosts">0</div>
-              <div class="metric-sub">Awaiting KYC verification</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label" style="color: #1E8449;">Approved Hosts</span>
-                <span class="metric-trend-chip chip-green" id="trendApprovedBadge">Verified</span>
+                <span class="metric-label" style="color: #1E8449;">Approved</span>
               </div>
               <div class="metric-val" style="color: #1E8449;" id="metricApprovedHosts">0</div>
-              <div class="metric-sub">Contracted active properties</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
                 <span class="metric-label">Live Stays</span>
-                <span class="metric-trend-chip chip-gold" id="trendStaysLive">100% Active</span>
               </div>
               <div class="metric-val" id="metricTotalStays">0</div>
-              <div class="metric-sub">Bookable residences online</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
                 <span class="metric-label">VIP Guests</span>
-                <span class="metric-trend-chip chip-neutral" id="trendWaitlistTier">Founding</span>
               </div>
               <div class="metric-val" id="metricTotalGuests">0</div>
-              <div class="metric-sub">Founding Circle passholders</div>
             </div>
           </div>
 
-          <!-- Executive Valuation & Operational Performance Cluster -->
+          <!-- Nightly Value & Key Figures Banner (KSh Standard) -->
           <div class="analytics-headline-banner">
             <div class="headline-primary">
-              <div class="headline-badge">PORTFOLIO YIELD &amp; VALUATION</div>
+              <div class="headline-badge">NIGHTLY VALUE</div>
               <div class="headline-val-wrap">
-                <span class="currency-symbol">$</span>
-                <span class="headline-amount" id="analyticsTotalUsd">0</span>
-                <span class="headline-currency-tag">USD / Night</span>
-                <span class="headline-kes-tag">≈ KES <strong id="analyticsTotalKes">0</strong> / Night</span>
+                <span class="currency-symbol" id="analyticsMainSymbol">KSh</span>
+                <span class="headline-amount" id="analyticsTotalPrimary">0</span>
+                <span class="headline-currency-tag" id="analyticsMainUnit">/ night</span>
               </div>
-              <p class="headline-sub">
-                Combined bookable asset yield across verified penthouses, beachfront villas, and country sanctuaries.
-              </p>
             </div>
 
             <div class="headline-kpi-stack">
               <div class="kpi-mini-card">
-                <span class="kpi-mini-label">Average Daily Rate (ADR)</span>
-                <span class="kpi-mini-val" id="analyticsAdr">$0 / nt</span>
-                <small class="kpi-mini-sub" id="analyticsAdrSub">Median Rate</small>
+                <span class="kpi-mini-label">Avg / Night</span>
+                <span class="kpi-mini-val" id="analyticsAdr">KSh 0</span>
               </div>
               <div class="kpi-mini-card">
-                <span class="kpi-mini-label">Monthly Gross Potential</span>
-                <span class="kpi-mini-val" id="analyticsMonthlyGross">$0</span>
-                <small class="kpi-mini-sub">At 70% Occupancy Model</small>
+                <span class="kpi-mini-label">Monthly (70%)</span>
+                <span class="kpi-mini-val" id="analyticsMonthlyGross">KSh 0</span>
               </div>
               <div class="kpi-mini-card">
-                <span class="kpi-mini-label">Vetting Approval Rate</span>
-                <span class="kpi-mini-val" id="analyticsApprovalRate">83.3%</span>
-                <small class="kpi-mini-sub" id="analyticsApprovalSub">1 Host In Audit</small>
+                <span class="kpi-mini-label">Approved Rate</span>
+                <span class="kpi-mini-val" id="analyticsApprovalRate">0%</span>
+                <small class="kpi-mini-sub" id="analyticsApprovalSub">0 pending</small>
               </div>
             </div>
           </div>
 
-          <!-- Section: Interactive Visual Analytics & Graphs -->
-          <div class="admin-section-header" style="margin-top: 28px; margin-bottom: 16px;">
-            <div>
-              <h2 style="font-family: var(--font-serif); font-size: 1.4rem; color: #241812; margin: 0;">Portfolio Visual Intelligence</h2>
-              <p style="font-size: 0.82rem; color: var(--color-cocoa); margin: 2px 0 0;">Real-time graphical analytics powered by live Supabase PostgreSQL data streams.</p>
-            </div>
-            <div class="chart-currency-toggle">
-              <span style="font-size: 0.76rem; font-weight: 700; color: #241812;">Currency:</span>
-              <button type="button" class="btn-toggle-curr active" id="btnToggleUsd">USD ($)</button>
-              <button type="button" class="btn-toggle-curr" id="btnToggleKes">KES (Ksh)</button>
-            </div>
-          </div>
-
-          <!-- 4 Luxury Graphs Grid -->
-          <div class="admin-charts-grid">
-            <!-- Chart 1: Regional Valuation & Yield -->
+          <!-- 4 Clean Charts Grid -->
+          <div class="admin-charts-grid" style="margin-top: 18px;">
+            <!-- Chart 1: Value by Area -->
             <div class="chart-card">
               <div class="chart-card-header">
-                <div>
-                  <span class="analytics-badge">GEOGRAPHIC ALLOCATION</span>
-                  <h3 class="analytics-title">Nightly Yield by Hub</h3>
-                </div>
-                <span class="analytics-chip-gold">Regional Yield</span>
+                <h3 class="analytics-title">Value by Area</h3>
+                <span class="analytics-chip-gold" id="chartAreaCurrencyTag">KSh</span>
               </div>
               <div class="chart-wrapper">
                 <canvas id="chartRegionalYield"></canvas>
               </div>
             </div>
 
-            <!-- Chart 2: Asset Allocation / Category Mix -->
+            <!-- Chart 2: Stay Types -->
             <div class="chart-card">
               <div class="chart-card-header">
-                <div>
-                  <span class="analytics-badge">PORTFOLIO MIX</span>
-                  <h3 class="analytics-title">Property Class Allocation</h3>
-                </div>
-                <span class="analytics-chip-neutral" id="assetMixTotalTag">5 Residences</span>
+                <h3 class="analytics-title">Stay Types</h3>
+                <span class="analytics-chip-neutral" id="assetMixTotalTag">0 stays</span>
               </div>
               <div class="chart-wrapper">
                 <canvas id="chartAssetMix"></canvas>
               </div>
             </div>
 
-            <!-- Chart 3: Platform Growth & Pipeline Trajectory -->
+            <!-- Chart 3: Growth -->
             <div class="chart-card">
               <div class="chart-card-header">
-                <div>
-                  <span class="analytics-badge">PLATFORM EXPANSION</span>
-                  <h3 class="analytics-title">Growth &amp; Pipeline Velocity</h3>
-                </div>
-                <span class="analytics-chip-green">Live Pipeline</span>
+                <h3 class="analytics-title">Growth</h3>
+                <span class="analytics-chip-green">Live</span>
               </div>
               <div class="chart-wrapper">
                 <canvas id="chartGrowthTrajectory"></canvas>
               </div>
             </div>
 
-            <!-- Chart 4: Nightly Rate Benchmarking vs Portfolio ADR -->
+            <!-- Chart 4: Nightly Rates -->
             <div class="chart-card">
               <div class="chart-card-header">
-                <div>
-                  <span class="analytics-badge">PRICING TIERS</span>
-                  <h3 class="analytics-title">Residence ADR Benchmark</h3>
-                </div>
-                <span class="analytics-chip-gold" id="chartAdrTag">ADR: $339</span>
+                <h3 class="analytics-title">Nightly Rates</h3>
+                <span class="analytics-chip-gold" id="chartAdrTag">Avg: KSh 0</span>
               </div>
               <div class="chart-wrapper">
                 <canvas id="chartPricingBenchmark"></canvas>
@@ -466,162 +422,111 @@
             </div>
           </div>
 
-          <!-- Section: Executive Intelligence & Strategic Takeaways -->
-          <div class="admin-section-header" style="margin-top: 32px; margin-bottom: 16px;">
-            <div>
-              <h2 style="font-family: var(--font-serif); font-size: 1.4rem; color: #241812; margin: 0;">Executive Strategic Briefing</h2>
-              <p style="font-size: 0.82rem; color: var(--color-cocoa); margin: 2px 0 0;">Visual data interpretations and high-level platform health indicators.</p>
-            </div>
-          </div>
-
-          <div class="chart-insights-cluster">
-            <div class="insight-card">
-              <div class="insight-header">
-                <span class="insight-icon">💼</span>
-                <span class="insight-title">Portfolio Earning Velocity</span>
-              </div>
-              <p class="insight-body" id="insightYieldText">
-                The catalog commands <strong>$1,695 / KES 220,350</strong> in gross nightly potential. At a modeled 70% monthly occupancy, projected gross volume is <strong>$35,595 (KES 4.62M)</strong>, generating an estimated <strong>KES 694,000 in monthly platform commissions</strong>.
-              </p>
-            </div>
-
-            <div class="insight-card">
-              <div class="insight-header">
-                <span class="insight-icon">📍</span>
-                <span class="insight-title">Primary Value Centers</span>
-              </div>
-              <p class="insight-body" id="insightRegionalText">
-                <strong>Coastal Diani ($650/nt)</strong> and <strong>Westlands Skyline ($480/nt)</strong> contribute <strong>66.7% ($1,130/night)</strong> of gross portfolio valuation, demonstrating strong HNW demand for waterfront sanctuaries and panoramic high-rises.
-              </p>
-            </div>
-
-            <div class="insight-card">
-              <div class="insight-header">
-                <span class="insight-icon">🛡️</span>
-                <span class="insight-title">Curatorial Acceptance Standard</span>
-              </div>
-              <p class="insight-body" id="insightVettingText">
-                <strong>83.3%</strong> approval rate across evaluated host submissions (5 approved, 1 pending). <strong>Evans Kipchoge (Karen Sanctuary)</strong> is under active curatorial audit for fiber internet verification and staging prior to catalog launch.
-              </p>
-            </div>
-
-            <div class="insight-card">
-              <div class="insight-header">
-                <span class="insight-icon">🚀</span>
-                <span class="insight-title">Founding Host Expansion</span>
-              </div>
-              <p class="insight-body" id="insightPipelineText">
-                <strong>6 verified host partners</strong> are on the Founding Waitlist across Naivasha, Kilifi, Nanyuki, Watamu, and Kitisuru, representing an incoming pipeline of <strong>~KES 450,000/night</strong> in verified inventory.
-              </p>
-            </div>
-          </div>
-
-          <!-- Quick Jump Navigation Cards -->
-          <div class="admin-quick-jump-grid">
+          <!-- Compact Quick Jump Bar (Numbers Only) -->
+          <div class="admin-quick-jump-grid quick-jump-compact">
             <div class="quick-jump-card" id="jumpToHostsCard" style="cursor: pointer;">
-              <div class="jump-icon">📋</div>
-              <div class="jump-meta">
-                <h4>Host Vetting Desk</h4>
-                <p>Audit incoming host partner dossiers, inspect ID verification documents, and approve payouts.</p>
+              <div class="jump-top-row">
+                <span class="jump-icon">📋</span>
+                <strong class="jump-count" id="jumpHostsCount">0</strong>
               </div>
-              <span class="jump-arrow">Open Host Applications →</span>
+              <div class="jump-label-row">
+                <span>Hosts</span>
+                <span class="jump-arrow">→</span>
+              </div>
             </div>
 
             <div class="quick-jump-card" id="jumpToStaysCard" style="cursor: pointer;">
-              <div class="jump-icon">🏡</div>
-              <div class="jump-meta">
-                <h4>Live Stays Catalog</h4>
-                <p>Inspect bookable residences, nightly pricing, active inventory, and live availability toggles.</p>
+              <div class="jump-top-row">
+                <span class="jump-icon">🏡</span>
+                <strong class="jump-count" id="jumpStaysCount">0</strong>
               </div>
-              <span class="jump-arrow">Open Stays Catalog →</span>
+              <div class="jump-label-row">
+                <span>Stays</span>
+                <span class="jump-arrow">→</span>
+              </div>
             </div>
 
             <div class="quick-jump-card" id="jumpToGuestsCard" style="cursor: pointer;">
-              <div class="jump-icon">✨</div>
-              <div class="jump-meta">
-                <h4>VIP Guest Waitlist</h4>
-                <p>Review high-net-worth passholders, priority destination interests, and export member rosters.</p>
+              <div class="jump-top-row">
+                <span class="jump-icon">✨</span>
+                <strong class="jump-count" id="jumpGuestsCount">0</strong>
               </div>
-              <span class="jump-arrow">Open Guest Waitlist →</span>
+              <div class="jump-label-row">
+                <span>VIP Guests</span>
+                <span class="jump-arrow">→</span>
+              </div>
             </div>
 
             <div class="quick-jump-card" id="jumpToWaitlistCard" style="cursor: pointer;">
-              <div class="jump-icon">🤝</div>
-              <div class="jump-meta">
-                <h4>Founding Host Waitlist</h4>
-                <p>Manage founding property owners registered on partners.luxealiving.co.ke with 0% launch perks.</p>
+              <div class="jump-top-row">
+                <span class="jump-icon">🤝</span>
+                <strong class="jump-count" id="jumpWaitlistCount">0</strong>
               </div>
-              <span class="jump-arrow">Open Host Waitlist →</span>
+              <div class="jump-label-row">
+                <span>Host Waitlist</span>
+                <span class="jump-arrow">→</span>
+              </div>
             </div>
 
             <div class="quick-jump-card" id="jumpToLaundryCard" style="cursor: pointer;">
-              <div class="jump-icon">🧺</div>
-              <div class="jump-meta">
-                <h4>Laundry Service Partners</h4>
-                <p>Manage verified valet laundromats, dry cleaners, host turnover rates, and live orders.</p>
+              <div class="jump-top-row">
+                <span class="jump-icon">🧺</span>
+                <strong class="jump-count" id="jumpLaundryCount">0</strong>
               </div>
-              <span class="jump-arrow">Open Laundry Registry →</span>
+              <div class="jump-label-row">
+                <span>Laundry</span>
+                <span class="jump-arrow">→</span>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- ==================================================================
-             VIEW 1: HOST APPLICATIONS
+             VIEW 1: HOSTS
              ================================================================== -->
         <div id="viewHosts" class="admin-view-page hidden">
-          <!-- Host Header Metrics -->
           <div class="admin-metrics-grid">
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Applications</span>
-                <span class="metric-trend-chip chip-neutral">Incoming</span>
+                <span class="metric-label">Total</span>
               </div>
               <div class="metric-val" id="hostCardTotal">0</div>
-              <div class="metric-sub">Submitted via /host/</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label" style="color: #9A7B0C;">Pending Vetting</span>
-                <span class="metric-trend-chip chip-amber" id="hostCardPendingBadge">Action Req</span>
+                <span class="metric-label" style="color: #9A7B0C;">Pending</span>
               </div>
               <div class="metric-val" style="color: #9A7B0C;" id="hostCardPending">0</div>
-              <div class="metric-sub">KYC &amp; audit queue</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label" style="color: #1E8449;">Approved Partners</span>
-                <span class="metric-trend-chip chip-green">Verified</span>
+                <span class="metric-label" style="color: #1E8449;">Approved</span>
               </div>
               <div class="metric-val" style="color: #1E8449;" id="hostCardApproved">0</div>
-              <div class="metric-sub">Active contracted stays</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label" style="color: #C0392B;">Archived / Declined</span>
-                <span class="metric-trend-chip chip-neutral">Declined</span>
+                <span class="metric-label" style="color: #C0392B;">Rejected</span>
               </div>
               <div class="metric-val" style="color: #C0392B;" id="hostCardRejected">0</div>
-              <div class="metric-sub">Below luxury baseline</div>
             </div>
           </div>
 
-          <!-- Urgent Action Required Banner (Visible when pending applications exist) -->
           <div id="pendingAuditBanner" class="pending-alert-banner hidden">
             <div class="pending-alert-content">
               <span class="pulsing-beacon-dot"></span>
-              <span><strong>Action Required:</strong> <span id="pendingBannerCount">1</span> host application(s) awaiting curatorial audit and approval.</span>
+              <span><strong id="pendingBannerCount">1</strong> pending host(s) to review.</span>
             </div>
-            <a href="#" id="pendingBannerLink" class="btn-banner-review">Review Latest Dossier ↗</a>
+            <a href="#" id="pendingBannerLink" class="btn-banner-review">Review ↗</a>
           </div>
 
-          <!-- Toolbar / Fast Search & Status Pills -->
           <div class="admin-toolbar-card">
             <div class="admin-search-box">
               <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input type="text" id="adminSearchInput" class="form-control" placeholder="Search by name, property, phone, county, ref ID, or email...">
+              <input type="text" id="adminSearchInput" class="form-control" placeholder="Search hosts, property, area, ref...">
             </div>
 
             <div class="status-pills-filter" id="statusPillsFilter">
@@ -630,488 +535,413 @@
                 <span class="pill-count" id="pillCountAll">0</span>
               </button>
               <button type="button" class="status-pill pill-amber" data-status="pending_review">
-                <span>⏳ Pending</span>
+                <span>Pending</span>
                 <span class="pill-count" id="pillCountPending">0</span>
               </button>
               <button type="button" class="status-pill pill-green" data-status="approved">
-                <span>✅ Approved</span>
+                <span>Approved</span>
                 <span class="pill-count" id="pillCountApproved">0</span>
               </button>
               <button type="button" class="status-pill pill-red" data-status="rejected">
-                <span>❌ Rejected</span>
+                <span>Rejected</span>
                 <span class="pill-count" id="pillCountRejected">0</span>
               </button>
             </div>
 
             <button type="button" class="btn btn-primary btn-sm" id="openCreateHostModalBtn" style="white-space: nowrap; height: 38px; display: inline-flex; align-items: center; gap: 6px;">
-              <span>+ Provision Host Partner</span>
+              <span>+ Add Host</span>
             </button>
           </div>
 
-          <!-- VIEW 1: HOSTS APPLICATIONS TABLE -->
+          <!-- HOSTS TABLE (Pure % columns = 100%) -->
           <div id="hostsViewPane" class="table-responsive-box">
             <table class="lux-data-table">
               <thead>
                 <tr>
-                  <th style="width: 28%;">Host Partner</th>
-                  <th style="width: 26%;">Property &amp; Location</th>
-                  <th style="width: 140px;">Review Status</th>
-                  <th style="width: 250px; text-align: right;">Platform Actions</th>
+                  <th style="width: 26%;">Host</th>
+                  <th style="width: 24%;">Stay &amp; Area</th>
+                  <th style="width: 16%;">Status</th>
+                  <th style="width: 34%; text-align: right;">Actions</th>
                 </tr>
               </thead>
-              <tbody id="hostsTableBody">
-                <!-- Injected by admin.js -->
-              </tbody>
+              <tbody id="hostsTableBody"></tbody>
             </table>
-            <div id="hostsEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
-              No host applications found. Partner submissions from <a href="/host/" style="color: var(--color-camel-dark); text-decoration: underline;">/host/</a> will appear here instantly.
+            <div id="hostsEmptyState" class="empty-state hidden" style="padding: 36px; text-align: center; color: var(--color-cocoa);">
+              No hosts found.
             </div>
           </div>
         </div>
 
         <!-- ==================================================================
-             VIEW 2: LIVE STAYS CATALOG
+             VIEW 2: STAYS
              ================================================================== -->
         <div id="viewStays" class="admin-view-page hidden">
-          <!-- Stays Header Metrics -->
           <div class="admin-metrics-grid">
             <div class="stat-metric-card">
               <div class="metric-card-top">
                 <span class="metric-label">Live Stays</span>
-                <span class="metric-trend-chip chip-gold">100% Active</span>
               </div>
               <div class="metric-val" id="staysCardTotal">0</div>
-              <div class="metric-sub">Bookable residences online</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Nightly Valuation</span>
-                <span class="metric-trend-chip chip-neutral">USD / Night</span>
+                <span class="metric-label">Nightly Total</span>
               </div>
-              <div class="metric-val" id="staysCardUsd">$0</div>
-              <div class="metric-sub" id="staysCardKes">≈ KES 0 / Night</div>
+              <div class="metric-val" id="staysCardUsd">KSh 0</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Average ADR</span>
-                <span class="metric-trend-chip chip-neutral">Benchmark</span>
+                <span class="metric-label">Avg / Night</span>
               </div>
-              <div class="metric-val" id="staysCardAdr">$0 / nt</div>
-              <div class="metric-sub">Average nightly rate</div>
+              <div class="metric-val" id="staysCardAdr">KSh 0</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Bookability</span>
-                <span class="metric-trend-chip chip-green">Live Online</span>
+                <span class="metric-label">Online</span>
               </div>
-              <div class="metric-val" style="color: #1E8449;">100% Active</div>
-              <div class="metric-sub">Ready for reservations</div>
+              <div class="metric-val" style="color: #1E8449;" id="staysCardOnlinePct">100%</div>
             </div>
           </div>
 
-          <!-- Stays Toolbar -->
           <div class="admin-toolbar-card">
             <div class="admin-search-box">
               <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input type="text" id="staysSearchInput" class="form-control" placeholder="Search stays by title, owner, area, category, or nightly price...">
+              <input type="text" id="staysSearchInput" class="form-control" placeholder="Search stays, owner, area...">
             </div>
             <a href="/stays/" target="_blank" class="btn btn-primary btn-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-              <span>View Public Catalog ↗</span>
+              <span>Open Stays ↗</span>
             </a>
           </div>
 
-          <!-- VIEW 2: LIVE STAYS & INVENTORY -->
+          <!-- STAYS TABLE (Pure % columns = 100%) -->
           <div id="staysViewPane" class="table-responsive-box">
             <table class="lux-data-table">
               <thead>
                 <tr>
-                  <th style="width: 32%;">Stay &amp; Classification</th>
-                  <th style="width: 26%;">Location &amp; Owner</th>
-                  <th style="width: 18%;">Nightly Rate</th>
-                  <th style="width: 12%;">Availability</th>
-                  <th style="width: 12%; text-align: right;">Actions</th>
+                  <th style="width: 30%;">Stay</th>
+                  <th style="width: 24%;">Area &amp; Host</th>
+                  <th style="width: 18%;">Rate / Night</th>
+                  <th style="width: 16%;">Live</th>
+                  <th style="width: 12%; text-align: right;">Open</th>
                 </tr>
               </thead>
-              <tbody id="staysTableBody">
-                <!-- Injected by admin.js -->
-              </tbody>
+              <tbody id="staysTableBody"></tbody>
             </table>
           </div>
         </div>
 
         <!-- ==================================================================
-             VIEW 3: VIP GUEST WAITLIST
+             VIEW 3: VIP GUESTS
              ================================================================== -->
         <div id="viewGuests" class="admin-view-page hidden">
-          <!-- Guest Header Metrics -->
           <div class="admin-metrics-grid">
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">VIP Waitlist</span>
-                <span class="metric-trend-chip chip-gold">Founding</span>
+                <span class="metric-label">VIP Guests</span>
               </div>
               <div class="metric-val" id="guestsCardTotal">0</div>
-              <div class="metric-sub">Founding Circle passholders</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Pass Status</span>
-                <span class="metric-trend-chip chip-neutral">Batch 1</span>
+                <span class="metric-label">Batch</span>
               </div>
-              <div class="metric-val" style="font-size: 1.15rem;">Founding Circle</div>
-              <div class="metric-sub">Launch priority pass</div>
+              <div class="metric-val" style="font-size: 1.15rem;">Batch 1</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Top Hubs</span>
-                <span class="metric-trend-chip chip-neutral">Hotspots</span>
+                <span class="metric-label">Top Areas</span>
               </div>
-              <div class="metric-val" style="font-size: 1.15rem;">Nairobi &amp; Diani</div>
-              <div class="metric-sub">Followed by Mara &amp; Naivasha</div>
+              <div class="metric-val" style="font-size: 1.15rem;">NRB &amp; Diani</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Roster Export</span>
-                <span class="metric-trend-chip chip-neutral">CSV</span>
+                <span class="metric-label">Export</span>
               </div>
-              <div style="margin-top: 4px;">
-                <button type="button" class="btn btn-secondary btn-sm" id="exportGuestsCsvBtnInline" style="width: 100%; padding: 4px 8px; font-size: 0.72rem;">
-                  📥 Export Guests CSV
+              <div style="margin-top: 6px;">
+                <button type="button" class="btn btn-secondary btn-sm" id="exportGuestsCsvBtnInline" style="width: 100%; padding: 5px 8px; font-size: 0.74rem;">
+                  📥 CSV
                 </button>
               </div>
-              <div class="metric-sub" style="margin-top: 4px;">Live synced roster</div>
             </div>
           </div>
 
-          <!-- Guest Toolbar -->
           <div class="admin-toolbar-card">
             <div class="admin-search-box">
               <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input type="text" id="guestsSearchInput" class="form-control" placeholder="Search guests by pass #, name, email, phone, or preferred destination...">
+              <input type="text" id="guestsSearchInput" class="form-control" placeholder="Search guests, pass #, phone...">
             </div>
             <a href="/waitlist/" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration: none; font-size: 0.8rem;">
-              <span>Public Guest Waitlist ↗</span>
+              <span>Waitlist Page ↗</span>
             </a>
           </div>
 
-          <!-- VIEW 3: GUESTS WAITLIST -->
+          <!-- GUESTS TABLE (Pure % columns = 100%) -->
           <div id="guestsViewPane" class="table-responsive-box">
             <table class="lux-data-table">
               <thead>
                 <tr>
-                  <th style="width: 120px;">Pass #</th>
-                  <th style="width: 28%;">Guest &amp; Contact</th>
-                  <th style="width: 26%;">Preferred Destinations</th>
-                  <th style="width: 20%;">Membership Tier</th>
-                  <th style="width: 110px; text-align: right;">Joined Date</th>
+                  <th style="width: 16%;">Pass #</th>
+                  <th style="width: 30%;">Guest</th>
+                  <th style="width: 24%;">Areas</th>
+                  <th style="width: 16%;">Tier</th>
+                  <th style="width: 14%; text-align: right;">Date</th>
                 </tr>
               </thead>
-              <tbody id="guestsTableBody">
-                <!-- Injected by admin.js -->
-              </tbody>
+              <tbody id="guestsTableBody"></tbody>
             </table>
-            <div id="guestsEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
-              No waitlist signups recorded yet. Submissions from <a href="/waitlist/" style="color: var(--color-camel-dark); text-decoration: underline;">/waitlist/</a> will appear here.
+            <div id="guestsEmptyState" class="empty-state hidden" style="padding: 36px; text-align: center; color: var(--color-cocoa);">
+              No VIP guests yet.
             </div>
           </div>
         </div>
 
         <!-- ==================================================================
-             VIEW 4: HOST PARTNER WAITLIST (partners.luxealiving.co.ke)
+             VIEW 4: HOST WAITLIST
              ================================================================== -->
         <div id="viewHostWaitlist" class="admin-view-page hidden">
-          <!-- Host Waitlist Header Metrics -->
           <div class="admin-metrics-grid">
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Founding Hosts</span>
-                <span class="metric-trend-chip chip-gold" style="color: #9A7B0C; background: rgba(212, 175, 55, 0.15);">Early Custodians</span>
+                <span class="metric-label">Waitlist</span>
               </div>
               <div class="metric-val" id="waitlistCardTotal">0</div>
-              <div class="metric-sub">partners.luxealiving.co.ke</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Turnkey Ready</span>
-                <span class="metric-trend-chip chip-green">Ready Now</span>
+                <span class="metric-label">Ready Now</span>
               </div>
-              <div class="metric-val" id="waitlistCardReady">0</div>
-              <div class="metric-sub">Ready for immediate onboarding</div>
+              <div class="metric-val" style="color: #1E8449;" id="waitlistCardReady">0</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Privileges</span>
-                <span class="metric-trend-chip chip-gold">90 Days</span>
+                <span class="metric-label">Offer</span>
               </div>
-              <div class="metric-val" style="font-size: 1.15rem; color: #B28756;">0% Commission</div>
-              <div class="metric-sub">Complimentary 4K HDR Drone Shoot</div>
+              <div class="metric-val" style="font-size: 1.15rem; color: #B28756;">0% (90d)</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Portal Link</span>
-                <span class="metric-trend-chip chip-neutral">Live</span>
+                <span class="metric-label">Portal</span>
               </div>
-              <div style="margin-top: 4px;">
-                <a href="/partners/" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 8px; font-size: 0.72rem;">
-                  <span>Open partners. ↗</span>
+              <div style="margin-top: 6px;">
+                <a href="/partners/" target="_blank" class="btn btn-secondary btn-sm" style="width: 100%; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; padding: 5px 8px; font-size: 0.74rem;">
+                  <span>Open ↗</span>
                 </a>
               </div>
-              <div class="metric-sub" style="margin-top: 4px;">Dedicated landing page</div>
             </div>
           </div>
 
-          <!-- Host Waitlist Toolbar -->
           <div class="admin-toolbar-card">
             <div class="admin-search-box">
               <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input type="text" id="hostWaitlistSearchInput" class="form-control" placeholder="Search waitlist hosts by partner name, email, phone, residence, county, or pass #...">
+              <input type="text" id="hostWaitlistSearchInput" class="form-control" placeholder="Search waitlist hosts, stay, area...">
             </div>
             <button type="button" class="btn btn-primary btn-sm" id="exportHostWaitlistCsvBtnInline">
-              📥 Export Waitlist CSV
+              📥 CSV
             </button>
           </div>
 
-          <!-- Table Container -->
+          <!-- HOST WAITLIST TABLE (Pure % columns = 100%) -->
           <div id="hostWaitlistViewPane" class="table-responsive-box">
             <table class="lux-data-table">
               <thead>
                 <tr>
-                  <th style="width: 130px;">Host Pass #</th>
-                  <th style="width: 28%;">Partner &amp; Contact</th>
-                  <th style="width: 26%;">Residence &amp; Region</th>
-                  <th style="width: 22%;">Readiness &amp; Perks</th>
-                  <th style="width: 110px; text-align: right;">Registered</th>
+                  <th style="width: 17%;">Pass #</th>
+                  <th style="width: 27%;">Host</th>
+                  <th style="width: 25%;">Stay &amp; Area</th>
+                  <th style="width: 19%;">Status</th>
+                  <th style="width: 12%; text-align: right;">Date</th>
                 </tr>
               </thead>
-              <tbody id="hostWaitlistTableBody">
-                <!-- Injected by admin.js -->
-              </tbody>
+              <tbody id="hostWaitlistTableBody"></tbody>
             </table>
-            <div id="hostWaitlistEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
-              No host waitlist signups recorded yet. Submissions from <a href="/partners/" target="_blank" style="color: var(--color-camel-dark); text-decoration: underline;">partners.luxealiving.co.ke</a> will appear here.
+            <div id="hostWaitlistEmptyState" class="empty-state hidden" style="padding: 36px; text-align: center; color: var(--color-cocoa);">
+              No waitlist hosts yet.
             </div>
           </div>
         </div>
-      <!-- End hostWaitlistViewPane -->
 
         <!-- ==================================================================
-             VIEW 5: USER PROFILES & ROLES DIRECTORY (lux_profiles)
+             VIEW 5: USERS
              ================================================================== -->
         <div id="viewProfiles" class="admin-view-page hidden">
-          <!-- Profiles Header Metrics -->
           <div class="admin-metrics-grid">
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Total Users</span>
-                <span class="metric-trend-chip chip-green">lux_profiles</span>
+                <span class="metric-label">Users</span>
               </div>
               <div class="metric-val" id="profilesCardTotal">0</div>
-              <div class="metric-sub">Registered in auth.users</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
                 <span class="metric-label">Admins</span>
-                <span class="metric-trend-chip chip-gold">Full Access</span>
               </div>
               <div class="metric-val" id="profilesCardAdmins">0</div>
-              <div class="metric-sub">Super &amp; System Admins</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">Host Partners</span>
-                <span class="metric-trend-chip chip-neutral">Host Suite</span>
+                <span class="metric-label">Hosts</span>
               </div>
               <div class="metric-val" id="profilesCardHosts">0</div>
-              <div class="metric-sub">Property partners in registry</div>
             </div>
 
             <div class="stat-metric-card">
               <div class="metric-card-top">
-                <span class="metric-label">VIP Members</span>
-                <span class="metric-trend-chip chip-neutral">VIP Circle</span>
+                <span class="metric-label">Members</span>
               </div>
               <div class="metric-val" id="profilesCardMembers">0</div>
-              <div class="metric-sub">Bookers &amp; passholders</div>
             </div>
           </div>
 
-          <!-- Toolbar -->
           <div class="admin-toolbar-card">
             <div class="admin-search-box">
               <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input type="text" id="profilesSearchInput" class="form-control" placeholder="Search profiles by name, email, or role...">
+              <input type="text" id="profilesSearchInput" class="form-control" placeholder="Search users by name, email, role...">
             </div>
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-              <!-- Sort Filter: Newest to Oldest -->
-              <select id="profilesSortFilter" class="form-control" style="max-width: 155px; padding: 6px 10px; font-size: 0.82rem; height: 38px;" title="Sort profiles order">
-                <option value="newest" selected>⬇️ Newest First</option>
-                <option value="oldest">⬆️ Oldest First</option>
-                <option value="name_asc">🔤 Name (A - Z)</option>
+              <select id="profilesSortFilter" class="form-control" style="max-width: 140px; padding: 6px 10px; font-size: 0.8rem; height: 38px;">
+                <option value="newest" selected>Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="name_asc">A - Z</option>
               </select>
 
-              <!-- Status Filter: Active vs Non-Active / Suspended -->
-              <select id="profilesStatusFilter" class="form-control" style="max-width: 145px; padding: 6px 10px; font-size: 0.82rem; height: 38px;" title="Filter by account status">
-                <option value="all" selected>All Members</option>
-                <option value="active">🟢 Active Only</option>
-                <option value="suspended">🔴 Suspended / Inactive</option>
+              <select id="profilesStatusFilter" class="form-control" style="max-width: 130px; padding: 6px 10px; font-size: 0.8rem; height: 38px;">
+                <option value="all" selected>All Status</option>
+                <option value="active">Active</option>
+                <option value="suspended">Blocked</option>
               </select>
 
-              <!-- Role Filter -->
-              <select id="profilesRoleFilter" class="form-control" style="max-width: 145px; padding: 6px 10px; font-size: 0.82rem; height: 38px;" title="Filter by system access role">
+              <select id="profilesRoleFilter" class="form-control" style="max-width: 135px; padding: 6px 10px; font-size: 0.8rem; height: 38px;">
                 <option value="all">All Roles</option>
-                <option value="super_admin">👑 Super Admins</option>
-                <option value="admin">🛡️ System Admins</option>
-                <option value="host">🏡 Host Partners</option>
-                <option value="member">💎 VIP Members</option>
+                <option value="super_admin">Super Admin</option>
+                <option value="admin">Admin</option>
+                <option value="host">Host</option>
+                <option value="member">Member</option>
               </select>
 
-              <button type="button" class="btn btn-primary btn-sm" id="openCreateUserModalBtn" style="height: 38px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
-                <span>+ Create Account / Host</span>
+              <button type="button" class="btn btn-primary btn-sm" id="openCreateUserModalBtn" style="height: 38px; white-space: nowrap;">
+                <span>+ Add User</span>
               </button>
             </div>
           </div>
 
-          <!-- Profiles Table -->
+          <!-- USERS TABLE (Pure % columns = 100%) -->
           <div class="table-responsive-box">
             <table class="lux-data-table">
               <thead>
                 <tr>
-                  <th style="width: 24%;">User Identity &amp; Auth ID</th>
-                  <th style="width: 19%;">Email Address</th>
-                  <th style="width: 17%;">System Role</th>
-                  <th style="width: 12%;">Status</th>
-                  <th style="width: 12%;">Registry</th>
-                  <th style="width: 10%;">Joined</th>
-                  <th style="width: 6%; text-align: right;">Action</th>
+                  <th style="width: 21%;">User</th>
+                  <th style="width: 22%;">Email</th>
+                  <th style="width: 16%;">Role</th>
+                  <th style="width: 11%;">Status</th>
+                  <th style="width: 11%;">Type</th>
+                  <th style="width: 10%; text-align: right;">Date</th>
+                  <th style="width: 9%; text-align: right;">Edit</th>
                 </tr>
               </thead>
-              <tbody id="profilesTableBody">
-                <!-- Injected dynamically by admin.js -->
-              </tbody>
+              <tbody id="profilesTableBody"></tbody>
             </table>
-            <div id="profilesEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
-              No user profiles found matching your query.
+            <div id="profilesEmptyState" class="empty-state hidden" style="padding: 36px; text-align: center; color: var(--color-cocoa);">
+              No users found.
             </div>
           </div>
         </div>
-      <!-- End profilesViewPane -->
 
         <!-- ==================================================================
-             VIEW 6: LAUNDRY & VALET PARTNERS REGISTRY (luxealiving.co.ke/laundry)
+             VIEW 6: LAUNDRY
              ================================================================== -->
         <div id="viewLaundry" class="admin-view-page hidden">
-          <!-- Laundry Metrics Grid -->
           <div class="admin-metrics-grid grid-compact">
             <div class="stat-metric-card card-compact">
               <div class="metric-card-top">
                 <span class="metric-label">Partners</span>
-                <span class="metric-trend-chip chip-neutral" id="trendLaundryTotal">Active</span>
               </div>
               <div class="metric-val" id="metricTotalLaundryPartners">0</div>
-              <div class="metric-sub">Nairobi verified network</div>
             </div>
 
             <div class="stat-metric-card card-compact">
               <div class="metric-card-top">
-                <span class="metric-label" style="color: #9A7B0C;">In Progress</span>
-                <span class="metric-trend-chip chip-amber">Live</span>
+                <span class="metric-label" style="color: #9A7B0C;">Active</span>
               </div>
               <div class="metric-val" style="color: #9A7B0C;" id="metricActiveLaundryOrders">0</div>
-              <div class="metric-sub">Washing &amp; delivery</div>
             </div>
 
             <div class="stat-metric-card card-compact">
               <div class="metric-card-top">
-                <span class="metric-label" style="color: #1E8449;">Completed</span>
-                <span class="metric-trend-chip chip-green">Done</span>
+                <span class="metric-label" style="color: #1E8449;">Done</span>
               </div>
               <div class="metric-val" style="color: #1E8449;" id="metricCompletedLaundryOrders">0</div>
-              <div class="metric-sub">Delivered orders</div>
             </div>
 
             <div class="stat-metric-card card-compact">
               <div class="metric-card-top">
-                <span class="metric-label">Valet GMV</span>
-                <span class="metric-trend-chip chip-gold">Volume</span>
+                <span class="metric-label">Total</span>
               </div>
-              <div class="metric-val" style="color: #B28756;" id="metricLaundryGmv">KES 0</div>
-              <div class="metric-sub">Total orders value</div>
+              <div class="metric-val" style="color: #B28756;" id="metricLaundryGmv">KSh 0</div>
             </div>
           </div>
 
-          <!-- Laundry Partners Toolbar -->
           <div class="admin-toolbar-card">
             <div class="admin-search-box">
               <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <input type="text" id="laundrySearchInput" class="form-control" placeholder="Search partners, phone, ref ID, or neighborhood...">
+              <input type="text" id="laundrySearchInput" class="form-control" placeholder="Search partners, phone, area...">
             </div>
 
             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-              <select id="laundryAreaFilter" class="form-control" style="width: 140px; padding: 6px 10px; font-size: 0.82rem; height: 38px;">
-                <option value="all">All Locations</option>
-                <option value="westlands">Westlands</option>
-                <option value="kilimani">Kilimani</option>
-                <option value="ruaka">Ruaka</option>
-                <option value="roysambu">Roysambu</option>
-                <option value="karen">Karen</option>
+              <select id="laundryAreaFilter" class="form-control" style="width: 130px; padding: 6px 10px; font-size: 0.8rem; height: 38px;">
+                <option value="all">All Areas</option>
+                <option value="westlands">WST</option>
+                <option value="kilimani">KLM</option>
+                <option value="ruaka">RKA</option>
+                <option value="roysambu">RYS</option>
+                <option value="karen">KRN</option>
               </select>
 
               <button type="button" class="btn btn-secondary btn-sm" id="copyLaundryInviteLinkBtn" style="height: 38px; white-space: nowrap;">
-                <span>🔗 Copy Invite Link</span>
+                <span>🔗 Invite Link</span>
               </button>
-              <a href="/laundry/" target="_blank" class="btn btn-primary btn-sm" style="height: 38px; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                <span>Live Hub ↗</span>
+              <a href="/laundry/" target="_blank" class="btn btn-primary btn-sm" style="height: 38px; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center;">
+                <span>Open ↗</span>
               </a>
             </div>
           </div>
 
-          <!-- Section 1: Laundry Partners Roster Table -->
-          <div class="admin-section-header" style="margin: 20px 0 10px; display: flex; justify-content: space-between; align-items: flex-end;">
-            <div>
-              <h2 style="font-family: var(--font-serif); font-size: 1.12rem; color: #241812; margin: 0;">Verified Laundry Partners</h2>
-              <p style="font-size: 0.76rem; color: var(--color-cocoa); margin: 2px 0 0;">Service providers, operational zones, and laundry price list.</p>
-            </div>
-            <span class="badge-tag chip-neutral" id="laundryPartnersCountTag" style="font-size: 0.7rem; padding: 2px 8px;">0 Partners</span>
+          <div class="admin-section-header" style="margin: 16px 0 8px; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-family: var(--font-serif); font-size: 1.1rem; color: #241812; margin: 0;">Partners</h2>
+            <span class="badge-tag chip-neutral" id="laundryPartnersCountTag" style="font-size: 0.7rem; padding: 2px 8px;">0</span>
           </div>
 
-          <div class="table-responsive-box" style="margin-bottom: 24px;">
+          <div class="table-responsive-box" style="margin-bottom: 20px;">
             <table class="lux-data-table table-compact">
               <thead>
                 <tr>
-                  <th style="width: 30%;">Partner &amp; Code</th>
-                  <th style="width: 23%;">Contact</th>
-                  <th style="width: 22%;">Coverage</th>
-                  <th style="width: 17%;">Rates (KES)</th>
-                  <th style="width: 8%; text-align: right;">Rating</th>
+                  <th style="width: 28%;">Partner</th>
+                  <th style="width: 22%;">Contact</th>
+                  <th style="width: 22%;">Areas</th>
+                  <th style="width: 18%;">Rates (KSh)</th>
+                  <th style="width: 10%; text-align: right;">Rating</th>
                 </tr>
               </thead>
-              <tbody id="laundryPartnersTableBody">
-                <!-- Injected dynamically by admin.js -->
-              </tbody>
+              <tbody id="laundryPartnersTableBody"></tbody>
             </table>
-            <div id="laundryPartnersEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
-              No laundry service partners found matching your search.
+            <div id="laundryPartnersEmptyState" class="empty-state hidden" style="padding: 32px; text-align: center; color: var(--color-cocoa);">
+              No partners found.
             </div>
           </div>
 
-          <!-- Section 2: Recent Laundry Orders Audit Log -->
-          <div class="admin-section-header" style="margin: 20px 0 10px; display: flex; justify-content: space-between; align-items: flex-end;">
-            <div>
-              <h2 style="font-family: var(--font-serif); font-size: 1.12rem; color: #241812; margin: 0;">Valet &amp; Linen Orders Log</h2>
-              <p style="font-size: 0.76rem; color: var(--color-cocoa); margin: 2px 0 0;">Recent guest valet requests and host turnover pickups.</p>
-            </div>
-            <span class="badge-tag chip-neutral" id="laundryOrdersCountTag" style="font-size: 0.7rem; padding: 2px 8px;">0 Orders</span>
+          <div class="admin-section-header" style="margin: 16px 0 8px; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-family: var(--font-serif); font-size: 1.1rem; color: #241812; margin: 0;">Orders</h2>
+            <span class="badge-tag chip-neutral" id="laundryOrdersCountTag" style="font-size: 0.7rem; padding: 2px 8px;">0</span>
           </div>
 
           <div class="table-responsive-box">
@@ -1119,21 +949,17 @@
               <thead>
                 <tr>
                   <th style="width: 15%;">Order #</th>
-                  <th style="width: 20%;">Customer</th>
-                  <th style="width: 23%;">Stay &amp; Area</th>
-                  <th style="width: 20%;">Service &amp; Slot</th>
-                  <th style="width: 12%;">Amount</th>
-                  <th style="width: 10%; text-align: right;">Status</th>
+                  <th style="width: 20%;">Client</th>
+                  <th style="width: 22%;">Stay &amp; Area</th>
+                  <th style="width: 19%;">Service</th>
+                  <th style="width: 13%;">Amount</th>
+                  <th style="width: 11%; text-align: right;">Status</th>
                 </tr>
               </thead>
-              <tbody id="laundryOrdersTableBody">
-                <!-- Injected dynamically by admin.js -->
-              </tbody>
+              <tbody id="laundryOrdersTableBody"></tbody>
             </table>
-            <div id="laundryOrdersEmptyState" class="empty-state hidden" style="padding: 40px; text-align: center; color: var(--color-cocoa);">
-              <div style="font-size: 1.8rem; margin-bottom: 6px;">🧺</div>
-              <p style="font-weight: 600; color: var(--color-espresso); margin-bottom: 4px; font-size: 0.95rem;">No valet orders in queue</p>
-              <p style="font-size: 0.8rem; margin: 0;">Guest valet requests and host turnover orders will show here in real-time.</p>
+            <div id="laundryOrdersEmptyState" class="empty-state hidden" style="padding: 32px; text-align: center; color: var(--color-cocoa);">
+              No orders yet.
             </div>
           </div>
 
@@ -1430,7 +1256,7 @@
 
   <script src="/assets/js/main.js"></script>
   <script type="module">
-    import { initAdminDashboard } from '/assets/js/modules/admin.js?v=2.4.2';
+    import { initAdminDashboard } from '/assets/js/modules/admin.js?v=2.5.0';
 
     document.addEventListener('DOMContentLoaded', () => {
       initAdminDashboard();

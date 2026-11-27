@@ -311,7 +311,7 @@ export function initHostManager(containerId = 'hostManagerContainer') {
             <div style="flex: 1;">
               <span class="manage-type-tag">${esc((listing.property_type || 'Apartment').toUpperCase())} • ${esc(listing.city)}</span>
               <h3 class="manage-prop-name">${esc(listing.name)}</h3>
-              <p class="manage-price-line">KSh ${(listing.price_per_night_kes || 12000).toLocaleString()}<small> / night</small> <span style="font-size: 0.78rem; color: var(--color-cocoa); font-weight: normal;">(≈ $${listing.price_per_night_usd || Math.round((listing.price_per_night_kes || 12000) / 130)})</span></p>
+              <p class="manage-price-line" data-kes="${listing.price_per_night_kes || 12000}" data-per-night="true">KSh ${(listing.price_per_night_kes || 12000).toLocaleString()}<small> / night</small></p>
             </div>
             <div style="display: flex; gap: 6px;">
               <button class="btn btn-secondary btn-sm edit-stay-btn" data-id="${esc(listing.id)}" style="padding: 5px 11px; font-size: 0.75rem; border-radius: var(--radius-pill); white-space: nowrap;">
@@ -367,6 +367,9 @@ export function initHostManager(containerId = 'hostManagerContainer') {
     });
 
     bindEvents();
+    if (window.LuxeaCurrency && typeof window.LuxeaCurrency.refreshPrices === 'function') {
+      window.LuxeaCurrency.refreshPrices();
+    }
   }
 
   function bindEvents() {

@@ -419,7 +419,7 @@
   <script src="/assets/js/main.js?v=2.4.0"></script>
   <script type="module">
     import { LUXEA_STAYS } from '/assets/js/modules/staysData.js?v=2.4.0';
-    import { initCurrencyToggle, refreshPrices } from '/assets/js/modules/currency.js?v=2.4.0';
+    import { initCurrencyToggle, refreshPrices } from '/assets/js/modules/currency.js?v=2.5.0';
 
     // Haversine distance calculator
     function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -802,18 +802,21 @@
           };
         }
 
-        // Pricing (Exclusively KES)
-        const formattedKes = `KSh ${stay.kesPrice.toLocaleString()}`;
+        // Pricing (Defaults to KSh; updates live if user switches currency)
+        const fmtPrice = (kesVal) => (window.LuxeaCurrency ? window.LuxeaCurrency.formatFromKes(kesVal) : `KSh ${Math.round(kesVal).toLocaleString()}`);
+        const formattedRate = fmtPrice(stay.kesPrice);
         const priceEl = document.getElementById('detailPriceNum');
         if (priceEl) {
           priceEl.setAttribute('data-kes', stay.kesPrice);
           priceEl.setAttribute('data-usd', stay.usdPrice);
-          priceEl.textContent = formattedKes;
+          priceEl.textContent = formattedRate;
         }
 
         const mobilePriceEl = document.getElementById('mobileDetailPrice');
         if (mobilePriceEl) {
-          mobilePriceEl.textContent = formattedKes;
+          mobilePriceEl.setAttribute('data-kes', stay.kesPrice);
+          mobilePriceEl.setAttribute('data-usd', stay.usdPrice);
+          mobilePriceEl.textContent = formattedRate;
         }
 
         // Details & Titles
@@ -891,19 +894,27 @@
 
           const subtotal = nights * stay.kesPrice;
           const nightsLabel = document.getElementById('costBreakdownNights');
-          if (nightsLabel) nightsLabel.textContent = `KSh ${stay.kesPrice.toLocaleString()} × ${nights} night${nights > 1 ? 's' : ''}`;
+          if (nightsLabel) nightsLabel.textContent = `${fmtPrice(stay.kesPrice)} × ${nights} night${nights > 1 ? 's' : ''}`;
           const subtotalEl = document.getElementById('costBreakdownSubtotal');
-          if (subtotalEl) subtotalEl.textContent = `KSh ${subtotal.toLocaleString()}`;
+          if (subtotalEl) subtotalEl.textContent = fmtPrice(subtotal);
           const totalEl = document.getElementById('costTotalAmount');
-          if (totalEl) totalEl.textContent = `KSh ${subtotal.toLocaleString()}`;
+          if (totalEl) totalEl.textContent = fmtPrice(subtotal);
 
           // Live WhatsApp Concierge Link
           const waBtn = document.getElementById('whatsappConciergeBtn');
           if (waBtn) {
-            const msg = `Hello Luxea Concierge, I would like to reserve "${stay.name}" in ${stay.location.split('•')[0].trim()} for ${nights} night(s) (${cinVal} to ${coutVal}) for ${guests} guest(s). Estimated total: KSh ${subtotal.toLocaleString()}. Please confirm availability.`;
+            const msg = `Hello Luxea Concierge, I would like to reserve "${stay.name}" in ${stay.location.split('•')[0].trim()} for ${nights} night(s) (${cinVal} to ${coutVal}) for ${guests} guest(s). Estimated total: ${fmtPrice(subtotal)}. Please confirm availability.`;
             waBtn.href = `https://wa.me/254700000000?text=${encodeURIComponent(msg)}`;
           }
         }
+
+        if (window._luxeaCurrencyListener) {
+          window.removeEventListener('luxea:currency_changed', window._luxeaCurrencyListener);
+        }
+        window._luxeaCurrencyListener = () => {
+          updateBookingCost();
+        };
+        window.addEventListener('luxea:currency_changed', window._luxeaCurrencyListener);
 
         if (checkInInput) {
           checkInInput.onchange = () => {

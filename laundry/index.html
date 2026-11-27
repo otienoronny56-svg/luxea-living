@@ -480,8 +480,10 @@
 
   <!-- Scripts -->
   <script type="module">
-    import { initLaundryManager } from '/assets/js/modules/laundryManager.js';
+    import { initCurrency } from '/assets/js/modules/currency.js?v=2.5.0';
+    import { initLaundryManager } from '/assets/js/modules/laundryManager.js?v=2.5.0';
     document.addEventListener('DOMContentLoaded', () => {
+      initCurrency();
       const dateInput = document.getElementById('ordDate');
       if (dateInput) {
         dateInput.value = new Date().toISOString().split('T')[0];

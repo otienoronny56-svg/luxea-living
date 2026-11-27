@@ -981,3 +981,30 @@
   cursor: pointer;
 }
 
+/* Compact Header Currency Switcher (Defaults to KSh) */
+.lux-currency-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--color-linen, #F5F1EA);
+  color: var(--color-espresso, #3A251B);
+  border: 1px solid rgba(74, 52, 42, 0.22);
+  border-radius: 999px;
+  padding: 6px 26px 6px 12px;
+  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1.2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234A342A' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.lux-currency-select:hover,
+.lux-currency-select:focus {
+  border-color: var(--color-camel-dark, #8C6D4F);
+  background-color: #FFFFFF;
+  outline: none;
+}
+

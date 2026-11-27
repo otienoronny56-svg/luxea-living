@@ -979,12 +979,12 @@
 .lux-data-table,
 .admin-data-table {
   width: 100%;
-  min-width: 760px;
+  min-width: 860px;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   text-align: left;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-family: var(--font-sans);
 }
 
@@ -994,31 +994,32 @@
   background: #FBF9F5;
   color: #241812;
   font-family: var(--font-sans);
-  font-size: 0.65rem;
+  font-size: 0.66rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 10px 14px;
+  padding: 10px 12px;
   border-bottom: 1px solid rgba(178, 150, 125, 0.2);
-  white-space: normal;
+  white-space: nowrap;
   position: sticky;
   top: 0;
   z-index: 10;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .lux-data-table tbody td,
 .admin-data-table tbody td,
 .lux-data-table.table-compact tbody td {
-  padding: 10px 14px;
+  padding: 10px 12px;
   border-bottom: 1px solid rgba(178, 150, 125, 0.1);
   color: #241812;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-family: var(--font-sans);
   vertical-align: middle;
   transition: background 0.15s ease;
-  word-break: break-word;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .lux-data-table tbody tr,
@@ -1800,4 +1801,92 @@
 .insight-body strong {
   color: #241812;
   font-weight: 700;
+}
+
+/* ==========================================================================
+   ZERO-OVERLAP TABLE UTILITIES & COMPACT NUMBERS-FIRST JUMP TILES
+   ========================================================================== */
+.cell-ellipsis {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.cell-inline-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cell-inline-row > .cell-ellipsis {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.table-action-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex-wrap: nowrap;
+  max-width: 100%;
+}
+
+.table-action-row .btn-table-action {
+  padding: 4px 8px;
+  font-size: 0.69rem;
+  line-height: 1.15;
+  flex-shrink: 0;
+}
+
+.status-select-inline {
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+
+.status-select-inline.status-suspended {
+  background: #FEE2E2;
+  color: #B91C1C;
+  border-color: #FCA5A5;
+}
+
+.quick-jump-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.quick-jump-compact .quick-jump-card {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jump-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.jump-count {
+  font-family: var(--font-sans);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #241812;
+  line-height: 1;
+}
+
+.jump-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-cocoa);
 }

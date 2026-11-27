@@ -223,6 +223,10 @@ export function initNearbyStays(containerId = 'locationSectionsContainer') {
         renderAllSections();
       });
     }
+
+    if (window.LuxeaCurrency && typeof window.LuxeaCurrency.refreshPrices === 'function') {
+      window.LuxeaCurrency.refreshPrices();
+    }
   }
 
   function renderShelf(parent, config) {

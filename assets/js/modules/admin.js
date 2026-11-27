@@ -32,7 +32,80 @@ function csvCell(v) {
   return `"${s.replace(/"/g, '""')}"`;
 }
 
+// Short area/city codes so long location names fit cleanly in tables (full value kept in title tooltip)
+const LOCATION_ABBR_RULES = [
+  [/\bNairobi\b/gi, 'NRB'],
+  [/\bWestlands\b/gi, 'WST'],
+  [/\bKilimani\b/gi, 'KLM'],
+  [/\bLavington\b/gi, 'LVG'],
+  [/\bKileleshwa\b/gi, 'KLS'],
+  [/\bRoysambu\b/gi, 'RYS'],
+  [/\bKitisuru\b/gi, 'KTS'],
+  [/\bMombasa\b/gi, 'MBA'],
+  [/\bNaivasha\b/gi, 'NVS'],
+  [/\bNanyuki\b/gi, 'NYK'],
+  [/\bDiani\s*Beach\b/gi, 'Diani'],
+  [/\bNorthern\s*Bypass\b/gi, 'N.Bypass'],
+  [/\bRift\s*Valley\b/gi, 'R.Valley'],
+  [/\bSouth\s*Coast\b/gi, 'S.Coast'],
+  [/\bNorth\s*Coast\b/gi, 'N.Coast'],
+  [/\bRuaka\b/gi, 'RKA'],
+  [/\bKaren\b/gi, 'KRN'],
+  [/\bKilifi\b/gi, 'KLF'],
+  [/\bWatamu\b/gi, 'WTM'],
+  [/\bMalindi\b/gi, 'MLD'],
+  [/\bNakuru\b/gi, 'NKR'],
+  [/\bKisumu\b/gi, 'KSM'],
+  [/\bEldoret\b/gi, 'ELD'],
+  [/\bKenya\b/gi, 'KE']
+];
+
+function abbrLocation(raw) {
+  if (!raw) return '—';
+  let out = String(raw).trim();
+  LOCATION_ABBR_RULES.forEach(([rx, rep]) => {
+    out = out.replace(rx, rep);
+  });
+  // Deduplicate repeated comma-separated parts (e.g. "NRB, NRB" -> "NRB")
+  const parts = out.split(',').map(s => s.trim()).filter(Boolean);
+  const seen = new Set();
+  const dedup = parts.filter(p => {
+    const k = p.toLowerCase();
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  return dedup.join(', ') || '—';
+}
+
+function abbrType(raw) {
+  const s = String(raw || '').trim();
+  if (!s) return 'Stay';
+  const l = s.toLowerCase();
+  if (l.includes('apartment') || l.includes('bnb')) return 'Apt';
+  if (l.includes('penthouse')) return 'Penthouse';
+  if (l.includes('villa')) return 'Villa';
+  if (l.includes('townhouse') || l.includes('townhome')) return 'Townhome';
+  if (l.includes('hotel')) return 'Hotel';
+  if (l.includes('studio')) return 'Studio';
+  return s.length > 12 ? s.slice(0, 11) + '…' : s;
+}
+
+function abbrStatus(raw) {
+  const l = String(raw || '').toLowerCase();
+  if (l.includes('ready') || l.includes('active')) return 'Ready';
+  if (l.includes('soon') || l.includes('month')) return 'Soon';
+  if (l.includes('build') || l.includes('renovat')) return 'Setup';
+  return raw ? (raw.length > 14 ? raw.slice(0, 13) + '…' : raw) : 'Ready';
+}
+
 export function initAdminDashboard() {
+  let analyticsCurrencyMode = 'KES';
+  let chartRegionalInstance = null;
+  let chartAssetMixInstance = null;
+  let chartGrowthInstance = null;
+  let chartPricingInstance = null;
+
   const loginGateway = document.getElementById('adminLoginGateway');
   const dashboardView = document.getElementById('adminDashboardView');
   const loginForm = document.getElementById('adminLoginForm');
@@ -445,15 +518,15 @@ export function initAdminDashboard() {
     if (elTotalLaundry) elTotalLaundry.textContent = totalLaundryPartners;
     if (elActiveLaundry) elActiveLaundry.textContent = activeLaundryOrders;
     if (elCompletedLaundry) elCompletedLaundry.textContent = completedLaundryOrders;
-    if (elLaundryGmv) elLaundryGmv.textContent = `KES ${laundryGmv.toLocaleString()}`;
+    if (elLaundryGmv) elLaundryGmv.textContent = formatAdminMoney(laundryGmv);
 
     const countTagPartners = document.getElementById('laundryPartnersCountTag');
-    if (countTagPartners) countTagPartners.textContent = `${totalLaundryPartners} Partner${totalLaundryPartners === 1 ? '' : 's'}`;
+    if (countTagPartners) countTagPartners.textContent = `${totalLaundryPartners}`;
 
     const countTagOrders = document.getElementById('laundryOrdersCountTag');
-    if (countTagOrders) countTagOrders.textContent = `${cachedLaundryOrders.length} Order${cachedLaundryOrders.length === 1 ? '' : 's'}`;
+    if (countTagOrders) countTagOrders.textContent = `${cachedLaundryOrders.length}`;
 
-    // Tab counters
+    // Tab counters & overview quick jump counts
     const tHost = document.getElementById('hostTabCounter');
     const tStays = document.getElementById('staysTabCounter');
     const tGuest = document.getElementById('guestTabCounter');
@@ -466,6 +539,17 @@ export function initAdminDashboard() {
     if (tHostWaitlist) tHostWaitlist.textContent = totalHostWaitlist;
     if (tProfiles) tProfiles.textContent = totalProfiles;
     if (tLaundry) tLaundry.textContent = totalLaundryPartners;
+
+    const jHosts = document.getElementById('jumpHostsCount');
+    const jStays = document.getElementById('jumpStaysCount');
+    const jGuests = document.getElementById('jumpGuestsCount');
+    const jWaitlist = document.getElementById('jumpWaitlistCount');
+    const jLaundry = document.getElementById('jumpLaundryCount');
+    if (jHosts) jHosts.textContent = totalHosts;
+    if (jStays) jStays.textContent = totalStays;
+    if (jGuests) jGuests.textContent = totalGuests;
+    if (jWaitlist) jWaitlist.textContent = totalHostWaitlist;
+    if (jLaundry) jLaundry.textContent = totalLaundryPartners;
 
     // Filter pill count badges
     const pAll = document.getElementById('pillCountAll');
@@ -487,7 +571,6 @@ export function initAdminDashboard() {
     const trendPendingBadge = document.getElementById('trendPendingBadge');
 
     if (pendingHosts > 0) {
-      // 1. Blinking pulsing glow on Pending filter pill
       if (pendingPill) {
         pendingPill.classList.add('has-pending');
         if (!pendingPill.querySelector('.pulsing-beacon-dot')) {
@@ -497,7 +580,6 @@ export function initAdminDashboard() {
         }
       }
 
-      // 2. Urgent Action Banner at top of table
       if (pendingBanner) {
         pendingBanner.classList.remove('hidden');
         if (pendingBannerCount) pendingBannerCount.textContent = pendingHosts;
@@ -505,13 +587,12 @@ export function initAdminDashboard() {
         if (latestPending && pendingBannerLink) {
           const ref = latestPending.ref_id || latestPending.refId;
           pendingBannerLink.href = `/admin/host-dossier.html?ref=${ref}`;
-          pendingBannerLink.textContent = `Audit ${latestPending.full_name || latestPending.fullName || 'Host'} [${ref}] ↗`;
+          pendingBannerLink.textContent = `Review ${latestPending.full_name || latestPending.fullName || 'Host'} ↗`;
         }
       }
 
-      // 3. Pulse badge on Pending KPI card
       if (trendPendingBadge) {
-        trendPendingBadge.textContent = `⚡ ${pendingHosts} Action Req`;
+        trendPendingBadge.textContent = `${pendingHosts} new`;
         trendPendingBadge.classList.add('pulse-badge');
       }
     } else {
@@ -524,16 +605,16 @@ export function initAdminDashboard() {
         pendingBanner.classList.add('hidden');
       }
       if (trendPendingBadge) {
-        trendPendingBadge.textContent = 'All Vetted';
+        trendPendingBadge.textContent = '0';
         trendPendingBadge.classList.remove('pulse-badge');
       }
     }
 
     // =======================================================================
-    // ANALYTICS HUB 1: PORTFOLIO REVENUE, VALUATION & METRICS
+    // ANALYTICS HUB 1: NUMBERS-FIRST VALUATION (STANDARD KSh, OPTIONAL USD)
     // =======================================================================
     const availMap = JSON.parse(localStorage.getItem('luxea_host_avail_map') || '{}');
-    let totalUsdVal = 0;
+    const usdRate = (window.LUXEA_CONFIG && window.LUXEA_CONFIG.currency && window.LUXEA_CONFIG.currency.exchangeRateUsdToKes) || 130;
     let totalKesVal = 0;
     let activeStaysCount = 0;
 
@@ -541,74 +622,74 @@ export function initAdminDashboard() {
       const isAvail = availMap[s.id] !== undefined ? availMap[s.id] : (s.is_available !== false);
       if (isAvail) {
         activeStaysCount++;
-        const usd = parseFloat(s.price_per_night_usd) || Math.round((s.price_per_night_kes || s.kesPrice || 0) / 130);
-        const kes = parseFloat(s.price_per_night_kes) || ((s.price_per_night_usd || 0) * 130);
-        totalUsdVal += usd;
+        const kes = parseFloat(s.price_per_night_kes) || parseFloat(s.kesPrice) || ((parseFloat(s.price_per_night_usd) || 0) * usdRate);
         totalKesVal += kes;
       }
     });
 
-    const elTotalUsd = document.getElementById('analyticsTotalUsd');
-    const elTotalKes = document.getElementById('analyticsTotalKes');
+    const isKes = analyticsCurrencyMode === 'KES';
+    const totalDisplayVal = isKes ? Math.round(totalKesVal) : Math.round(totalKesVal / usdRate);
+    const adrKes = activeStaysCount > 0 ? Math.round(totalKesVal / activeStaysCount) : 0;
+    const monthlyGrossKes = Math.round(totalKesVal * 30 * 0.7);
+
+    const elMainSymbol = document.getElementById('analyticsMainSymbol');
+    const elTotalPrimary = document.getElementById('analyticsTotalPrimary');
     const elAdr = document.getElementById('analyticsAdr');
-    const elAdrSub = document.getElementById('analyticsAdrSub');
     const elMonthlyGross = document.getElementById('analyticsMonthlyGross');
     const elApprovalRate = document.getElementById('analyticsApprovalRate');
     const elApprovalSub = document.getElementById('analyticsApprovalSub');
+    const elAssetMixTag = document.getElementById('assetMixTotalTag');
+    const elChartAdrTag = document.getElementById('chartAdrTag');
+    const elChartAreaCurrTag = document.getElementById('chartAreaCurrencyTag');
 
-    if (elTotalUsd) elTotalUsd.textContent = totalUsdVal.toLocaleString();
-    if (elTotalKes) elTotalKes.textContent = totalKesVal.toLocaleString();
-
-    const adr = activeStaysCount > 0 ? Math.round(totalUsdVal / activeStaysCount) : 0;
-    if (elAdr) elAdr.textContent = `$${adr.toLocaleString()} / nt`;
-    if (elAdrSub) elAdrSub.textContent = `≈ KES ${(adr * 130).toLocaleString()} Median Rate`;
-
-    const monthlyGrossUsd = Math.round(totalUsdVal * 30 * 0.7);
-    const monthlyGrossKes = monthlyGrossUsd * 130;
-    if (elMonthlyGross) elMonthlyGross.textContent = `$${monthlyGrossUsd.toLocaleString()}`;
+    if (elMainSymbol) elMainSymbol.textContent = isKes ? 'KSh' : '$';
+    if (elTotalPrimary) elTotalPrimary.textContent = totalDisplayVal.toLocaleString();
+    if (elAdr) elAdr.textContent = formatAdminMoney(adrKes);
+    if (elMonthlyGross) elMonthlyGross.textContent = formatAdminMoney(monthlyGrossKes, true);
 
     const totalApplications = approvedHosts + pendingHosts;
     const approvalPct = totalApplications > 0 ? Math.round((approvedHosts / totalApplications) * 1000) / 10 : 100;
     if (elApprovalRate) elApprovalRate.textContent = `${approvalPct}%`;
-    if (elApprovalSub) elApprovalSub.textContent = `${pendingHosts} Host(s) In Audit`;
+    if (elApprovalSub) elApprovalSub.textContent = `${pendingHosts} pending`;
 
-    // Populate dedicated Stays View card valuations
+    if (elAssetMixTag) elAssetMixTag.textContent = `${cachedStays.length} stays`;
+    if (elChartAdrTag) elChartAdrTag.textContent = `Avg: ${formatAdminMoney(adrKes)}`;
+    if (elChartAreaCurrTag) elChartAreaCurrTag.textContent = isKes ? 'KSh' : 'USD';
+
+    // Populate dedicated Stays View KPI cards
     const staysCardUsd = document.getElementById('staysCardUsd');
-    const staysCardKes = document.getElementById('staysCardKes');
     const staysCardAdr = document.getElementById('staysCardAdr');
-    if (staysCardUsd) staysCardUsd.textContent = `$${totalUsdVal.toLocaleString()}`;
-    if (staysCardKes) staysCardKes.textContent = `≈ KES ${totalKesVal.toLocaleString()} / Night`;
-    if (staysCardAdr) staysCardAdr.textContent = `$${adr.toLocaleString()} / night`;
-
-    // Update dynamic executive briefing narratives
-    const insightYieldText = document.getElementById('insightYieldText');
-    if (insightYieldText) {
-      insightYieldText.innerHTML = `The catalog commands <strong>$${totalUsdVal.toLocaleString()} / KES ${totalKesVal.toLocaleString()}</strong> in gross nightly potential. At a modeled 70% monthly occupancy, projected gross volume is <strong>$${monthlyGrossUsd.toLocaleString()} (KES ${(monthlyGrossKes / 1000000).toFixed(2)}M)</strong>, generating an estimated <strong>KES ${(Math.round(monthlyGrossKes * 0.15)).toLocaleString()} in monthly platform commissions</strong>.`;
+    const staysCardOnlinePct = document.getElementById('staysCardOnlinePct');
+    if (staysCardUsd) staysCardUsd.textContent = formatAdminMoney(totalKesVal);
+    if (staysCardAdr) staysCardAdr.textContent = formatAdminMoney(adrKes);
+    if (staysCardOnlinePct) {
+      const onlinePct = cachedStays.length > 0 ? Math.round((activeStaysCount / cachedStays.length) * 100) : 0;
+      staysCardOnlinePct.textContent = `${onlinePct}%`;
     }
 
-    const insightVettingText = document.getElementById('insightVettingText');
-    if (insightVettingText) {
-      const pendingNames = cachedHosts.filter(h => !h.review_status || h.review_status === 'pending_review').map(h => esc(h.full_name || h.fullName)).join(', ');
-      insightVettingText.innerHTML = `<strong>${approvalPct}%</strong> approval rate across evaluated host submissions (${approvedHosts} approved, ${pendingHosts} pending). ${pendingHosts > 0 ? `<strong>${pendingNames || 'Pending Hosts'}</strong> is currently under curatorial inspection for high-speed fiber and staging before catalog launch.` : 'All submitted host dossiers are fully audited and contracted.'}`;
-    }
-
-    const insightPipelineText = document.getElementById('insightPipelineText');
-    if (insightPipelineText) {
-      insightPipelineText.innerHTML = `<strong>${cachedHostWaitlist.length} verified host partners</strong> are on the Founding Waitlist (including Naivasha, Kilifi, Nanyuki, Watamu, Nairobi), representing an incoming pipeline of <strong>~KES 450,000/night</strong> in verified inventory.`;
-    }
-
-    // Render / Update Chart.js luxury graphs
+    // Render / Update Chart.js graphs
     renderAnalyticsCharts();
   }
 
   // =========================================================================
-  // LUXURY CHARTS ENGINE (CHART.JS)
+  // CHARTS ENGINE (CHART.JS — STANDARD KSh, OPTIONAL USD)
   // =========================================================================
-  let chartRegionalInstance = null;
-  let chartAssetMixInstance = null;
-  let chartGrowthInstance = null;
-  let chartPricingInstance = null;
-  let analyticsCurrencyMode = 'USD';
+  function formatAdminMoney(kesVal, compact = false) {
+    const usdRate = (window.LUXEA_CONFIG && window.LUXEA_CONFIG.currency && window.LUXEA_CONFIG.currency.exchangeRateUsdToKes) || 130;
+    const isKes = analyticsCurrencyMode === 'KES';
+    const raw = isKes ? Math.round(Number(kesVal) || 0) : Math.round((Number(kesVal) || 0) / usdRate);
+    if (compact) {
+      if (raw >= 1000000) {
+        const m = (raw / 1000000).toFixed(1).replace(/\.0$/, '');
+        return isKes ? `KSh ${m}M` : `$${m}M`;
+      }
+      if (raw >= 100000) {
+        const k = Math.round(raw / 1000);
+        return isKes ? `KSh ${k}k` : `$${k}k`;
+      }
+    }
+    return isKes ? `KSh ${raw.toLocaleString()}` : `$${raw.toLocaleString()}`;
+  }
 
   function renderAnalyticsCharts() {
     if (typeof Chart === 'undefined') {
@@ -616,20 +697,19 @@ export function initAdminDashboard() {
       return;
     }
 
-    // 1. Chart: Regional Nightly Yield
+    const usdRate = (window.LUXEA_CONFIG && window.LUXEA_CONFIG.currency && window.LUXEA_CONFIG.currency.exchangeRateUsdToKes) || 130;
+    const isKes = analyticsCurrencyMode === 'KES';
+
+    // 1. Chart: Value by Area
     const regionVal = {};
     cachedStays.forEach(s => {
       const isAvail = s.is_available !== false;
       if (!isAvail) return;
       const hub = s.city || s.location_group || s.area || 'Other';
-      const cleanHub = hub.includes('Ruaka') ? 'Ruaka & Northern Bypass'
-        : hub.includes('Westlands') ? 'Westlands Skyline'
-        : hub.includes('Diani') || hub.includes('Coast') ? 'Diani Beach'
-        : hub.includes('Karen') ? 'Karen Sanctuary'
-        : hub;
+      const cleanHub = abbrLocation(hub.split(',')[0].trim());
 
-      const usd = parseFloat(s.price_per_night_usd) || Math.round((s.price_per_night_kes || 0) / 130);
-      const val = analyticsCurrencyMode === 'KES' ? (usd * 130) : usd;
+      const kes = parseFloat(s.price_per_night_kes) || parseFloat(s.kesPrice) || ((parseFloat(s.price_per_night_usd) || 0) * usdRate);
+      const val = isKes ? Math.round(kes) : Math.round(kes / usdRate);
       regionVal[cleanHub] = (regionVal[cleanHub] || 0) + val;
     });
 
@@ -645,7 +725,7 @@ export function initAdminDashboard() {
         data: {
           labels: regionLabels,
           datasets: [{
-            label: analyticsCurrencyMode === 'KES' ? 'Nightly Value (KES)' : 'Nightly Value (USD)',
+            label: isKes ? 'KSh / Night' : 'USD / Night',
             data: regionData,
             backgroundColor: [
               'rgba(212, 175, 55, 0.88)',
@@ -675,9 +755,9 @@ export function initAdminDashboard() {
               bodyFont: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" },
               callbacks: {
                 label: function (ctx) {
-                  return analyticsCurrencyMode === 'KES'
-                    ? ` Nightly Yield: KES ${ctx.raw.toLocaleString()}`
-                    : ` Nightly Yield: $${ctx.raw.toLocaleString()}`;
+                  return isKes
+                    ? ` KSh ${ctx.raw.toLocaleString()} / night`
+                    : ` $${ctx.raw.toLocaleString()} / night`;
                 }
               }
             }
@@ -685,13 +765,13 @@ export function initAdminDashboard() {
           scales: {
             x: {
               grid: { display: false },
-              ticks: { font: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif", weight: '600' }, color: '#604D42' }
+              ticks: { font: { size: 10, family: "'Plus Jakarta Sans', sans-serif", weight: '600' }, color: '#604D42' }
             },
             y: {
               beginAtZero: true,
               grid: { color: 'rgba(178, 150, 125, 0.12)' },
               ticks: {
-                callback: (v) => analyticsCurrencyMode === 'KES' ? `KES ${(v / 1000)}k` : `$${v}`,
+                callback: (v) => isKes ? (v >= 1000 ? `${Math.round(v / 1000)}k` : `${v}`) : `$${v}`,
                 font: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" },
                 color: '#604D42'
               }
@@ -701,14 +781,14 @@ export function initAdminDashboard() {
       });
     }
 
-    // 2. Chart: Asset Allocation / Category Mix (Doughnut Ring Chart)
-    const catMap = { 'Penthouses': 0, 'Beach Villas': 0, 'Townhomes': 0, 'Modern Suites': 0 };
+    // 2. Chart: Stay Types (Doughnut)
+    const catMap = { 'Penthouse': 0, 'Villa': 0, 'Townhome': 0, 'Apt': 0 };
     cachedStays.forEach(s => {
       const cat = (s.property_type || s.category || '').toLowerCase();
-      if (cat.includes('penthouse')) catMap['Penthouses']++;
-      else if (cat.includes('villa')) catMap['Beach Villas']++;
-      else if (cat.includes('townhouse') || cat.includes('townhome')) catMap['Townhomes']++;
-      else catMap['Modern Suites']++;
+      if (cat.includes('penthouse')) catMap['Penthouse']++;
+      else if (cat.includes('villa')) catMap['Villa']++;
+      else if (cat.includes('townhouse') || cat.includes('townhome')) catMap['Townhome']++;
+      else catMap['Apt']++;
     });
 
     const canvasAsset = document.getElementById('chartAssetMix');
@@ -753,7 +833,7 @@ export function initAdminDashboard() {
                 label: function (ctx) {
                   const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                   const pct = Math.round((ctx.raw / (total || 1)) * 100);
-                  return ` ${ctx.label}: ${ctx.raw} Residence(s) (${pct}%)`;
+                  return ` ${ctx.label}: ${ctx.raw} (${pct}%)`;
                 }
               }
             }
@@ -763,7 +843,7 @@ export function initAdminDashboard() {
       });
     }
 
-    // 3. Chart: Platform Growth & Pipeline Trajectory (Spline Chart)
+    // 3. Chart: Growth
     const approvedCount = cachedHosts.filter(h => h.review_status === 'approved').length;
     const canvasGrowth = document.getElementById('chartGrowthTrajectory');
     if (canvasGrowth) {
@@ -772,10 +852,10 @@ export function initAdminDashboard() {
       chartGrowthInstance = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: ['Alpha Launch', 'Week 1', 'Week 2', 'Current Live', 'Q4 Target'],
+          labels: ['Launch', 'W1', 'W2', 'Now', 'Goal'],
           datasets: [
             {
-              label: 'Approved Live Stays',
+              label: 'Stays',
               data: [1, 2, 3, cachedStays.length, 12],
               borderColor: '#B28756',
               backgroundColor: 'rgba(212, 175, 55, 0.12)',
@@ -786,7 +866,7 @@ export function initAdminDashboard() {
               pointRadius: 3
             },
             {
-              label: 'Verified Host Partners',
+              label: 'Hosts',
               data: [1, 2, 4, approvedCount, 15],
               borderColor: '#4A342A',
               borderWidth: 1.8,
@@ -795,7 +875,7 @@ export function initAdminDashboard() {
               pointRadius: 3
             },
             {
-              label: 'Founding Waitlist Pipeline',
+              label: 'Waitlist',
               data: [2, 3, 5, cachedHostWaitlist.length, 25],
               borderColor: '#F59E0B',
               borderDash: [5, 5],
@@ -840,20 +920,20 @@ export function initAdminDashboard() {
       });
     }
 
-    // 4. Chart: Residence Nightly Pricing Benchmark vs ADR
+    // 4. Chart: Nightly Rates
     const sortedStays = [...cachedStays].sort((a, b) => {
-      const pA = parseFloat(a.price_per_night_usd) || 0;
-      const pB = parseFloat(b.price_per_night_usd) || 0;
+      const pA = parseFloat(a.price_per_night_kes) || ((parseFloat(a.price_per_night_usd) || 0) * usdRate);
+      const pB = parseFloat(b.price_per_night_kes) || ((parseFloat(b.price_per_night_usd) || 0) * usdRate);
       return pB - pA;
     });
 
     const stayLabels = sortedStays.map(s => {
-      const n = s.name || 'Residence';
-      return n.length > 20 ? n.substring(0, 20) + '...' : n;
+      const n = s.name || 'Stay';
+      return n.length > 16 ? n.substring(0, 15) + '…' : n;
     });
     const stayPrices = sortedStays.map(s => {
-      const usd = parseFloat(s.price_per_night_usd) || Math.round((s.price_per_night_kes || 0) / 130);
-      return analyticsCurrencyMode === 'KES' ? (usd * 130) : usd;
+      const kes = parseFloat(s.price_per_night_kes) || parseFloat(s.kesPrice) || ((parseFloat(s.price_per_night_usd) || 0) * usdRate);
+      return isKes ? Math.round(kes) : Math.round(kes / usdRate);
     });
 
     const canvasPricing = document.getElementById('chartPricingBenchmark');
@@ -865,7 +945,7 @@ export function initAdminDashboard() {
         data: {
           labels: stayLabels,
           datasets: [{
-            label: analyticsCurrencyMode === 'KES' ? 'Nightly Rate (KES)' : 'Nightly Rate (USD)',
+            label: isKes ? 'KSh / Night' : 'USD / Night',
             data: stayPrices,
             backgroundColor: [
               '#059669',
@@ -895,9 +975,9 @@ export function initAdminDashboard() {
               bodyFont: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" },
               callbacks: {
                 label: function (ctx) {
-                  return analyticsCurrencyMode === 'KES'
-                    ? ` Rate: KES ${ctx.raw.toLocaleString()} / night`
-                    : ` Rate: $${ctx.raw.toLocaleString()} / night`;
+                  return isKes
+                    ? ` KSh ${ctx.raw.toLocaleString()} / night`
+                    : ` $${ctx.raw.toLocaleString()} / night`;
                 }
               }
             }
@@ -907,7 +987,7 @@ export function initAdminDashboard() {
               beginAtZero: true,
               grid: { color: 'rgba(178, 150, 125, 0.12)' },
               ticks: {
-                callback: (v) => analyticsCurrencyMode === 'KES' ? `KES ${(v / 1000)}k` : `$${v}`,
+                callback: (v) => isKes ? (v >= 1000 ? `${Math.round(v / 1000)}k` : `${v}`) : `$${v}`,
                 font: { size: 9.5, family: "'Plus Jakarta Sans', sans-serif" },
                 color: '#604D42'
               }
@@ -922,7 +1002,7 @@ export function initAdminDashboard() {
     }
   }
 
-  // Currency Toggle Handler for Charts & Valuations
+  // Global Currency Switch (Default: KSh; optional USD)
   const btnToggleUsd = document.getElementById('btnToggleUsd');
   const btnToggleKes = document.getElementById('btnToggleKes');
 
@@ -930,14 +1010,16 @@ export function initAdminDashboard() {
     analyticsCurrencyMode = 'USD';
     btnToggleUsd.classList.add('active');
     btnToggleKes?.classList.remove('active');
-    renderAnalyticsCharts();
+    renderMetricsAndAnalytics();
+    renderAllViews();
   });
 
   btnToggleKes?.addEventListener('click', () => {
     analyticsCurrencyMode = 'KES';
     btnToggleKes.classList.add('active');
     btnToggleUsd?.classList.remove('active');
-    renderAnalyticsCharts();
+    renderMetricsAndAnalytics();
+    renderAllViews();
   });
 
   function renderAllViews() {
@@ -1005,48 +1087,40 @@ export function initAdminDashboard() {
       tr.className = 'host-table-row';
       tr.setAttribute('data-ref', ref);
       tr.setAttribute('data-email', email);
-      tr.title = 'Click row to inspect full dossier';
+      tr.title = 'Click row to view full details';
+      const shortLoc = abbrLocation(loc);
+      const shortRef = ref && ref.length > 12 ? ref.slice(-8) : ref;
       tr.innerHTML = `
         <td>
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span class="host-cell-name">${esc(name)}</span>
-            <button type="button" class="btn-copy-micro copy-ref-btn" data-ref="${esc(ref)}" title="Click to copy Ref ID: ${esc(ref)}">
-              <span>${esc(ref)}</span>
-            </button>
-            ${isSuspended ? '<span class="status-chip chip-red" style="padding: 1px 6px;">🚫 Suspended</span>' : ''}
-            ${isDelisted ? '<span class="status-chip chip-neutral" style="padding: 1px 6px; background:#FEF3C7; color:#B45309;">🙈 Delisted</span>' : ''}
+          <div class="cell-inline-row">
+            <span class="host-cell-name cell-ellipsis" title="${esc(name)}">${esc(name)}</span>
+            <button type="button" class="btn-copy-micro copy-ref-btn" data-ref="${esc(ref)}" title="Copy Ref: ${esc(ref)}">${esc(shortRef)}</button>
+            ${isSuspended ? '<span class="status-chip chip-red" style="padding: 1px 5px; font-size: 0.62rem;">Blocked</span>' : ''}
+            ${isDelisted ? '<span class="status-chip chip-neutral" style="padding: 1px 5px; font-size: 0.62rem; background:#FEF3C7; color:#B45309;">Hidden</span>' : ''}
           </div>
-          <div class="host-cell-sub" style="margin-top: 2px;">${esc(email)}</div>
+          <div class="host-cell-sub cell-ellipsis" title="${esc(email)}">${esc(email)}</div>
         </td>
 
         <td>
-          <div class="host-cell-name">${esc(prop)}</div>
-          <div class="host-cell-sub" style="margin-top: 2px;">${esc(loc)}</div>
+          <div class="host-cell-name cell-ellipsis" title="${esc(prop)}">${esc(prop)}</div>
+          <div class="host-cell-sub cell-ellipsis" title="${esc(loc)}">${esc(shortLoc)}</div>
         </td>
 
         <td>
-          <select class="status-select-inline status-${esc(status)} host-status-select" data-ref="${esc(ref)}" style="width: 100%; min-width: 110px;">
-            <option value="pending_review" ${status === 'pending_review' ? 'selected' : ''}>⏳ Pending</option>
-            <option value="approved" ${status === 'approved' ? 'selected' : ''}>✅ Approved</option>
-            <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
-            <option value="suspended" ${status === 'suspended' || isSuspended ? 'selected' : ''}>🚫 Suspended</option>
+          <select class="status-select-inline status-${esc(status)} host-status-select" data-ref="${esc(ref)}" style="width: 100%;">
+            <option value="pending_review" ${status === 'pending_review' ? 'selected' : ''}>Pending</option>
+            <option value="approved" ${status === 'approved' ? 'selected' : ''}>Approved</option>
+            <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>Rejected</option>
+            <option value="suspended" ${status === 'suspended' || isSuspended ? 'selected' : ''}>Blocked</option>
           </select>
         </td>
 
-        <td style="text-align: right; white-space: nowrap;">
-          <div style="display: inline-flex; align-items: center; gap: 4px; justify-content: flex-end;">
-            <button type="button" class="btn-table-action btn-edit-host" data-ref="${esc(ref)}" data-email="${esc(email)}" title="Edit host bio, photo, property details & security controls" style="background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
-              <span>✏️ Edit</span>
-            </button>
-            <button type="button" class="btn-table-action btn-toggle-suspend-quick" data-email="${esc(email)}" data-suspended="${isSuspended ? 'true' : 'false'}" title="${isSuspended ? 'Unsuspend portal access' : 'Block / Suspend access to earnings & portal'}" style="${isSuspended ? 'background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC;' : 'background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;'}">
-              <span>${isSuspended ? '🔓 Unblock' : '🔒 Block'}</span>
-            </button>
-            <button type="button" class="btn-table-action btn-toggle-delist-quick" data-email="${esc(email)}" data-delisted="${isDelisted ? 'true' : 'false'}" title="${isDelisted ? 'Relist property on platform catalog' : 'Delist / Hide residence from stays catalog'}" style="${isDelisted ? 'background: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD;' : 'background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D;'}">
-              <span>${isDelisted ? '🌐 Relist' : '🚫 Delist'}</span>
-            </button>
-            <button type="button" class="btn-table-action btn-inspect trigger-inspect-btn" data-ref="${esc(ref)}" title="Inspect full application dossier (photos, payout, KYC)">
-              <span>Inspect ↗</span>
-            </button>
+        <td style="text-align: right;">
+          <div class="table-action-row">
+            <button type="button" class="btn-table-action btn-edit-host" data-ref="${esc(ref)}" data-email="${esc(email)}" title="Edit host" style="background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">Edit</button>
+            <button type="button" class="btn-table-action btn-toggle-suspend-quick" data-email="${esc(email)}" data-suspended="${isSuspended ? 'true' : 'false'}" title="${isSuspended ? 'Unblock host access' : 'Block host access'}" style="${isSuspended ? 'background: #DCFCE7; color: #15803D; border: 1px solid #86EFAC;' : 'background: #FEE2E2; color: #DC2626; border: 1px solid #FCA5A5;'}">${isSuspended ? 'Unblock' : 'Block'}</button>
+            <button type="button" class="btn-table-action btn-toggle-delist-quick" data-email="${esc(email)}" data-delisted="${isDelisted ? 'true' : 'false'}" title="${isDelisted ? 'Show on site' : 'Hide from site'}" style="${isDelisted ? 'background: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD;' : 'background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D;'}">${isDelisted ? 'Show' : 'Hide'}</button>
+            <button type="button" class="btn-table-action btn-inspect trigger-inspect-btn" data-ref="${esc(ref)}" title="View full dossier">View ↗</button>
           </div>
         </td>
       `;
@@ -1352,39 +1426,42 @@ export function initAdminDashboard() {
       const hostRef = host ? (host.ref_id || host.refId) : (stay.host_ref_id || 'Verified Partner');
       const hostPhone = host ? (host.phone || '') : '';
 
+      const fullArea = `${stay.city || 'Nairobi'}, ${stay.area || stay.county || 'Kenya'}`;
+      const shortArea = abbrLocation(fullArea);
+      const shortType = abbrType(stay.property_type || stay.category || 'Apartment');
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="${esc(safeUrl(stay.cover_image_url || stay.image, '/assets/images/hero-1.webp'))}" alt="${esc(stay.name)}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0;" loading="lazy">
-            <div>
-              <div class="host-cell-name">${esc(stay.name)}</div>
-              <span class="status-chip chip-neutral" style="padding: 1px 6px; font-size: 0.66rem; margin-top: 2px;">${esc(stay.property_type || stay.category || 'Apartment')}</span>
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+            <img src="${esc(safeUrl(stay.cover_image_url || stay.image, '/assets/images/hero-1.webp'))}" alt="${esc(stay.name)}" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover; flex-shrink: 0;" loading="lazy">
+            <div style="min-width: 0; flex: 1;">
+              <div class="host-cell-name cell-ellipsis" title="${esc(stay.name)}">${esc(stay.name)}</div>
+              <span class="status-chip chip-neutral" style="padding: 1px 6px; font-size: 0.65rem; margin-top: 2px;" title="${esc(stay.property_type || stay.category || '')}">${esc(shortType)}</span>
             </div>
           </div>
         </td>
 
         <td>
-          <div style="font-weight: 600; font-size: 0.82rem; color: #241812;">${esc(stay.city || 'Nairobi')}, ${esc(stay.area || stay.county || 'Kenya')}</div>
-          <div class="host-cell-sub" style="margin-top: 2px;">Owner: ${esc(hostName)}</div>
+          <div class="cell-ellipsis" style="font-weight: 600; font-size: 0.78rem; color: #241812;" title="${esc(fullArea)}">${esc(shortArea)}</div>
+          <div class="host-cell-sub cell-ellipsis" title="${esc(hostName)}">${esc(hostName)}</div>
         </td>
 
         <td>
-          <div style="font-weight: 700; color: #241812; font-size: 0.86rem;">$${usdPrice} <span style="font-size: 0.7rem; color: var(--color-cocoa);">/nt</span></div>
-          <small style="color: var(--color-camel-dark); font-weight: 600; font-size: 0.72rem;">KES ${kesPrice.toLocaleString()}</small>
+          <div style="font-weight: 700; color: #241812; font-size: 0.84rem; white-space: nowrap;">${esc(formatAdminMoney(kesPrice))}</div>
+          <small style="color: var(--color-cocoa); font-size: 0.68rem;">/ night</small>
         </td>
 
         <td>
           <label class="lux-toggle-switch">
             <input type="checkbox" class="lux-toggle-input admin-stay-avail-toggle" data-id="${esc(stay.id || stay.slug)}" ${isAvail ? 'checked' : ''}>
             <span class="lux-toggle-slider"></span>
-            <span class="lux-toggle-status-text" style="font-size: 0.74rem;">${isAvail ? 'Live' : 'Hidden'}</span>
+            <span class="lux-toggle-status-text" style="font-size: 0.72rem;">${isAvail ? 'Live' : 'Off'}</span>
           </label>
         </td>
 
         <td style="text-align: right;">
-          <a href="/stays/?id=${encodeURIComponent(stay.id || stay.slug)}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect" style="padding: 4px 8px; font-size: 0.72rem;">
-            <span>Preview ↗</span>
+          <a href="/stays/?id=${encodeURIComponent(stay.id || stay.slug)}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-inspect" style="padding: 4px 8px; font-size: 0.7rem;">
+            <span>Open ↗</span>
           </a>
         </td>
       `;
@@ -1452,27 +1529,28 @@ export function initAdminDashboard() {
       const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
       const waUrl = digitsOnly ? `https://wa.me/${waNumber}` : '';
 
+      const shortDest = abbrLocation(dest);
+      const shortTier = tier.replace(/Founding\s*Circle/i, 'Founding');
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <strong style="font-family: monospace; color: #B28756; font-size: 0.8rem;">${esc(pass)}</strong>
+          <strong class="cell-ellipsis" style="font-family: monospace; color: #B28756; font-size: 0.76rem;" title="${esc(pass)}">${esc(pass)}</strong>
         </td>
         <td>
-          <div class="host-cell-name">${esc(name)}</div>
-          <div class="host-cell-sub" style="margin-top: 2px;">
-            <span>${esc(phone)}</span>
-            ${waUrl ? `<a href="${esc(waUrl)}" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
-            <span>•</span>
-            <span title="${esc(email)}" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${esc(email)}</span>
+          <div class="host-cell-name cell-ellipsis" title="${esc(name)}">${esc(name)}</div>
+          <div class="host-cell-sub cell-inline-row">
+            <span style="flex-shrink: 0;">${esc(phone)}</span>
+            ${waUrl ? `<a href="${esc(waUrl)}" target="_blank" rel="noopener noreferrer" title="WhatsApp" style="color: #22C55E; font-size: 11px; text-decoration: none; flex-shrink: 0;">💬</a>` : ''}
+            <span class="cell-ellipsis" title="${esc(email)}">${esc(email)}</span>
           </div>
         </td>
         <td>
-          <div style="font-weight: 500; color: #241812; font-size: 0.8rem;">${esc(dest)}</div>
+          <div class="cell-ellipsis" style="font-weight: 600; color: #241812; font-size: 0.76rem;" title="${esc(dest)}">${esc(shortDest)}</div>
         </td>
         <td>
-          <span class="status-chip chip-gold" style="padding: 2px 8px; font-size: 0.72rem;">${esc(tier)}</span>
+          <span class="status-chip chip-gold" style="padding: 2px 7px; font-size: 0.68rem;" title="${esc(tier)}">${esc(shortTier)}</span>
         </td>
-        <td style="text-align: right;">
+        <td style="text-align: right; white-space: nowrap;">
           <small style="color: var(--color-cocoa); font-weight: 600;">${esc(date)}</small>
         </td>
       `;
@@ -1525,39 +1603,34 @@ export function initAdminDashboard() {
       const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${name}, this is Ronald from Luxea Living regarding your host registration (${pass}).`)}` : '';
 
       const safePortfolioLink = safeUrl(link);
+      const shortRegion = abbrLocation(region);
+      const shortType = abbrType(propType);
+      const shortReady = abbrStatus(readiness);
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <strong style="font-family: monospace; color: #D4AF37; font-size: 0.8rem;">${esc(pass)}</strong>
-          <div style="margin-top: 2px;">
-            <span class="status-chip chip-gold" style="padding: 1px 6px; font-size: 0.65rem;">${esc(tier)}</span>
+          <strong class="cell-ellipsis" style="font-family: monospace; color: #D4AF37; font-size: 0.76rem;" title="${esc(pass)}">${esc(pass)}</strong>
+        </td>
+        <td>
+          <div class="host-cell-name cell-ellipsis" title="${esc(name)}">${esc(name)}</div>
+          <div class="host-cell-sub cell-inline-row">
+            <span style="flex-shrink: 0;">${esc(phone)}</span>
+            ${waUrl ? `<a href="${esc(waUrl)}" target="_blank" rel="noopener noreferrer" title="WhatsApp" style="color: #22C55E; font-size: 11px; text-decoration: none; flex-shrink: 0;">💬</a>` : ''}
+            <span class="cell-ellipsis" title="${esc(email)}">${esc(email)}</span>
           </div>
         </td>
         <td>
-          <div class="host-cell-name">${esc(name)}</div>
-          <div class="host-cell-sub" style="margin-top: 2px;">
-            <span>${esc(phone)}</span>
-            ${waUrl ? `<a href="${esc(waUrl)}" target="_blank" rel="noopener noreferrer" title="Chat on WhatsApp" style="color: #22C55E; font-size: 12px; text-decoration: none;">💬</a>` : ''}
-            <span>•</span>
-            <span title="${esc(email)}" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${esc(email)}</span>
-          </div>
+          <div class="cell-ellipsis" style="font-weight: 700; color: #241812; font-size: 0.8rem;" title="${esc(propName)}">${esc(propName)}</div>
+          <div class="host-cell-sub cell-ellipsis" title="${esc(`${propType} • ${beds} Bed • ${region}`)}">${esc(shortType)} • ${esc(beds)}B • ${esc(shortRegion)}</div>
         </td>
         <td>
-          <div style="font-weight: 700; color: #241812; font-size: 0.85rem;">${esc(propName)}</div>
-          <div class="host-cell-sub" style="margin-top: 2px;">
-            <span>${esc(propType)} • ${esc(beds)} Bed</span>
-            <span>•</span>
-            <span style="font-weight: 600;">${esc(region)}</span>
+          <div class="cell-inline-row">
+            <span class="status-chip ${readiness.toLowerCase().includes('ready') ? 'chip-green' : 'chip-neutral'}" style="padding: 1px 6px; font-size: 0.66rem;" title="${esc(readiness)}">${esc(shortReady)}</span>
+            <span style="color: #1E8449; font-weight: 700; font-size: 0.68rem;">0%</span>
+            ${safePortfolioLink ? `<a href="${esc(safePortfolioLink)}" target="_blank" rel="noopener noreferrer" style="color: #B28756; text-decoration: underline; font-size: 0.68rem;">Link ↗</a>` : ''}
           </div>
         </td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <span class="status-chip ${readiness.toLowerCase().includes('ready') ? 'chip-green' : 'chip-neutral'}" style="padding: 1px 6px; font-size: 0.68rem;">${esc(readiness)}</span>
-            <span style="color: #22C55E; font-weight: 700; font-size: 0.7rem;">0% (90d)</span>
-          </div>
-          ${safePortfolioLink ? `<div style="margin-top: 2px;"><a href="${esc(safePortfolioLink)}" target="_blank" rel="noopener noreferrer" style="color: #B28756; text-decoration: underline; font-size: 0.72rem;">Portfolio Link ↗</a></div>` : ''}
-        </td>
-        <td style="text-align: right;">
+        <td style="text-align: right; white-space: nowrap;">
           <small style="color: var(--color-cocoa); font-weight: 600;">${esc(date)}</small>
         </td>
       `;
@@ -1620,23 +1693,24 @@ export function initAdminDashboard() {
       const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
       const isSuspended = p.is_suspended === true;
 
-      // Status chip: Active vs Inactive / Suspended
+      // Status chip: Active vs Blocked
       const statusChip = isSuspended
-        ? `<span class="status-chip chip-red" style="padding: 2px 8px; font-size: 0.7rem; font-weight: 700;">🔴 Suspended</span>`
-        : `<span class="status-chip chip-green" style="padding: 2px 8px; font-size: 0.7rem; font-weight: 700;">🟢 Active</span>`;
+        ? `<span class="status-chip chip-red" style="padding: 2px 7px; font-size: 0.68rem; font-weight: 700;">Blocked</span>`
+        : `<span class="status-chip chip-green" style="padding: 2px 7px; font-size: 0.68rem; font-weight: 700;">Active</span>`;
 
       // Cross check linked registries
-      let linkedBadge = '<span class="status-chip chip-neutral" style="padding: 1px 6px; font-size: 0.65rem;">Auth Account</span>';
+      let linkedBadge = '<span class="status-chip chip-neutral" style="padding: 1px 6px; font-size: 0.65rem;">User</span>';
       const hostMatch = cachedHosts.find(h => (h.email || '').toLowerCase() === email.toLowerCase());
       const waitlistMatch = cachedGuests.find(g => (g.email || '').toLowerCase() === email.toLowerCase());
       const hostWaitlistMatch = cachedHostWaitlist.find(hw => (hw.email || '').toLowerCase() === email.toLowerCase());
 
       if (hostMatch) {
-        linkedBadge = `<span class="status-chip ${hostMatch.review_status === 'approved' ? 'chip-green' : 'chip-gold'}" style="padding: 1px 6px; font-size: 0.65rem;">Host: ${hostMatch.review_status || 'Pending'}</span>`;
+        const hs = hostMatch.review_status === 'approved' ? 'Live' : 'Pending';
+        linkedBadge = `<span class="status-chip ${hostMatch.review_status === 'approved' ? 'chip-green' : 'chip-gold'}" style="padding: 1px 6px; font-size: 0.65rem;">Host (${hs})</span>`;
       } else if (hostWaitlistMatch) {
-        linkedBadge = `<span class="status-chip chip-gold" style="padding: 1px 6px; font-size: 0.65rem;">Host Waitlist</span>`;
+        linkedBadge = `<span class="status-chip chip-gold" style="padding: 1px 6px; font-size: 0.65rem;">Waitlist</span>`;
       } else if (waitlistMatch) {
-        linkedBadge = `<span class="status-chip chip-green" style="padding: 1px 6px; font-size: 0.65rem;">VIP Waitlist</span>`;
+        linkedBadge = `<span class="status-chip chip-green" style="padding: 1px 6px; font-size: 0.65rem;">VIP</span>`;
       }
 
       const isSuperAdminRole = currentRole === 'super_admin';
@@ -1644,48 +1718,40 @@ export function initAdminDashboard() {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #B28756, #241812); color: #FFF; font-weight: 700; font-size: 0.72rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+          <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+            <div style="width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, #B28756, #241812); color: #FFF; font-weight: 700; font-size: 0.68rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
               ${esc(initials)}
             </div>
-            <div>
-              <div class="host-cell-name" style="display: flex; align-items: center; gap: 6px;">
-                <span>${esc(name)}</span>
-                ${isSuperAdminRole ? '<span title="Super Admin" style="font-size: 11px;">👑</span>' : ''}
+            <div style="min-width: 0; flex: 1;">
+              <div class="host-cell-name cell-inline-row">
+                <span class="cell-ellipsis" title="${esc(name)}">${esc(name)}</span>
+                ${isSuperAdminRole ? '<span title="Super Admin" style="font-size: 11px; flex-shrink: 0;">👑</span>' : ''}
               </div>
-              <div class="host-cell-sub" style="font-family: monospace; font-size: 0.68rem; color: #8F847C;" title="Supabase Auth UUID">
-                ${p.id ? esc(p.id.substring(0, 13)) + '...' : 'Auth UUID'}
+              <div class="host-cell-sub cell-ellipsis" style="font-family: monospace; font-size: 0.64rem; color: #8F847C;" title="${esc(p.id || '')}">
+                ${p.id ? esc(p.id.substring(0, 8)) : '—'}
               </div>
             </div>
           </div>
         </td>
         <td>
-          <div style="font-weight: 600; color: #241812; font-size: 0.78rem;">${esc(email)}</div>
-          ${p.phone ? `<div class="host-cell-sub">${esc(p.phone)}</div>` : ''}
+          <div class="cell-ellipsis" style="font-weight: 600; color: #241812; font-size: 0.76rem;" title="${esc(email)}">${esc(email)}</div>
+          ${p.phone ? `<div class="host-cell-sub cell-ellipsis">${esc(p.phone)}</div>` : ''}
         </td>
         <td>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <select class="form-control profile-role-select" data-user-id="${esc(p.id)}" data-email="${esc(email)}" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 6px; font-weight: 600; height: 28px; cursor: pointer; ${currentRole === 'super_admin' ? 'border-color: #D4AF37; background: rgba(212, 175, 55, 0.08); color: #9A7B0C;' : currentRole === 'admin' ? 'border-color: #3B82F6; color: #1D4ED8;' : currentRole === 'host' ? 'border-color: #10B981; color: #047857;' : 'border-color: #D1D5DB; color: #374151;'}">
-              <option value="super_admin" ${currentRole === 'super_admin' ? 'selected' : ''}>👑 Super Admin</option>
-              <option value="admin" ${currentRole === 'admin' ? 'selected' : ''}>🛡️ System Admin</option>
-              <option value="host" ${currentRole === 'host' ? 'selected' : ''}>🏡 Host Partner</option>
-              <option value="member" ${currentRole === 'member' || !currentRole ? 'selected' : ''}>✨ VIP Member</option>
-            </select>
-          </div>
+          <select class="form-control profile-role-select" data-user-id="${esc(p.id)}" data-email="${esc(email)}" style="width: 100%; padding: 2px 6px; font-size: 0.7rem; border-radius: 6px; font-weight: 600; height: 28px; cursor: pointer; ${currentRole === 'super_admin' ? 'border-color: #D4AF37; background: rgba(212, 175, 55, 0.08); color: #9A7B0C;' : currentRole === 'admin' ? 'border-color: #3B82F6; color: #1D4ED8;' : currentRole === 'host' ? 'border-color: #10B981; color: #047857;' : 'border-color: #D1D5DB; color: #374151;'}">
+            <option value="super_admin" ${currentRole === 'super_admin' ? 'selected' : ''}>Super Admin</option>
+            <option value="admin" ${currentRole === 'admin' ? 'selected' : ''}>Admin</option>
+            <option value="host" ${currentRole === 'host' ? 'selected' : ''}>Host</option>
+            <option value="member" ${currentRole === 'member' || !currentRole ? 'selected' : ''}>Member</option>
+          </select>
         </td>
-        <td>
-          ${statusChip}
-        </td>
-        <td>
-          ${linkedBadge}
-        </td>
-        <td style="text-align: right;">
+        <td>${statusChip}</td>
+        <td>${linkedBadge}</td>
+        <td style="text-align: right; white-space: nowrap;">
           <small style="color: var(--color-cocoa); font-weight: 600;">${esc(date)}</small>
         </td>
         <td style="text-align: right; white-space: nowrap;">
-          <button type="button" class="btn-table-action btn-edit-profile-row" data-email="${esc(email)}" data-user-id="${esc(p.id)}" title="Edit profile bio, avatar, role & permissions" style="background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">
-            <span>✏️ Edit</span>
-          </button>
+          <button type="button" class="btn-table-action btn-edit-profile-row" data-email="${esc(email)}" data-user-id="${esc(p.id)}" title="Edit user" style="background: #FAF5EE; border: 1px solid #D4AF37; color: #9A7B0C;">Edit</button>
         </td>
       `;
 
@@ -1782,37 +1848,37 @@ export function initAdminDashboard() {
           const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
           const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${contact}, this is Ronald from Luxea Living Admin regarding your valet partnership (${refId}).`)}` : '';
 
-          const areasText = areas.join(', ');
+          const areasFull = areas.join(', ');
+          const areasShort = abbrLocation(areasFull);
 
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>
-              <div style="font-weight: 700; color: #241812; font-size: 0.78rem; line-height: 1.2;">${bizName}</div>
-              <div style="display: flex; align-items: center; gap: 4px; margin-top: 3px; flex-wrap: wrap;">
-                <code style="font-family: monospace; font-size: 0.65rem; color: #8C6D58; background: #F6F3EE; padding: 1px 4px; border-radius: 3px; border: 1px solid #E5DFD7;">${refId}</code>
-                ${isExpress ? '<span class="status-chip chip-gold" style="font-size: 0.58rem; padding: 1px 4px;">⚡ Express</span>' : ''}
+              <div class="cell-ellipsis" style="font-weight: 700; color: #241812; font-size: 0.78rem;" title="${esc(bizName)}">${esc(bizName)}</div>
+              <div class="cell-inline-row" style="margin-top: 2px;">
+                <code style="font-family: monospace; font-size: 0.64rem; color: #8C6D58; background: #F6F3EE; padding: 1px 4px; border-radius: 3px; border: 1px solid #E5DFD7;">${esc(refId)}</code>
+                ${isExpress ? '<span class="status-chip chip-gold" style="font-size: 0.58rem; padding: 1px 4px;">Fast</span>' : ''}
               </div>
             </td>
             <td>
-              <div class="host-cell-name" style="font-size: 0.78rem;">${contact}</div>
-              <div class="host-cell-sub" style="margin-top: 1px; font-size: 0.70rem;">
-                <span>${phone}</span>
-                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Partner" style="color: #22C55E; font-size: 11px; text-decoration: none; margin-left: 2px;">💬</a>` : ''}
+              <div class="host-cell-name cell-ellipsis" style="font-size: 0.76rem;" title="${esc(contact)}">${esc(contact)}</div>
+              <div class="host-cell-sub cell-inline-row" style="font-size: 0.7rem;">
+                <span>${esc(phone)}</span>
+                ${waUrl ? `<a href="${esc(waUrl)}" target="_blank" rel="noopener noreferrer" title="WhatsApp" style="color: #22C55E; font-size: 11px; text-decoration: none;">💬</a>` : ''}
               </div>
             </td>
             <td>
-              <div style="font-size: 0.72rem; color: #4A3B32; line-height: 1.3;">${areasText}</div>
+              <div class="cell-ellipsis" style="font-size: 0.74rem; color: #4A3B32; font-weight: 600;" title="${esc(areasFull)}">${esc(areasShort)}</div>
             </td>
             <td>
-              <div style="font-size: 0.68rem; color: #241812; line-height: 1.3;">
-                <div><span style="color: #8C6D58;">Wash:</span> <strong>${washRate}</strong>/kg</div>
-                <div><span style="color: #8C6D58;">Linen:</span> <strong>${linenRate}</strong>/set</div>
-                <div><span style="color: #8C6D58;">Suit:</span> <strong>${suitRate}</strong></div>
+              <div style="font-size: 0.7rem; color: #241812; line-height: 1.3; white-space: nowrap;">
+                <div><span style="color: #8C6D58;">Kg:</span> <strong>${esc(formatAdminMoney(washRate))}</strong></div>
+                <div><span style="color: #8C6D58;">Set:</span> <strong>${esc(formatAdminMoney(linenRate))}</strong></div>
               </div>
             </td>
-            <td style="text-align: right;">
-              <div style="font-weight: 700; color: #B28756; font-size: 0.76rem;">⭐ ${rating}</div>
-              <small style="color: #8C6D58; font-size: 0.64rem;">${completedJobs} jobs</small>
+            <td style="text-align: right; white-space: nowrap;">
+              <div style="font-weight: 700; color: #B28756; font-size: 0.76rem;">⭐ ${esc(rating)}</div>
+              <small style="color: #8C6D58; font-size: 0.64rem;">${esc(completedJobs)} jobs</small>
             </td>
           `;
           laundryPartnersTableBody.appendChild(tr);
@@ -1870,38 +1936,40 @@ export function initAdminDashboard() {
           const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
           const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${custName}, this is Luxea Living Concierge regarding your laundry valet pickup (${orderNum}).`)}` : '';
 
+          const shortArea = abbrLocation(area);
+          const propFull = `${propName} ${unit}`.trim();
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>
-              <code style="font-family: monospace; font-size: 0.72rem; font-weight: 700; color: #241812;">${orderNum}</code>
+              <code class="cell-ellipsis" style="font-family: monospace; font-size: 0.72rem; font-weight: 700; color: #241812;" title="${esc(orderNum)}">${esc(orderNum)}</code>
               <div style="margin-top: 2px;">
                 <span class="status-chip ${isTurnover ? 'chip-gold' : 'chip-neutral'}" style="font-size: 0.58rem; padding: 1px 4px;">
-                  ${isTurnover ? '🏡 Linen' : '✨ Valet'}
+                  ${isTurnover ? 'Linen' : 'Valet'}
                 </span>
               </div>
             </td>
             <td>
-              <div class="host-cell-name" style="font-size: 0.76rem;">${custName}</div>
-              <div class="host-cell-sub" style="margin-top: 1px; font-size: 0.70rem;">
-                <span>${custPhone}</span>
-                ${waUrl ? `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" title="WhatsApp Customer" style="color: #22C55E; font-size: 11px; text-decoration: none; margin-left: 2px;">💬</a>` : ''}
+              <div class="host-cell-name cell-ellipsis" style="font-size: 0.76rem;" title="${esc(custName)}">${esc(custName)}</div>
+              <div class="host-cell-sub cell-inline-row" style="font-size: 0.7rem;">
+                <span>${esc(custPhone)}</span>
+                ${waUrl ? `<a href="${esc(waUrl)}" target="_blank" rel="noopener noreferrer" title="WhatsApp" style="color: #22C55E; font-size: 11px; text-decoration: none;">💬</a>` : ''}
               </div>
             </td>
             <td>
-              <div style="font-weight: 600; color: #241812; font-size: 0.75rem;">${propName} ${unit}</div>
-              <small style="color: #8C6D58; font-size: 0.68rem;">📍 ${area}</small>
+              <div class="cell-ellipsis" style="font-weight: 600; color: #241812; font-size: 0.75rem;" title="${esc(propFull)}">${esc(propFull)}</div>
+              <small class="cell-ellipsis" style="color: #8C6D58; font-size: 0.68rem;" title="${esc(area)}">${esc(shortArea)}</small>
             </td>
             <td>
-              <div style="font-size: 0.74rem; font-weight: 600; color: #241812;">${service}</div>
-              <small style="color: #8C6D58; font-size: 0.66rem; display: block;">📅 ${pickupDate} ${timeSlot ? `• ${timeSlot}` : ''}</small>
+              <div class="cell-ellipsis" style="font-size: 0.74rem; font-weight: 600; color: #241812;" title="${esc(service)}">${esc(service)}</div>
+              <small class="cell-ellipsis" style="color: #8C6D58; font-size: 0.66rem;">${esc(pickupDate)}</small>
             </td>
-            <td>
-              <div style="font-weight: 700; color: #B28756; font-size: 0.78rem;">KES ${amount.toLocaleString()}</div>
+            <td style="white-space: nowrap;">
+              <div style="font-weight: 700; color: #B28756; font-size: 0.78rem;">${esc(formatAdminMoney(amount))}</div>
               <small style="color: #1E8449; font-size: 0.64rem; font-weight: 600;">M-Pesa</small>
             </td>
-            <td style="text-align: right;">
+            <td style="text-align: right; white-space: nowrap;">
               <span class="status-chip ${statusBadgeClass}" style="font-size: 0.64rem; padding: 1px 6px;">
-                ${statusText}
+                ${esc(statusText)}
               </span>
             </td>
           `;
@@ -1953,13 +2021,13 @@ export function initAdminDashboard() {
   const hostWaitlistSearchInput = document.getElementById('hostWaitlistSearchInput');
 
   const tabTitles = {
-    overview: { title: 'Executive Overview', sub: 'High-level command center, portfolio valuation, and platform economics.' },
-    hosts: { title: 'Host Applications', sub: 'Curatorial vetting, identity verification documents, and payout routing.' },
-    stays: { title: 'Live Stays Catalog', sub: 'Active bookable residences published in the live guest collection.' },
-    guests: { title: 'VIP Guest Waitlist', sub: 'Founding Circle passholders with priority destination interests.' },
-    hostWaitlist: { title: 'Host Partner Waitlist (partners.)', sub: 'Founding property custodians registered from partners.luxealiving.co.ke.' },
-    profiles: { title: 'User Profiles & Access Roles', sub: 'Registered Supabase Auth users (lux_profiles). Assign administrative privileges and change roles.' },
-    laundry: { title: 'Laundry & Valet Service Partners', sub: 'Verified dry cleaners, laundromats, and host turnover linen partners.' }
+    overview: { title: 'Overview', sub: '' },
+    hosts: { title: 'Hosts', sub: '' },
+    stays: { title: 'Stays', sub: '' },
+    guests: { title: 'VIP Guests', sub: '' },
+    hostWaitlist: { title: 'Host Waitlist', sub: '' },
+    profiles: { title: 'Users', sub: '' },
+    laundry: { title: 'Laundry', sub: '' }
   };
 
   tabOverview?.addEventListener('click', () => switchTab('overview'));
