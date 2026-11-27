@@ -35,18 +35,18 @@ export function redirectUserToPortal(session) {
   if (!session) return;
   if (session.role === 'super_admin' || session.role === 'admin') {
     if (!window.location.pathname.startsWith('/admin')) {
-      setTimeout(() => { window.location.href = '/admin/'; }, 250);
+      setTimeout(() => { window.location.href = '/admin'; }, 250);
     }
     return;
   }
   if (session.role === 'host') {
     if (!window.location.pathname.startsWith('/host')) {
-      setTimeout(() => { window.location.href = '/host/?mode=manage'; }, 250);
+      setTimeout(() => { window.location.href = '/host?mode=manage'; }, 250);
     }
     return;
   }
   if (window.location.pathname === '/' || window.location.pathname.includes('/login') || window.location.pathname.includes('/waitlist')) {
-    setTimeout(() => { window.location.href = '/stays/'; }, 250);
+    setTimeout(() => { window.location.href = '/stays'; }, 250);
   }
 }
 
@@ -186,32 +186,32 @@ export function updateHeaderAuthState() {
             <div class="dropdown-divider"></div>
 
             ${isAdmin ? `
-              <a href="/admin/" class="dropdown-link active-link">
+              <a href="/admin" class="dropdown-link active-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
                 <span>Super Admin Console</span>
               </a>
-              <a href="/host/?mode=manage" class="dropdown-link">
+              <a href="/host?mode=manage" class="dropdown-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                 <span>Host Partner Suite</span>
               </a>
             ` : user.role === 'host' ? `
-              <a href="/host/?mode=manage" class="dropdown-link active-link">
+              <a href="/host?mode=manage" class="dropdown-link active-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                 <span>Host Suite Dashboard</span>
               </a>
-              <a href="/host/" class="dropdown-link">
+              <a href="/host" class="dropdown-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
                 <span>Register Another Property</span>
               </a>
             ` : ''}
 
-            <a href="/stays/" class="dropdown-link">
+            <a href="/stays" class="dropdown-link">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               <span>Browse All Stays</span>
             </a>
 
             ${user.role !== 'host' && !isAdmin ? `
-              <a href="/host/" class="dropdown-link">
+              <a href="/host" class="dropdown-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                 <span>Host with Luxea</span>
               </a>
@@ -267,7 +267,8 @@ export function updateHeaderAuthState() {
     authNavItem.addEventListener('click', (e) => {
       e.preventDefault();
       if (activeVerifiedUser) {
-        if (activeVerifiedUser.isSuperAdmin) window.location.href = '/admin/';
+        if (activeVerifiedUser.isSuperAdmin || activeVerifiedUser.role === 'admin') window.location.href = '/admin';
+        else if (activeVerifiedUser.role === 'host') window.location.href = '/host?mode=manage';
         else window.openAuthModal();
       } else {
         window.openAuthModal();
@@ -496,7 +497,7 @@ function injectAuthModalHtml() {
       if (currentAuthMode === 'reset') {
         btnText.textContent = 'Sending Reset Link...';
         const { error } = await client.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/host/activate/`
+          redirectTo: `${window.location.origin}/host/activate`
         });
         if (error) {
           showError(error.message || 'Unable to send reset link.');

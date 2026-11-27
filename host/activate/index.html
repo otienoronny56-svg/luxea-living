@@ -356,7 +356,7 @@
           submitBtn.disabled = true;
           submitBtn.textContent = 'Sending Secure Link...';
           const { error } = await client.auth.resetPasswordForEmail(targetEmail, {
-            redirectTo: `${window.location.origin}/host/activate/`
+            redirectTo: `${window.location.origin}/host/activate`
           });
           if (error) {
             errorDiv.textContent = error.message || 'Could not send link.';
@@ -437,7 +437,7 @@
         googleBtn.textContent = 'Connecting with Google...';
         const { error } = await client.auth.signInWithOAuth({
           provider: 'google',
-          options: { redirectTo: `${window.location.origin}/host/?mode=manage` }
+          options: { redirectTo: `${window.location.origin}/host?mode=manage` }
         });
         if (error) {
           errorDiv.textContent = error.message || 'Google Sign-In unavailable. Use the form below.';

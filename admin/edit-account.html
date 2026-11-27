@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Account | Luxea Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/components.css?v=2.6.0">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js?v=2.6.0"></script>
+  <script src="/assets/js/supabase.js?v=2.6.0"></script>
+
+  <style>
+    :root {
+      --bg: #F9F6F0;
+      --card: #FFFFFF;
+      --border: rgba(178, 135, 86, 0.22);
+      --espresso: #241812;
+      --cocoa: #604D42;
+      --gold: #B28756;
+      --gold-dark: #8C6436;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--espresso);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .exec-nav-bar {
+      background: #FFFFFF;
+      border-bottom: 1px solid rgba(178, 135, 86, 0.2);
+      padding: 14px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .exec-nav-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #F4ECE1;
+      color: var(--espresso);
+      border: 1px solid rgba(178, 135, 86, 0.3);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .btn-back:hover { background: #EAE0D3; }
+
+    .page-wrap {
+      max-width: 960px;
+      margin: 28px auto 60px;
+      padding: 0 24px;
+    }
+
+    .page-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+    }
+
+    .page-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 18px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(178, 135, 86, 0.16);
+    }
+
+    .ref-pill {
+      display: inline-block;
+      font-family: monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      background: rgba(178, 135, 86, 0.12);
+      border: 1px solid var(--gold);
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .page-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--espresso);
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 720px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .page-card { padding: 20px; }
+      .page-wrap { padding: 0 14px; }
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--espresso);
+      margin-bottom: 6px;
+    }
+
+    .field-group .form-control {
+      width: 100%;
+    }
+
+    .photo-preview-row {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .security-box {
+      margin-top: 22px;
+      padding: 18px 20px;
+      background: #FDFBF7;
+      border: 1px solid rgba(178, 135, 86, 0.25);
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .form-footer {
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(178, 135, 86, 0.16);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toast-banner {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--espresso);
+      color: #F5EFE6;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      z-index: 200;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="exec-nav-bar">
+    <div class="exec-nav-inner">
+      <a href="/admin?tab=hosts" class="btn-back" id="backLink">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span id="backLabel">Back to Admin</span>
+      </a>
+      <a href="/admin?tab=hosts" class="btn btn-outline btn-sm" id="viewDossierLink" style="display: none; text-decoration: none;">View Dossier ↗</a>
+    </div>
+  </nav>
+
+  <main class="page-wrap">
+    <div class="page-card">
+      <div class="page-head">
+        <div>
+          <span class="ref-pill" id="editRefBadge">ACCOUNT</span>
+          <h1 class="page-title" id="editHeading">Edit Account</h1>
+        </div>
+      </div>
+
+      <form id="editProfileForm">
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label for="editFullName">Full Name</label>
+            <input type="text" id="editFullName" class="form-control" required>
+          </div>
+          <div class="field-group">
+            <label for="editEmail">Email (Read-only)</label>
+            <input type="email" id="editEmail" class="form-control" readonly style="background: rgba(0,0,0,0.04);">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label for="editRole">Role</label>
+            <select id="editRole" class="form-control" style="font-weight: 600;">
+              <option value="super_admin">Super Admin</option>
+              <option value="admin">Admin</option>
+              <option value="host">Host</option>
+              <option value="member">Member</option>
+              <option value="suspended">Blocked</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="editPhone">Phone</label>
+            <input type="text" id="editPhone" class="form-control">
+          </div>
+        </div>
+
+        <div id="hostPropWrap" style="margin-bottom: 18px;">
+          <div class="field-group">
+            <label for="editPropName">Property Name</label>
+            <input type="text" id="editPropName" class="form-control">
+          </div>
+        </div>
+
+        <div class="field-group" style="margin-bottom: 18px;">
+          <label for="editBio">Notes / Bio</label>
+          <textarea id="editBio" class="form-control" rows="4" placeholder="Short notes or host bio..."></textarea>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label for="editAvatarFile">Profile Photo</label>
+            <input type="file" id="editAvatarFile" accept="image/*" class="form-control" style="font-size: 0.82rem;">
+            <div class="photo-preview-row">
+              <img id="editAvatarImg" src="" alt="Avatar" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid #D4AF37; display: none;">
+              <span id="editAvatarStatus" style="font-size: 0.76rem; color: #8F847C;">No photo</span>
+            </div>
+          </div>
+
+          <div class="field-group" id="hostPhotoWrap">
+            <label for="editPropPhotoFile">Property Cover Photo</label>
+            <input type="file" id="editPropPhotoFile" accept="image/*" class="form-control" style="font-size: 0.82rem;">
+            <div class="photo-preview-row">
+              <img id="editPropImg" src="" alt="Property" style="width: 56px; height: 38px; border-radius: 6px; object-fit: cover; border: 1px solid #D4AF37; display: none;">
+              <span id="editPropStatus" style="font-size: 0.76rem; color: #8F847C;">No photo</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="hostSecurityControls" class="security-box" style="display: none;">
+          <div>
+            <div style="font-size: 0.86rem; font-weight: 700;">Access &amp; Listing Controls</div>
+            <div style="font-size: 0.76rem; color: var(--cocoa);">Block portal access or hide property from Stays.</div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-sm" id="btnToggleSuspend">Block Access</button>
+            <button type="button" class="btn btn-outline btn-sm" id="btnToggleDelist">Hide Listing</button>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <a href="/admin?tab=hosts" class="btn btn-outline btn-sm" id="cancelLink" style="text-decoration: none;">Cancel</a>
+          <button type="submit" class="btn btn-primary btn-sm" id="saveBtn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <div class="toast-banner" id="toastBanner"></div>
+
+  <script type="module">
+    const safeUrl = (u) => window.LuxeaSanitize ? window.LuxeaSanitize.safeUrl(u) : '';
+
+    function notify(msg) {
+      const el = document.getElementById('toastBanner');
+      if (!el) return;
+      el.textContent = msg;
+      el.style.display = 'block';
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.style.display = 'none'; }, 3200);
+    }
+
+    document.body.style.visibility = 'hidden';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const authCheck = window.LuxeaAuth ? await window.LuxeaAuth.verifyAdminSession() : { valid: false };
+      if (!authCheck.valid) {
+        window.location.replace('/admin');
+        return;
+      }
+      document.body.style.visibility = 'visible';
+
+      const params = new URLSearchParams(window.location.search);
+      const refParam = (params.get('ref') || '').trim();
+      const emailParam = (params.get('email') || '').trim();
+      const fromTab = params.get('from') || (refParam ? 'hosts' : 'profiles');
+      const returnUrl = `/admin?tab=${encodeURIComponent(fromTab)}`;
+
+      document.getElementById('backLink').href = returnUrl;
+      document.getElementById('cancelLink').href = returnUrl;
+      document.getElementById('backLabel').textContent = fromTab === 'profiles' ? 'Back to Users' : 'Back to Hosts';
+
+      const [hosts, profiles] = await Promise.all([
+        window.LuxeaDB.fetchAllHosts(),
+        window.LuxeaDB.fetchAllProfiles()
+      ]);
+
+      const host = (hosts || []).find(h =>
+        (refParam && (h.ref_id === refParam || h.refId === refParam)) ||
+        (emailParam && (h.email || '').toLowerCase() === emailParam.toLowerCase())
+      );
+      const profile = (profiles || []).find(p =>
+        (emailParam && (p.email || '').toLowerCase() === emailParam.toLowerCase()) ||
+        (host && host.email && (p.email || '').toLowerCase() === host.email.toLowerCase())
+      );
+
+      const email = host?.email || profile?.email || emailParam;
+      const name = host?.full_name || profile?.full_name || (email ? email.split('@')[0] : 'User');
+      const phone = host?.phone || profile?.phone || '';
+      const ref = host?.ref_id || refParam || 'USER';
+      const propName = host?.property_name || '';
+      const bio = host?.host_bio || profile?.bio || '';
+      const role = profile?.role || (host ? 'host' : 'member');
+      const avatarUrl = profile?.avatar_url || host?.avatar_url || '';
+      const photoUrls = Array.isArray(host?.property_photos_urls) ? host.property_photos_urls : [];
+
+      let isSuspended = host?.is_suspended === true || profile?.is_suspended === true || role === 'suspended' || host?.review_status === 'suspended';
+      let isDelisted = host?.is_delisted === true;
+      const userId = profile?.id || null;
+
+      document.title = `Edit ${name} | Luxea Admin`;
+      document.getElementById('editRefBadge').textContent = ref;
+      document.getElementById('editHeading').textContent = `Edit: ${name}`;
+      document.getElementById('editFullName').value = name;
+      document.getElementById('editEmail').value = email;
+      document.getElementById('editRole').value = isSuspended ? 'suspended' : role;
+      document.getElementById('editPhone').value = phone;
+      document.getElementById('editPropName').value = propName;
+      document.getElementById('editBio').value = bio;
+
+      if (host && host.ref_id) {
+        const dossierLink = document.getElementById('viewDossierLink');
+        dossierLink.href = `/admin/host-dossier?ref=${encodeURIComponent(host.ref_id)}&from=${encodeURIComponent(fromTab)}`;
+        dossierLink.style.display = 'inline-flex';
+      }
+
+      const isHostAccount = Boolean(host || role === 'host');
+      document.getElementById('hostPropWrap').style.display = isHostAccount ? 'block' : 'none';
+      document.getElementById('hostPhotoWrap').style.display = isHostAccount ? 'block' : 'none';
+      document.getElementById('hostSecurityControls').style.display = isHostAccount ? 'flex' : 'none';
+
+      const avatarImg = document.getElementById('editAvatarImg');
+      const avatarStatus = document.getElementById('editAvatarStatus');
+      if (avatarUrl && safeUrl(avatarUrl)) {
+        avatarImg.src = safeUrl(avatarUrl);
+        avatarImg.style.display = 'block';
+        avatarStatus.textContent = 'Photo uploaded';
+        avatarStatus.style.color = '#15803D';
+      }
+
+      const propImg = document.getElementById('editPropImg');
+      const propStatus = document.getElementById('editPropStatus');
+      if (photoUrls.length > 0 && safeUrl(photoUrls[0])) {
+        propImg.src = safeUrl(photoUrls[0]);
+        propImg.style.display = 'block';
+        propStatus.textContent = `${photoUrls.length} photo(s)`;
+        propStatus.style.color = '#15803D';
+      }
+
+      const btnSuspend = document.getElementById('btnToggleSuspend');
+      const btnDelist = document.getElementById('btnToggleDelist');
+
+      function syncControlBtns() {
+        btnSuspend.textContent = isSuspended ? 'Unblock Access' : 'Block Access';
+        btnSuspend.style.color = isSuspended ? '#15803D' : '#DC2626';
+        btnSuspend.style.borderColor = isSuspended ? '#86EFAC' : '#FCA5A5';
+
+        btnDelist.textContent = isDelisted ? 'Show Listing' : 'Hide Listing';
+        btnDelist.style.color = isDelisted ? '#1D4ED8' : '#D97706';
+        btnDelist.style.borderColor = isDelisted ? '#93C5FD' : '#FCD34D';
+      }
+      syncControlBtns();
+
+      btnSuspend.addEventListener('click', async () => {
+        if (!email) return;
+        const next = !isSuspended;
+        if (!confirm(`${next ? 'Block' : 'Unblock'} access for ${email}?`)) return;
+        const res = await window.LuxeaDB.toggleHostSuspension(email, next);
+        if (res && res.success) {
+          isSuspended = next;
+          syncControlBtns();
+          notify(next ? 'Access blocked.' : 'Access restored.');
+        } else {
+          notify('Error: ' + (res?.error || 'Failed'));
+        }
+      });
+
+      btnDelist.addEventListener('click', async () => {
+        if (!email) return;
+        const next = !isDelisted;
+        if (!confirm(`${next ? 'Hide' : 'Show'} listings for ${email}?`)) return;
+        const res = await window.LuxeaDB.toggleHostDelist(email, next);
+        if (res && res.success) {
+          isDelisted = next;
+          syncControlBtns();
+          notify(next ? 'Listing hidden.' : 'Listing live.');
+        } else {
+          notify('Error: ' + (res?.error || 'Failed'));
+        }
+      });
+
+      document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+
+        try {
+          let newAvatarUrl = null;
+          let newPropUrl = null;
+          const avatarFile = document.getElementById('editAvatarFile').files[0];
+          const propFile = document.getElementById('editPropPhotoFile').files[0];
+
+          if (avatarFile) newAvatarUrl = await window.LuxeaDB.uploadListingPhoto(avatarFile, 'hosts');
+          if (propFile) newPropUrl = await window.LuxeaDB.uploadListingPhoto(propFile, 'properties');
+
+          const updates = {
+            email,
+            ref_id: ref,
+            full_name: document.getElementById('editFullName').value.trim(),
+            phone: document.getElementById('editPhone').value.trim(),
+            role: document.getElementById('editRole').value,
+            property_name: document.getElementById('editPropName').value.trim(),
+            bio: document.getElementById('editBio').value.trim(),
+            avatar_url: newAvatarUrl || undefined
+          };
+
+          if (newPropUrl) updates.property_photos_urls = [newPropUrl, ...photoUrls];
+
+          const res = await window.LuxeaDB.updateHostProfile(email, updates);
+          if (res && res.success) {
+            if (userId && updates.role) {
+              await window.LuxeaDB.updateProfileRole(userId, updates.role);
+            }
+            notify('Saved! Returning to dashboard...');
+            setTimeout(() => { window.location.href = returnUrl; }, 600);
+          } else {
+            notify('Error: ' + (res?.error || 'Could not save'));
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Changes';
+          }
+        } catch (err) {
+          notify('Save failed.');
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Changes';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

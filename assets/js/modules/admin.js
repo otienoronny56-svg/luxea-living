@@ -256,6 +256,10 @@ export function initAdminDashboard() {
       if (window.LuxeaDB && typeof window.LuxeaDB.initAdminRealtime === 'function') {
         window.LuxeaDB.initAdminRealtime();
       }
+      const initialTab = new URLSearchParams(window.location.search).get('tab');
+      if (initialTab && ['overview', 'hosts', 'stays', 'guests', 'hostWaitlist', 'profiles', 'laundry'].includes(initialTab)) {
+        switchTab(initialTab, false);
+      }
       loadDashboardData();
     } else {
       if (window.LuxeaDB && typeof window.LuxeaDB.stopAdminRealtime === 'function') {
@@ -299,7 +303,7 @@ export function initAdminDashboard() {
       try {
         await client.auth.signInWithOAuth({
           provider: 'google',
-          options: { redirectTo: window.location.origin + '/admin/' }
+          options: { redirectTo: window.location.origin + '/admin' }
         });
       } catch (err) {
         if (loginErrorMsg) {
@@ -586,7 +590,7 @@ export function initAdminDashboard() {
         const latestPending = cachedHosts.find(h => !h.review_status || h.review_status === 'pending_review');
         if (latestPending && pendingBannerLink) {
           const ref = latestPending.ref_id || latestPending.refId;
-          pendingBannerLink.href = `/admin/host-dossier.html?ref=${ref}`;
+          pendingBannerLink.href = `/admin/host-dossier?ref=${encodeURIComponent(ref)}&from=hosts`;
           pendingBannerLink.textContent = `Review ${latestPending.full_name || latestPending.fullName || 'Host'} ↗`;
         }
       }
@@ -1142,13 +1146,13 @@ export function initAdminDashboard() {
       });
     });
 
-    // 2. Edit Host Profile button
+    // 2. Edit Host Profile button (dedicated page)
     hostsTableBody.querySelectorAll('.btn-edit-host').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const ref = btn.getAttribute('data-ref');
-        const email = btn.getAttribute('data-email');
-        openEditProfileModal(ref || email, 'host');
+        const ref = btn.getAttribute('data-ref') || '';
+        const email = btn.getAttribute('data-email') || '';
+        openEditProfileModal(ref, 'hosts', email);
       });
     });
 
@@ -1227,111 +1231,11 @@ export function initAdminDashboard() {
   }
 
   // =========================================================================
-  // 4. HOST INSPECTION MODAL (Lightbox Dossier)
+  // 4. HOST DOSSIER PAGE NAVIGATION (Dedicated spacious page, no crunched modal)
   // =========================================================================
   function openInspectModal(refId) {
-    const host = cachedHosts.find(h => (h.refId || h.ref_id) === refId);
-    if (!host || !inspectModal) return;
-
-    currentInspectedRef = refId;
-    if (inspectRefBadge) {
-      inspectRefBadge.innerHTML = `
-        <span>${esc(refId)}</span>
-        <a href="/admin/host-dossier.html?ref=${encodeURIComponent(refId)}" target="_blank" rel="noopener noreferrer" style="color: #241812; font-size: 0.72rem; text-decoration: underline; margin-left: 10px; font-weight: 600;">Open Separate Page ↗</a>
-      `;
-    }
-    if (inspectTitle) inspectTitle.textContent = `${host.fullName || host.full_name} — ${host.propertyName || host.property_name}`;
-
-    const status = host.review_status || 'pending_review';
-    if (inspectStatusLabel) {
-      inspectStatusLabel.innerHTML = `Review Status: <strong style="text-transform: uppercase;">${esc(status)}</strong>`;
-    }
-
-    const photos = host.property_photos_urls || [];
-    let photosHtml = '';
-    if (Array.isArray(photos) && photos.length > 0) {
-      photosHtml = `
-        <div class="inspect-photos-gallery">
-          ${photos.map((p) => {
-            const cleanP = safeUrl(p);
-            return cleanP ? `<a href="${esc(cleanP)}" target="_blank" rel="noopener noreferrer"><img src="${esc(cleanP)}" alt="Property Staging" class="inspect-photo-thumb"></a>` : '';
-          }).join('')}
-        </div>
-      `;
-    } else {
-      photosHtml = `<p style="font-size: 0.82rem; color: var(--color-cocoa);">Standard luxury property staging photos on file.</p>`;
-    }
-
-    const idDocUrl = host.id_document_url;
-    const phone = host.phone || '';
-    const digitsOnly = phone.replace(/[^0-9]/g, '');
-    const waNumber = digitsOnly.startsWith('0') ? '254' + digitsOnly.substring(1) : digitsOnly.startsWith('254') ? digitsOnly : '254' + digitsOnly;
-    const waUrl = digitsOnly ? `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${host.fullName || host.full_name}, this is Luxea Living regarding your host application (${refId}).`)}` : '';
-
-    if (inspectBody) {
-      inspectBody.innerHTML = `
-        <div class="inspect-item">
-          <span class="inspect-label">Host Partner Details</span>
-          <div class="inspect-val"><strong>Name:</strong> ${esc(host.fullName || host.full_name)}</div>
-          <div class="inspect-val" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-            <strong>Phone:</strong> <span>${esc(phone || '—')}</span>
-            ${phone ? `<a href="${esc(waUrl)}" target="_blank" rel="noopener noreferrer" class="btn-table-action btn-wa-action" style="padding: 2px 8px; font-size: 0.72rem; margin-left: 6px;">💬 Chat on WhatsApp</a>` : ''}
-          </div>
-          <div class="inspect-val" style="margin-top: 4px;">
-            <strong>Email:</strong> <a href="mailto:${esc(host.email)}" style="color: var(--color-camel-dark); text-decoration: underline;">${esc(host.email)}</a>
-          </div>
-          <div class="inspect-val" style="margin-top: 4px;">
-            <strong>National ID / Passport:</strong> ${esc(host.nationalId || host.national_id || 'On File')}
-            ${idDocUrl ? `<button type="button" id="inspectOpenPrivateIdBtn" style="background:none;border:none;color:#B28756;font-size:0.75rem;text-decoration:underline;margin-left:8px;font-weight:700;cursor:pointer;">🔒 View Private Document ↗</button>` : ''}
-          </div>
-          <div class="inspect-val" style="margin-top: 4px;"><strong>KRA PIN:</strong> ${esc(host.kraPin || host.kra_pin || 'On File')}</div>
-          <div class="inspect-val" style="margin-top: 4px;"><strong>Date of Birth:</strong> ${esc(host.dob || '—')}</div>
-        </div>
-
-        <div class="inspect-item">
-          <span class="inspect-label">Property Specifications</span>
-          <div class="inspect-val"><strong>Property:</strong> ${esc(host.propertyName || host.property_name)}</div>
-          <div class="inspect-val"><strong>Type:</strong> ${esc(host.propertyType || host.property_type)}</div>
-          <div class="inspect-val"><strong>Location:</strong> ${esc(host.area || host.area_suburb)}, ${esc(host.county)}</div>
-          <div class="inspect-val"><strong>Address:</strong> ${esc(host.propertyAddress || host.property_address || '—')}</div>
-          <div class="inspect-val"><strong>Layout:</strong> ${esc(host.bedrooms)} Beds • ${esc(host.bathrooms)} Baths • Max ${esc(host.maxGuests || host.max_guests || 2)} Guests</div>
-          <div class="inspect-val"><strong>Amenities:</strong> ${esc(host.amenities || 'Standard luxury portfolio amenities')}</div>
-        </div>
-
-        <div class="inspect-item inspect-row-full" style="background: #F5EFE6;">
-          <span class="inspect-label">Payout &amp; Settlement Information</span>
-          <div class="inspect-val"><strong>Method:</strong> ${esc((host.payoutDetails && host.payoutDetails.method) || host.payoutMethod || host.payout_method || 'M-Pesa')}</div>
-          <div class="inspect-val" style="color: #241812; font-family: monospace;">
-            <strong>Account / Mobile:</strong> ${esc((host.payoutDetails && (host.payoutDetails.number || host.payoutDetails.account)) || host.mpesa_number || host.bank_account_number || 'Registered')}
-          </div>
-        </div>
-
-        <div class="inspect-item inspect-row-full">
-          <span class="inspect-label">Verified High-Resolution Property Photos</span>
-          ${photosHtml}
-        </div>
-
-        <div class="inspect-row-full" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--color-cocoa); padding-top: 10px;">
-          <span><strong>Digital Signature:</strong> ${esc(host.signature || host.fullName || host.full_name)}</span>
-          <span><strong>Submitted:</strong> ${esc(host.signatureDate || host.signature_date || host.submittedAt || 'Recent')}</span>
-        </div>
-      `;
-
-      const privateDocBtn = inspectBody.querySelector('#inspectOpenPrivateIdBtn');
-      if (privateDocBtn && idDocUrl) {
-        privateDocBtn.addEventListener('click', async () => {
-          privateDocBtn.disabled = true;
-          privateDocBtn.textContent = 'Signing secure URL...';
-          const signed = await window.LuxeaDB.getSignedDocumentUrl(idDocUrl);
-          privateDocBtn.disabled = false;
-          privateDocBtn.textContent = '🔒 View Private Document ↗';
-          if (signed) window.open(signed, '_blank', 'noopener,noreferrer');
-          else if (window.showToast) window.showToast('Could not generate signed link for this document.');
-        });
-      }
-    }
-
-    inspectModal.classList.add('open');
+    if (!refId) return;
+    window.location.href = `/admin/host-dossier?ref=${encodeURIComponent(refId)}&from=hosts`;
   }
 
   closeInspectBtn?.addEventListener('click', () => inspectModal?.classList.remove('open'));
@@ -1758,12 +1662,12 @@ export function initAdminDashboard() {
       profilesTableBody.appendChild(tr);
     });
 
-    // Wire up Edit button clicks on profile rows
+    // Wire up Edit button clicks on profile rows (dedicated page)
     profilesTableBody.querySelectorAll('.btn-edit-profile-row').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const email = btn.getAttribute('data-email');
-        openEditProfileModal(email, 'profile');
+        const email = btn.getAttribute('data-email') || '';
+        openEditProfileModal('', 'profiles', email);
       });
     });
 
@@ -2110,7 +2014,7 @@ export function initAdminDashboard() {
     exportHostWaitlistBtn?.click();
   });
 
-  function switchTab(tab) {
+  function switchTab(tab, updateUrl = true) {
     tabOverview?.classList.toggle('active', tab === 'overview');
     tabHosts?.classList.toggle('active', tab === 'hosts');
     tabStays?.classList.toggle('active', tab === 'stays');
@@ -2126,6 +2030,11 @@ export function initAdminDashboard() {
     viewHostWaitlist?.classList.toggle('hidden', tab !== 'hostWaitlist');
     viewProfiles?.classList.toggle('hidden', tab !== 'profiles');
     viewLaundry?.classList.toggle('hidden', tab !== 'laundry');
+
+    if (updateUrl && window.history && typeof window.history.replaceState === 'function') {
+      const targetUrl = tab === 'overview' ? '/admin' : `/admin?tab=${encodeURIComponent(tab)}`;
+      window.history.replaceState(null, '', targetUrl);
+    }
 
     if (adminViewTitle && tabTitles[tab]) {
       adminViewTitle.textContent = tabTitles[tab].title;
@@ -2349,95 +2258,22 @@ export function initAdminDashboard() {
     }
   }
 
-  function openCreateAccountModal() {
-    if (createUserModal) createUserModal.classList.add('open');
+  function openCreateAccountModal(role = 'host', fromTab = 'hosts') {
+    window.location.href = `/admin/add-account?role=${encodeURIComponent(role)}&from=${encodeURIComponent(fromTab)}`;
   }
 
-  function closeCreateAccountModal() {
-    if (createUserModal) createUserModal.classList.remove('open');
-    if (createUserForm) createUserForm.reset();
-    if (newAccAvatarPreview) newAccAvatarPreview.classList.add('hidden');
-    if (newAccPropPhotoPreview) newAccPropPhotoPreview.classList.add('hidden');
-  }
+  function closeCreateAccountModal() {}
 
-  function openEditProfileModal(identifier, type = 'host') {
-    if (!editProfileModal) return;
-
-    const host = cachedHosts.find(h =>
-      (h.refId || h.ref_id) === identifier ||
-      (h.email || '').toLowerCase() === (identifier || '').toLowerCase()
-    );
-
-    const profile = cachedProfiles.find(p =>
-      (p.email || '').toLowerCase() === (identifier || '').toLowerCase() ||
-      p.id === identifier
-    );
-
-    const email = host?.email || profile?.email || identifier || '';
-    const name = host?.fullName || host?.full_name || profile?.full_name || (email ? email.split('@')[0] : 'User');
-    const phone = host?.phone || profile?.phone || '';
-    const ref = host?.refId || host?.ref_id || 'LUX-USER';
-    const propName = host?.propertyName || host?.property_name || '';
-    const bio = host?.host_bio || profile?.bio || '';
-    const role = profile?.role || (host ? 'host' : 'member');
-    const avatarUrl = profile?.avatar_url || host?.avatar_url || '';
-    const photoUrls = host?.property_photos_urls || [];
-    const isSuspended = host?.is_suspended === true || profile?.is_suspended === true || (role === 'suspended') || (host?.review_status === 'suspended');
-    const isDelisted = host?.is_delisted === true;
-
-    activeEditingEmail = email;
-    activeEditingUserId = profile?.id || null;
-    activeEditingRef = ref;
-    activeEditingIsSuspended = isSuspended;
-    activeEditingIsDelisted = isDelisted;
-
-    if (editProfileRef) editProfileRef.textContent = ref;
-    if (editProfileTitle) editProfileTitle.textContent = `Edit Profile: ${name}`;
-    if (editProfileUserId) editProfileUserId.value = activeEditingUserId || '';
-    if (editProfileRefId) editProfileRefId.value = activeEditingRef || '';
-    if (editProfileFullName) editProfileFullName.value = name;
-    if (editProfileEmail) editProfileEmail.value = email;
-    if (editProfileRole) editProfileRole.value = isSuspended ? 'suspended' : role;
-    if (editProfilePhone) editProfilePhone.value = phone;
-    if (editProfilePropName) editProfilePropName.value = propName;
-    if (editProfileBio) editProfileBio.value = bio;
-
-    // Avatar preview
-    if (editProfileAvatarImg && editProfileAvatarStatus) {
-      if (avatarUrl) {
-        editProfileAvatarImg.src = avatarUrl;
-        editProfileAvatarImg.style.display = 'block';
-        editProfileAvatarStatus.textContent = 'Current custom avatar';
-        editProfileAvatarStatus.style.color = '#15803D';
-      } else {
-        editProfileAvatarImg.style.display = 'none';
-        editProfileAvatarStatus.textContent = 'No custom avatar';
-        editProfileAvatarStatus.style.color = '#8F847C';
-      }
+  function openEditProfileModal(refOrId = '', fromTab = 'hosts', emailOpt = '') {
+    const params = new URLSearchParams();
+    if (refOrId && !String(refOrId).includes('@')) {
+      params.set('ref', refOrId);
+    } else if (refOrId && !emailOpt) {
+      emailOpt = refOrId;
     }
-
-    // Property photo preview
-    if (editProfilePropImg && editProfilePropStatus) {
-      if (photoUrls && photoUrls.length > 0) {
-        editProfilePropImg.src = photoUrls[0];
-        editProfilePropImg.style.display = 'block';
-        editProfilePropStatus.textContent = `${photoUrls.length} photo(s) on file`;
-        editProfilePropStatus.style.color = '#15803D';
-      } else {
-        editProfilePropImg.style.display = 'none';
-        editProfilePropStatus.textContent = 'No property photo';
-        editProfilePropStatus.style.color = '#8F847C';
-      }
-    }
-
-    // Host controls visibility & labels
-    const isHostAccount = host || role === 'host';
-    if (editProfileHostSection) editProfileHostSection.style.display = isHostAccount ? 'block' : 'none';
-    if (editProfilePropPhotoWrap) editProfilePropPhotoWrap.style.display = isHostAccount ? 'block' : 'none';
-    if (editProfileHostControls) editProfileHostControls.style.display = isHostAccount ? 'flex' : 'none';
-
-    updateSecurityButtonsUI();
-    editProfileModal.classList.add('open');
+    if (emailOpt) params.set('email', emailOpt);
+    params.set('from', fromTab === 'profile' ? 'profiles' : (fromTab || 'hosts'));
+    window.location.href = `/admin/edit-account?${params.toString()}`;
   }
 
   function closeEditProfileModal() {
@@ -2634,16 +2470,13 @@ export function initAdminDashboard() {
     }
   });
 
-  // Modal Triggers & File Previews
+  // Dedicated Page Navigation Triggers
   openCreateHostModalBtn?.addEventListener('click', () => {
-    if (newAccRole) newAccRole.value = 'host';
-    if (newAccHostSection) newAccHostSection.style.display = 'block';
-    if (newAccPropPhotoWrap) newAccPropPhotoWrap.style.display = 'block';
-    openCreateAccountModal();
+    openCreateAccountModal('host', 'hosts');
   });
 
   openCreateUserModalBtn?.addEventListener('click', () => {
-    openCreateAccountModal();
+    openCreateAccountModal('member', 'profiles');
   });
 
   closeCreateUserModalBtn?.addEventListener('click', closeCreateAccountModal);

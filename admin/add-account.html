@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Account | Luxea Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/components.css?v=2.6.0">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js?v=2.6.0"></script>
+  <script src="/assets/js/supabase.js?v=2.6.0"></script>
+
+  <style>
+    :root {
+      --bg: #F9F6F0;
+      --card: #FFFFFF;
+      --border: rgba(178, 135, 86, 0.22);
+      --espresso: #241812;
+      --cocoa: #604D42;
+      --gold: #B28756;
+      --gold-dark: #8C6436;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--espresso);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .exec-nav-bar {
+      background: #FFFFFF;
+      border-bottom: 1px solid rgba(178, 135, 86, 0.2);
+      padding: 14px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .exec-nav-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #F4ECE1;
+      color: var(--espresso);
+      border: 1px solid rgba(178, 135, 86, 0.3);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .btn-back:hover { background: #EAE0D3; }
+
+    .page-wrap {
+      max-width: 960px;
+      margin: 28px auto 60px;
+      padding: 0 24px;
+    }
+
+    .page-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+    }
+
+    .page-head {
+      padding-bottom: 18px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(178, 135, 86, 0.16);
+    }
+
+    .page-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--espresso);
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 720px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .page-card { padding: 20px; }
+      .page-wrap { padding: 0 14px; }
+    }
+
+    .field-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--espresso);
+      margin-bottom: 6px;
+    }
+
+    .field-group .form-control { width: 100%; }
+
+    .host-box {
+      padding: 18px 20px;
+      background: #FDFBF7;
+      border: 1px solid rgba(178, 135, 86, 0.28);
+      border-radius: 12px;
+      margin-bottom: 18px;
+    }
+
+    .host-box-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 14px;
+    }
+
+    .form-footer {
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(178, 135, 86, 0.16);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .toast-banner {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--espresso);
+      color: #F5EFE6;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      z-index: 200;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="exec-nav-bar">
+    <div class="exec-nav-inner">
+      <a href="/admin?tab=hosts" class="btn-back" id="backLink">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span id="backLabel">Back to Admin</span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="page-wrap">
+    <div class="page-card">
+      <div class="page-head">
+        <h1 class="page-title" id="pageTitle">Add Host / User</h1>
+      </div>
+
+      <form id="createAccountForm">
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label for="newFullName">Full Name *</label>
+            <input type="text" id="newFullName" class="form-control" placeholder="e.g. Dennis Barasa" required>
+          </div>
+          <div class="field-group">
+            <label for="newEmail">Email *</label>
+            <input type="email" id="newEmail" class="form-control" placeholder="name@example.com" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label for="newRole">Role *</label>
+            <select id="newRole" class="form-control" required style="font-weight: 600;">
+              <option value="host">Host</option>
+              <option value="admin">Admin</option>
+              <option value="super_admin">Super Admin</option>
+              <option value="member">Member</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="newPhone">Phone</label>
+            <input type="text" id="newPhone" class="form-control" placeholder="e.g. 0712 345 678">
+          </div>
+        </div>
+
+        <div class="field-group" style="margin-bottom: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label for="newPassword" style="margin: 0;">Password *</label>
+            <button type="button" id="btnGenPass" style="background: none; border: none; color: var(--gold-dark); font-size: 0.78rem; font-weight: 700; cursor: pointer;">Generate Password</button>
+          </div>
+          <input type="text" id="newPassword" class="form-control" placeholder="Min 8 characters" required minlength="8">
+        </div>
+
+        <!-- Host Property Section -->
+        <div id="hostDetailsSection" class="host-box">
+          <div class="host-box-title">Property Details</div>
+          <div class="form-grid-2">
+            <div class="field-group">
+              <label for="newPropName">Property Name</label>
+              <input type="text" id="newPropName" class="form-control" placeholder="e.g. Karen Glasshouse">
+            </div>
+            <div class="field-group">
+              <label for="newPropType">Type</label>
+              <select id="newPropType" class="form-control">
+                <option value="Apartment">Apartment</option>
+                <option value="Penthouse">Penthouse</option>
+                <option value="Villa">Villa</option>
+                <option value="Townhouse">Townhouse</option>
+                <option value="Studio">Studio</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid-2" style="margin-bottom: 0;">
+            <div class="field-group">
+              <label for="newCounty">County</label>
+              <input type="text" id="newCounty" class="form-control" placeholder="e.g. Nairobi">
+            </div>
+            <div class="field-group">
+              <label for="newArea">Area</label>
+              <input type="text" id="newArea" class="form-control" placeholder="e.g. Westlands">
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group" style="margin-bottom: 18px;">
+          <label for="newBio">Notes / Bio</label>
+          <textarea id="newBio" class="form-control" rows="3" placeholder="Optional notes..."></textarea>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label for="newAvatarFile">Profile Photo</label>
+            <input type="file" id="newAvatarFile" accept="image/*" class="form-control" style="font-size: 0.82rem;">
+          </div>
+          <div class="field-group" id="propPhotoWrap">
+            <label for="newPropPhotoFile">Property Photo</label>
+            <input type="file" id="newPropPhotoFile" accept="image/*" class="form-control" style="font-size: 0.82rem;">
+          </div>
+        </div>
+
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.84rem; cursor: pointer;">
+          <input type="checkbox" id="newSendEmail" checked style="width: 16px; height: 16px;">
+          <span>Email login details to this user</span>
+        </label>
+
+        <div class="form-footer">
+          <a href="/admin?tab=hosts" class="btn btn-outline btn-sm" id="cancelLink" style="text-decoration: none;">Cancel</a>
+          <button type="submit" class="btn btn-primary btn-sm" id="submitBtn">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <div class="toast-banner" id="toastBanner"></div>
+
+  <script type="module">
+    function notify(msg) {
+      const el = document.getElementById('toastBanner');
+      if (!el) return;
+      el.textContent = msg;
+      el.style.display = 'block';
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.style.display = 'none'; }, 3200);
+    }
+
+    document.body.style.visibility = 'hidden';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const authCheck = window.LuxeaAuth ? await window.LuxeaAuth.verifyAdminSession() : { valid: false };
+      if (!authCheck.valid) {
+        window.location.replace('/admin');
+        return;
+      }
+      document.body.style.visibility = 'visible';
+
+      const params = new URLSearchParams(window.location.search);
+      const initialRole = params.get('role') || 'host';
+      const fromTab = params.get('from') || (initialRole === 'host' ? 'hosts' : 'profiles');
+      const returnUrl = `/admin?tab=${encodeURIComponent(fromTab)}`;
+
+      document.getElementById('backLink').href = returnUrl;
+      document.getElementById('cancelLink').href = returnUrl;
+      document.getElementById('backLabel').textContent = fromTab === 'profiles' ? 'Back to Users' : 'Back to Hosts';
+
+      const roleSel = document.getElementById('newRole');
+      roleSel.value = ['host', 'admin', 'super_admin', 'member'].includes(initialRole) ? initialRole : 'host';
+
+      const hostSec = document.getElementById('hostDetailsSection');
+      const propPhotoWrap = document.getElementById('propPhotoWrap');
+      const titleEl = document.getElementById('pageTitle');
+
+      function syncRoleUI() {
+        const isHost = roleSel.value === 'host';
+        hostSec.style.display = isHost ? 'block' : 'none';
+        propPhotoWrap.style.display = isHost ? 'block' : 'none';
+        titleEl.textContent = isHost ? 'Add Host' : 'Add User';
+      }
+      syncRoleUI();
+      roleSel.addEventListener('change', syncRoleUI);
+
+      document.getElementById('btnGenPass').addEventListener('click', () => {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#';
+        let pass = 'Luxea';
+        for (let i = 0; i < 6; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        document.getElementById('newPassword').value = pass;
+      });
+
+      document.getElementById('createAccountForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating...';
+
+        try {
+          let avatarUrl = '';
+          let propPhotoUrl = '';
+          const avatarFile = document.getElementById('newAvatarFile').files[0];
+          const propFile = document.getElementById('newPropPhotoFile').files[0];
+
+          if (avatarFile) avatarUrl = await window.LuxeaDB.uploadListingPhoto(avatarFile, 'hosts') || '';
+          if (propFile) propPhotoUrl = await window.LuxeaDB.uploadListingPhoto(propFile, 'properties') || '';
+
+          const accountData = {
+            full_name: document.getElementById('newFullName').value.trim(),
+            email: document.getElementById('newEmail').value.trim(),
+            role: roleSel.value,
+            phone: document.getElementById('newPhone').value.trim(),
+            password: document.getElementById('newPassword').value,
+            property_name: document.getElementById('newPropName').value.trim() || 'Luxury Stay',
+            property_type: document.getElementById('newPropType').value || 'Apartment',
+            county: document.getElementById('newCounty').value.trim() || 'Nairobi',
+            area: document.getElementById('newArea').value.trim() || 'Kenya',
+            bio: document.getElementById('newBio').value.trim(),
+            avatar_url: avatarUrl,
+            property_photos_urls: propPhotoUrl ? [propPhotoUrl] : [],
+            send_credentials: document.getElementById('newSendEmail').checked
+          };
+
+          const res = await window.LuxeaDB.provisionUser(accountData);
+          if (res && res.success) {
+            notify('Account created! Redirecting...');
+            const dest = accountData.role === 'host' ? '/admin?tab=hosts' : '/admin?tab=profiles';
+            setTimeout(() => { window.location.href = dest; }, 650);
+          } else {
+            notify('Error: ' + (res?.error || 'Could not create account'));
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Create Account';
+          }
+        } catch (err) {
+          notify('Failed to create account.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create Account';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
