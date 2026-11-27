@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us | Luxea Living</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/components.css?v=3.0.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
+  <style>
+    body { background: #F9F6F0; color: #241812; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .about-wrap { max-width: 1140px; margin: 24px auto 40px; padding: 0 20px; }
+    .about-hero { position: relative; border-radius: 20px; overflow: hidden; height: 340px; margin-bottom: 28px; }
+    .about-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .about-hero-cap { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(24,16,12,0.82) 0%, transparent 70%); display: flex; flex-direction: column; justify-content: flex-end; padding: 32px; color: #FFFFFF; }
+    .pillar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
+    .pillar-card { background: #FFFFFF; border: 1px solid rgba(178,135,86,0.22); border-radius: 16px; overflow: hidden; }
+    .pillar-card img { width: 100%; height: 210px; object-fit: cover; display: block; }
+    .pillar-card div { padding: 16px 18px; }
+    .pillar-card h3 { margin: 0 0 4px; font-size: 1.05rem; }
+    .pillar-card p { margin: 0; font-size: 0.84rem; color: #604D42; }
+  </style>
+</head>
+<body>
+  <header class="lux-header">
+    <div class="container nav-container">
+      <a href="/" class="brand-logo"><span class="brand-monogram">L</span><span class="brand-name">Luxea</span></a>
+      <nav class="desktop-nav">
+        <a href="/stays" class="nav-link">Stays</a>
+        <a href="/hotels" class="nav-link">Hotels</a>
+        <a href="/host" class="nav-link">Host</a>
+        <a href="/laundry" class="nav-link">Laundry</a>
+        <a href="/about" class="nav-link active">About</a>
+        <a href="/faqs" class="nav-link">FAQs</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/stays" class="btn btn-primary btn-sm">Explore Stays</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="about-wrap">
+    <section class="about-hero">
+      <img src="/assets/images/hotels/nairobi_skyline.webp" alt="Nairobi Kenya">
+      <div class="about-hero-cap">
+        <h1 style="font-family:'Cormorant Garamond',serif; font-size:2.4rem; margin:0 0 6px;">Stays, Hotels &amp; Care in Kenya.</h1>
+        <p style="margin:0; font-size:0.95rem; color:#EFE8DF;">Verified homes, top hotels, and doorstep laundry in one place.</p>
+      </div>
+    </section>
+
+    <section class="pillar-grid">
+      <article class="pillar-card">
+        <img src="/assets/images/stays/westlands_loft_1.webp" alt="Curated Homes" loading="lazy">
+        <div>
+          <h3>Verified Homes</h3>
+          <p>Real photos, inspected spaces, clear KSh rates.</p>
+        </div>
+      </article>
+
+      <article class="pillar-card">
+        <img src="/assets/images/hotels/jw_marriott_day.webp" alt="Partner Hotels" loading="lazy">
+        <div>
+          <h3>Partner Hotels</h3>
+          <p>Compare suites and book rooms directly.</p>
+        </div>
+      </article>
+
+      <article class="pillar-card">
+        <img src="/assets/images/hotels/housekeeping_team.webp" alt="Housekeeping & Laundry" loading="lazy">
+        <div>
+          <h3>Linen &amp; Laundry Care</h3>
+          <p>Automatic room turnover and guest valet pickup.</p>
+        </div>
+      </article>
+
+      <article class="pillar-card">
+        <img src="/assets/images/hotels/guest_morning.webp" alt="Guest Experience" loading="lazy">
+        <div>
+          <h3>Host Tools</h3>
+          <p>Calendars, M-Pesa tracking, and zero double-bookings.</p>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="/assets/js/main.js?v=3.0.0"></script>
+  <script type="module">
+    import { initCurrency } from '/assets/js/modules/currency.js?v=3.0.0';
+    import { initFooter } from '/assets/js/modules/footer.js?v=3.0.0';
+    document.addEventListener('DOMContentLoaded', () => {
+      initCurrency();
+      initFooter();
+    });
+  </script>
+</body>
+</html>

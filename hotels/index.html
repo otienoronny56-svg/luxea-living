@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotels &amp; Suites | Luxea Living</title>
+  <meta name="description" content="Book verified luxury hotels &amp; suites in Kenya in KSh.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/components.css?v=3.0.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js?v=3.0.0"></script>
+  <script src="/assets/js/supabase.js?v=3.0.0"></script>
+  <style>
+    body { background: #F9F6F0; color: #241812; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .hotels-hero { position: relative; max-width: 1180px; margin: 22px auto 0; border-radius: 20px; overflow: hidden; height: 280px; }
+    .hotels-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hotels-hero-overlay { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(24,16,12,0.82) 0%, rgba(24,16,12,0.2) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 28px 32px; color: #FFFFFF; }
+    .hotels-wrap { max-width: 1180px; margin: 24px auto 40px; padding: 0 20px; }
+    .hotel-card { background: #FFFFFF; border: 1px solid rgba(178,135,86,0.22); border-radius: 18px; overflow: hidden; margin-bottom: 24px; display: grid; grid-template-columns: 360px 1fr; box-shadow: 0 6px 22px rgba(36,24,18,0.04); }
+    @media (max-width: 860px) { .hotel-card { grid-template-columns: 1fr; } .hotels-hero { margin: 12px 16px 0; height: 220px; } }
+    .hotel-media { position: relative; min-height: 260px; background: #1E140F; }
+    .hotel-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hotel-body { padding: 22px 24px; display: flex; flex-direction: column; gap: 14px; }
+    .room-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; background: #FDFBF7; border: 1px solid rgba(178,135,86,0.18); border-radius: 10px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <header class="lux-header">
+    <div class="container nav-container">
+      <a href="/" class="brand-logo"><span class="brand-monogram">L</span><span class="brand-name">Luxea</span></a>
+      <nav class="desktop-nav">
+        <a href="/stays" class="nav-link">Stays</a>
+        <a href="/hotels" class="nav-link active">Hotels</a>
+        <a href="/host" class="nav-link">Host</a>
+        <a href="/laundry" class="nav-link">Laundry</a>
+        <a href="/about" class="nav-link">About</a>
+        <a href="/faqs" class="nav-link">FAQs</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/host?type=hotel" class="btn btn-primary btn-sm">List Hotel</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="hotels-hero">
+    <img src="/assets/images/hotels/jw_marriott_night.webp" alt="Luxury Hotels Kenya">
+    <div class="hotels-hero-overlay">
+      <h1 style="font-family:'Cormorant Garamond',serif; font-size:2.3rem; margin:0 0 6px;">Partner Hotels &amp; Suites</h1>
+      <p style="margin:0; font-size:0.92rem; color:#EFE8DF;">Compare room rates in KSh and reserve directly.</p>
+    </div>
+  </section>
+
+  <main class="hotels-wrap">
+    <div id="hotelsGrid"></div>
+  </main>
+
+  <script src="/assets/js/main.js?v=3.0.0"></script>
+  <script type="module">
+    import { initCurrency } from '/assets/js/modules/currency.js?v=3.0.0';
+    import { initFooter } from '/assets/js/modules/footer.js?v=3.0.0';
+
+    const HOTELS = [
+      {
+        id: 'hotel-jw-marriott',
+        name: 'JW Marriott Hotel Nairobi',
+        area: 'Westlands, Nairobi',
+        image: '/assets/images/hotels/jw_marriott_day.webp',
+        rating: '★ 4.98',
+        rooms: [
+          { name: 'Deluxe King Room', kes: 34500, specs: '1 King • Breakfast' },
+          { name: 'Executive Skyline Suite', kes: 54000, specs: 'Lounge Access • Breakfast' },
+          { name: 'Presidential Suite', kes: 145000, specs: '2 Beds • Butler' }
+        ]
+      },
+      {
+        id: 'hotel-movenpick',
+        name: 'Mövenpick Hotel & Residences',
+        area: 'Westlands, Nairobi',
+        image: '/assets/images/hotels/movenpick_night.webp',
+        rating: '★ 4.94',
+        rooms: [
+          { name: 'Superior Room', kes: 24500, specs: '1 Queen • Pool & Gym' },
+          { name: '1-Bedroom Residence', kes: 36000, specs: 'Kitchen • Balcony' },
+          { name: 'Executive Suite', kes: 48000, specs: 'Panoramic View' }
+        ]
+      },
+      {
+        id: 'hotel-sarit-exec',
+        name: 'The Sarit Executive Hotel',
+        area: 'Parklands / Westlands, Nairobi',
+        image: '/assets/images/hotels/urban_hotel_suite.webp',
+        rating: '★ 4.95',
+        rooms: [
+          { name: 'Executive Studio', kes: 19500, specs: 'Work Desk • Breakfast' },
+          { name: 'Corner City Suite', kes: 29000, specs: 'Living Area • Valet' }
+        ]
+      }
+    ];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      initCurrency();
+      initFooter();
+      const grid = document.getElementById('hotelsGrid');
+      const fmt = (k) => window.LuxeaCurrency ? window.LuxeaCurrency.formatFromKes(k) : `KSh ${k.toLocaleString()}`;
+
+      // Include any hotel-type listings published by hosts/hotels in Supabase
+      let extraHotels = [];
+      if (window.LuxeaDB?.fetchProperties) {
+        const allProps = await window.LuxeaDB.fetchProperties();
+        extraHotels = (allProps || [])
+          .filter(p => (p.property_type || '').toLowerCase().includes('hotel') && p.is_available !== false)
+          .map(p => ({
+            id: p.id,
+            name: p.name,
+            area: [p.area, p.city].filter(Boolean).join(', '),
+            image: p.cover_image_url || '/assets/images/hotels/urban_hotel_suite.webp',
+            rating: `★ ${p.rating || '5.0'}`,
+            rooms: [{ name: 'Standard Suite', kes: Number(p.price_per_night_kes) || 19500, specs: `${p.bedrooms || 1} Bed • ${p.bathrooms || 1} Bath` }]
+          }));
+      }
+
+      const list = [...HOTELS, ...extraHotels];
+      grid.innerHTML = list.map(h => `
+        <article class="hotel-card">
+          <div class="hotel-media">
+            <img src="${h.image}" alt="${h.name}" loading="lazy">
+          </div>
+          <div class="hotel-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+              <div>
+                <div style="font-size:0.78rem; color:#8C6436; font-weight:700; text-transform:uppercase;">${h.area}</div>
+                <h2 style="font-family:'Cormorant Garamond',serif; font-size:1.65rem; margin:2px 0 0;">${h.name}</h2>
+              </div>
+              <span style="font-weight:700; color:#B28756;">${h.rating}</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              ${h.rooms.map(r => `
+                <div class="room-row">
+                  <div>
+                    <strong style="font-size:0.9rem;">${r.name}</strong>
+                    <div style="font-size:0.76rem; color:#604D42;">${r.specs}</div>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:12px;">
+                    <strong style="font-size:0.95rem;" data-kes="${r.kes}" data-per-night="true">${fmt(r.kes)}<small style="font-weight:normal; opacity:0.8;"> / night</small></strong>
+                    <a href="https://wa.me/254700000000?text=${encodeURIComponent(`Hello Luxea Concierge, I would like to book "${r.name}" at ${h.name} (${fmt(r.kes)}/night).`)}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">Book Room</a>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </article>
+      `).join('');
+
+      window.LuxeaCurrency?.refreshPrices?.();
+    });
+  </script>
+</body>
+</html>

@@ -34,9 +34,12 @@
       </a>
       <nav class="desktop-nav">
         <a href="/stays" class="nav-link">Stays</a>
+        <a href="/hotels" class="nav-link">Hotels</a>
         <a href="/trips" class="nav-link active">My Trips</a>
         <a href="/host" class="nav-link">Host</a>
         <a href="/laundry" class="nav-link">Laundry</a>
+        <a href="/about" class="nav-link">About</a>
+        <a href="/faqs" class="nav-link">FAQs</a>
       </nav>
       <div class="header-actions">
         <a href="/stays" class="btn btn-primary btn-sm">Browse Stays</a>
@@ -58,10 +61,12 @@
   <script src="/assets/js/main.js?v=2.9.0"></script>
   <script type="module">
     import { initCurrency } from '/assets/js/modules/currency.js?v=2.9.0';
+    import { initFooter } from '/assets/js/modules/footer.js?v=1.0.0';
     const esc = (v) => window.LuxeaSanitize ? window.LuxeaSanitize.escapeHtml(v) : String(v ?? '');
 
     document.addEventListener('DOMContentLoaded', async () => {
       initCurrency();
+      initFooter();
       const box = document.getElementById('tripsContent');
       const client = window.LuxeaDB?.getClient();
       const { data: userData } = client ? await client.auth.getUser() : { data: {} };

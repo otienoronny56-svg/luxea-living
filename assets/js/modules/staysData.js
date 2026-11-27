@@ -20,12 +20,11 @@ export const LUXEA_STAYS = [
     kesPrice: 15600,
     rating: '★ 4.96 (42)',
     specs: '2 Beds • 2 Baths • 1,600 sqft',
-    image: '/assets/images/penthouse.jpg',
+    image: '/assets/images/stays/nordic_bed.webp',
     images: [
-      '/assets/images/penthouse.jpg',
-      '/assets/images/penthouse_terrace.jpg',
-      '/assets/images/suite_living.jpg',
-      '/assets/images/suite_bath.jpg'
+      '/assets/images/stays/nordic_bed.webp',
+      '/assets/images/stays/westlands_loft_bath.webp',
+      '/assets/images/stays/nairobi_apts_1.webp'
     ],
     description: 'A minimalist Nordic-inspired penthouse in Ruaka with seamless access to Two Rivers and Westlands. Panoramic sunset views, private rooftop terrace, high-speed fiber WiFi, and bespoke modern furnishings.',
     amenities: ['Rooftop Terrace', 'High-Speed Fiber', 'Smart TV 65"', 'Secure Covered Parking', 'Gym Access', '24/7 Security']
@@ -45,12 +44,12 @@ export const LUXEA_STAYS = [
     kesPrice: 7150,
     rating: '★ 4.92 (38)',
     specs: '1 Bed • 1 Bath • 650 sqft',
-    image: '/assets/images/suite.jpg',
+    image: '/assets/images/stays/ruaka_studio_1.webp',
     images: [
-      '/assets/images/suite.jpg',
-      '/assets/images/suite_balcony.jpg',
-      '/assets/images/suite_living.jpg',
-      '/assets/images/suite_bath.jpg'
+      '/assets/images/stays/ruaka_studio_1.webp',
+      '/assets/images/stays/ruaka_studio_2.webp',
+      '/assets/images/stays/ruaka_studio_3.webp',
+      '/assets/images/stays/ruaka_studio_kitchen.webp'
     ],
     description: 'A chic, sun-drenched apartment in Ruaka with private balcony, high-speed WiFi, modern kitchenette, smart Netflix TV, and 24/7 security. Perfect for staycations or business travel.',
     amenities: ['High-Speed WiFi', 'Smart 50" 4K TV', 'Balcony View', 'Fully Equipped Kitchen', 'Free Parking', 'Elevator']
@@ -70,12 +69,11 @@ export const LUXEA_STAYS = [
     kesPrice: 62400,
     rating: '★ 4.98 (38)',
     specs: '3 Beds • 3.5 Baths • 3,800 sqft',
-    image: '/assets/images/penthouse_terrace.jpg',
+    image: '/assets/images/stays/westlands_loft_1.webp',
     images: [
-      '/assets/images/penthouse_terrace.jpg',
-      '/assets/images/penthouse.jpg',
-      '/assets/images/suite_living.jpg',
-      '/assets/images/suite_bath.jpg'
+      '/assets/images/stays/westlands_loft_1.webp',
+      '/assets/images/stays/westlands_loft_2.webp',
+      '/assets/images/stays/westlands_loft_bath.webp'
     ],
     description: 'Perched high above Nairobi with dual-aspect skyline vistas. Features soaring double-height ceilings, bespoke camel leather accents, curated contemporary African art, marble kitchen island, and high-speed executive boardroom setup.',
     amenities: ['Sky Terrace & Fire Pit', 'Ultra High-Speed Fiber', 'Heated Rooftop Pool', 'Concierge & Chauffeur Staging', 'Biometric Access', 'Full Acoustic Glazing']
@@ -95,12 +93,11 @@ export const LUXEA_STAYS = [
     kesPrice: 19500,
     rating: '★ 4.97 (45)',
     specs: '1 Bed • 1 Bath • 1,100 sqft',
-    image: '/assets/images/suite_living.jpg',
+    image: '/assets/images/hotels/urban_hotel_suite.webp',
     images: [
-      '/assets/images/suite_living.jpg',
-      '/assets/images/suite.jpg',
-      '/assets/images/suite_bath.jpg',
-      '/assets/images/suite_balcony.jpg'
+      '/assets/images/hotels/urban_hotel_suite.webp',
+      '/assets/images/hotels/jw_marriott_day.webp',
+      '/assets/images/stays/westlands_loft_bath.webp'
     ],
     description: 'Luxury boutique hotel suite with 24/7 concierge, room service, executive work lounge, marble rainfall shower, and complimentary artisan breakfast.',
     amenities: ['24/7 Concierge', 'Complimentary Breakfast', 'High-Speed Fiber', 'Marble Bath', 'Valet Parking', 'Fitness Center']
@@ -122,12 +119,11 @@ export const LUXEA_STAYS = [
     kesPrice: 9750,
     rating: '★ 4.91 (56)',
     specs: '1 Bed • 1 Bath • 850 sqft',
-    image: '/assets/images/suite_balcony.jpg',
+    image: '/assets/images/stays/nairobi_apts_2.webp',
     images: [
-      '/assets/images/suite_balcony.jpg',
-      '/assets/images/suite.jpg',
-      '/assets/images/suite_living.jpg',
-      '/assets/images/suite_bath.jpg'
+      '/assets/images/stays/nairobi_apts_2.webp',
+      '/assets/images/stays/ruaka_studio_kitchen.webp',
+      '/assets/images/stays/nordic_bed.webp'
     ],
     description: 'Chic, sunlit modern executive suite with warm mustard and cream tones, plush velvet lounging, high-speed streaming setup, and dedicated workstation near Garden City & TRM.',
     amenities: ['High-Speed WiFi', 'Dedicated Workspace', 'Smart 55" OLED TV', 'Balcony Sunset View', 'Full Kitchen', 'Elevator & Security']
@@ -147,12 +143,11 @@ export const LUXEA_STAYS = [
     kesPrice: 11050,
     rating: '★ 4.88 (31)',
     specs: '1 Bed • 1 Bath • 920 sqft',
-    image: '/assets/images/modern_loft.jpg',
+    image: '/assets/images/stays/roysambu_amber.webp',
     images: [
-      '/assets/images/modern_loft.jpg',
-      '/assets/images/suite.jpg',
-      '/assets/images/suite_living.jpg',
-      '/assets/images/suite_bath.jpg'
+      '/assets/images/stays/roysambu_amber.webp',
+      '/assets/images/stays/ruaka_studio_kitchen.webp',
+      '/assets/images/stays/westlands_loft_bath.webp'
     ],
     description: 'Warm ambient lighting, bespoke timber bar, plush memory foam queen bedding, and tranquil acoustic glass insulation offering a serene escape right by Nairobi’s vibrant hub.',
     amenities: ['Artisan Coffee Station', 'Fast Fiber WiFi', 'Smart Security Access', 'Free Resident Parking', 'Housekeeping']
@@ -174,12 +169,10 @@ export const LUXEA_STAYS = [
     kesPrice: 84500,
     rating: '★ 4.98 (64)',
     specs: '4 Beds • 4.5 Baths • 5,400 sqft',
-    image: '/assets/images/villa_pool.jpg',
+    image: '/assets/images/stays/diani_villa_living.webp',
     images: [
-      '/assets/images/villa_pool.jpg',
-      '/assets/images/villa.jpg',
-      '/assets/images/suite_balcony.jpg',
-      '/assets/images/suite_bath.jpg'
+      '/assets/images/stays/diani_villa_living.webp',
+      '/assets/images/stays/diani_villa_bed.webp'
     ],
     description: 'An oceanfront sanctuary framed by swaying palms and azure waters. Features expansive living pavilions, travertine sun terraces, private ocean-view infinity pool, dedicated butler, and resident private chef preparing coastal Swahili-fusion gourmet dining.',
     amenities: ['Private Beach Access', 'Infinity Pool', 'Starlink 250Mbps WiFi', 'Private Chef & Butler', '24/7 Gated Security', 'Backup Solar & Generator', 'Air Conditioning']
@@ -199,12 +192,10 @@ export const LUXEA_STAYS = [
     kesPrice: 24700,
     rating: '★ 5.0 (29)',
     specs: '2 Beds • 2 Baths • 1,750 sqft',
-    image: '/assets/images/villa.jpg',
+    image: '/assets/images/stays/diani_villa_bed.webp',
     images: [
-      '/assets/images/villa.jpg',
-      '/assets/images/villa_pool.jpg',
-      '/assets/images/suite_balcony.jpg',
-      '/assets/images/suite_living.jpg'
+      '/assets/images/stays/diani_villa_bed.webp',
+      '/assets/images/stays/diani_villa_living.webp'
     ],
     description: 'Direct views of the Indian Ocean, private sea-facing balcony, coastal boho aesthetic with custom Swahili carved wood, and swimming pool access.',
     amenities: ['Direct Beach Walkway', 'Swimming Pool', 'Air Conditioning', 'High-Speed Fiber', 'Sea-View Balcony', 'Secure Estate']
@@ -226,12 +217,11 @@ export const LUXEA_STAYS = [
     kesPrice: 50700,
     rating: '★ 4.95 (34)',
     specs: '3 Beds • 3 Baths • 3,200 sqft',
-    image: '/assets/images/townhouse_garden.jpg',
+    image: '/assets/images/stays/safari_bed_1.webp',
     images: [
-      '/assets/images/townhouse_garden.jpg',
-      '/assets/images/townhouse.jpg',
-      '/assets/images/suite_living.jpg',
-      '/assets/images/suite_bath.jpg'
+      '/assets/images/stays/safari_bed_1.webp',
+      '/assets/images/stays/safari_dining.webp',
+      '/assets/images/stays/safari_bed_2.webp'
     ],
     description: 'Nestled amidst the serene indigenous forest of Karen. An architectural residence highlighting natural timber, floor-to-ceiling glass pavilions, organic herb gardens, and an evening fire pit courtyard designed for intimate gatherings.',
     amenities: ['Private Forest Courtyard', 'Outdoor Fire Pit', 'Wood-burning Fireplace', 'Chef Kitchen', 'Dedicated Workspace', 'Tesla/EV Charging', 'Housekeeping']
@@ -251,12 +241,11 @@ export const LUXEA_STAYS = [
     kesPrice: 28600,
     rating: '★ 5.0 (18)',
     specs: '1 Bed • 1 Bath • 1,150 sqft',
-    image: '/assets/images/townhouse.jpg',
+    image: '/assets/images/stays/kitisuru_bed.webp',
     images: [
-      '/assets/images/townhouse.jpg',
-      '/assets/images/townhouse_garden.jpg',
-      '/assets/images/suite_balcony.jpg',
-      '/assets/images/suite_bath.jpg'
+      '/assets/images/stays/kitisuru_bed.webp',
+      '/assets/images/hotels/guest_morning.webp',
+      '/assets/images/stays/westlands_loft_bath.webp'
     ],
     description: 'A serene boutique sanctuary tailored for romantic escapes and discerning executive stays. Fitted with natural organic linen bedding, brass fittings, private terrace overlooking coffee orchards, and an artisan coffee station.',
     amenities: ['Private Garden Balcony', 'Smart 65" OLED TV', 'Artisan Coffee Bar', 'High-Speed WiFi', 'Secure Parking', 'Premium Toiletries']
@@ -278,12 +267,13 @@ export const LUXEA_STAYS = [
     kesPrice: 45500,
     rating: '★ 4.97 (22)',
     specs: '3 Beds • 3 Baths • 2,900 sqft',
-    image: '/assets/images/townhouse_garden.jpg',
+    image: '/assets/images/stays/safari_bed_3.webp',
     images: [
-      '/assets/images/townhouse_garden.jpg',
-      '/assets/images/villa_pool.jpg',
-      '/assets/images/townhouse.jpg',
-      '/assets/images/suite_living.jpg'
+      '/assets/images/stays/safari_bed_3.webp',
+      '/assets/images/stays/safari_bed_4.webp',
+      '/assets/images/stays/safari_bed_5.webp',
+      '/assets/images/stays/safari_bed_6.webp',
+      '/assets/images/stays/safari_dining.webp'
     ],
     description: 'A magnificent stone and timber safari villa facing Lake Naivasha. Features resident zebras grazing on the lawn, wrap-around sunset deck, private plunge pool, and wood-burning stone hearth.',
     amenities: ['Lake View Deck', 'Private Plunge Pool', 'Wood Fireplace', 'Chef on Demand', 'Game Viewing', 'Starlink WiFi']
@@ -305,12 +295,11 @@ export const LUXEA_STAYS = [
     kesPrice: 12350,
     rating: '★ 4.94 (48)',
     specs: '1 Bed • 1 Bath • 880 sqft',
-    image: '/assets/images/modern_loft.jpg',
+    image: '/assets/images/stays/rhapta_bed.webp',
     images: [
-      '/assets/images/modern_loft.jpg',
-      '/assets/images/suite_balcony.jpg',
-      '/assets/images/suite_living.jpg',
-      '/assets/images/suite_bath.jpg'
+      '/assets/images/stays/rhapta_bed.webp',
+      '/assets/images/stays/nairobi_apts_1.webp',
+      '/assets/images/stays/westlands_loft_bath.webp'
     ],
     description: 'A curated modern Airbnb with industrial black glass partitions, custom acacia dining counter, high-speed Starlink WiFi, washer/dryer, and heated swimming pool.',
     amenities: ['High-Speed WiFi', 'Heated Pool', 'Washer & Dryer', 'Full Kitchen', 'Dedicated Workspace', 'Gym']
@@ -330,12 +319,10 @@ export const LUXEA_STAYS = [
     kesPrice: 75400,
     rating: '★ 4.99 (36)',
     specs: '4 Beds • 4 Baths • 4,800 sqft',
-    image: '/assets/images/villa_pool.jpg',
+    image: '/assets/images/stays/diani_villa_living.webp',
     images: [
-      '/assets/images/villa_pool.jpg',
-      '/assets/images/villa.jpg',
-      '/assets/images/suite_balcony.jpg',
-      '/assets/images/suite_living.jpg'
+      '/assets/images/stays/diani_villa_living.webp',
+      '/assets/images/stays/diani_villa_bed.webp'
     ],
     description: 'Perched above pristine coral cliffs with private stairs down to turquoise waters. Private infinity edge pool, open-air coral stone dining loggia, and resident chef.',
     amenities: ['Cliffside Infinity Pool', 'Private Beach Stairs', 'Private Chef', 'Air Conditioning', 'Generator Backup', 'Starlink']
@@ -355,12 +342,11 @@ export const LUXEA_STAYS = [
     kesPrice: 33800,
     rating: '★ 4.98 (29)',
     specs: '1 Bed • 1 Bath • 1,200 sqft',
-    image: '/assets/images/suite_living.jpg',
+    image: '/assets/images/stays/safari_bed_2.webp',
     images: [
-      '/assets/images/suite_living.jpg',
-      '/assets/images/townhouse_garden.jpg',
-      '/assets/images/suite_bath.jpg',
-      '/assets/images/suite.jpg'
+      '/assets/images/stays/safari_bed_2.webp',
+      '/assets/images/stays/safari_dining.webp',
+      '/assets/images/stays/kitisuru_bed.webp'
     ],
     description: 'Classic colonial luxury meets contemporary bespoke service. Butler service, clawfoot soaking tub, afternoon tea terrace, and serene views of the Ngong Hills.',
     amenities: ['Butler Service', 'Ngong Hills View', 'Clawfoot Soaking Tub', 'Complimentary Breakfast', 'Fine Dining Lounge', 'High-Speed WiFi']

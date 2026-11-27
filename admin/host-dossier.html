@@ -847,7 +847,7 @@
             const kes = Math.round(parseFloat(p.price_per_night_kes) || ((parseFloat(p.price_per_night_usd) || 0) * usdRate));
             const isLive = p.is_available !== false;
             const pPhotos = Array.isArray(p.gallery_images) ? p.gallery_images : [];
-            const cover = safeUrl(p.cover_image_url || pPhotos[0], '/assets/images/villa.jpg');
+            const cover = safeUrl(p.cover_image_url || pPhotos[0], '/assets/images/stays/westlands_loft_1.webp');
 
             const card = document.createElement('div');
             card.style.cssText = 'border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#FDFBF7; display:flex; flex-direction:column;';
@@ -951,7 +951,7 @@
         galleryGrid.appendChild(empty);
       } else {
         photoEntries.forEach(({ url, label }) => {
-          const cleanPhoto = safeUrl(url, '/assets/images/villa.jpg');
+          const cleanPhoto = safeUrl(url, '/assets/images/stays/westlands_loft_1.webp');
           if (!cleanPhoto) return;
           const item = document.createElement('div');
           item.className = 'gallery-item';

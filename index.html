@@ -44,8 +44,11 @@
 
       <nav class="desktop-nav">
         <a href="/stays/" class="nav-link">Stays</a>
+        <a href="/hotels/" class="nav-link">Hotels</a>
         <a href="/host/" class="nav-link">Host</a>
         <a href="/laundry/" class="nav-link">Laundry</a>
+        <a href="/about/" class="nav-link">About</a>
+        <a href="/faqs/" class="nav-link">FAQs</a>
       </nav>
 
       <div class="header-actions">
@@ -58,10 +61,10 @@
     
     <!-- 1. HERO BANNER CARD (Phone 1) -->
     <div class="mobile-hero-banner">
-      <img src="/assets/images/villa_pool.jpg" alt="Villa Seraphina" class="hero-bg-img">
+      <img src="/assets/images/hotels/nairobi_skyline.webp" alt="Luxea Living Kenya" class="hero-bg-img">
       <div class="hero-overlay">
         <h1 class="hero-title-clean">Find a home that elevates life.</h1>
-        <p class="hero-subtitle-clean">Curated properties in the neighborhoods you love.</p>
+        <p class="hero-subtitle-clean">Curated homes &amp; hotels across Kenya.</p>
       </div>
     </div>
 
@@ -82,7 +85,7 @@
         <span class="btn btn-secondary btn-sm" style="margin-top: 6px; display: inline-flex;">Start Registration &rarr;</span>
       </div>
       <div class="featured-area-thumb">
-        <img src="/assets/images/penthouse_terrace.jpg" alt="Host with Luxea">
+        <img src="/assets/images/stays/westlands_loft_1.webp" alt="Host with Luxea">
       </div>
     </a>
 
@@ -108,10 +111,12 @@
   <script type="module">
     import { initCurrency } from '/assets/js/modules/currency.js?v=2.5.0';
     import { initNearbyStays } from '/assets/js/modules/nearbyStays.js?v=2.5.0';
+    import { initFooter } from '/assets/js/modules/footer.js?v=1.0.0';
 
     document.addEventListener('DOMContentLoaded', () => {
       initCurrency();
       initNearbyStays('locationSectionsContainer');
+      initFooter();
     });
   </script>
 </body>

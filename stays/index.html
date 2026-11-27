@@ -32,8 +32,11 @@
 
       <nav class="desktop-nav">
         <a href="/stays/" class="nav-link active">Stays</a>
+        <a href="/hotels/" class="nav-link">Hotels</a>
         <a href="/host/" class="nav-link">Host</a>
         <a href="/laundry/" class="nav-link">Laundry</a>
+        <a href="/about/" class="nav-link">About</a>
+        <a href="/faqs/" class="nav-link">FAQs</a>
       </nav>
 
       <div class="header-actions">
@@ -126,7 +129,7 @@
       <div class="detail-hero-showcase" id="detailHeroMedia">
         <!-- Main Primary Photo (Carousel) -->
         <div class="hero-primary-photo">
-          <img id="detailHeroImg" src="/assets/images/villa_pool.jpg" alt="Stay Preview">
+          <img id="detailHeroImg" src="/assets/images/stays/westlands_loft_1.webp" alt="Stay Preview">
           <button class="card-carousel-arrow arrow-prev" id="detailHeroPrev" aria-label="Previous photo" title="Previous photo">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
           </button>
@@ -138,7 +141,7 @@
 
         <!-- Secondary Preview Photo (Desktop only) -->
         <div class="hero-secondary-photo" id="heroSecondaryPhoto">
-          <img id="detailSecondaryImg" src="/assets/images/suite_living.jpg" alt="Secondary Room Preview">
+          <img id="detailSecondaryImg" src="/assets/images/stays/westlands_loft_2.webp" alt="Secondary Room Preview">
           <button class="view-all-photos-badge" id="viewAllPhotosBadge">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             <span id="allPhotosCountLabel">✦ View all photos</span>
@@ -466,8 +469,9 @@
 
   <script src="/assets/js/main.js?v=2.4.0"></script>
   <script type="module">
-    import { LUXEA_STAYS } from '/assets/js/modules/staysData.js?v=2.4.0';
+    import { LUXEA_STAYS } from '/assets/js/modules/staysData.js?v=2.9.0';
     import { initCurrencyToggle, refreshPrices } from '/assets/js/modules/currency.js?v=2.5.0';
+    import { initFooter } from '/assets/js/modules/footer.js?v=1.0.0';
 
     // Haversine distance calculator
     function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -484,6 +488,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       initCurrencyToggle();
+      initFooter();
 
       const feedContainer = document.getElementById('browseFeedContainer');
       const browseView = document.getElementById('browseView');
@@ -550,7 +555,7 @@
                 kesPrice: cp.price_per_night_kes || 13000,
                 rating: '★ 5.0 (New)',
                 specs: `${cp.bedrooms || 2} Beds • ${cp.bathrooms || 2} Baths`,
-                image: cp.cover_image_url || '/assets/images/villa.jpg',
+                image: cp.cover_image_url || '/assets/images/stays/westlands_loft_1.webp',
                 description: cp.description,
                 amenities: cp.amenities || ['WiFi', 'Parking'],
                 is_available: cp.is_available !== false

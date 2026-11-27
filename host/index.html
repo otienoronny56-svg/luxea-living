@@ -33,8 +33,11 @@
 
       <nav class="desktop-nav">
         <a href="/stays/" class="nav-link">Stays</a>
+        <a href="/hotels/" class="nav-link">Hotels</a>
         <a href="/host/" class="nav-link active">Host</a>
         <a href="/laundry/" class="nav-link">Laundry</a>
+        <a href="/about/" class="nav-link">About</a>
+        <a href="/faqs/" class="nav-link">FAQs</a>
       </nav>
 
       <div class="header-actions">
@@ -374,6 +377,14 @@
                       <span class="prop-card-icon">🌿</span>
                       <strong class="prop-card-title">Cottage</strong>
                       <span class="prop-card-desc">Boutique haven</span>
+                    </div>
+                  </label>
+                  <label class="property-type-card">
+                    <input type="radio" name="propertyType" value="Hotel">
+                    <div class="prop-card-inner">
+                      <span class="prop-card-icon">🏨</span>
+                      <strong class="prop-card-title">Hotel Suite</strong>
+                      <span class="prop-card-desc">Hotel &amp; rooms</span>
                     </div>
                   </label>
                 </div>
@@ -1031,12 +1042,20 @@
     import { initHostForm } from '/assets/js/modules/hostForm.js?v=2.4.4';
     import { initHostManager } from '/assets/js/modules/hostManager.js?v=2.9.0';
     import { initHostOps } from '/assets/js/modules/hostOps.js?v=2.8.0';
+    import { initFooter } from '/assets/js/modules/footer.js?v=1.0.0';
 
     document.addEventListener('DOMContentLoaded', async () => {
       initCurrency();
       initHostForm('luxeaHostForm');
       initHostManager('hostManagerContainer');
       initHostOps();
+      initFooter();
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('type') === 'hotel') {
+        const hotelRadio = document.querySelector('input[name="propertyType"][value="Hotel"]');
+        if (hotelRadio) hotelRadio.checked = true;
+      }
 
       const registerView = document.getElementById('hostRegisterView');
       const gatedView = document.getElementById('hostGatedView');

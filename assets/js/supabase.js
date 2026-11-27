@@ -511,7 +511,7 @@
         photoUrls = await this.uploadListingPhotos(photoFiles, 'properties');
       }
 
-      const coverImage = photoUrls[0] || listingData.coverImage || '/assets/images/villa.jpg';
+      const coverImage = photoUrls[0] || listingData.coverImage || '/assets/images/stays/westlands_loft_1.webp';
       const gallery = photoUrls.length > 0 ? photoUrls : [coverImage];
 
       const newProperty = {

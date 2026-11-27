@@ -280,7 +280,7 @@ export function initHostManager(containerId = 'hostManagerContainer') {
         hostGallery = [listing.cover_image_url];
       }
       if (hostGallery.length === 0) {
-        hostGallery = ['/assets/images/villa.jpg'];
+        hostGallery = ['/assets/images/stays/westlands_loft_1.webp'];
       }
       const hasGalleryMultiple = hostGallery.length > 1;
 
@@ -289,7 +289,7 @@ export function initHostManager(containerId = 'hostManagerContainer') {
       card.setAttribute('data-id', listing.id);
 
       const esc = (v) => window.LuxeaSanitize ? window.LuxeaSanitize.escapeHtml(v) : String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-      const safeImg = (u) => window.LuxeaSanitize ? window.LuxeaSanitize.safeUrl(u, '/assets/images/villa.jpg') : '/assets/images/villa.jpg';
+      const safeImg = (u) => window.LuxeaSanitize ? window.LuxeaSanitize.safeUrl(u, '/assets/images/stays/westlands_loft_1.webp') : '/assets/images/stays/westlands_loft_1.webp';
 
       card.innerHTML = `
         <div class="manage-card-thumb-wrap" data-listing-id="${esc(listing.id)}">
@@ -451,7 +451,7 @@ export function initHostManager(containerId = 'hostManagerContainer') {
       if (!listing) return;
       const gallery = (listing.gallery_images && listing.gallery_images.length > 0)
         ? listing.gallery_images
-        : (listing.cover_image_url ? [listing.cover_image_url] : ['/assets/images/villa.jpg']);
+        : (listing.cover_image_url ? [listing.cover_image_url] : ['/assets/images/stays/westlands_loft_1.webp']);
       if (gallery.length <= 1) return;
 
       let activeIdx = 0;
