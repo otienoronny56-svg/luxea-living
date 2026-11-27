@@ -1,0 +1,305 @@
+/* ==========================================================================
+   LUXEA LIVING — HOST OPERATIONS SUITE (Calendar, Clients Ledger, Backups)
+   ========================================================================== */
+.host-ops-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 20px;
+  padding: 6px;
+  background: #FFFFFF;
+  border: 1px solid rgba(178, 135, 86, 0.22);
+  border-radius: 14px;
+}
+
+.host-ops-tab {
+  border: none;
+  background: transparent;
+  color: #604D42;
+  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 9px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.host-ops-tab:hover {
+  background: #F7F3EC;
+  color: #241812;
+}
+
+.host-ops-tab.active {
+  background: #241812;
+  color: #F5EFE6;
+}
+
+.host-ops-badge {
+  background: rgba(212, 175, 55, 0.25);
+  color: #D4AF37;
+  font-size: 0.7rem;
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+
+.host-ops-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 780px) {
+  .host-ops-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.host-kpi-box {
+  background: #FFFFFF;
+  border: 1px solid rgba(178, 135, 86, 0.22);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.host-kpi-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #604D42;
+  margin-bottom: 4px;
+}
+
+.host-kpi-val {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #241812;
+}
+
+.host-ops-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(178, 135, 86, 0.22);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+
+.host-ops-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(178, 135, 86, 0.14);
+}
+
+.host-ops-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #241812;
+}
+
+/* Interactive Calendar */
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 6px;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #604D42;
+  text-transform: uppercase;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.cal-day {
+  min-height: 76px;
+  border-radius: 10px;
+  border: 1px solid rgba(178, 135, 86, 0.2);
+  background: #FDFBF7;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.15s ease, transform 0.12s ease;
+  overflow: hidden;
+}
+
+.cal-day:hover {
+  border-color: #B28756;
+  transform: translateY(-1px);
+}
+
+.cal-day.empty {
+  background: transparent;
+  border-color: transparent;
+  cursor: default;
+}
+
+.cal-day.today {
+  border: 2px solid #241812;
+}
+
+.cal-day.booked {
+  background: #FEF3C7;
+  border-color: #D4AF37;
+}
+
+.cal-day.pending {
+  background: #FFFBEB;
+  border-color: #F59E0B;
+}
+
+.cal-day.avail {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+}
+
+.cal-day-num {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #241812;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cal-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #241812;
+  color: #F5EFE6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-tag.pending {
+  background: #D97706;
+  color: #FFFFFF;
+}
+
+.cal-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #604D42;
+  margin-top: 12px;
+}
+
+.cal-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 4px;
+}
+
+/* Form & Ledger Table */
+.host-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 760px) {
+  .host-form-grid { grid-template-columns: 1fr; }
+  .cal-day { min-height: 58px; padding: 4px; }
+}
+
+.host-ledger-wrap {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.host-ledger-table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.host-ledger-table th {
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #604D42;
+  padding: 10px;
+  border-bottom: 1px solid rgba(178, 135, 86, 0.2);
+  background: #FBF9F5;
+  white-space: nowrap;
+}
+
+.host-ledger-table td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(178, 135, 86, 0.12);
+  vertical-align: middle;
+}
+
+.ops-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ops-chip.green { background: #DEF7EC; color: #03543F; }
+.ops-chip.amber { background: #FEF3C7; color: #92400E; }
+.ops-chip.red   { background: #FEE2E2; color: #B91C1C; }
+.ops-chip.gray  { background: #F3F4F6; color: #374151; }
+
+.ops-mini-btn {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: 1px solid rgba(178, 135, 86, 0.3);
+  background: #FAF5EE;
+  color: #241812;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ops-mini-btn:hover { background: #EFE4D6; }
+.ops-mini-btn.ok { background: #DEF7EC; color: #03543F; border-color: #A7F3D0; }
+.ops-mini-btn.wa { background: #DCFCE7; color: #15803D; border-color: #86EFAC; }
+
+.backup-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.backup-tile {
+  background: #FDFBF7;
+  border: 1px solid rgba(178, 135, 86, 0.25);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

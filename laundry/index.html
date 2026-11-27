@@ -17,8 +17,8 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/assets/js/config.js"></script>
-  <script src="/assets/js/supabase.js"></script>
+  <script src="/assets/js/config.js?v=2.8.0"></script>
+  <script src="/assets/js/supabase.js?v=2.8.0"></script>
 </head>
 <body>
 
@@ -108,6 +108,36 @@
       <!-- Providers Grid Container (Injected by laundryManager.js) -->
       <div id="laundryProvidersGrid" class="laundry-providers-grid">
         <!-- Rendered Provider Cards -->
+      </div>
+
+      <!-- Rate or Report a Laundry Partner -->
+      <div class="laundry-card" style="margin-top: 26px;">
+        <h3 style="margin: 0 0 10px; font-size: 1rem; color: var(--color-espresso);">⭐ Rate or Report a Laundry Partner</h3>
+        <form id="laundryFeedbackForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px;">
+          <select id="lfPartner" class="form-control" required>
+            <option value="LXL-2026-WEST">Spotless Valet (Westlands)</option>
+            <option value="LXL-2026-KILI">LinenCraft (Kilimani)</option>
+            <option value="LXL-2026-RUAK">FreshBreeze (Ruaka)</option>
+            <option value="LXL-2026-ROYS">Safari Sparkle (Roysambu)</option>
+            <option value="LXL-2026-KAREN">Prestige Valet (Karen)</option>
+          </select>
+          <select id="lfKind" class="form-control">
+            <option value="review">⭐ Positive / Review</option>
+            <option value="complaint">⚠️ Report Issue</option>
+          </select>
+          <select id="lfRating" class="form-control">
+            <option value="5">★★★★★ (5)</option>
+            <option value="4">★★★★ (4)</option>
+            <option value="3">★★★ (3)</option>
+            <option value="2">★★ (2)</option>
+            <option value="1">★ (1)</option>
+          </select>
+          <input type="text" id="lfName" class="form-control" placeholder="Your name *" required>
+          <input type="text" id="lfComment" class="form-control" placeholder="Comment or issue *" required style="grid-column: 1 / -1;">
+          <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary btn-sm" id="lfSubmitBtn">Submit Feedback</button>
+          </div>
+        </form>
       </div>
 
     </div>
@@ -489,6 +519,32 @@
         dateInput.value = new Date().toISOString().split('T')[0];
       }
       initLaundryManager();
+
+      const lfForm = document.getElementById('laundryFeedbackForm');
+      lfForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('lfSubmitBtn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+        const sel = document.getElementById('lfPartner');
+        const kind = document.getElementById('lfKind').value;
+        const res = await window.LuxeaDB.submitReviewOrComplaint({
+          target_type: 'laundry',
+          target_id: sel.value,
+          target_name: sel.options[sel.selectedIndex]?.text || sel.value,
+          kind,
+          rating: kind === 'complaint' ? 1 : parseInt(document.getElementById('lfRating').value, 10),
+          category: kind === 'complaint' ? 'Laundry Issue' : 'Laundry Service',
+          reviewer_name: document.getElementById('lfName').value.trim(),
+          comment: document.getElementById('lfComment').value.trim()
+        });
+        if (btn) { btn.disabled = false; btn.textContent = 'Submit Feedback'; }
+        if (res.success) {
+          lfForm.reset();
+          alert(kind === 'complaint' ? 'Issue reported to Luxea Admin.' : 'Thank you! Your review was saved.');
+        } else {
+          alert('Could not submit: ' + (res.error || 'Try again'));
+        }
+      });
     });
   </script>
 </body>

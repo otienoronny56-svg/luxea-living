@@ -225,6 +225,7 @@ export function initAdminDashboard() {
   let cachedProfiles = [];
   let cachedLaundryPartners = [];
   let cachedLaundryOrders = [];
+  let cachedReviews = [];
   let currentStatusFilter = 'all';
 
   // =========================================================================
@@ -257,7 +258,7 @@ export function initAdminDashboard() {
         window.LuxeaDB.initAdminRealtime();
       }
       const initialTab = new URLSearchParams(window.location.search).get('tab');
-      if (initialTab && ['overview', 'hosts', 'stays', 'guests', 'hostWaitlist', 'profiles', 'laundry'].includes(initialTab)) {
+      if (initialTab && ['overview', 'hosts', 'stays', 'guests', 'hostWaitlist', 'profiles', 'laundry', 'performance'].includes(initialTab)) {
         switchTab(initialTab, false);
       }
       loadDashboardData();
@@ -383,6 +384,10 @@ export function initAdminDashboard() {
       cachedLaundryOrders = typeof window.LuxeaDB.fetchLaundryOrders === 'function'
         ? await window.LuxeaDB.fetchLaundryOrders()
         : JSON.parse(localStorage.getItem('luxea_laundry_orders') || '[]');
+
+      cachedReviews = typeof window.LuxeaDB.fetchReviewsAndComplaints === 'function'
+        ? await window.LuxeaDB.fetchReviewsAndComplaints({ limit: 200 })
+        : [];
     } else {
       cachedHosts = JSON.parse(localStorage.getItem('luxea_host_applications') || '[]');
       cachedGuests = JSON.parse(localStorage.getItem('luxea_waitlist_guests') || '[]');
@@ -1034,6 +1039,7 @@ export function initAdminDashboard() {
     renderHostWaitlistTable(filterQuery);
     renderProfilesTable(filterQuery);
     renderLaundryTable(filterQuery);
+    renderPerformanceView();
   }
 
   // =========================================================================
@@ -1763,7 +1769,9 @@ export function initAdminDashboard() {
           const areasFull = areas.join(', ');
           const areasShort = abbrLocation(areasFull);
 
+          const laundryAuditUrl = `/admin/laundry-audit?ref=${encodeURIComponent(refId)}`;
           const tr = document.createElement('tr');
+          tr.title = 'Click to audit laundry partner';
           tr.innerHTML = `
             <td>
               <div class="cell-ellipsis" style="font-weight: 700; color: #241812; font-size: 0.78rem;" title="${esc(bizName)}">${esc(bizName)}</div>
@@ -1792,7 +1800,14 @@ export function initAdminDashboard() {
               <div style="font-weight: 700; color: #B28756; font-size: 0.76rem;">⭐ ${esc(rating)}</div>
               <small style="color: #8C6D58; font-size: 0.64rem;">${esc(completedJobs)} jobs</small>
             </td>
+            <td style="text-align: right; white-space: nowrap;">
+              <a href="${esc(laundryAuditUrl)}" class="btn-table-action btn-inspect" style="padding: 4px 8px; font-size: 0.7rem;">Audit →</a>
+            </td>
           `;
+          tr.addEventListener('click', (e) => {
+            if (e.target.closest('a') || e.target.closest('button')) return;
+            window.location.href = laundryAuditUrl;
+          });
           laundryPartnersTableBody.appendChild(tr);
         });
       }
@@ -1892,6 +1907,161 @@ export function initAdminDashboard() {
   }
 
   // =========================================================================
+  // 6E. PERFORMANCE, REVIEWS, COMPLAINTS & TRUST CREDITS VIEW
+  // =========================================================================
+  const perfSearchInput = document.getElementById('perfSearchInput');
+  const perfKindFilter = document.getElementById('perfKindFilter');
+  const perfTargetFilter = document.getElementById('perfTargetFilter');
+
+  function renderPerformanceView() {
+    const feedbackBody = document.getElementById('perfFeedbackTableBody');
+    const feedbackEmpty = document.getElementById('perfFeedbackEmpty');
+    const leaderBody = document.getElementById('perfLeaderboardBody');
+    if (!feedbackBody || !leaderBody) return;
+
+    const reviews = cachedReviews.filter(r => r.kind === 'review');
+    const openComplaints = cachedReviews.filter(r => r.kind === 'complaint' && r.status === 'open');
+    const avgRating = reviews.length > 0
+      ? (reviews.reduce((s, r) => s + (Number(r.rating) || 5), 0) / reviews.length).toFixed(1)
+      : '5.0';
+
+    const allEntities = [
+      ...cachedStays.map(s => ({
+        group: 'Stay',
+        name: s.name || 'Stay',
+        area: abbrLocation([s.area, s.city].filter(Boolean).join(', ')),
+        rating: s.rating || 5.0,
+        credits: s.trust_credits ?? 100,
+        url: `/admin/stay-audit?id=${encodeURIComponent(s.id || s.slug)}&from=performance`
+      })),
+      ...cachedHosts.map(h => ({
+        group: 'Host',
+        name: h.full_name || h.fullName || 'Host',
+        area: abbrLocation([h.area_suburb, h.county].filter(Boolean).join(', ')),
+        rating: '—',
+        credits: h.trust_credits ?? 100,
+        url: `/admin/host-dossier?ref=${encodeURIComponent(h.ref_id || h.refId || '')}&from=performance`
+      })),
+      ...cachedLaundryPartners.map(p => ({
+        group: 'Laundry',
+        name: p.business_name || p.businessName || 'Partner',
+        area: abbrLocation((Array.isArray(p.coverage_areas) ? p.coverage_areas : []).join(', ')),
+        rating: p.rating || 5.0,
+        credits: p.trust_credits ?? 100,
+        url: `/admin/laundry-audit?ref=${encodeURIComponent(p.ref_id || p.refId || '')}`
+      }))
+    ].sort((a, b) => b.credits - a.credits);
+
+    const topCredits = allEntities.length > 0 ? allEntities[0].credits : 100;
+    const elAvg = document.getElementById('perfAvgRating');
+    const elRev = document.getElementById('perfReviewsCount');
+    const elOpen = document.getElementById('perfOpenComplaints');
+    const elTop = document.getElementById('perfTopCredits');
+    const tabBadge = document.getElementById('performanceTabCounter');
+    if (elAvg) elAvg.textContent = avgRating;
+    if (elRev) elRev.textContent = reviews.length;
+    if (elOpen) elOpen.textContent = openComplaints.length;
+    if (elTop) elTop.textContent = topCredits;
+    if (tabBadge) tabBadge.textContent = openComplaints.length > 0 ? openComplaints.length : reviews.length;
+
+    const q = (perfSearchInput?.value || '').toLowerCase().trim();
+    const kindF = perfKindFilter?.value || 'all';
+    const targetF = perfTargetFilter?.value || 'all';
+
+    const filtered = cachedReviews.filter(r => {
+      const mKind = kindF === 'all' || r.kind === kindF;
+      const mTarget = targetF === 'all' || r.target_type === targetF;
+      const mQ = !q ||
+        (r.target_name || '').toLowerCase().includes(q) ||
+        (r.reviewer_name || '').toLowerCase().includes(q) ||
+        (r.comment || '').toLowerCase().includes(q) ||
+        (r.category || '').toLowerCase().includes(q);
+      return mKind && mTarget && mQ;
+    });
+
+    const countTag = document.getElementById('perfFeedbackCountTag');
+    if (countTag) countTag.textContent = filtered.length;
+
+    feedbackBody.innerHTML = '';
+    if (filtered.length === 0) {
+      feedbackEmpty?.classList.remove('hidden');
+    } else {
+      feedbackEmpty?.classList.add('hidden');
+      filtered.forEach(item => {
+        const isComplaint = item.kind === 'complaint';
+        const auditUrl = item.target_type === 'stay'
+          ? `/admin/stay-audit?id=${encodeURIComponent(item.target_id)}&from=performance`
+          : item.target_type === 'host'
+            ? `/admin/host-dossier?ref=${encodeURIComponent(item.target_id)}&from=performance`
+            : `/admin/laundry-audit?ref=${encodeURIComponent(item.target_id)}`;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <span class="status-chip ${isComplaint ? 'chip-red' : 'chip-gold'}" style="font-size: 0.64rem; padding: 1px 6px;">
+              ${isComplaint ? 'Issue' : `⭐ ${esc(item.rating || 5)}`}
+            </span>
+          </td>
+          <td>
+            <a href="${esc(auditUrl)}" class="cell-ellipsis" style="font-weight: 700; color: #241812; text-decoration: underline;" title="${esc(item.target_name || item.target_id)}">
+              ${esc(item.target_name || item.target_id)}
+            </a>
+            <small class="cell-ellipsis" style="color: #8C6D58; font-size: 0.66rem;">${esc(item.target_type)} • ${esc(item.category || 'General')}</small>
+          </td>
+          <td>
+            <div class="cell-ellipsis" style="font-weight: 600; font-size: 0.74rem;" title="${esc(item.reviewer_name)}">${esc(item.reviewer_name)}</div>
+            <small class="cell-ellipsis" style="color: #8C6D58; font-size: 0.66rem;">${esc(item.reviewer_phone || '')}</small>
+          </td>
+          <td>
+            <div class="cell-ellipsis" style="font-size: 0.74rem; color: #4A3B32;" title="${esc(item.comment)}">${esc(item.comment)}</div>
+          </td>
+          <td>
+            <span class="status-chip ${item.status === 'open' ? 'chip-red' : 'chip-green'}" style="font-size: 0.64rem; padding: 1px 6px;">${esc(item.status)}</span>
+          </td>
+          <td style="text-align: right; white-space: nowrap;">
+            ${isComplaint && item.status === 'open' ? `
+              <button type="button" class="btn-table-action perf-resolve-btn" data-id="${esc(item.id)}" style="background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;">Resolve</button>
+            ` : `<a href="${esc(auditUrl)}" class="btn-table-action btn-inspect">Audit →</a>`}
+          </td>
+        `;
+        feedbackBody.appendChild(tr);
+      });
+
+      feedbackBody.querySelectorAll('.perf-resolve-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-id');
+          const note = prompt('Resolution note (optional):', 'Resolved with partner') ?? '';
+          const res = await window.LuxeaDB.resolveComplaint(id, 'resolved', note);
+          if (res.success) {
+            if (window.showToast) window.showToast('Issue marked resolved & credits updated.');
+            await loadDashboardData();
+          }
+        });
+      });
+    }
+
+    // Leaderboard
+    leaderBody.innerHTML = '';
+    allEntities.slice(0, 25).forEach(e => {
+      const tierClass = e.credits >= 120 ? 'chip-green' : e.credits >= 90 ? 'chip-gold' : 'chip-red';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="status-chip chip-neutral" style="font-size: 0.64rem; padding: 1px 6px;">${esc(e.group)}</span></td>
+        <td><div class="cell-ellipsis" style="font-weight: 700;" title="${esc(e.name)}">${esc(e.name)}</div></td>
+        <td><div class="cell-ellipsis" style="color: #604D42;">${esc(e.area)}</div></td>
+        <td style="font-weight: 700; color: #B28756;">${e.rating === '—' ? '—' : `⭐ ${esc(e.rating)}`}</td>
+        <td><span class="status-chip ${tierClass}" style="font-size: 0.68rem; padding: 2px 8px; font-weight: 700;">${esc(e.credits)} pts</span></td>
+        <td style="text-align: right;"><a href="${esc(e.url)}" class="btn-table-action btn-inspect">Audit →</a></td>
+      `;
+      leaderBody.appendChild(tr);
+    });
+  }
+
+  perfSearchInput?.addEventListener('input', renderPerformanceView);
+  perfKindFilter?.addEventListener('change', renderPerformanceView);
+  perfTargetFilter?.addEventListener('change', renderPerformanceView);
+
+  // =========================================================================
   // 7. TOOLBAR, SEARCH & FILTER EVENTS
   // =========================================================================
   searchInput?.addEventListener('input', () => {
@@ -1926,6 +2096,8 @@ export function initAdminDashboard() {
   const viewGuests = document.getElementById('viewGuests');
   const viewHostWaitlist = document.getElementById('viewHostWaitlist');
   const viewProfiles = document.getElementById('viewProfiles');
+  const tabPerformance = document.getElementById('tabPerformanceBtn');
+  const viewPerformance = document.getElementById('viewPerformance');
 
   // Per-view search inputs
   const staysSearchInput = document.getElementById('staysSearchInput');
@@ -1939,7 +2111,8 @@ export function initAdminDashboard() {
     guests: { title: 'VIP Guests', sub: '' },
     hostWaitlist: { title: 'Host Waitlist', sub: '' },
     profiles: { title: 'Users', sub: '' },
-    laundry: { title: 'Laundry', sub: '' }
+    laundry: { title: 'Laundry', sub: '' },
+    performance: { title: 'Performance', sub: '' }
   };
 
   tabOverview?.addEventListener('click', () => switchTab('overview'));
@@ -1949,6 +2122,7 @@ export function initAdminDashboard() {
   tabHostWaitlist?.addEventListener('click', () => switchTab('hostWaitlist'));
   tabProfiles?.addEventListener('click', () => switchTab('profiles'));
   tabLaundry?.addEventListener('click', () => switchTab('laundry'));
+  tabPerformance?.addEventListener('click', () => switchTab('performance'));
 
   // Quick Jump cards from Overview
   document.getElementById('jumpToHostsCard')?.addEventListener('click', () => switchTab('hosts'));
@@ -2030,6 +2204,7 @@ export function initAdminDashboard() {
     tabHostWaitlist?.classList.toggle('active', tab === 'hostWaitlist');
     tabProfiles?.classList.toggle('active', tab === 'profiles');
     tabLaundry?.classList.toggle('active', tab === 'laundry');
+    tabPerformance?.classList.toggle('active', tab === 'performance');
 
     viewOverview?.classList.toggle('hidden', tab !== 'overview');
     viewHosts?.classList.toggle('hidden', tab !== 'hosts');
@@ -2038,6 +2213,7 @@ export function initAdminDashboard() {
     viewHostWaitlist?.classList.toggle('hidden', tab !== 'hostWaitlist');
     viewProfiles?.classList.toggle('hidden', tab !== 'profiles');
     viewLaundry?.classList.toggle('hidden', tab !== 'laundry');
+    viewPerformance?.classList.toggle('hidden', tab !== 'performance');
 
     if (updateUrl && window.history && typeof window.history.replaceState === 'function') {
       const targetUrl = tab === 'overview' ? '/admin' : `/admin?tab=${encodeURIComponent(tab)}`;

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laundry Audit | Luxea Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/components.css?v=2.8.0">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js?v=2.8.0"></script>
+  <script src="/assets/js/supabase.js?v=2.8.0"></script>
+
+  <style>
+    :root {
+      --bg: #F9F6F0;
+      --card: #FFFFFF;
+      --border: rgba(178, 135, 86, 0.22);
+      --espresso: #241812;
+      --cocoa: #604D42;
+      --gold: #B28756;
+      --gold-dark: #8C6436;
+      --gold-soft: rgba(178, 135, 86, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--espresso);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .exec-nav-bar {
+      background: #FFFFFF;
+      border-bottom: 1px solid rgba(178, 135, 86, 0.2);
+      padding: 14px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .exec-nav-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #F4ECE1;
+      color: var(--espresso);
+      border: 1px solid rgba(178, 135, 86, 0.3);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .btn-back:hover { background: #EAE0D3; }
+
+    .page-container {
+      max-width: 1180px;
+      margin: 28px auto 64px;
+      padding: 0 24px;
+    }
+
+    .hero-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.95rem;
+      font-weight: 700;
+      margin: 6px 0;
+    }
+    .ref-pill {
+      font-family: monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      background: var(--gold-soft);
+      border: 1px solid var(--gold);
+      padding: 3px 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .pill-badge {
+      display: inline-flex;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .pill-ok { background: #DEF7EC; color: #03543F; border: 1px solid #BCF0DA; }
+    .pill-warn { background: #FEF08A; color: #713F12; border: 1px solid #FDE047; }
+    .pill-bad { background: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; }
+
+    .hero-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .btn-ok { background: #057A55; color: #FFFFFF; }
+    .btn-bad { background: #FEE2E2; color: #B91C1C; border-color: #FCA5A5; }
+    .btn-wa { background: #25D366; color: #FFFFFF; }
+    .btn-gold { background: #FAF5EE; color: #9A7B0C; border-color: #D4AF37; }
+
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .stat-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .stat-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--cocoa);
+      margin-bottom: 6px;
+    }
+    .stat-num { font-size: 1.35rem; font-weight: 800; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .stats-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .page-container { padding: 0 16px; }
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 24px;
+    }
+    .panel-full { grid-column: 1 / -1; }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(178, 135, 86, 0.16);
+      flex-wrap: wrap;
+    }
+    .panel-title { font-size: 1rem; font-weight: 700; margin: 0; }
+
+    .form-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+    .form-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 640px) { .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; } }
+    .field label { display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 5px; }
+    .field .form-control { width: 100%; }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 14px;
+    }
+    .photo-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #FDFBF7;
+    }
+    .photo-card img {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      display: block;
+      cursor: pointer;
+    }
+    .photo-foot {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 10px;
+      gap: 6px;
+    }
+    .mini-btn {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(178, 135, 86, 0.3);
+      background: #FFFFFF;
+      color: var(--espresso);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .mini-btn.danger { color: #B91C1C; border-color: #FCA5A5; background: #FEF2F2; }
+
+    .review-item {
+      padding: 12px 14px;
+      border: 1px solid rgba(178, 135, 86, 0.18);
+      border-radius: 10px;
+      background: #FDFBF7;
+      margin-bottom: 10px;
+    }
+
+    .toast-banner {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--espresso);
+      color: #F5EFE6;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      z-index: 200;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="exec-nav-bar">
+    <div class="exec-nav-inner">
+      <a href="/admin?tab=laundry" class="btn-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Back to Laundry</span>
+      </a>
+      <a href="/laundry" target="_blank" rel="noopener noreferrer" class="btn-action btn-gold">Public Laundry Hub ↗</a>
+    </div>
+  </nav>
+
+  <main class="page-container">
+    <div class="hero-card">
+      <div>
+        <span class="ref-pill" id="heroRef">Loading...</span>
+        <h1 class="hero-title" id="heroName">Loading Partner...</h1>
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.86rem; color: var(--cocoa);">
+          <span id="heroContact">—</span>
+          <span>•</span>
+          <span id="heroAreas">—</span>
+          <span class="pill-badge pill-ok" id="heroStatus">Approved</span>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <button type="button" class="btn-action btn-ok" id="btnApprove">Approve</button>
+        <button type="button" class="btn-action btn-bad" id="btnSuspend">Suspend</button>
+        <a href="#" target="_blank" rel="noopener noreferrer" class="btn-action btn-wa" id="btnWa">WhatsApp</a>
+      </div>
+    </div>
+
+    <div class="stats-strip">
+      <div class="stat-box">
+        <div class="stat-label">Completed Jobs</div>
+        <div class="stat-num" id="statJobs">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Orders Value</div>
+        <div class="stat-num" id="statGmv">KSh 0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Rating</div>
+        <div class="stat-num" id="statRating">⭐ 5.0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Trust Credits</div>
+        <div class="stat-num" id="statCredits" style="color: #057A55;">100</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Edit Partner & Pricing (KSh) -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Partner Details &amp; Rates (KSh)</h2>
+        </div>
+
+        <form id="partnerEditForm">
+          <div class="form-grid-2">
+            <div class="field">
+              <label for="fBizName">Business Name *</label>
+              <input type="text" id="fBizName" class="form-control" required>
+            </div>
+            <div class="field">
+              <label for="fContact">Contact Person</label>
+              <input type="text" id="fContact" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="field">
+              <label for="fPhone">Phone</label>
+              <input type="text" id="fPhone" class="form-control">
+            </div>
+            <div class="field">
+              <label for="fMpesa">M-Pesa Number</label>
+              <input type="text" id="fMpesa" class="form-control">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="field">
+              <label for="fEmail">Email</label>
+              <input type="email" id="fEmail" class="form-control">
+            </div>
+            <div class="field">
+              <label for="fTurnaround">Turnaround</label>
+              <input type="text" id="fTurnaround" class="form-control" placeholder="e.g. Same-day 4-6 hrs">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="field">
+              <label for="fAddress">Shop Address</label>
+              <input type="text" id="fAddress" class="form-control">
+            </div>
+            <div class="field">
+              <label for="fAreas">Coverage Areas (comma separated)</label>
+              <input type="text" id="fAreas" class="form-control" placeholder="Westlands, Kilimani, Ruaka">
+            </div>
+          </div>
+
+          <div class="form-grid-3">
+            <div class="field">
+              <label for="fWash">Wash / kg (KSh)</label>
+              <input type="number" id="fWash" class="form-control" min="0">
+            </div>
+            <div class="field">
+              <label for="fLinen">Linen Set (KSh)</label>
+              <input type="number" id="fLinen" class="form-control" min="0">
+            </div>
+            <div class="field">
+              <label for="fSuit">Suit Clean (KSh)</label>
+              <input type="number" id="fSuit" class="form-control" min="0">
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom: 14px;">
+            <label for="fNotes">Admin Notes</label>
+            <textarea id="fNotes" class="form-control" rows="3" placeholder="Inspection notes, quality checks..."></textarea>
+          </div>
+
+          <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.84rem; margin-bottom: 16px; cursor: pointer;">
+            <input type="checkbox" id="fExpress" style="width: 16px; height: 16px;">
+            <span>Express Same-Day Service Available</span>
+          </label>
+
+          <div style="display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn btn-primary btn-sm" id="saveBtn">Save Changes</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Performance: Reviews, Complaints & Recent Orders -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        <section class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Reviews &amp; Complaints (<span id="rcCount">0</span>)</h2>
+          </div>
+          <div id="rcList"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Recent Orders (<span id="ordCount">0</span>)</h2>
+          </div>
+          <div id="ordersList"></div>
+        </section>
+      </div>
+
+      <!-- Full Width: Shop & Equipment Photos -->
+      <section class="panel panel-full">
+        <div class="panel-header">
+          <h2 class="panel-title">Shop &amp; Equipment Photos (<span id="photoCount">0</span>)</h2>
+          <label class="btn-action btn-gold" style="cursor: pointer;">
+            <input type="file" id="uploadPhotosInput" accept="image/*" multiple style="display: none;">
+            <span>+ Upload Photos</span>
+          </label>
+        </div>
+        <div class="photo-grid" id="photoGrid"></div>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast-banner" id="toastBanner"></div>
+
+  <script type="module">
+    const safeUrl = (u) => window.LuxeaSanitize ? window.LuxeaSanitize.safeUrl(u) : '';
+
+    function notify(msg) {
+      const el = document.getElementById('toastBanner');
+      if (!el) return;
+      el.textContent = msg;
+      el.style.display = 'block';
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.style.display = 'none'; }, 3200);
+    }
+
+    document.body.style.visibility = 'hidden';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const auth = window.LuxeaAuth ? await window.LuxeaAuth.verifyAdminSession() : { valid: false };
+      if (!auth.valid) {
+        window.location.replace('/admin');
+        return;
+      }
+      document.body.style.visibility = 'visible';
+
+      const params = new URLSearchParams(window.location.search);
+      const refParam = (params.get('ref') || params.get('id') || '').trim();
+      if (!refParam) {
+        document.getElementById('heroName').textContent = 'Missing Partner Ref';
+        return;
+      }
+
+      const client = window.LuxeaDB?.getClient();
+      if (!client) return;
+
+      let partner = null;
+
+      async function loadPartner() {
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(refParam);
+        const { data } = await client
+          .from('lux_laundry_partners')
+          .select('*')
+          .eq(isUuid ? 'id' : 'ref_id', refParam)
+          .maybeSingle();
+
+        partner = data || null;
+        if (!partner) {
+          document.getElementById('heroName').textContent = 'Partner Not Found';
+          return;
+        }
+
+        const [ordersRes, rcList] = await Promise.all([
+          client.from('lux_laundry_orders').select('*').eq('assigned_partner_id', partner.id).order('created_at', { ascending: false }).limit(20),
+          window.LuxeaDB.fetchReviewsAndComplaints({ targetType: 'laundry', targetId: partner.ref_id })
+        ]);
+
+        renderPartner(ordersRes?.data || [], rcList || []);
+      }
+
+      function renderPartner(orders, rcItems) {
+        const areas = Array.isArray(partner.coverage_areas) ? partner.coverage_areas : [];
+        const photos = Array.isArray(partner.photos_urls) ? partner.photos_urls : [];
+        const gmv = orders.reduce((s, o) => s + (parseFloat(o.total_amount_kes) || 0), 0);
+
+        document.title = `${partner.business_name} | Luxea Admin`;
+        document.getElementById('heroRef').textContent = partner.ref_id || 'PARTNER';
+        document.getElementById('heroName').textContent = partner.business_name || 'Partner';
+        document.getElementById('heroContact').textContent = `${partner.contact_person || 'Manager'} • ${partner.phone || '—'}`;
+        document.getElementById('heroAreas').textContent = areas.join(', ') || 'Nairobi';
+
+        const st = (partner.status || 'approved').toLowerCase();
+        const stEl = document.getElementById('heroStatus');
+        stEl.textContent = st;
+        stEl.className = `pill-badge ${st === 'approved' ? 'pill-ok' : st === 'suspended' ? 'pill-bad' : 'pill-warn'}`;
+
+        document.getElementById('statJobs').textContent = partner.completed_orders_count || orders.length;
+        document.getElementById('statGmv').textContent = `KSh ${Math.round(gmv).toLocaleString()}`;
+        document.getElementById('statRating').textContent = `⭐ ${partner.rating || 5.0}`;
+        const credits = partner.trust_credits ?? 100;
+        const credEl = document.getElementById('statCredits');
+        credEl.textContent = credits;
+        credEl.style.color = credits >= 100 ? '#057A55' : credits >= 80 ? '#B45309' : '#B91C1C';
+
+        const digits = (partner.phone || '').replace(/[^0-9]/g, '');
+        const waBtn = document.getElementById('btnWa');
+        if (digits) {
+          const waNum = digits.startsWith('0') ? '254' + digits.slice(1) : digits.startsWith('254') ? digits : '254' + digits;
+          waBtn.href = `https://wa.me/${waNum}?text=${encodeURIComponent(`Hello ${partner.contact_person || ''}, this is Luxea Living Admin regarding ${partner.business_name}.`)}`;
+        } else {
+          waBtn.style.display = 'none';
+        }
+
+        // Fill form
+        document.getElementById('fBizName').value = partner.business_name || '';
+        document.getElementById('fContact').value = partner.contact_person || '';
+        document.getElementById('fPhone').value = partner.phone || '';
+        document.getElementById('fMpesa').value = partner.mpesa_number || '';
+        document.getElementById('fEmail').value = partner.email || '';
+        document.getElementById('fTurnaround').value = partner.turnaround || '';
+        document.getElementById('fAddress').value = partner.address || '';
+        document.getElementById('fAreas').value = areas.join(', ');
+        document.getElementById('fWash').value = partner.price_wash_fold_per_kg ?? 250;
+        document.getElementById('fLinen').value = partner.price_linen_turnover_set ?? 1500;
+        document.getElementById('fSuit').value = partner.price_dry_clean_suit ?? 900;
+        document.getElementById('fNotes').value = partner.internal_notes || '';
+        document.getElementById('fExpress').checked = partner.express_available !== false;
+
+        // Reviews & Complaints
+        document.getElementById('rcCount').textContent = rcItems.length;
+        const rcListEl = document.getElementById('rcList');
+        rcListEl.textContent = '';
+        if (!rcItems.length) {
+          const p = document.createElement('p');
+          p.style.cssText = 'color: var(--cocoa); font-size: 0.84rem; margin: 0;';
+          p.textContent = 'No reviews or complaints yet.';
+          rcListEl.appendChild(p);
+        } else {
+          rcItems.forEach((item) => {
+            const box = document.createElement('div');
+            box.className = 'review-item';
+            const head = document.createElement('div');
+            head.style.cssText = 'display:flex; justify-content:space-between; gap:8px; margin-bottom:4px; font-size:0.8rem;';
+            const who = document.createElement('strong');
+            who.textContent = `${item.reviewer_name} (${item.kind === 'complaint' ? 'Complaint' : `⭐ ${item.rating || 5}`})`;
+            const badge = document.createElement('span');
+            badge.className = `pill-badge ${item.kind === 'complaint' && item.status === 'open' ? 'pill-bad' : 'pill-ok'}`;
+            badge.style.fontSize = '0.62rem';
+            badge.textContent = item.status;
+            head.appendChild(who);
+            head.appendChild(badge);
+
+            const body = document.createElement('div');
+            body.style.cssText = 'font-size:0.82rem; color:var(--cocoa);';
+            body.textContent = item.comment;
+
+            box.appendChild(head);
+            box.appendChild(body);
+            rcListEl.appendChild(box);
+          });
+        }
+
+        // Recent Orders
+        document.getElementById('ordCount').textContent = orders.length;
+        const ordEl = document.getElementById('ordersList');
+        ordEl.textContent = '';
+        if (!orders.length) {
+          const p = document.createElement('p');
+          p.style.cssText = 'color: var(--cocoa); font-size: 0.84rem; margin: 0;';
+          p.textContent = 'No orders assigned yet.';
+          ordEl.appendChild(p);
+        } else {
+          orders.slice(0, 8).forEach((o) => {
+            const row = document.createElement('div');
+            row.className = 'review-item';
+            row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:0.8rem;';
+            const left = document.createElement('div');
+            left.innerHTML = `<strong>${window.LuxeaSanitize.escapeHtml(o.order_number || 'ORD')}</strong> · ${window.LuxeaSanitize.escapeHtml(o.property_name || o.customer_name || '')}`;
+            const right = document.createElement('div');
+            right.style.cssText = 'font-weight:700; white-space:nowrap;';
+            right.textContent = `KSh ${Math.round(parseFloat(o.total_amount_kes) || 0).toLocaleString()} (${o.status || 'open'})`;
+            row.appendChild(left);
+            row.appendChild(right);
+            ordEl.appendChild(row);
+          });
+        }
+
+        // Photos
+        document.getElementById('photoCount').textContent = photos.length;
+        const grid = document.getElementById('photoGrid');
+        grid.textContent = '';
+        if (!photos.length) {
+          const p = document.createElement('p');
+          p.style.cssText = 'color: var(--cocoa); font-size: 0.84rem; margin: 0;';
+          p.textContent = 'No shop or equipment photos uploaded yet.';
+          grid.appendChild(p);
+        } else {
+          photos.forEach((url, idx) => {
+            const clean = safeUrl(url);
+            if (!clean) return;
+            const card = document.createElement('div');
+            card.className = 'photo-card';
+            const img = document.createElement('img');
+            img.src = clean;
+            img.alt = `Shop photo ${idx + 1}`;
+            img.addEventListener('click', () => window.open(clean, '_blank', 'noopener,noreferrer'));
+            const foot = document.createElement('div');
+            foot.className = 'photo-foot';
+            const openA = document.createElement('a');
+            openA.href = clean;
+            openA.target = '_blank';
+            openA.rel = 'noopener noreferrer';
+            openA.className = 'mini-btn';
+            openA.textContent = 'Full ↗';
+            const rm = document.createElement('button');
+            rm.type = 'button';
+            rm.className = 'mini-btn danger';
+            rm.textContent = 'Remove';
+            rm.addEventListener('click', async () => {
+              if (!confirm('Remove this photo?')) return;
+              const next = photos.filter(p => p !== url);
+              const res = await window.LuxeaDB.updateLaundryPartner(partner.id, { photos_urls: next });
+              if (res.success) {
+                partner.photos_urls = next;
+                notify('Photo removed.');
+                loadPartner();
+              }
+            });
+            foot.appendChild(openA);
+            foot.appendChild(rm);
+            card.appendChild(img);
+            card.appendChild(foot);
+            grid.appendChild(card);
+          });
+        }
+      }
+
+      document.getElementById('btnApprove').addEventListener('click', async () => {
+        if (!partner) return;
+        const res = await window.LuxeaDB.updateLaundryPartner(partner.id, { status: 'approved' });
+        if (res.success) { notify('Partner approved.'); loadPartner(); }
+      });
+
+      document.getElementById('btnSuspend').addEventListener('click', async () => {
+        if (!partner) return;
+        if (!confirm(`Suspend ${partner.business_name}?`)) return;
+        const res = await window.LuxeaDB.updateLaundryPartner(partner.id, { status: 'suspended' });
+        if (res.success) { notify('Partner suspended.'); loadPartner(); }
+      });
+
+      document.getElementById('partnerEditForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!partner) return;
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        const updates = {
+          business_name: document.getElementById('fBizName').value.trim(),
+          contact_person: document.getElementById('fContact').value.trim(),
+          phone: document.getElementById('fPhone').value.trim(),
+          mpesa_number: document.getElementById('fMpesa').value.trim(),
+          email: document.getElementById('fEmail').value.trim() || null,
+          turnaround: document.getElementById('fTurnaround').value.trim(),
+          address: document.getElementById('fAddress').value.trim(),
+          coverage_areas: document.getElementById('fAreas').value.split(',').map(s => s.trim()).filter(Boolean),
+          price_wash_fold_per_kg: parseFloat(document.getElementById('fWash').value) || 250,
+          price_linen_turnover_set: parseFloat(document.getElementById('fLinen').value) || 1500,
+          price_dry_clean_suit: parseFloat(document.getElementById('fSuit').value) || 900,
+          internal_notes: document.getElementById('fNotes').value.trim(),
+          express_available: document.getElementById('fExpress').checked
+        };
+
+        const res = await window.LuxeaDB.updateLaundryPartner(partner.id, updates);
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+        if (res.success) { notify('Partner updated.'); loadPartner(); }
+        else notify('Error: ' + (res.error || 'Failed'));
+      });
+
+      document.getElementById('uploadPhotosInput').addEventListener('change', async (e) => {
+        const files = e.target.files;
+        if (!files || !files.length || !partner) return;
+        notify(`Compressing & uploading ${files.length} photo(s)...`);
+        const urls = await window.LuxeaDB.uploadListingPhotos(files, 'laundry');
+        if (urls.length) {
+          const existing = Array.isArray(partner.photos_urls) ? partner.photos_urls : [];
+          const merged = [...existing, ...urls.filter(u => !existing.includes(u))];
+          const res = await window.LuxeaDB.updateLaundryPartner(partner.id, { photos_urls: merged });
+          if (res.success) { notify(`Uploaded ${urls.length} photo(s).`); loadPartner(); }
+        } else {
+          notify('Upload failed.');
+        }
+        e.target.value = '';
+      });
+
+      await loadPartner();
+    });
+  </script>
+</body>
+</html>

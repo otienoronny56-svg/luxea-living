@@ -19,8 +19,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-  <script src="/assets/js/config.js?v=2.6.0"></script>
-  <script src="/assets/js/supabase.js?v=2.6.0"></script>
+  <script src="/assets/js/config.js?v=2.8.0"></script>
+  <script src="/assets/js/supabase.js?v=2.8.0"></script>
 </head>
 <body>
 
@@ -187,6 +187,14 @@
               <span>Laundry</span>
             </span>
             <span class="tab-badge" id="laundryTabCounter" style="background: rgba(14, 165, 233, 0.2); color: #0284C7;">0</span>
+          </button>
+
+          <button type="button" class="sidebar-nav-item" id="tabPerformanceBtn">
+            <span class="nav-item-left">
+              <span class="nav-icon">⭐</span>
+              <span>Performance</span>
+            </span>
+            <span class="tab-badge" id="performanceTabCounter" style="background: rgba(245, 158, 11, 0.2); color: #B45309;">0</span>
           </button>
 
           <div class="sidebar-section-title">Data</div>
@@ -925,11 +933,12 @@
             <table class="lux-data-table table-compact">
               <thead>
                 <tr>
-                  <th style="width: 28%;">Partner</th>
-                  <th style="width: 22%;">Contact</th>
-                  <th style="width: 22%;">Areas</th>
-                  <th style="width: 18%;">Rates (KSh)</th>
+                  <th style="width: 24%;">Partner</th>
+                  <th style="width: 20%;">Contact</th>
+                  <th style="width: 20%;">Areas</th>
+                  <th style="width: 16%;">Rates (KSh)</th>
                   <th style="width: 10%; text-align: right;">Rating</th>
+                  <th style="width: 10%; text-align: right;">Audit</th>
                 </tr>
               </thead>
               <tbody id="laundryPartnersTableBody"></tbody>
@@ -965,6 +974,94 @@
 
         </div> <!-- /#viewLaundry -->
 
+        <!-- ==================================================================
+             VIEW 7: PERFORMANCE, REVIEWS, COMPLAINTS & TRUST CREDITS
+             ================================================================== -->
+        <div id="viewPerformance" class="admin-view-page hidden">
+          <div class="admin-metrics-grid">
+            <div class="stat-metric-card">
+              <div class="metric-card-top"><span class="metric-label">Avg Rating</span></div>
+              <div class="metric-val" id="perfAvgRating">5.0</div>
+            </div>
+            <div class="stat-metric-card">
+              <div class="metric-card-top"><span class="metric-label">Reviews</span></div>
+              <div class="metric-val" id="perfReviewsCount">0</div>
+            </div>
+            <div class="stat-metric-card">
+              <div class="metric-card-top"><span class="metric-label" style="color: #C0392B;">Open Issues</span></div>
+              <div class="metric-val" style="color: #C0392B;" id="perfOpenComplaints">0</div>
+            </div>
+            <div class="stat-metric-card">
+              <div class="metric-card-top"><span class="metric-label" style="color: #1E8449;">Top Credits</span></div>
+              <div class="metric-val" style="color: #1E8449;" id="perfTopCredits">100</div>
+            </div>
+          </div>
+
+          <div class="admin-toolbar-card">
+            <div class="admin-search-box">
+              <svg class="search-lens-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input type="text" id="perfSearchInput" class="form-control" placeholder="Search stay, host, laundry, guest...">
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <select id="perfKindFilter" class="form-control" style="width: 135px; padding: 6px 10px; font-size: 0.8rem; height: 38px;">
+                <option value="all">All Feedback</option>
+                <option value="complaint">Issues Only</option>
+                <option value="review">Reviews Only</option>
+              </select>
+              <select id="perfTargetFilter" class="form-control" style="width: 125px; padding: 6px 10px; font-size: 0.8rem; height: 38px;">
+                <option value="all">All Types</option>
+                <option value="stay">Stays</option>
+                <option value="host">Hosts</option>
+                <option value="laundry">Laundry</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="admin-section-header" style="margin: 14px 0 8px; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-family: var(--font-serif); font-size: 1.1rem; color: #241812; margin: 0;">Reviews &amp; Complaints</h2>
+            <span class="badge-tag chip-neutral" id="perfFeedbackCountTag" style="font-size: 0.7rem; padding: 2px 8px;">0</span>
+          </div>
+
+          <div class="table-responsive-box" style="margin-bottom: 22px;">
+            <table class="lux-data-table table-compact">
+              <thead>
+                <tr>
+                  <th style="width: 12%;">Type</th>
+                  <th style="width: 22%;">Target</th>
+                  <th style="width: 16%;">Guest</th>
+                  <th style="width: 28%;">Comment</th>
+                  <th style="width: 10%;">Status</th>
+                  <th style="width: 12%; text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="perfFeedbackTableBody"></tbody>
+            </table>
+            <div id="perfFeedbackEmpty" class="empty-state hidden" style="padding: 32px; text-align: center; color: var(--color-cocoa);">
+              No reviews or complaints yet.
+            </div>
+          </div>
+
+          <div class="admin-section-header" style="margin: 14px 0 8px; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="font-family: var(--font-serif); font-size: 1.1rem; color: #241812; margin: 0;">Trust Credit Leaderboard</h2>
+          </div>
+
+          <div class="table-responsive-box">
+            <table class="lux-data-table table-compact">
+              <thead>
+                <tr>
+                  <th style="width: 12%;">Group</th>
+                  <th style="width: 32%;">Name</th>
+                  <th style="width: 18%;">Area</th>
+                  <th style="width: 12%;">Rating</th>
+                  <th style="width: 14%;">Credits</th>
+                  <th style="width: 12%; text-align: right;">Audit</th>
+                </tr>
+              </thead>
+              <tbody id="perfLeaderboardBody"></tbody>
+            </table>
+          </div>
+        </div> <!-- /#viewPerformance -->
+
       </main>
       <!-- End admin-workspace -->
 
@@ -996,7 +1093,7 @@
 
   <script src="/assets/js/main.js"></script>
   <script type="module">
-    import { initAdminDashboard } from '/assets/js/modules/admin.js?v=2.7.0';
+    import { initAdminDashboard } from '/assets/js/modules/admin.js?v=2.8.0';
 
     document.addEventListener('DOMContentLoaded', () => {
       initAdminDashboard();

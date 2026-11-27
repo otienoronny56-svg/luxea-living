@@ -17,8 +17,8 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/assets/js/config.js"></script>
-  <script src="/assets/js/supabase.js"></script>
+  <script src="/assets/js/config.js?v=2.8.0"></script>
+  <script src="/assets/js/supabase.js?v=2.8.0"></script>
 </head>
 <body>
 
@@ -236,8 +236,47 @@
                   <span style="font-size: 0.8rem; color: var(--color-cocoa);">Doorstep pickup and return delivery during your stay. Fast M-Pesa payment.</span>
                 </div>
               </div>
-              <a href="/laundry/" class="btn btn-outline btn-sm" style="background: #FFFFFF;">Request Pickup ↗</a>
+              <a href="/laundry" class="btn btn-outline btn-sm" style="background: #FFFFFF;">Request Pickup ↗</a>
             </div>
+          </div>
+
+          <!-- Guest Reviews & Report Issue -->
+          <div class="detail-section" id="stayReviewsSection" style="margin-top: 24px; padding: 20px; background: #FFFFFF; border: 1px solid var(--color-khaki-light); border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+              <h3 class="detail-section-heading" style="margin: 0;">Guest Reviews &amp; Feedback</h3>
+              <span id="stayReviewsCountTag" style="font-size: 0.78rem; font-weight: 700; color: var(--color-camel-dark);">0 reviews</span>
+            </div>
+
+            <div id="stayReviewsList" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;"></div>
+
+            <form id="stayFeedbackForm" style="background: var(--color-linen-light); padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(178,135,86,0.2);">
+              <div style="display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary btn-sm feedback-mode-btn active" data-kind="review" style="padding: 5px 12px; font-size: 0.76rem;">⭐ Leave Review</button>
+                <button type="button" class="btn btn-outline btn-sm feedback-mode-btn" data-kind="complaint" style="padding: 5px 12px; font-size: 0.76rem;">⚠️ Report Issue</button>
+              </div>
+              <input type="hidden" id="fbKind" value="review">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="fbName" class="form-control" placeholder="Your name *" required style="font-size: 0.82rem;">
+                <input type="text" id="fbPhone" class="form-control" placeholder="Phone (optional)" style="font-size: 0.82rem;">
+                <select id="fbRating" class="form-control" style="font-size: 0.82rem;">
+                  <option value="5">★★★★★ (5)</option>
+                  <option value="4">★★★★ (4)</option>
+                  <option value="3">★★★ (3)</option>
+                  <option value="2">★★ (2)</option>
+                  <option value="1">★ (1)</option>
+                </select>
+                <select id="fbCategory" class="form-control" style="font-size: 0.82rem;">
+                  <option value="Great Stay">Great Stay</option>
+                  <option value="Cleanliness">Cleanliness</option>
+                  <option value="Wi-Fi">Wi-Fi</option>
+                  <option value="Photos">Photos Accuracy</option>
+                  <option value="Check-in">Check-in</option>
+                  <option value="Host Service">Host Service</option>
+                </select>
+              </div>
+              <textarea id="fbComment" class="form-control" rows="2" placeholder="Share your experience or report an issue..." required style="font-size: 0.82rem; margin-bottom: 10px;"></textarea>
+              <button type="submit" class="btn btn-primary btn-sm" id="fbSubmitBtn">Submit Feedback</button>
+            </form>
           </div>
         </div>
 
@@ -275,6 +314,15 @@
                 </select>
               </div>
             </div>
+
+            <!-- Guest Name & Phone for Instant Calendar Lock -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+              <input type="text" id="bookingGuestName" class="form-control" placeholder="Your name *" style="font-size: 0.8rem; padding: 8px 10px;">
+              <input type="text" id="bookingGuestPhone" class="form-control" placeholder="Phone (07...)" style="font-size: 0.8rem; padding: 8px 10px;">
+            </div>
+
+            <!-- Live Booked Dates Warning -->
+            <div id="bookedDatesNotice" style="display: none; background: #FFFBEB; border: 1px solid #FCD34D; color: #92400E; font-size: 0.75rem; font-weight: 600; padding: 8px 10px; border-radius: 8px; margin-bottom: 10px;"></div>
 
             <!-- Live Pricing Breakdown -->
             <div class="booking-cost-breakdown">
@@ -933,22 +981,146 @@
         if (guestsInput) guestsInput.onchange = updateBookingCost;
         updateBookingCost();
 
-        // Direct Reserve Action Handlers
-        const handleReserve = () => {
-          const cinVal = checkInInput ? checkInInput.value : '';
-          const coutVal = checkOutInput ? checkOutInput.value : '';
+        // Fetch booked dates for this property (PII-free RPC) & prevent double-booking
+        let bookedRanges = [];
+        const bookedNotice = document.getElementById('bookedDatesNotice');
+        const checkDateConflict = (ci, co) => bookedRanges.some(r => ci < r.check_out && co > r.check_in);
+
+        if (window.LuxeaDB && typeof window.LuxeaDB.getPropertyBookedDates === 'function') {
+          window.LuxeaDB.getPropertyBookedDates(stay.id).then((ranges) => {
+            bookedRanges = ranges || [];
+            if (bookedNotice) {
+              if (bookedRanges.length > 0) {
+                const list = bookedRanges.slice(0, 4).map(r => `${r.check_in} to ${r.check_out}`).join(', ');
+                bookedNotice.textContent = `Booked dates: ${list}`;
+                bookedNotice.style.display = 'block';
+              } else {
+                bookedNotice.style.display = 'none';
+              }
+            }
+          });
+        }
+
+        // Pre-fill guest name/phone if logged in
+        try {
+          const sess = JSON.parse(localStorage.getItem('luxea_user_session') || 'null');
+          const gNameInput = document.getElementById('bookingGuestName');
+          const gPhoneInput = document.getElementById('bookingGuestPhone');
+          if (sess?.name && gNameInput && !gNameInput.value) gNameInput.value = sess.name;
+          if (sess?.phone && gPhoneInput && !gPhoneInput.value) gPhoneInput.value = sess.phone;
+        } catch (e) {}
+
+        // Load & handle Reviews + Complaints for this stay
+        const reviewsListEl = document.getElementById('stayReviewsList');
+        const reviewsCountTag = document.getElementById('stayReviewsCountTag');
+        const escHtml = (v) => window.LuxeaSanitize ? window.LuxeaSanitize.escapeHtml(v) : String(v ?? '');
+
+        async function loadStayReviews() {
+          if (!reviewsListEl || !window.LuxeaDB?.fetchReviewsAndComplaints) return;
+          const items = await window.LuxeaDB.fetchReviewsAndComplaints({ targetType: 'stay', targetId: stay.id, kind: 'review' });
+          if (reviewsCountTag) reviewsCountTag.textContent = `${items.length} review${items.length === 1 ? '' : 's'}`;
+          if (!items.length) {
+            reviewsListEl.innerHTML = `<p style="font-size: 0.82rem; color: var(--color-cocoa); margin: 0;">Be the first guest to review this stay.</p>`;
+            return;
+          }
+          reviewsListEl.innerHTML = items.map(r => `
+            <div style="padding: 10px 12px; background: #FDFBF7; border: 1px solid rgba(178,135,86,0.18); border-radius: 8px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.78rem; margin-bottom:4px;">
+                <strong>${escHtml(r.reviewer_name)}</strong>
+                <span style="color:#B28756; font-weight:700;">${'★'.repeat(Math.min(5, Math.max(1, r.rating || 5)))}</span>
+              </div>
+              <div style="font-size:0.82rem; color:var(--color-espresso);">${escHtml(r.comment)}</div>
+            </div>
+          `).join('');
+        }
+        loadStayReviews();
+
+        const fbForm = document.getElementById('stayFeedbackForm');
+        const fbKind = document.getElementById('fbKind');
+        const fbRating = document.getElementById('fbRating');
+        document.querySelectorAll('.feedback-mode-btn').forEach(btn => {
+          btn.onclick = () => {
+            const k = btn.getAttribute('data-kind');
+            if (fbKind) fbKind.value = k;
+            document.querySelectorAll('.feedback-mode-btn').forEach(b => {
+              b.classList.toggle('btn-primary', b === btn);
+              b.classList.toggle('btn-outline', b !== btn);
+            });
+            if (fbRating) fbRating.style.display = k === 'complaint' ? 'none' : 'block';
+          };
+        });
+
+        if (fbForm) {
+          fbForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('fbSubmitBtn');
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
+            const kindVal = fbKind?.value || 'review';
+            const res = await window.LuxeaDB.submitReviewOrComplaint({
+              target_type: 'stay',
+              target_id: stay.id,
+              target_name: stay.name,
+              kind: kindVal,
+              rating: kindVal === 'complaint' ? 1 : parseInt(fbRating?.value || '5', 10),
+              category: document.getElementById('fbCategory')?.value || 'General',
+              reviewer_name: document.getElementById('fbName')?.value || '',
+              reviewer_phone: document.getElementById('fbPhone')?.value || '',
+              comment: document.getElementById('fbComment')?.value || ''
+            });
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Feedback'; }
+            if (res.success) {
+              fbForm.reset();
+              if (window.showToast) window.showToast(kindVal === 'complaint' ? '⚠️ Issue reported to Luxea Admin.' : '⭐ Thank you! Review published.');
+              loadStayReviews();
+            } else {
+              if (window.showToast) window.showToast('Error: ' + (res.error || 'Could not submit'));
+            }
+          };
+        }
+
+        // Direct Reserve Action Handlers (Saves real booking in Supabase + Auto-Blocks Dates + WhatsApp)
+        const handleReserve = async () => {
+          const cinVal = checkInInput ? checkInInput.value : toIso(tomorrow);
+          const coutVal = checkOutInput ? checkOutInput.value : toIso(checkOutDefault);
+          if (checkDateConflict(cinVal, coutVal)) {
+            if (window.showToast) window.showToast('⚠️ Those dates are already booked. Please choose other dates.');
+            return;
+          }
+
+          const gName = (document.getElementById('bookingGuestName')?.value || '').trim();
+          const gPhone = (document.getElementById('bookingGuestPhone')?.value || '').trim();
           const cin = cinVal ? new Date(cinVal) : tomorrow;
           const cout = coutVal ? new Date(coutVal) : checkOutDefault;
           let nights = Math.round((cout - cin) / (1000 * 60 * 60 * 24));
           if (isNaN(nights) || nights < 1) nights = 1;
-          const guests = guestsInput ? guestsInput.value : '2';
+          const guests = parseInt(guestsInput ? guestsInput.value : '2', 10) || 2;
           const subtotal = nights * stay.kesPrice;
 
-          const msg = `Hello Luxea Concierge, I would like to reserve "${stay.name}" in ${stay.location.split('•')[0].trim()} for ${nights} night(s) from ${cinVal} to ${coutVal} for ${guests} guest(s). Total: KSh ${subtotal.toLocaleString()}.`;
-          window.open(`https://wa.me/254700000000?text=${encodeURIComponent(msg)}`, '_blank');
-          if (window.showToast) {
-            window.showToast(`Connecting with Luxea VIP Concierge for ${stay.name}...`);
+          let codeText = '';
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(stay.id));
+          if (isUuid && window.LuxeaDB?.createBooking) {
+            const guestLabel = gName || 'Luxea Guest';
+            const res = await window.LuxeaDB.createBooking({
+              property_id: stay.id,
+              property_name: stay.name,
+              guest_name: guestLabel,
+              guest_phone: gPhone,
+              guests_count: guests,
+              check_in: cinVal,
+              check_out: coutVal,
+              total_kes: subtotal,
+              source: 'luxea',
+              status: 'pending'
+            });
+            if (res.success && res.data?.booking_code) {
+              codeText = ` (Ref: ${res.data.booking_code})`;
+              bookedRanges.push({ check_in: cinVal, check_out: coutVal, status: 'pending' });
+              if (window.showToast) window.showToast(`✅ Booking requested${codeText}! Dates held on host calendar.`);
+            }
           }
+
+          const msg = `Hello Luxea Concierge, I would like to reserve "${stay.name}" in ${stay.location.split('•')[0].trim()} for ${nights} night(s) from ${cinVal} to ${coutVal} for ${guests} guest(s). Total: ${fmtPrice(subtotal)}${codeText}.`;
+          window.open(`https://wa.me/254700000000?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
         const directBtn = document.getElementById('directReserveBtn');

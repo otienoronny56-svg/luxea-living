@@ -11,14 +11,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="/assets/css/main.css">
-  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/components.css?v=2.8.0">
   <link rel="stylesheet" href="/assets/css/pages/host.css">
+  <link rel="stylesheet" href="/assets/css/pages/host-ops.css?v=2.8.0">
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/assets/js/config.js?v=2.4.4"></script>
-  <script src="/assets/js/supabase.js?v=2.4.4"></script>
+  <script src="/assets/js/config.js?v=2.8.0"></script>
+  <script src="/assets/js/supabase.js?v=2.8.0"></script>
 </head>
 <body>
 
@@ -869,7 +870,14 @@
 
       <!-- VIEW 4: HOST DASHBOARD & AVAILABILITY / STORAGE MANAGER (Authorized Only) -->
       <div id="hostManagerView" class="hidden">
+        <div class="host-ops-tabs" id="hostOpsTabsBar">
+          <button type="button" class="host-ops-tab active" data-tab="stays">🏡 My Stays</button>
+          <button type="button" class="host-ops-tab" data-tab="calendar">📅 Calendar</button>
+          <button type="button" class="host-ops-tab" data-tab="bookings">📒 Clients &amp; Payments <span class="host-ops-badge" id="hostBookingsBadge">0</span></button>
+          <button type="button" class="host-ops-tab" data-tab="backup">💾 Backup</button>
+        </div>
         <div id="hostManagerContainer"></div>
+        <div id="hostOpsContainer" class="hidden"></div>
       </div>
 
       <!-- VIEW 5: HOST ACCOUNT SUSPENDED (Block/Suspend access button) -->
@@ -1018,14 +1026,16 @@
 
   <script src="/assets/js/main.js?v=2.4.4"></script>
   <script type="module">
-    import { initCurrency } from '/assets/js/modules/currency.js?v=2.5.0';
+    import { initCurrency } from '/assets/js/modules/currency.js?v=2.8.0';
     import { initHostForm } from '/assets/js/modules/hostForm.js?v=2.4.4';
-    import { initHostManager } from '/assets/js/modules/hostManager.js?v=2.5.0';
+    import { initHostManager } from '/assets/js/modules/hostManager.js?v=2.8.0';
+    import { initHostOps } from '/assets/js/modules/hostOps.js?v=2.8.0';
 
     document.addEventListener('DOMContentLoaded', async () => {
       initCurrency();
       initHostForm('luxeaHostForm');
       initHostManager('hostManagerContainer');
+      initHostOps();
 
       const registerView = document.getElementById('hostRegisterView');
       const gatedView = document.getElementById('hostGatedView');
