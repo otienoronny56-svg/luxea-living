@@ -73,21 +73,18 @@ export function initHostManager(containerId = 'hostManagerContainer') {
     const userSession = JSON.parse(localStorage.getItem('luxea_user_session') || 'null');
     const adminSession = JSON.parse(localStorage.getItem('luxea_admin_session') || 'null');
     const isSuperAdmin = (adminSession && adminSession.isSuperAdmin) || (userSession && userSession.isSuperAdmin);
-    const hostTitle = userSession && userSession.name && !isSuperAdmin ? `${userSession.name}'s Property Portfolio` : 'Your Property Portfolio';
-    const hostSub = isSuperAdmin 
-      ? 'Super Admin Control: Manage live availability, rates, and blackout calendar across all listings.' 
-      : 'Manage live guest availability, blackout calendar dates, and photography for your residence.';
+    const hostTitle = userSession && userSession.name && !isSuperAdmin ? `${userSession.name}'s Stays` : (isSuperAdmin ? 'All Platform Stays (Admin Preview)' : 'Your Stays');
+    const hostSub = isSuperAdmin
+      ? 'Viewing all listings across hosts. Use Admin Console for full audits.'
+      : 'Manage your stays, availability, and photos.';
 
     let displayListings = listings;
-    if (userSession && userSession.refId && !isSuperAdmin) {
-      const myProps = listings.filter(l => 
-        l.host_ref_id === userSession.refId || 
-        l.host_ref_id === 'LXH-HOST-DIRECT' ||
+    if (!isSuperAdmin && userSession) {
+      displayListings = listings.filter(l =>
+        (userSession.refId && l.host_ref_id === userSession.refId) ||
+        (userSession.id && l.owner_id === userSession.id) ||
         (userSession.email && l.host_email === userSession.email)
       );
-      if (myProps.length > 0) {
-        displayListings = myProps;
-      }
     }
 
     container.innerHTML = `
@@ -253,6 +250,20 @@ export function initHostManager(containerId = 'hostManagerContainer') {
     `;
 
     const grid = container.querySelector('#hostListingsGrid');
+
+    if (displayListings.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; background: #FFFFFF; border: 1px dashed rgba(178,135,86,0.4); border-radius: 14px; padding: 36px 24px; text-align: center;">
+          <div style="font-size: 2rem; margin-bottom: 8px;">🏡</div>
+          <h3 style="margin: 0 0 6px; color: var(--color-espresso);">No stays published yet</h3>
+          <p style="margin: 0 0 16px; font-size: 0.85rem; color: var(--color-cocoa);">Add your first property to start accepting bookings and managing your calendar.</p>
+          <button type="button" class="btn btn-primary btn-sm" id="emptyAddStayBtn">+ Add Your First Stay</button>
+        </div>
+      `;
+      grid.querySelector('#emptyAddStayBtn')?.addEventListener('click', () => {
+        container.querySelector('#openNewListingBtn')?.click();
+      });
+    }
 
     displayListings.forEach(listing => {
       const isAvailable = listing.is_available !== false;

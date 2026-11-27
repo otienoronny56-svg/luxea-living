@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Trips | Luxea Living</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/components.css?v=2.9.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%234A342A'/><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' font-family='serif' font-size='44' fill='%23F5F1EA'>L</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js?v=2.9.0"></script>
+  <script src="/assets/js/supabase.js?v=2.9.0"></script>
+  <style>
+    body { background: #F9F6F0; color: #241812; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .trips-wrap { max-width: 960px; margin: 28px auto 80px; padding: 0 20px; }
+    .trips-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+    .trips-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 700; margin: 0; }
+    .trip-card { background: #FFFFFF; border: 1px solid rgba(178,135,86,0.22); border-radius: 14px; padding: 20px 22px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .trip-chip { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+    .chip-ok { background: #DEF7EC; color: #03543F; }
+    .chip-wait { background: #FEF3C7; color: #92400E; }
+    .chip-bad { background: #FEE2E2; color: #B91C1C; }
+  </style>
+</head>
+<body>
+  <header class="lux-header">
+    <div class="container nav-container">
+      <a href="/" class="brand-logo">
+        <span class="brand-monogram">L</span>
+        <span class="brand-name">Luxea</span>
+      </a>
+      <nav class="desktop-nav">
+        <a href="/stays" class="nav-link">Stays</a>
+        <a href="/trips" class="nav-link active">My Trips</a>
+        <a href="/host" class="nav-link">Host</a>
+        <a href="/laundry" class="nav-link">Laundry</a>
+      </nav>
+      <div class="header-actions">
+        <a href="/stays" class="btn btn-primary btn-sm">Browse Stays</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="trips-wrap">
+    <div class="trips-head">
+      <h1 class="trips-title">My Trips &amp; Bookings</h1>
+      <a href="/stays" class="btn btn-outline btn-sm">+ Book a Stay</a>
+    </div>
+
+    <div id="tripsContent">
+      <p style="color:#604D42;">Loading your bookings...</p>
+    </div>
+  </main>
+
+  <script src="/assets/js/main.js?v=2.9.0"></script>
+  <script type="module">
+    import { initCurrency } from '/assets/js/modules/currency.js?v=2.9.0';
+    const esc = (v) => window.LuxeaSanitize ? window.LuxeaSanitize.escapeHtml(v) : String(v ?? '');
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      initCurrency();
+      const box = document.getElementById('tripsContent');
+      const client = window.LuxeaDB?.getClient();
+      const { data: userData } = client ? await client.auth.getUser() : { data: {} };
+
+      if (!userData?.user) {
+        box.innerHTML = `
+          <div class="trip-card" style="justify-content:center; text-align:center; padding:40px 24px; flex-direction:column;">
+            <h2 style="margin:0 0 6px;">Sign in to view your trips</h2>
+            <p style="margin:0 0 16px; color:#604D42; font-size:0.88rem;">Track booking status, payment receipts, and review your stays.</p>
+            <button type="button" class="btn btn-primary btn-sm" onclick="window.LuxeaAuthModal ? window.LuxeaAuthModal.openAuthModal() : (window.location.href='/stays')">Sign In</button>
+          </div>
+        `;
+        return;
+      }
+
+      const { data: bookings } = await client
+        .from('lux_bookings')
+        .select('*')
+        .eq('guest_user_id', userData.user.id)
+        .order('check_in', { ascending: false });
+
+      if (!bookings || bookings.length === 0) {
+        box.innerHTML = `
+          <div class="trip-card" style="justify-content:center; text-align:center; padding:40px 24px; flex-direction:column;">
+            <h2 style="margin:0 0 6px;">No bookings yet</h2>
+            <p style="margin:0 0 16px; color:#604D42; font-size:0.88rem;">Explore curated stays across Nairobi, Diani, Naivasha &amp; more.</p>
+            <a href="/stays" class="btn btn-primary btn-sm">Explore Stays</a>
+          </div>
+        `;
+        return;
+      }
+
+      const fmt = (k) => window.LuxeaCurrency ? window.LuxeaCurrency.formatFromKes(k) : `KSh ${Math.round(Number(k) || 0).toLocaleString()}`;
+      box.innerHTML = bookings.map(b => {
+        const stCls = (b.status === 'confirmed' || b.status === 'checked_in' || b.status === 'checked_out') ? 'chip-ok' : b.status === 'cancelled' ? 'chip-bad' : 'chip-wait';
+        const bal = Math.max(0, (Number(b.total_kes) || 0) - (Number(b.amount_paid_kes) || 0));
+        return `
+          <div class="trip-card">
+            <div>
+              <div style="font-family:monospace; font-size:0.75rem; font-weight:700; color:#8C6436;">${esc(b.booking_code)}</div>
+              <h3 style="margin:4px 0; font-size:1.1rem;">${esc(b.property_name)}</h3>
+              <div style="font-size:0.84rem; color:#604D42;">${esc(b.check_in)} → ${esc(b.check_out)} (${b.nights || 1} nights)</div>
+              <div style="margin-top:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <span class="trip-chip ${stCls}">${esc(b.status)}</span>
+                <span style="font-weight:700; font-size:0.84rem;" data-kes="${Number(b.total_kes) || 0}">${esc(fmt(b.total_kes))}</span>
+                ${bal > 0 ? `<span style="font-size:0.76rem; color:#B91C1C; font-weight:700;">Balance: ${esc(fmt(bal))}</span>` : `<span style="font-size:0.76rem; color:#057A55; font-weight:700;">Paid</span>`}
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              ${b.property_id ? `<a href="/stays?id=${encodeURIComponent(b.property_id)}#stayReviewsSection" class="btn btn-outline btn-sm">Review / Issue</a>` : ''}
+              <a href="/stays${b.property_id ? `?id=${encodeURIComponent(b.property_id)}` : ''}" class="btn btn-primary btn-sm">View Stay</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    });
+  </script>
+</body>
+</html>
